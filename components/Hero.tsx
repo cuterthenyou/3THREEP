@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import s from './Hero.module.css'
 
 const BUTTON_TEXTS = [
   'Посмотреть',
@@ -46,34 +47,19 @@ export default function Hero() {
   }
 
   return (
-    <section
-      className="hero-bg w-full relative"
-      style={{ background: '#000', overflow: 'hidden' }}
-    >
-      <style>{`
-        .hero-bg {
-          aspect-ratio: 1 / 1;
-        }
-        @media (min-width: 768px) {
-          .hero-bg {
-            aspect-ratio: unset;
-            height: 80vh;
-            min-height: 500px;
-          }
-        }
-      `}</style>
-
+    <section className={`${s.hero} w-full relative`}>
       <video
         ref={videoRef}
-        className="hero-video"
+        className={s.video}
         autoPlay
         muted
         loop
         playsInline
       >
-        <source src="/images/фон 2.mp4" type="video/mp4" />
+        <source src="/images/фон 3.mp4" type="video/mp4" />
       </video>
 
+      {/* TODO: вернуть кнопку прокрутки к каталогу
       <div
         className="absolute bottom-8 left-0 right-0 flex justify-center"
         style={{ zIndex: 10 }}
@@ -96,6 +82,7 @@ export default function Hero() {
           {btnText}
         </button>
       </div>
+      */}
     </section>
   )
 }

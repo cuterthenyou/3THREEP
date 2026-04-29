@@ -1,0 +1,140 @@
+.page {
+  background: var(--color-bg-dark);
+  min-height: 100vh;
+}
+
+.backLink {
+  color: var(--color-accent);
+  font-family: var(--font-involve);
+  font-size: 0.8rem;
+  opacity: 0.45;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin-bottom: 0.75rem;
+}
+
+@media (min-width: 640px) {
+  .backLink {
+    margin-bottom: 0;
+  }
+}
+
+.pageTitle {
+  color: var(--color-accent);
+  font-family: var(--font-onder);
+  word-break: break-word;
+}
+
+.sectionLabel {
+  color: var(--color-accent);
+  font-family: var(--font-onder);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  opacity: 0.45;
+}
+
+.summaryCard {
+  background: var(--color-primary);
+  border-radius: 1rem;
+}
+
+.itemName {
+  color: var(--color-accent);
+  font-family: var(--font-onder);
+  font-size: 0.82rem;
+  line-height: 1.5;
+  word-break: break-word;
+}
+
+.itemVariant {
+  color: var(--color-accent);
+  font-family: var(--font-involve);
+  opacity: 0.6;
+}
+
+.itemPrice {
+  color: var(--color-accent);
+  font-family: var(--font-onder);
+  font-size: 0.9rem;
+  flex-shrink: 0;
+}
+
+.totalDivider {
+  border-top: 1px solid rgba(242, 151, 116, 0.3);
+}
+
+.totalLabel {
+  color: var(--color-accent);
+  font-family: var(--font-involve);
+  opacity: 0.6;
+}
+
+.totalValue {
+  color: var(--color-accent);
+  font-family: var(--font-onder);
+  font-size: 1.3rem;
+}
+
+.notice {
+  background: rgba(242, 151, 116, 0.07);
+  border: 1px solid rgba(242, 151, 116, 0.18);
+  border-radius: 0.75rem;
+  padding: 1rem;
+}
+
+.emptyText {
+  color: var(--color-accent);
+  font-family: var(--font-involve);
+}
+
+.noticeText {
+  color: var(--color-accent);
+  font-family: var(--font-involve);
+  font-size: 0.875rem;
+  line-height: 1.6;
+  opacity: 0.7;
+}
+
+.fieldLabel {
+  color: var(--color-accent);
+  font-family: var(--font-onder);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  opacity: 0.55;
+}
+
+.input {
+  background: rgba(242, 151, 116, 0.08);
+  color: var(--color-accent);
+  border: 1px solid rgba(242, 151, 116, 0.3);
+  font-family: var(--font-involve);
+  font-size: 0.9rem;
+  border-radius: 0.75rem;
+  outline: none;
+  width: 100%;
+}
+
+.errorText {
+  color: #E08080;
+  font-family: var(--font-involve);
+  font-size: 0.875rem;
+}
+
+.submitBtn {
+  width: 100%;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  background: var(--color-accent);
+  color: var(--color-primary);
+  border-radius: 12px;
+  font-family: var(--font-onder);
+  font-size: 0.82rem;
+  transition: opacity 0.2s;
+}
+
+.submitBtn:hover {
+  opacity: 0.9;
+}

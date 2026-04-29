@@ -1,0 +1,243 @@
+'use client'
+
+import React, { useState, useRef } from 'react'
+import { useRouter } from 'next/navigation'
+import type { Category } from '@/lib/types'
+
+const EMPTY: Omit<Category, never> = {
+  slug: '', name: '', active: true, texture_url: null, texture_url_2: null, texture_url_3: null, logo_top_url: null, logo_bottom_url: null,
+}
+
+const INPUT_STYLE = {
+  background: 'rgba(242,151,116,0.08)',
+  color: '#F29774',
+  border: '1px solid rgba(242,151,116,0.2)',
+  fontFamily: "'Involve', sans-serif",
+}
+const LABEL_STYLE = { color: '#F29774', opacity: 0.5, fontFamily: "'ONDER', sans-serif" }
+
+type UploadField = 'texture_url' | 'texture_url_2' | 'texture_url_3' | 'logo_top_url' | 'logo_bottom_url'
+
+export default function CollectionsClient({ collections }: { collections: Category[] }) {
+  const [editing, setEditing] = useState<Category | null>(null)
+  const [originalSlug, setOriginalSlug] = useState<string>('')
+  const [saving, setSaving] = useState(false)
+  const [uploading, setUploading] = useState<UploadField | null>(null)
+  const [error, setError] = useState('')
+  const router = useRouter()
+
+  const textureRef = useRef<HTMLInputElement>(null) as React.RefObject<HTMLInputElement>
+  const texture2Ref = useRef<HTMLInputElement>(null) as React.RefObject<HTMLInputElement>
+  const texture3Ref = useRef<HTMLInputElement>(null) as React.RefObject<HTMLInputElement>
+  const logoTopRef = useRef<HTMLInputElement>(null) as React.RefObject<HTMLInputElement>
+  const logoBottomRef = useRef<HTMLInputElement>(null) as React.RefObject<HTMLInputElement>
+
+  function openNew() { setEditing({ ...EMPTY }); setOriginalSlug(''); setError('') }
+  function openEdit(c: Category) { setEditing({ ...c }); setOriginalSlug(c.slug); setError('') }
+
+  async function uploadFile(file: File, field: UploadField) {
+    setUploading(field)
+    const fd = new FormData()
+    fd.append('file', file)
+    const res = await fetch('/api/admin/upload', { method: 'POST', body: fd })
+    const data = await res.json()
+    setUploading(null)
+    if (data.url) setEditing(e => e ? { ...e, [field]: data.url } : e)
+    else setError(`Ошибка загрузки: ${data.error}`)
+  }
+
+  async function save() {
+    if (!editing) return
+    if (!editing.slug.trim()) { setError('Укажи slug коллекции (напр. aqua)'); return }
+    if (!editing.name.trim()) { setError('Укажи название'); return }
+    setSaving(true); setError('')
+    if (originalSlug && originalSlug !== editing.slug) {
+      await fetch('/api/admin/collections', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ slug: originalSlug }),
+      })
+    }
+    const res = await fetch('/api/admin/collections', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(editing),
+    })
+    const data = await res.json()
+    setSaving(false)
+    if (!res.ok) { setError(data.error ?? 'Ошибка'); return }
+    setEditing(null)
+    router.refresh()
+  }
+
+  async function toggleActive(c: Category) {
+    await fetch('/api/admin/collections', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ...c, active: !c.active }),
+    })
+    router.refresh()
+  }
+
+  async function remove(slug: string) {
+    if (!confirm('Удалить коллекцию?')) return
+    await fetch('/api/admin/collections', {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ slug }),
+    })
+    router.refresh()
+  }
+
+  function UploadBtn({ field, label, refEl }: { field: UploadField; label: string; refEl: React.RefObject<HTMLInputElement> }) {
+    const val = editing?.[field]
+    return (
+      <div className="flex flex-col gap-1">
+        <label className="text-xs uppercase tracking-widest" style={LABEL_STYLE}>{label}</label>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => refEl.current?.click()}
+            className="px-3 py-2 text-xs rounded-lg uppercase tracking-widest"
+            style={{ background: 'rgba(242,151,116,0.12)', color: '#F29774', fontFamily: "'ONDER', sans-serif", fontSize: '0.65rem' }}
+          >
+            {uploading === field ? 'Загружаем...' : 'Загрузить'}
+          </button>
+          <input
+            ref={refEl}
+            type="file"
+            accept="image/*,.svg"
+            className="hidden"
+            onChange={e => e.target.files?.[0] && uploadFile(e.target.files[0], field)}
+          />
+          {val && (
+            <span className="text-xs truncate max-w-[180px]" style={{ color: '#F29774', opacity: 0.6, fontFamily: "'Involve', sans-serif" }}>
+              {val.split('/').pop()}
+            </span>
+          )}
+          {val && (
+            <button type="button" onClick={() => setEditing(e => e ? { ...e, [field]: null } : e)}
+              style={{ color: '#F29774', opacity: 0.4, fontSize: '0.8rem' }}>✕</button>
+          )}
+        </div>
+        {val && (
+          <div className="w-16 h-10 rounded overflow-hidden mt-1" style={{ background: 'rgba(242,151,116,0.08)' }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={val} alt="" className="w-full h-full object-cover" />
+          </div>
+        )}
+      </div>
+    )
+  }
+
+  return (
+    <div className="px-6 py-6 max-w-3xl mx-auto">
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-xl uppercase tracking-widest" style={{ color: '#F29774', fontFamily: "'ONDER', sans-serif" }}>
+          Коллекции ({collections.length})
+        </h1>
+        <button onClick={openNew}
+          className="px-4 py-2 uppercase tracking-widest transition-opacity hover:opacity-80"
+          style={{ background: '#F29774', color: '#A9342A', borderRadius: '8px', fontFamily: "'ONDER', sans-serif", fontSize: '0.75rem' }}>
+          + Добавить
+        </button>
+      </div>
+
+      <div className="flex flex-col gap-3">
+        {collections.length === 0 && (
+          <p className="text-sm" style={{ color: '#F29774', opacity: 0.4, fontFamily: "'Involve', sans-serif" }}>
+            Коллекций нет. Создай первую — slug должен совпадать с category у товаров.
+          </p>
+        )}
+        {collections.map(c => (
+          <div key={c.slug} className="rounded-xl p-4 flex items-center gap-4"
+            style={{ background: 'rgba(242,151,116,0.06)', border: '1px solid rgba(242,151,116,0.15)' }}>
+            {c.texture_url && (
+              <div className="w-14 h-14 rounded-lg overflow-hidden flex-shrink-0">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={c.texture_url} alt="" className="w-full h-full object-cover" />
+              </div>
+            )}
+            <div className="flex-1 min-w-0">
+              <p style={{ color: '#F29774', fontFamily: "'ONDER', sans-serif" }}>{c.name}</p>
+              <p className="text-xs" style={{ color: '#F29774', opacity: 0.45, fontFamily: "'Involve', sans-serif" }}>
+                {!c.active && <span style={{ color: '#E08080', opacity: 0.8 }}>● скрыта · </span>}
+                slug: {c.slug}
+                {c.logo_top_url ? ' · лого-топ ✓' : ''}
+                {c.logo_bottom_url ? ' · лого-боттом ✓' : ''}
+                {c.texture_url ? ' · текстура ✓' : ''}
+              </p>
+            </div>
+            <div className="flex gap-2 flex-shrink-0">
+              <button onClick={() => toggleActive(c)}
+                className="px-3 py-1.5 text-xs uppercase tracking-widest rounded-lg"
+                style={{ background: c.active ? 'rgba(242,151,116,0.08)' : 'rgba(242,151,116,0.25)', color: '#F29774', fontFamily: "'ONDER', sans-serif", fontSize: '0.65rem' }}>
+                {c.active ? 'Скрыть' : 'Показать'}
+              </button>
+              <button onClick={() => openEdit(c)}
+                className="px-3 py-1.5 text-xs uppercase tracking-widest rounded-lg"
+                style={{ background: 'rgba(242,151,116,0.15)', color: '#F29774', fontFamily: "'ONDER', sans-serif", fontSize: '0.65rem' }}>
+                Ред.
+              </button>
+              <button onClick={() => remove(c.slug)}
+                className="px-3 py-1.5 text-xs uppercase tracking-widest rounded-lg"
+                style={{ background: 'rgba(242,151,116,0.08)', color: '#F29774', opacity: 0.5, fontFamily: "'ONDER', sans-serif", fontSize: '0.65rem' }}>
+                Удалить
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {editing && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.75)' }}>
+          <div className="w-full max-w-lg rounded-2xl p-6 flex flex-col gap-4 overflow-y-auto max-h-[92vh]"
+            style={{ background: '#1a0808', border: '1px solid rgba(242,151,116,0.25)' }}>
+
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg uppercase tracking-widest" style={{ color: '#F29774', fontFamily: "'ONDER', sans-serif" }}>
+                {editing.slug ? 'Редактировать' : 'Новая коллекция'}
+              </h2>
+              <button onClick={() => setEditing(null)} style={{ color: '#F29774', opacity: 0.4, fontSize: '1.2rem' }}>✕</button>
+            </div>
+
+            <div className="flex flex-col gap-1">
+              <label className="text-xs uppercase tracking-widest" style={LABEL_STYLE}>Slug * (напр. aqua, dich)</label>
+              <input value={editing.slug} onChange={e => setEditing(ed => ed ? { ...ed, slug: e.target.value } : ed)}
+                className="w-full px-3 py-2 rounded-lg outline-none text-sm" style={INPUT_STYLE}
+                placeholder="aqua" />
+            </div>
+
+            <div className="flex flex-col gap-1">
+              <label className="text-xs uppercase tracking-widest" style={LABEL_STYLE}>Название *</label>
+              <input value={editing.name} onChange={e => setEditing(ed => ed ? { ...ed, name: e.target.value } : ed)}
+                className="w-full px-3 py-2 rounded-lg outline-none text-sm" style={INPUT_STYLE}
+                placeholder="AQUA+" />
+            </div>
+
+            <UploadBtn field="texture_url" label="Текстура карточек #1" refEl={textureRef} />
+            <UploadBtn field="texture_url_2" label="Текстура карточек #2" refEl={texture2Ref} />
+            <UploadBtn field="texture_url_3" label="Текстура карточек #3" refEl={texture3Ref} />
+            <UploadBtn field="logo_top_url" label="Лого TOP (над каталогом)" refEl={logoTopRef} />
+            <UploadBtn field="logo_bottom_url" label="Лого BOTTOM (под каталогом)" refEl={logoBottomRef} />
+
+            {error && <p className="text-sm" style={{ color: '#E08080', fontFamily: "'Involve', sans-serif" }}>{error}</p>}
+
+            <div className="flex gap-3">
+              <button onClick={save} disabled={saving || !!uploading}
+                className="flex-1 py-3 uppercase tracking-widest transition-opacity"
+                style={{ background: '#F29774', color: '#A9342A', borderRadius: '8px', fontFamily: "'ONDER', sans-serif", fontSize: '0.75rem', opacity: saving ? 0.5 : 1 }}>
+                {saving ? 'Сохраняем...' : 'Сохранить'}
+              </button>
+              <button onClick={() => setEditing(null)}
+                className="px-4 py-3 uppercase tracking-widest"
+                style={{ background: 'rgba(242,151,116,0.1)', color: '#F29774', borderRadius: '8px', fontFamily: "'ONDER', sans-serif", fontSize: '0.75rem' }}>
+                Отмена
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}

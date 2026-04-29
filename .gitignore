@@ -34,3 +34,15 @@ next-env.d.ts
 
 # utility scripts
 setup.js
+
+# local drafts and backups
+/new/
+/trash/
+
+# stray root assets
+/Cart background 1.jpg
+/Cart background 2.jpg
+/Cart background 3.jpg
+/DeutschGothic-RAMA.ttf
+/logo threep textured.png
+/фон 3.mp4

@@ -1,0 +1,110 @@
+.drawer {
+  background: var(--color-bg-dark);
+  border-left: 1px solid rgba(242, 151, 116, 0.2);
+}
+
+.drawerHeader {
+  border-bottom: 1px solid rgba(242, 151, 116, 0.15);
+}
+
+.heading {
+  color: var(--color-accent);
+  font-family: var(--font-onder);
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.closeBtn {
+  background: rgba(242, 151, 116, 0.1);
+  color: var(--color-accent);
+}
+
+.emptyText {
+  color: var(--color-accent);
+  font-family: var(--font-involve);
+  opacity: 0.4;
+}
+
+.backToShopBtn {
+  background: var(--color-accent);
+  color: var(--color-primary);
+  border-radius: 6px;
+  font-family: var(--font-onder);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.item {
+  border-bottom: 1px solid rgba(242, 151, 116, 0.1);
+  padding-bottom: 1rem;
+}
+
+.itemImg {
+  border: 1px solid rgba(242, 151, 116, 0.2);
+}
+
+.productName {
+  color: var(--color-accent);
+  font-family: var(--font-onder);
+  font-size: 0.82rem;
+  line-height: 1.5;
+  text-transform: uppercase;
+  word-break: break-word;
+}
+
+.productVariant {
+  color: var(--color-accent);
+  font-family: var(--font-involve);
+  opacity: 0.5;
+}
+
+.productPrice {
+  color: var(--color-accent);
+  font-family: var(--font-onder);
+  font-size: 0.85rem;
+}
+
+.qtyBtn {
+  background: rgba(242, 151, 116, 0.1);
+  color: var(--color-accent);
+}
+
+.qtyValue {
+  color: var(--color-accent);
+  font-family: var(--font-onder);
+}
+
+.removeBtn {
+  color: var(--color-accent);
+  opacity: 0.3;
+}
+
+.drawerFooter {
+  border-top: 1px solid rgba(242, 151, 116, 0.15);
+}
+
+.totalLabel {
+  color: var(--color-accent);
+  font-family: var(--font-involve);
+  opacity: 0.6;
+}
+
+.totalValue {
+  color: var(--color-accent);
+  font-family: var(--font-onder);
+  font-size: 1.1rem;
+}
+
+.checkoutLink {
+  display: block;
+  background: var(--color-accent);
+  color: var(--color-primary);
+  border-radius: 8px;
+  font-family: var(--font-onder);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  text-align: center;
+}

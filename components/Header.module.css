@@ -1,0 +1,11 @@
+.navBtn {
+  background: rgba(242, 151, 116, 0.15);
+  color: var(--color-accent);
+}
+
+.cartBadge {
+  background: var(--color-accent);
+  color: var(--color-primary);
+  font-family: var(--font-onder);
+  font-size: 0.4rem;
+}

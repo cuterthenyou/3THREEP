@@ -2,49 +2,34 @@
 
 import React, { useState, useEffect, useCallback } from 'react'
 import Image from 'next/image'
-import type { Product, ProductCategory } from '@/lib/types'
+import type { Product, ProductCategory, Category } from '@/lib/types'
+import ProductModal from './ProductModal'
+import s from './CatalogSection.module.css'
+
+const FALLBACK_TEXTURES = ['/images/cart-bg-1.jpg', '/images/cart-bg-2.jpg', '/images/cart-bg-3.jpg']
 
 interface Props {
   products: Product[]
   categories: ProductCategory[]
+  categoryData?: Record<string, Category>
 }
 
-const TELEGRAM = 'https://t.me/Arasuka2H'
-
-function buildTelegramUrl(product: Product, size: string) {
-  const text = `Хочу заказать: ${product.name}, размер ${size}, цена ${product.price} ₽`
-  return `${TELEGRAM}?text=${encodeURIComponent(text)}`
+function formatPrice(price: number) {
+  return price.toLocaleString('ru-RU') + ' ₽'
 }
 
-function formatPrice(price: string) {
-  const num = parseInt(price, 10)
-  if (isNaN(num)) return price
-  return num.toLocaleString('ru-RU') + ' ₽'
-}
-
-export default function CatalogSection({ products, categories }: Props) {
+export default function CatalogSection({ products, categories, categoryData = {} }: Props) {
   const [activeCategory, setActiveCategory] = useState<string>('all')
   const [openProduct, setOpenProduct] = useState<Product | null>(null)
-  const [activeImg, setActiveImg] = useState(0)
-  const [selectedSize, setSelectedSize] = useState('S')
   const [modalVisible, setModalVisible] = useState(false)
-  const [touchStart, setTouchStart] = useState<number | null>(null)
-  const [touchDelta, setTouchDelta] = useState(0)
 
   const filtered =
     activeCategory === 'all'
       ? products
-      : products.filter((p) => p.categories.some((c) => c.slug === activeCategory))
-
-  const sizes =
-    openProduct?.attributes.find((a) => a.name === 'Размер')?.options || ['S', 'M', 'L', 'XL', '2XL']
+      : products.filter((p) => p.category === activeCategory)
 
   const openModal = useCallback((product: Product) => {
     setOpenProduct(product)
-    setActiveImg(0)
-    setSelectedSize(
-      product.attributes.find((a) => a.name === 'Размер')?.options[0] || 'S'
-    )
     requestAnimationFrame(() => setModalVisible(true))
     document.body.style.overflow = 'hidden'
   }, [])
@@ -57,66 +42,16 @@ export default function CatalogSection({ products, categories }: Props) {
     }, 300)
   }, [])
 
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (!openProduct) return
-      if (e.key === 'Escape') closeModal()
-      if (e.key === 'ArrowLeft') setActiveImg((i) => Math.max(0, i - 1))
-      if (e.key === 'ArrowRight') setActiveImg((i) => Math.min((openProduct.images.length || 1) - 1, i + 1))
-    }
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
-  }, [openProduct, closeModal])
-
-  const handleImgTouch = {
-    onTouchStart: (e: React.TouchEvent) => {
-      setTouchStart(e.changedTouches[0].clientX)
-      setTouchDelta(0)
-    },
-    onTouchMove: (e: React.TouchEvent) => {
-      if (touchStart === null) return
-      setTouchDelta(e.changedTouches[0].clientX - touchStart)
-    },
-    onTouchEnd: () => {
-      if (Math.abs(touchDelta) > 50 && openProduct) {
-        if (touchDelta < 0) setActiveImg((i) => Math.min(openProduct.images.length - 1, i + 1))
-        else setActiveImg((i) => Math.max(0, i - 1))
-      }
-      setTouchStart(null)
-      setTouchDelta(0)
-    },
-  }
-
   return (
     <>
-      {/* Collection header */}
-      <div className="flex justify-center py-10">
-        <Image
-          src="/images/aqua+ collection logo V2.png"
-          alt="AQUA+ Collection"
-          width={0}
-          height={0}
-          sizes="30vw"
-          className="h-20 sm:h-28 lg:h-36 w-auto"
-        />
-      </div>
-
       {/* Category filter */}
-      <div id="catalog" className="w-full overflow-x-auto pb-2 px-6">
+      <div id="catalog" className="w-full overflow-x-auto pb-2 px-6 pt-16 sm:pt-20">
         <div className="flex gap-3 min-w-max mx-auto justify-center">
-          {[{ id: 0, name: 'Все', slug: 'all' }, ...categories.filter(c => c.slug !== 'all')].map((cat) => (
+          {[{ name: 'Все', slug: 'all' }, ...categories.filter(c => c.slug !== 'all')].map((cat) => (
             <button
               key={cat.slug}
               onClick={() => setActiveCategory(cat.slug)}
-              className="px-6 py-2 uppercase tracking-widest transition-all duration-200"
-              style={{
-                fontFamily: "'ONDER', sans-serif",
-                fontSize: '0.75rem',
-                borderRadius: '5px',
-                border: '2px solid #F29774',
-                background: activeCategory === cat.slug ? '#F29774' : 'transparent',
-                color: activeCategory === cat.slug ? '#A9342A' : '#F29774',
-              }}
+              className={`px-5 py-2 uppercase tracking-widest transition-all duration-200 ${s.filterBtn} ${activeCategory === cat.slug ? s.filterBtnActive : s.filterBtnInactive}`}
             >
               {cat.name}
             </button>
@@ -124,233 +59,55 @@ export default function CatalogSection({ products, categories }: Props) {
         </div>
       </div>
 
+      {/* Collection logo TOP */}
+      {(() => {
+        const activeCat = categoryData[activeCategory]
+        const logoTop = activeCat?.logo_top_url ?? '/images/vector-54.svg'
+        return logoTop ? (
+          <div className="flex justify-center pt-6 pb-2">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={logoTop} alt="Collection" className="h-16 sm:h-20 lg:h-28 w-auto" />
+          </div>
+        ) : null
+      })()}
+
       {/* Product grid */}
       <section className="w-full px-6 sm:px-8 py-10">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-y-20 gap-x-8 max-w-6xl mx-auto">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-y-8 gap-x-6 max-w-6xl mx-auto">
           {filtered.map((product, idx) => (
-            <ProductCard key={product.id} product={product} index={idx} onOpen={openModal} />
+            <ProductCard key={product.id} product={product} index={idx} onOpen={openModal} categoryData={categoryData} />
           ))}
         </div>
       </section>
 
-      {/* Product Modal */}
-      {openProduct && (
-        <div
-          className="fixed inset-0 z-50"
-          style={{
-            background: 'rgba(0,0,0,0.6)',
-            opacity: modalVisible ? 1 : 0,
-            transition: 'opacity 0.3s ease',
-          }}
-          onClick={(e) => e.target === e.currentTarget && closeModal()}
-        >
-          <div
-            className="absolute inset-0 overflow-y-auto"
-            style={{ background: '#A9342A' }}
-          >
-            {/* Close button */}
-            <button
-              onClick={closeModal}
-              className="fixed top-5 right-5 z-50 flex items-center justify-center w-9 h-9 rounded"
-              style={{ background: '#F29774', color: '#A9342A', borderRadius: '5px' }}
-              aria-label="Закрыть"
-            >
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                <path d="M2 2L14 14M14 2L2 14" stroke="#A9342A" strokeWidth="2.5" strokeLinecap="round" />
-              </svg>
-            </button>
-
-            <div
-              className="w-full max-w-6xl mx-auto px-6 py-20 sm:py-16"
-              style={{
-                transform: modalVisible ? 'translateY(0)' : 'translateY(30px)',
-                opacity: modalVisible ? 1 : 0,
-                transition: 'transform 0.3s ease, opacity 0.3s ease',
-              }}
-            >
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-start">
-                {/* Gallery */}
-                <div className="flex flex-col gap-4">
-                  <div
-                    className="w-full rounded-lg overflow-hidden"
-                    style={{ aspectRatio: '1/1', position: 'relative', background: '#000' }}
-                    {...handleImgTouch}
-                  >
-                    <Image
-                      src={openProduct.images[activeImg]?.src || openProduct.images[0]?.src}
-                      alt={openProduct.images[activeImg]?.alt || openProduct.name}
-                      fill
-                      className="object-cover select-none"
-                      draggable={false}
-                      sizes="(max-width: 768px) 100vw, 50vw"
-                    />
-                    {openProduct.images.length > 1 && (
-                      <>
-                        <button
-                          className="absolute left-3 top-1/2 -translate-y-1/2 flex items-center justify-center w-8 h-8 rounded"
-                          style={{ background: 'rgba(0,0,0,0.5)', color: '#F29774' }}
-                          onClick={() => setActiveImg((i) => Math.max(0, i - 1))}
-                        >
-                          ‹
-                        </button>
-                        <button
-                          className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center justify-center w-8 h-8 rounded"
-                          style={{ background: 'rgba(0,0,0,0.5)', color: '#F29774' }}
-                          onClick={() => setActiveImg((i) => Math.min(openProduct.images.length - 1, i + 1))}
-                        >
-                          ›
-                        </button>
-                      </>
-                    )}
-                  </div>
-
-                  {/* Thumbnails */}
-                  {openProduct.images.length > 1 && (
-                    <div className="grid grid-cols-5 gap-2">
-                      {openProduct.images.map((img, i) => (
-                        <button
-                          key={img.id}
-                          onClick={() => setActiveImg(i)}
-                          className="relative rounded overflow-hidden"
-                          style={{
-                            aspectRatio: '1/1',
-                            outline: i === activeImg ? '2px solid #F29774' : '2px solid transparent',
-                            outlineOffset: '-2px',
-                          }}
-                        >
-                          <Image
-                            src={img.src}
-                            alt={img.alt}
-                            fill
-                            className="object-cover"
-                            sizes="80px"
-                          />
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                </div>
-
-                {/* Product info */}
-                <div className="flex flex-col gap-6 lg:pt-0 pt-2 pb-24 lg:pb-0">
-                  {/* Collection logo */}
-                  <div className="flex justify-center lg:justify-start">
-                    <Image
-                      src="/images/aqua+.png"
-                      alt="AQUA+"
-                      width={0}
-                      height={0}
-                      sizes="15vw"
-                      className="h-16 w-auto"
-                    />
-                  </div>
-
-                  {/* Category label */}
-                  <p
-                    className="uppercase tracking-widest text-sm"
-                    style={{ color: '#F29774', fontFamily: "'Involve', sans-serif" }}
-                  >
-                    T-SHIRT
-                  </p>
-
-                  {/* Title + price */}
-                  <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-2">
-                    <h2
-                      className="text-3xl sm:text-4xl leading-tight"
-                      style={{ color: '#F29774', fontFamily: "'ONDER', sans-serif" }}
-                    >
-                      {openProduct.name}
-                    </h2>
-                    <p
-                      className="text-2xl sm:text-3xl price whitespace-nowrap"
-                      style={{ color: '#F29774' }}
-                    >
-                      {formatPrice(openProduct.price)}
-                    </p>
-                  </div>
-
-                  {/* Description */}
-                  <p
-                    className="text-sm sm:text-base leading-relaxed"
-                    style={{ color: '#F29774', fontFamily: "'Involve', sans-serif" }}
-                  >
-                    {openProduct.description}
-                  </p>
-
-                  {/* Composition + size select */}
-                  <div className="flex items-center justify-between">
-                    <div className="flex flex-col gap-1">
-                      <p className="text-sm" style={{ color: '#F29774', fontFamily: "'Involve', sans-serif" }}>
-                        <span style={{ opacity: 0.8 }}>Состав:</span> хлопок 100%
-                      </p>
-                      <p className="text-sm" style={{ color: '#F29774', fontFamily: "'Involve', sans-serif" }}>
-                        <span style={{ opacity: 0.8 }}>Посадка:</span> oversize
-                      </p>
-                    </div>
-                    <div className="flex gap-2 flex-wrap justify-end">
-                      {sizes.map((size) => (
-                        <button
-                          key={size}
-                          className="size-btn text-xs"
-                          style={{ width: '40px', height: '40px', fontSize: '0.7rem' }}
-                          onClick={() => setSelectedSize(size)}
-                          data-selected={selectedSize === size ? 'true' : undefined}
-                        >
-                          <span
-                            style={{
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              background: selectedSize === size ? '#F29774' : 'transparent',
-                              color: selectedSize === size ? '#A9342A' : '#F29774',
-                              border: '2px solid #F29774',
-                              borderRadius: '4px',
-                              width: '100%',
-                              height: '100%',
-                            }}
-                          >
-                            {size}
-                          </span>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Order button */}
-                  <a
-                    href={buildTelegramUrl(openProduct, selectedSize)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="block w-full text-center py-4 uppercase tracking-widest transition-opacity hover:opacity-90 active:opacity-75"
-                    style={{
-                      background: '#F29774',
-                      color: '#A9342A',
-                      fontFamily: "'ONDER', sans-serif",
-                      fontSize: '0.8rem',
-                      borderRadius: '5px',
-                      textDecoration: 'none',
-                    }}
-                  >
-                    Заказать в Telegram
-                  </a>
-                </div>
-              </div>
-            </div>
+      {/* Collection logo BOTTOM */}
+      {(() => {
+        const activeCat = categoryData[activeCategory]
+        const logoBottom = activeCat?.logo_bottom_url ?? '/images/vector-43.svg'
+        return logoBottom ? (
+          <div className="flex justify-center pb-16">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={logoBottom} alt="Collection" className="w-32 h-auto" />
           </div>
-        </div>
-      )}
+        ) : null
+      })()}
+
+      <ProductModal product={openProduct} visible={modalVisible} onClose={closeModal} />
     </>
   )
 }
+
 
 function ProductCard({
   product,
   index,
   onOpen,
+  categoryData,
 }: {
   product: Product
   index: number
   onOpen: (p: Product) => void
+  categoryData: Record<string, Category>
 }) {
   const [currentImg, setCurrentImg] = useState(0)
   const [btnText, setBtnText] = useState('Посмотреть')
@@ -382,19 +139,28 @@ function ProductCard({
     return () => clearInterval(id)
   }, [product.images.length])
 
+  const col = index % 3
+  const row = Math.floor(index / 3)
+  const cat = categoryData[product.category]
+  const catTextures = [cat?.texture_url, cat?.texture_url_2, cat?.texture_url_3].filter(Boolean) as string[]
+  const texturePool = catTextures.length > 0 ? catTextures : FALLBACK_TEXTURES
+  const texture = texturePool[(col + row) % texturePool.length]
+
   return (
-    <div className="flex flex-col items-center gap-5">
+    <div
+      className={`flex flex-col w-full ${s.productCard}`}
+      style={{ background: `url(${texture}) center/cover, #F29774` }}
+      onClick={() => onOpen(product)}
+    >
       {/* Image carousel */}
       <div
-        className="w-full max-w-md cursor-pointer relative rounded-lg overflow-hidden"
-        style={{ aspectRatio: '1/1' }}
-        onClick={() => onOpen(product)}
+        className={`w-full relative overflow-hidden ${s.productImgWrap}`}
       >
         {product.images.map((img, i) => (
           <Image
-            key={img.id}
-            src={img.src}
-            alt={img.alt}
+            key={i}
+            src={img}
+            alt={product.name}
             fill
             className="object-cover select-none"
             draggable={false}
@@ -418,7 +184,7 @@ function ProductCard({
                 style={{
                   width: i === currentImg ? '16px' : '6px',
                   height: '6px',
-                  background: i === currentImg ? '#F29774' : 'rgba(242,151,116,0.4)',
+                  background: i === currentImg ? '#A9342A' : 'rgba(169,52,42,0.3)',
                 }}
               />
             ))}
@@ -427,35 +193,21 @@ function ProductCard({
       </div>
 
       {/* Info */}
-      <div className="w-full max-w-md text-center">
-        <p
-          className="text-xs uppercase tracking-widest mb-1"
-          style={{ color: '#F29774', fontFamily: "'Involve', sans-serif" }}
-        >
-          T-SHIRT
+      <div className={s.productInfo}>
+        {/* Category */}
+        <p className={s.productType}>
+          {product.product_type || 'T-SHIRT'}
         </p>
-        <h3
-          className="text-lg mb-4"
-          style={{ color: '#F29774', fontFamily: "'ONDER', sans-serif" }}
-        >
-          {product.name}
-        </h3>
-        <button
-          onClick={() => onOpen(product)}
-          className="w-full py-3 uppercase tracking-widest transition-all duration-200"
-          style={{
-            background: '#F29774',
-            color: '#A9342A',
-            fontFamily: "'ONDER', sans-serif",
-            fontSize: '0.65rem',
-            borderRadius: '5px',
-            opacity: btnFade ? 0.3 : 1,
-            transform: btnFade ? 'scale(0.97)' : 'scale(1)',
-            transition: 'opacity 0.2s, transform 0.2s',
-          }}
-        >
-          {btnText}
-        </button>
+
+        {/* Name + Price row */}
+        <div className="flex items-end justify-between gap-2">
+          <h3 className={s.productName}>
+            {product.name}
+          </h3>
+          <span className={s.productPrice}>
+            {Number(product.price).toLocaleString('ru-RU')}
+          </span>
+        </div>
       </div>
     </div>
   )

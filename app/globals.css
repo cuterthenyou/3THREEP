@@ -16,10 +16,26 @@
   font-display: swap;
 }
 
+@font-face {
+  font-family: 'DeutschGothic';
+  src: url('/fonts/DeutschGothic-RAMA.ttf') format('truetype');
+  font-style: normal;
+  font-display: swap;
+}
+
 :root {
   --color-primary: #A9342A;
   --color-accent: #F29774;
   --color-bg: #000000;
+  --color-bg-dark: #1a0808;
+  --font-onder: 'ONDER', sans-serif;
+  --font-involve: 'Involve', sans-serif;
+  --font-deutsch: 'DeutschGothic', sans-serif;
+}
+
+*[style*="ONDER"] {
+  word-break: break-word;
+  overflow-wrap: break-word;
 }
 
 html,
