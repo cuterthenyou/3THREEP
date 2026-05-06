@@ -48,16 +48,23 @@ export default function Hero() {
 
   return (
     <section className={`${s.hero} w-full relative`}>
-      <video
-        ref={videoRef}
-        className={s.video}
-        autoPlay
-        muted
-        loop
-        playsInline
-      >
-        <source src="/images/фон 3.mp4" type="video/mp4" />
-      </video>
+    <video
+      ref={videoRef}
+      className={s.video}
+      autoPlay
+      muted
+      loop
+      playsInline
+    >
+      <source
+        src="https://wfgzofrtiinageegztux.supabase.co/storage/v1/object/public/assets/hero.av1.webm"
+        type='video/webm; codecs="av01"'
+      />
+      <source
+        src="https://wfgzofrtiinageegztux.supabase.co/storage/v1/object/public/assets/hero.webm"
+        type="video/webm"
+      />
+    </video>
 
       {/* TODO: вернуть кнопку прокрутки к каталогу
       <div
