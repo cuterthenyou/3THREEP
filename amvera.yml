@@ -9,11 +9,6 @@ build:
   additionalCommands: npm run build
   artifacts:
     "*": /
-  env:
-    - name: NEXT_PUBLIC_SUPABASE_URL
-      value: https://wfgzofrtiinageegztux.supabase.co
-    - name: NEXT_PUBLIC_SUPABASE_ANON_KEY
-      value: sb_publishable_AumgenscTXW2vMPcdMxbOA_tybf45si
 
 run:
   command: npm run start
