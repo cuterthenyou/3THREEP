@@ -85,8 +85,8 @@ CREATE TABLE messages (
 -- 8. Magic Links для авторизации
 CREATE TABLE magic_links (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  email TEXT NOT NULL,
-  token TEXT UNIQUE NOT NULL,
+  email TEXT UNIQUE NOT NULL,
+  token TEXT NOT NULL,
   expires_at TIMESTAMPTZ NOT NULL,
   used BOOLEAN DEFAULT false,
   created_at TIMESTAMPTZ DEFAULT now()
