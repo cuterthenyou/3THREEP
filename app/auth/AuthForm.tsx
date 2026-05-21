@@ -1,54 +1,40 @@
 'use client'
 
 import { useState } from 'react'
-import { createClient } from '@/lib/supabase/client'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { signIn } from 'next-auth/react'
+import { useSearchParams } from 'next/navigation'
 
 export default function AuthForm() {
   const [email, setEmail] = useState('')
-  const [code, setCode] = useState('')
-  const [step, setStep] = useState<'email' | 'code'>('email')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [success, setSuccess] = useState(false)
 
-  const supabase = createClient()
-  const router = useRouter()
   const searchParams = useSearchParams()
-  const next = searchParams.get('next') || '/account'
+  const callbackUrl = searchParams.get('callbackUrl') || '/account'
 
-  async function sendCode() {
+  async function sendMagicLink() {
     setLoading(true)
     setError('')
-    const { error } = await supabase.auth.signInWithOtp({
-      email,
-      options: {
-        shouldCreateUser: true,
-        emailRedirectTo: `${window.location.origin}/auth/callback?next=${next}`,
-      },
-    })
-    if (error) {
-      setError(error.message)
-    } else {
-      setStep('code')
-    }
-    setLoading(false)
-  }
+    setSuccess(false)
 
-  async function verifyCode() {
-    setLoading(true)
-    setError('')
-    const { error } = await supabase.auth.verifyOtp({
-      email,
-      token: code,
-      type: 'email',
-    })
-    if (error) {
-      setError('Неверный код. Попробуй ещё раз.')
-    } else {
-      router.push(next)
-      router.refresh()
+    try {
+      const result = await signIn('email', {
+        email,
+        redirect: false,
+        callbackUrl,
+      })
+
+      if (result?.error) {
+        setError('Не удалось отправить письмо. Попробуй ещё раз.')
+      } else {
+        setSuccess(true)
+      }
+    } catch (err) {
+      setError('Произошла ошибка. Попробуй ещё раз.')
+    } finally {
+      setLoading(false)
     }
-    setLoading(false)
   }
 
   return (
@@ -61,26 +47,54 @@ export default function AuthForm() {
         style={{ background: '#A9342A' }}
       >
         <h1
-          className={`text-center uppercase tracking-widest ${step === 'code' ? 'text-base sm:text-lg' : 'text-2xl'}`}
+          className="text-2xl text-center uppercase tracking-widest"
           style={{ color: '#F29774', fontFamily: "'ONDER', sans-serif" }}
         >
-          {step === 'email' ? 'Вход' : 'Код из письма'}
+          Вход
         </h1>
 
-        {step === 'email' ? (
+        {success ? (
+          <div className="flex flex-col gap-4">
+            <p
+              className="text-sm text-center"
+              style={{ color: '#F29774', opacity: 0.9, fontFamily: "'Involve', sans-serif" }}
+            >
+              ✅ Письмо отправлено на <strong>{email}</strong>
+            </p>
+            <p
+              className="text-sm text-center"
+              style={{ color: '#F29774', opacity: 0.7, fontFamily: "'Involve', sans-serif" }}
+            >
+              Открой письмо и кликни по ссылке для входа.
+            </p>
+            <p
+              className="text-xs text-center"
+              style={{ color: '#F29774', opacity: 0.5, fontFamily: "'Involve', sans-serif" }}
+            >
+              Ссылка действительна 15 минут.
+            </p>
+            <button
+              onClick={() => { setSuccess(false); setEmail(''); }}
+              className="text-sm text-center underline mt-4"
+              style={{ color: '#F29774', opacity: 0.6, fontFamily: "'Involve', sans-serif" }}
+            >
+              Изменить email
+            </button>
+          </div>
+        ) : (
           <>
             <p
               className="text-sm text-center"
               style={{ color: '#F29774', opacity: 0.8, fontFamily: "'Involve', sans-serif" }}
             >
-              Введи email — пришлём одноразовый код
+              Введи email — пришлём ссылку для входа
             </p>
             <input
               type="email"
               placeholder="твой@email.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && sendCode()}
+              onKeyDown={(e) => e.key === 'Enter' && !loading && email && sendMagicLink()}
               className="w-full px-4 py-3 rounded outline-none text-sm"
               style={{
                 background: 'rgba(255,255,255,0.1)',
@@ -90,9 +104,10 @@ export default function AuthForm() {
                 fontFamily: "'Involve', sans-serif",
               }}
               autoFocus
+              disabled={loading}
             />
             <button
-              onClick={sendCode}
+              onClick={sendMagicLink}
               disabled={loading || !email}
               className="w-full py-3 uppercase tracking-widest transition-opacity"
               style={{
@@ -104,56 +119,7 @@ export default function AuthForm() {
                 opacity: loading || !email ? 0.5 : 1,
               }}
             >
-              {loading ? 'Отправляем...' : 'Получить код'}
-            </button>
-          </>
-        ) : (
-          <>
-            <p
-              className="text-sm text-center"
-              style={{ color: '#F29774', opacity: 0.8, fontFamily: "'Involve', sans-serif" }}
-            >
-              Код отправлен на <strong>{email}</strong>
-            </p>
-            <input
-              type="text"
-              inputMode="numeric"
-              placeholder="00000000"
-              maxLength={8}
-              value={code}
-              onChange={(e) => setCode(e.target.value.replace(/\D/g, ''))}
-              onKeyDown={(e) => e.key === 'Enter' && verifyCode()}
-              className="w-full px-3 py-3 rounded outline-none text-center text-lg tracking-[0.35em]"
-              style={{
-                background: 'rgba(255,255,255,0.1)',
-                color: '#F29774',
-                border: '2px solid #F29774',
-                borderRadius: '5px',
-                fontFamily: "'ONDER', sans-serif",
-              }}
-              autoFocus
-            />
-            <button
-              onClick={verifyCode}
-              disabled={loading || code.length < 6}
-              className="w-full py-3 uppercase tracking-widest transition-opacity"
-              style={{
-                background: '#F29774',
-                color: '#A9342A',
-                borderRadius: '5px',
-                fontFamily: "'ONDER', sans-serif",
-                fontSize: '0.8rem',
-                opacity: loading || code.length < 6 ? 0.5 : 1,
-              }}
-            >
-              {loading ? 'Проверяем...' : 'Войти'}
-            </button>
-            <button
-              onClick={() => { setStep('email'); setCode(''); setError('') }}
-              className="text-sm text-center underline"
-              style={{ color: '#F29774', opacity: 0.6, fontFamily: "'Involve', sans-serif" }}
-            >
-              Изменить email
+              {loading ? 'Отправляем...' : 'Получить ссылку'}
             </button>
           </>
         )}
