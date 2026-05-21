@@ -24,6 +24,14 @@ yarn-error.log*
 
 # local env files
 .env*.local
+.env.migration
+
+# Migration data
+Supabase CSV/
+
+# Temp files
+Untitled-*.txt
+sshot-*.png
 
 # vercel
 .vercel

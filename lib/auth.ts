@@ -1,0 +1,229 @@
+import NextAuth, { type DefaultSession } from 'next-auth'
+import type { Adapter } from 'next-auth/adapters'
+import { query, queryOne } from './db'
+import { sendMagicLink } from './email'
+import { randomBytes } from 'crypto'
+
+// Расширяем типы NextAuth для наших полей
+declare module 'next-auth' {
+  interface Session {
+    user: {
+      id: string
+      email: string
+      emailVerified: boolean
+    } & DefaultSession['user']
+  }
+  
+  interface User {
+    id: string
+    email: string
+    emailVerified: boolean
+  }
+}
+
+// Кастомный адаптер для PostgreSQL
+function PostgresAdapter(): Adapter {
+  return {
+    async createUser(user) {
+      const result = await queryOne<{ id: string; email: string; email_verified: boolean }>(
+        `INSERT INTO users (email, email_verified) 
+         VALUES ($1, $2) 
+         RETURNING id, email, email_verified`,
+        [user.email, false]
+      )
+      
+      if (!result) throw new Error('Failed to create user')
+      
+      // Создаём профиль
+      await query(
+        `INSERT INTO profiles (id, email) VALUES ($1, $2)`,
+        [result.id, result.email]
+      )
+      
+      return {
+        id: result.id,
+        email: result.email,
+        emailVerified: result.email_verified,
+      }
+    },
+
+    async getUser(id) {
+      const user = await queryOne<{ id: string; email: string; email_verified: boolean }>(
+        `SELECT id, email, email_verified FROM users WHERE id = $1`,
+        [id]
+      )
+      
+      if (!user) return null
+      
+      return {
+        id: user.id,
+        email: user.email,
+        emailVerified: user.email_verified,
+      }
+    },
+
+    async getUserByEmail(email) {
+      const user = await queryOne<{ id: string; email: string; email_verified: boolean }>(
+        `SELECT id, email, email_verified FROM users WHERE email = $1`,
+        [email]
+      )
+      
+      if (!user) return null
+      
+      return {
+        id: user.id,
+        email: user.email,
+        emailVerified: user.email_verified,
+      }
+    },
+
+    async getUserByAccount({ provider, providerAccountId }) {
+      // Не используем OAuth провайдеры
+      return null
+    },
+
+    async updateUser(user) {
+      const result = await queryOne<{ id: string; email: string; email_verified: boolean }>(
+        `UPDATE users 
+         SET email = COALESCE($2, email),
+             email_verified = COALESCE($3, email_verified)
+         WHERE id = $1
+         RETURNING id, email, email_verified`,
+        [user.id, user.email, user.emailVerified]
+      )
+      
+      if (!result) throw new Error('User not found')
+      
+      return {
+        id: result.id,
+        email: result.email,
+        emailVerified: result.email_verified,
+      }
+    },
+
+    async deleteUser(userId) {
+      await query(`DELETE FROM users WHERE id = $1`, [userId])
+    },
+
+    async linkAccount(account) {
+      // Не используем OAuth
+      return account as any
+    },
+
+    async unlinkAccount({ provider, providerAccountId }) {
+      // Не используем OAuth
+    },
+
+    async createSession({ sessionToken, userId, expires }) {
+      // Используем JWT сессии, не храним в БД
+      return { sessionToken, userId, expires }
+    },
+
+    async getSessionAndUser(sessionToken) {
+      // Используем JWT сессии
+      return null
+    },
+
+    async updateSession({ sessionToken }) {
+      // Используем JWT сессии
+      return null
+    },
+
+    async deleteSession(sessionToken) {
+      // Используем JWT сессии
+    },
+
+    async createVerificationToken({ identifier, expires, token }) {
+      // Создаём magic link
+      await query(
+        `INSERT INTO magic_links (email, token, expires_at) 
+         VALUES ($1, $2, $3)`,
+        [identifier, token, expires]
+      )
+      
+      return { identifier, token, expires }
+    },
+
+    async useVerificationToken({ identifier, token }) {
+      const link = await queryOne<{ email: string; token: string; expires_at: Date; used: boolean }>(
+        `SELECT email, token, expires_at, used 
+         FROM magic_links 
+         WHERE email = $1 AND token = $2`,
+        [identifier, token]
+      )
+      
+      if (!link) return null
+      if (link.used) return null
+      if (new Date() > new Date(link.expires_at)) return null
+      
+      // Помечаем как использованный
+      await query(
+        `UPDATE magic_links SET used = true WHERE email = $1 AND token = $2`,
+        [identifier, token]
+      )
+      
+      return {
+        identifier: link.email,
+        token: link.token,
+        expires: link.expires_at,
+      }
+    },
+  }
+}
+
+export const { handlers, auth, signIn, signOut } = NextAuth({
+  adapter: PostgresAdapter(),
+  providers: [
+    {
+      id: 'email',
+      type: 'email',
+      name: 'Email',
+      
+      async sendVerificationRequest({ identifier: email, url, provider, theme }) {
+        // Генерируем токен
+        const token = randomBytes(32).toString('hex')
+        const expires = new Date(Date.now() + 15 * 60 * 1000) // 15 минут
+        
+        // Сохраняем в БД
+        await query(
+          `INSERT INTO magic_links (email, token, expires_at) 
+           VALUES ($1, $2, $3)`,
+          [email, token, expires]
+        )
+        
+        // Отправляем письмо
+        await sendMagicLink(email, token)
+      },
+      
+      options: {},
+    },
+  ],
+  session: {
+    strategy: 'jwt',
+    maxAge: 30 * 24 * 60 * 60, // 30 дней
+  },
+  pages: {
+    signIn: '/auth',
+    verifyRequest: '/auth/verify',
+    error: '/auth/error',
+  },
+  callbacks: {
+    async jwt({ token, user }) {
+      if (user) {
+        token.id = user.id
+        token.email = user.email
+        token.emailVerified = user.emailVerified
+      }
+      return token
+    },
+    
+    async session({ session, token }) {
+      if (token && session.user) {
+        session.user.id = token.id as string
+        session.user.email = token.email as string
+        session.user.emailVerified = token.emailVerified as boolean
+      }
+      return session
+    },
+  },
+})

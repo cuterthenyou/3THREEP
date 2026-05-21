@@ -6,18 +6,26 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start -p 3000",
-    "lint": "next lint"
+    "lint": "next lint",
+    "migrate": "node scripts/migrate-to-amvera.js",
+    "clean-db": "node scripts/clean-database.js"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1051.0",
     "@supabase/ssr": "^0.10.0",
     "@supabase/supabase-js": "^2.102.1",
+    "dotenv": "^17.4.2",
     "next": "^16.2.2",
+    "next-auth": "^5.0.0-beta.25",
+    "nodemailer": "^7.0.13",
+    "pg": "^8.13.1",
     "react": "^18",
     "react-dom": "^18"
   },
   "devDependencies": {
     "@types/node": "^20",
+    "@types/nodemailer": "^6.4.16",
+    "@types/pg": "^8.11.10",
     "@types/react": "^18",
     "@types/react-dom": "^18",
     "autoprefixer": "^10.0.1",
