@@ -1,4 +1,4 @@
-import { Pool, QueryResult } from 'pg'
+import { Pool, QueryResult, QueryResultRow } from 'pg'
 
 // Создаём пул подключений к PostgreSQL
 const pool = new Pool({
@@ -9,7 +9,7 @@ const pool = new Pool({
 })
 
 // Универсальная функция для выполнения SQL запросов
-export async function query<T = any>(
+export async function query<T extends QueryResultRow = any>(
   text: string,
   params?: any[]
 ): Promise<QueryResult<T>> {
@@ -35,7 +35,7 @@ export async function query<T = any>(
 }
 
 // Хелпер для получения одной записи
-export async function queryOne<T = any>(
+export async function queryOne<T extends QueryResultRow = any>(
   text: string,
   params?: any[]
 ): Promise<T | null> {
@@ -44,7 +44,7 @@ export async function queryOne<T = any>(
 }
 
 // Хелпер для получения массива записей
-export async function queryMany<T = any>(
+export async function queryMany<T extends QueryResultRow = any>(
   text: string,
   params?: any[]
 ): Promise<T[]> {
