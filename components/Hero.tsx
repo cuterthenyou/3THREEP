@@ -57,11 +57,11 @@ export default function Hero() {
       playsInline
     >
       <source
-        src="https://wfgzofrtiinageegztux.supabase.co/storage/v1/object/public/assets/hero.av1.webm"
+        src="https://storage.yandexcloud.net/threep-media/assets/hero.av1.webm"
         type='video/webm; codecs="av01"'
       />
       <source
-        src="https://wfgzofrtiinageegztux.supabase.co/storage/v1/object/public/assets/hero.webm"
+        src="https://storage.yandexcloud.net/threep-media/assets/hero.webm"
         type="video/webm"
       />
     </video>

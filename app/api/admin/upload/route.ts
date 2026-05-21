@@ -1,6 +1,7 @@
-import { createAdminClient, createClient } from '@/lib/supabase/server'
+import { createClient } from '@/lib/supabase/server'
 import { NextResponse, type NextRequest } from 'next/server'
 import { isAdmin } from '@/lib/isAdmin'
+import { uploadToYandex } from '@/lib/upload-to-yandex'
 
 export async function POST(req: NextRequest) {
   const supabase = await createClient()
@@ -15,21 +16,11 @@ export async function POST(req: NextRequest) {
 
   if (!file) return NextResponse.json({ error: 'No file' }, { status: 400 })
 
-  const ext = file.name.split('.').pop() ?? 'jpg'
-  const filename = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
-
-  const admin = await createAdminClient()
-
-  const arrayBuffer = await file.arrayBuffer()
-  const buffer = new Uint8Array(arrayBuffer)
-
-  const { error } = await admin.storage
-    .from('products')
-    .upload(filename, buffer, { contentType: file.type, upsert: false })
-
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-
-  const { data: { publicUrl } } = admin.storage.from('products').getPublicUrl(filename)
-
-  return NextResponse.json({ url: publicUrl })
+  try {
+    const result = await uploadToYandex('products', file)
+    return NextResponse.json({ url: result.url })
+  } catch (error) {
+    console.error('Upload error:', error)
+    return NextResponse.json({ error: 'Upload failed' }, { status: 500 })
+  }
 }

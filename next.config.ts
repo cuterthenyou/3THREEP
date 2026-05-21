@@ -14,6 +14,11 @@ const nextConfig: NextConfig = {
         hostname: 'wfgzofrtiinageegztux.supabase.co',
         pathname: '/storage/v1/object/public/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'storage.yandexcloud.net',
+        pathname: '/threep-media/**',
+      },
     ],
     unoptimized: false,
   },

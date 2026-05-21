@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/server'
+import { uploadToYandex } from '@/lib/upload-to-yandex'
 
 export async function POST(req: NextRequest) {
   const supabase = await createClient()
@@ -11,26 +12,23 @@ export async function POST(req: NextRequest) {
   const file = formData.get('file') as File | null
   if (!file) return NextResponse.json({ error: 'No file' }, { status: 400 })
 
-  const ext = file.name.split('.').pop() ?? 'jpg'
-  const path = `${user.id}.${ext}`
-  const buffer = Buffer.from(await file.arrayBuffer())
+  try {
+    const ext = file.name.split('.').pop() ?? 'jpg'
+    const customFileName = `${user.id}.${ext}`
+    
+    const result = await uploadToYandex('avatars', file, customFileName)
 
-  const admin = await createAdminClient()
+    const admin = await createAdminClient()
+    const { error: updateError } = await admin
+      .from('profiles')
+      .update({ avatar_url: result.url })
+      .eq('id', user.id)
 
-  const { error: uploadError } = await admin.storage
-    .from('avatars')
-    .upload(path, buffer, { contentType: file.type, upsert: true })
+    if (updateError) return NextResponse.json({ error: updateError.message }, { status: 500 })
 
-  if (uploadError) return NextResponse.json({ error: uploadError.message }, { status: 500 })
-
-  const { data: { publicUrl } } = admin.storage.from('avatars').getPublicUrl(path)
-
-  const { error: updateError } = await admin
-    .from('profiles')
-    .update({ avatar_url: publicUrl })
-    .eq('id', user.id)
-
-  if (updateError) return NextResponse.json({ error: updateError.message }, { status: 500 })
-
-  return NextResponse.json({ url: publicUrl })
+    return NextResponse.json({ url: result.url })
+  } catch (error) {
+    console.error('Avatar upload error:', error)
+    return NextResponse.json({ error: 'Upload failed' }, { status: 500 })
+  }
 }
