@@ -10,14 +10,14 @@ declare module 'next-auth' {
     user: {
       id: string
       email: string
-      emailVerified: boolean
+      emailVerified: Date | null
     } & DefaultSession['user']
   }
   
   interface User {
     id: string
     email: string
-    emailVerified: boolean
+    emailVerified: Date | null
   }
 }
 
@@ -25,11 +25,11 @@ declare module 'next-auth' {
 function PostgresAdapter(): Adapter {
   return {
     async createUser(user) {
-      const result = await queryOne<{ id: string; email: string; email_verified: boolean }>(
-        `INSERT INTO users (email, email_verified) 
+      const result = await queryOne<{ id: string; email: string; email_confirmed_at: string | null }>(
+        `INSERT INTO users (email, email_confirmed_at) 
          VALUES ($1, $2) 
-         RETURNING id, email, email_verified`,
-        [user.email, false]
+         RETURNING id, email, email_confirmed_at`,
+        [user.email, null]
       )
       
       if (!result) throw new Error('Failed to create user')
@@ -43,13 +43,13 @@ function PostgresAdapter(): Adapter {
       return {
         id: result.id,
         email: result.email,
-        emailVerified: result.email_verified,
+        emailVerified: result.email_confirmed_at ? new Date(result.email_confirmed_at) : null,
       }
     },
 
     async getUser(id) {
-      const user = await queryOne<{ id: string; email: string; email_verified: boolean }>(
-        `SELECT id, email, email_verified FROM users WHERE id = $1`,
+      const user = await queryOne<{ id: string; email: string; email_confirmed_at: string | null }>(
+        `SELECT id, email, email_confirmed_at FROM users WHERE id = $1`,
         [id]
       )
       
@@ -58,13 +58,13 @@ function PostgresAdapter(): Adapter {
       return {
         id: user.id,
         email: user.email,
-        emailVerified: user.email_verified,
+        emailVerified: user.email_confirmed_at ? new Date(user.email_confirmed_at) : null,
       }
     },
 
     async getUserByEmail(email) {
-      const user = await queryOne<{ id: string; email: string; email_verified: boolean }>(
-        `SELECT id, email, email_verified FROM users WHERE email = $1`,
+      const user = await queryOne<{ id: string; email: string; email_confirmed_at: string | null }>(
+        `SELECT id, email, email_confirmed_at FROM users WHERE email = $1`,
         [email]
       )
       
@@ -73,7 +73,7 @@ function PostgresAdapter(): Adapter {
       return {
         id: user.id,
         email: user.email,
-        emailVerified: user.email_verified,
+        emailVerified: user.email_confirmed_at ? new Date(user.email_confirmed_at) : null,
       }
     },
 
@@ -83,12 +83,12 @@ function PostgresAdapter(): Adapter {
     },
 
     async updateUser(user) {
-      const result = await queryOne<{ id: string; email: string; email_verified: boolean }>(
+      const result = await queryOne<{ id: string; email: string; email_confirmed_at: string | null }>(
         `UPDATE users 
          SET email = COALESCE($2, email),
-             email_verified = COALESCE($3, email_verified)
+             email_confirmed_at = COALESCE($3, email_confirmed_at)
          WHERE id = $1
-         RETURNING id, email, email_verified`,
+         RETURNING id, email, email_confirmed_at`,
         [user.id, user.email, user.emailVerified]
       )
       
@@ -97,7 +97,7 @@ function PostgresAdapter(): Adapter {
       return {
         id: result.id,
         email: result.email,
-        emailVerified: result.email_verified,
+        emailVerified: result.email_confirmed_at ? new Date(result.email_confirmed_at) : null,
       }
     },
 
@@ -221,7 +221,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       if (token && session.user) {
         session.user.id = token.id as string
         session.user.email = token.email as string
-        session.user.emailVerified = token.emailVerified as boolean
+        session.user.emailVerified = token.emailVerified as Date | null
       }
       return session
     },
