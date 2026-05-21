@@ -172,6 +172,7 @@ function PostgresAdapter(): Adapter {
 }
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
+  trustHost: true, // Доверяем всем хостам (для production)
   adapter: PostgresAdapter(),
   providers: [
     {
