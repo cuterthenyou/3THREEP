@@ -157,7 +157,7 @@ function PostgresAdapter(): Adapter {
     },
 
     async useVerificationToken({ identifier, token }) {
-      console.log(`[Adapter] Verifying OTP for: ${identifier}, input code: ${token}`)
+      console.log(`[Adapter] Verifying OTP for: ${identifier}, input token: ${token.substring(0, 10)}...`)
       
       // Получаем сохранённый OTP
       const storedOtp = otpStore.get(identifier)
@@ -166,19 +166,23 @@ function PostgresAdapter(): Adapter {
         return null
       }
       
-      // Проверяем совпадение
-      if (storedOtp !== token) {
-        console.log(`[Adapter] OTP mismatch: expected ${storedOtp}, got ${token}`)
+      console.log(`[Adapter] Stored OTP: ${storedOtp}`)
+      
+      // NextAuth хеширует токен перед передачей сюда
+      // Проверяем: token == hash(storedOtp)?
+      const hashedStoredOtp = hashToken(storedOtp)
+      
+      if (token !== hashedStoredOtp) {
+        console.log(`[Adapter] Token mismatch: expected hash ${hashedStoredOtp.substring(0, 10)}..., got ${token.substring(0, 10)}...`)
         return null
       }
       
-      // Проверяем в БД (по хешу)
-      const hashedToken = hashToken(storedOtp)
+      // Проверяем в БД
       const link = await queryOne<{ email: string; token: string; expires_at: Date; used: boolean }>(
         `SELECT email, token, expires_at, used 
          FROM magic_links 
          WHERE email = $1 AND token = $2`,
-        [identifier, hashedToken]
+        [identifier, hashedStoredOtp]
       )
       
       if (!link) {
@@ -202,7 +206,7 @@ function PostgresAdapter(): Adapter {
       // Помечаем как использованный
       await query(
         `UPDATE magic_links SET used = true WHERE email = $1 AND token = $2`,
-        [identifier, hashedToken]
+        [identifier, hashedStoredOtp]
       )
       
       // Удаляем из временного хранилища
