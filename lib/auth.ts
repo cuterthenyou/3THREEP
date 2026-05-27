@@ -138,20 +138,19 @@ function PostgresAdapter(): Adapter {
       // Используем JWT сессии
     },
 
-    async createVerificationToken({ identifier, expires }) {
-      // Генерируем 6-значный OTP код
-      const otp = Math.floor(100000 + Math.random() * 900000).toString()
-      console.log(`[Adapter] Creating OTP for ${identifier}: ${otp}`)
+    async createVerificationToken({ identifier, expires, token }) {
+      // NextAuth передаёт уже готовый OTP (из generateVerificationToken)
+      console.log(`[Adapter] Saving OTP for ${identifier}: ${token}`)
       
       await query(
         `INSERT INTO magic_links (email, token, expires_at) 
          VALUES ($1, $2, $3)
          ON CONFLICT (email) DO UPDATE 
          SET token = $2, expires_at = $3, used = false`,
-        [identifier, otp, expires]
+        [identifier, token, expires]
       )
       
-      return { identifier, token: otp, expires }
+      return { identifier, token, expires }
     },
 
     async useVerificationToken({ identifier, token }) {
@@ -207,6 +206,13 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       
       from: process.env.SMTP_FROM || process.env.SMTP_USER,
       maxAge: 15 * 60, // 15 минут
+      
+      // Переопределяем генерацию токена - создаём 6-значный OTP
+      generateVerificationToken: () => {
+        const otp = Math.floor(100000 + Math.random() * 900000).toString()
+        console.log(`[NextAuth] Generated OTP: ${otp}`)
+        return otp
+      },
       
       async sendVerificationRequest({ identifier: email, token }) {
         try {
