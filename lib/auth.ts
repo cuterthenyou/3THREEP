@@ -215,24 +215,27 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         try {
           console.log(`[NextAuth] Sending magic link to: ${email}`)
           
-          // Генерируем токен
+          // Генерируем токен (оригинальный для письма)
           const token = randomBytes(32).toString('hex')
+          const hashedToken = hashToken(token) // Хешируем для БД
           const expires = new Date(Date.now() + 15 * 60 * 1000)
           
           console.log(`[NextAuth] Token generated, saving to DB...`)
+          console.log(`[NextAuth] Original token: ${token.substring(0, 10)}...`)
+          console.log(`[NextAuth] Hashed token: ${hashedToken.substring(0, 10)}...`)
           
-          // Сохраняем в БД (с ON CONFLICT для повторных запросов)
+          // Сохраняем ХЕШИРОВАННЫЙ токен в БД
           await query(
             `INSERT INTO magic_links (email, token, expires_at) 
              VALUES ($1, $2, $3)
              ON CONFLICT (email) DO UPDATE 
              SET token = $2, expires_at = $3, used = false`,
-            [email, token, expires]
+            [email, hashedToken, expires]
           )
           
           console.log(`[NextAuth] Token saved, sending email...`)
           
-          // Отправляем письмо
+          // Отправляем письмо с ОРИГИНАЛЬНЫМ токеном
           await sendMagicLink(email, token)
           
           console.log(`[NextAuth] Magic link sent successfully to ${email}`)
