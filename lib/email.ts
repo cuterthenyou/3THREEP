@@ -35,7 +35,8 @@ export async function verifyEmailConnection() {
 // Отправка Magic Link
 export async function sendMagicLink(email: string, token: string) {
   const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000'
-  const magicLink = `${baseUrl}/api/auth/callback/email?token=${token}&email=${encodeURIComponent(email)}`
+  // Промежуточная страница (защита от prefetch антивирусами/Gmail)
+  const magicLink = `${baseUrl}/auth/verify?token=${token}&email=${encodeURIComponent(email)}`
 
   const html = `
     <!DOCTYPE html>

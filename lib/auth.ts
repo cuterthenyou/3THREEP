@@ -241,7 +241,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   },
   pages: {
     signIn: '/auth',
-    verifyRequest: '/auth/verify',
+    verifyRequest: '/auth?check=email', // Страница "проверьте почту" после отправки
     error: '/auth/error',
   },
   callbacks: {
@@ -261,6 +261,13 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         session.user.emailVerified = token.emailVerified as Date | null
       }
       return session
+    },
+
+    async redirect({ url, baseUrl }) {
+      // После успешной верификации редиректим на /account
+      if (url.startsWith('/')) return `${baseUrl}${url}`
+      if (new URL(url).origin === baseUrl) return url
+      return `${baseUrl}/account`
     },
   },
 })
