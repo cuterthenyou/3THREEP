@@ -1,5 +1,12 @@
 import nodemailer from 'nodemailer'
 
+// Проверяем наличие SMTP переменных
+if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
+  console.error('❌ SMTP credentials not found in environment variables!')
+  console.error('SMTP_USER:', process.env.SMTP_USER ? 'SET' : 'MISSING')
+  console.error('SMTP_PASS:', process.env.SMTP_PASS ? 'SET' : 'MISSING')
+}
+
 // Создаём транспорт для Yandex SMTP
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST || 'smtp.yandex.ru',
@@ -9,6 +16,8 @@ const transporter = nodemailer.createTransport({
     user: process.env.SMTP_USER!,
     pass: process.env.SMTP_PASS!,
   },
+  logger: true, // Включаем логирование
+  debug: true, // Включаем debug режим
 })
 
 // Проверка подключения к SMTP (опционально, для дебага)

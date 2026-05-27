@@ -184,21 +184,34 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       maxAge: 15 * 60, // 15 минут
       
       async sendVerificationRequest({ identifier: email }) {
-        // Генерируем токен
-        const token = randomBytes(32).toString('hex')
-        const expires = new Date(Date.now() + 15 * 60 * 1000)
-        
-        // Сохраняем в БД (с ON CONFLICT для повторных запросов)
-        await query(
-          `INSERT INTO magic_links (email, token, expires_at) 
-           VALUES ($1, $2, $3)
-           ON CONFLICT (email) DO UPDATE 
-           SET token = $2, expires_at = $3, used = false`,
-          [email, token, expires]
-        )
-        
-        // Отправляем письмо
-        await sendMagicLink(email, token)
+        try {
+          console.log(`[NextAuth] Sending magic link to: ${email}`)
+          
+          // Генерируем токен
+          const token = randomBytes(32).toString('hex')
+          const expires = new Date(Date.now() + 15 * 60 * 1000)
+          
+          console.log(`[NextAuth] Token generated, saving to DB...`)
+          
+          // Сохраняем в БД (с ON CONFLICT для повторных запросов)
+          await query(
+            `INSERT INTO magic_links (email, token, expires_at) 
+             VALUES ($1, $2, $3)
+             ON CONFLICT (email) DO UPDATE 
+             SET token = $2, expires_at = $3, used = false`,
+            [email, token, expires]
+          )
+          
+          console.log(`[NextAuth] Token saved, sending email...`)
+          
+          // Отправляем письмо
+          await sendMagicLink(email, token)
+          
+          console.log(`[NextAuth] Magic link sent successfully to ${email}`)
+        } catch (error) {
+          console.error(`[NextAuth] Error sending magic link:`, error)
+          throw error
+        }
       },
     },
   ],
