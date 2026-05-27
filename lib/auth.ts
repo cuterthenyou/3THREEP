@@ -1,7 +1,7 @@
 import NextAuth, { type DefaultSession } from 'next-auth'
 import type { Adapter } from 'next-auth/adapters'
 import { query, queryOne } from './db'
-import { sendMagicLink } from './email'
+import { sendMagicLinkDirect } from './email'
 import { randomBytes, createHash } from 'crypto'
 
 // Хеширование токена (NextAuth использует SHA-256)
@@ -210,22 +210,13 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       from: process.env.SMTP_FROM || process.env.SMTP_USER,
       maxAge: 15 * 60, // 15 минут
       
-      async sendVerificationRequest({ identifier: email, url, token }) {
+      async sendVerificationRequest({ identifier: email, url }) {
         try {
           console.log(`[NextAuth] Sending magic link to: ${email}`)
-          console.log(`[NextAuth] Token from NextAuth: ${token.substring(0, 10)}...`)
-          console.log(`[NextAuth] URL: ${url}`)
+          console.log(`[NextAuth] Callback URL: ${url}`)
           
-          // НЕ генерируем свой токен! Используем токен из NextAuth.
-          // NextAuth сам сохранит хеш в БД через createVerificationToken адаптера.
-          // Извлекаем токен из URL для письма
-          const urlObj = new URL(url)
-          const urlToken = urlObj.searchParams.get('token') || token
-          
-          console.log(`[NextAuth] Sending email with token: ${urlToken.substring(0, 10)}...`)
-          
-          // Отправляем письмо с токеном из NextAuth
-          await sendMagicLink(email, urlToken)
+          // Используем URL напрямую от NextAuth (прямой callback без промежуточной страницы)
+          await sendMagicLinkDirect(email, url)
           
           console.log(`[NextAuth] Magic link sent successfully to ${email}`)
         } catch (error) {
