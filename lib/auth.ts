@@ -9,6 +9,9 @@ function hashToken(token: string) {
   return createHash('sha256').update(token).digest('hex')
 }
 
+// Временное хранилище для OTP (email -> код)
+const otpStore = new Map<string, string>()
+
 // Расширяем типы NextAuth для наших полей
 declare module 'next-auth' {
   interface Session {
@@ -154,35 +157,56 @@ function PostgresAdapter(): Adapter {
     },
 
     async useVerificationToken({ identifier, token }) {
-      console.log(`[Adapter] Verifying OTP for: ${identifier}, code: ${token}`)
+      console.log(`[Adapter] Verifying OTP for: ${identifier}, input code: ${token}`)
       
+      // Получаем сохранённый OTP
+      const storedOtp = otpStore.get(identifier)
+      if (!storedOtp) {
+        console.log(`[Adapter] No OTP found in store for ${identifier}`)
+        return null
+      }
+      
+      // Проверяем совпадение
+      if (storedOtp !== token) {
+        console.log(`[Adapter] OTP mismatch: expected ${storedOtp}, got ${token}`)
+        return null
+      }
+      
+      // Проверяем в БД (по хешу)
+      const hashedToken = hashToken(storedOtp)
       const link = await queryOne<{ email: string; token: string; expires_at: Date; used: boolean }>(
         `SELECT email, token, expires_at, used 
          FROM magic_links 
          WHERE email = $1 AND token = $2`,
-        [identifier, token]
+        [identifier, hashedToken]
       )
       
       if (!link) {
-        console.log(`[Adapter] OTP not found`)
+        console.log(`[Adapter] OTP not found in DB`)
+        otpStore.delete(identifier)
         return null
       }
       
       if (link.used) {
         console.log(`[Adapter] OTP already used`)
+        otpStore.delete(identifier)
         return null
       }
       
       if (new Date() > new Date(link.expires_at)) {
         console.log(`[Adapter] OTP expired`)
+        otpStore.delete(identifier)
         return null
       }
       
       // Помечаем как использованный
       await query(
         `UPDATE magic_links SET used = true WHERE email = $1 AND token = $2`,
-        [identifier, token]
+        [identifier, hashedToken]
       )
+      
+      // Удаляем из временного хранилища
+      otpStore.delete(identifier)
       
       console.log(`[Adapter] OTP verified successfully for ${identifier}`)
       
@@ -216,7 +240,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       
       async sendVerificationRequest({ identifier: email, token }) {
         try {
-          console.log(`[NextAuth] Sending OTP to: ${email}, code: ${token}`)
+          // Сохраняем оригинальный OTP (token ещё не хеширован здесь)
+          otpStore.set(email, token)
+          console.log(`[NextAuth] Stored OTP for ${email}: ${token}`)
+          console.log(`[NextAuth] Sending OTP to: ${email}`)
           
           // Отправляем OTP код (не ссылку!)
           await sendOTP(email, token)
