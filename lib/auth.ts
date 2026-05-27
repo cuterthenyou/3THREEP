@@ -147,6 +147,8 @@ function PostgresAdapter(): Adapter {
     },
 
     async useVerificationToken({ identifier, token }) {
+      console.log(`[NextAuth] Verifying token for: ${identifier}`)
+      
       const link = await queryOne<{ email: string; token: string; expires_at: Date; used: boolean }>(
         `SELECT email, token, expires_at, used 
          FROM magic_links 
@@ -154,15 +156,28 @@ function PostgresAdapter(): Adapter {
         [identifier, token]
       )
       
-      if (!link) return null
-      if (link.used) return null
-      if (new Date() > new Date(link.expires_at)) return null
+      if (!link) {
+        console.log(`[NextAuth] Token not found in database`)
+        return null
+      }
+      
+      if (link.used) {
+        console.log(`[NextAuth] Token already used`)
+        return null
+      }
+      
+      if (new Date() > new Date(link.expires_at)) {
+        console.log(`[NextAuth] Token expired at ${link.expires_at}`)
+        return null
+      }
       
       // Помечаем как использованный
       await query(
         `UPDATE magic_links SET used = true WHERE email = $1 AND token = $2`,
         [identifier, token]
       )
+      
+      console.log(`[NextAuth] Token verified successfully for ${identifier}`)
       
       return {
         identifier: link.email,
