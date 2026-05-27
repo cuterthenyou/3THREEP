@@ -155,17 +155,15 @@ function PostgresAdapter(): Adapter {
     },
 
     async useVerificationToken({ identifier, token }) {
-      // NextAuth передаёт НЕхешированный токен из URL, нужно хешировать
-      const hashedToken = hashToken(token)
+      // NextAuth УЖЕ ХЕШИРУЕТ токен перед передачей сюда! Не хешируем второй раз.
       console.log(`[NextAuth] Verifying token for: ${identifier}`)
-      console.log(`[NextAuth] Original token: ${token.substring(0, 10)}...`)
-      console.log(`[NextAuth] Hashed token: ${hashedToken.substring(0, 10)}...`)
+      console.log(`[NextAuth] Token (already hashed by NextAuth): ${token.substring(0, 10)}...`)
       
       const link = await queryOne<{ email: string; token: string; expires_at: Date; used: boolean }>(
         `SELECT email, token, expires_at, used 
          FROM magic_links 
          WHERE email = $1 AND token = $2`,
-        [identifier, hashedToken]
+        [identifier, token]
       )
       
       if (!link) {
@@ -183,10 +181,10 @@ function PostgresAdapter(): Adapter {
         return null
       }
       
-      // Помечаем как использованный (используем хешированный токен)
+      // Помечаем как использованный
       await query(
         `UPDATE magic_links SET used = true WHERE email = $1 AND token = $2`,
-        [identifier, hashedToken]
+        [identifier, token]
       )
       
       console.log(`[NextAuth] Token verified successfully for ${identifier}`)
