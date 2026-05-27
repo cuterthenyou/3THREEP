@@ -239,14 +239,32 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     strategy: 'jwt',
     maxAge: 30 * 24 * 60 * 60, // 30 дней
   },
+  cookies: {
+    sessionToken: {
+      name: `next-auth.session-token`,
+      options: {
+        httpOnly: true,
+        sameSite: 'lax',
+        path: '/',
+        secure: process.env.NEXTAUTH_URL?.startsWith('https://') ?? false,
+      },
+    },
+  },
   pages: {
     signIn: '/auth',
-    verifyRequest: '/auth?check=email', // Страница "проверьте почту" после отправки
+    verifyRequest: '/auth?check=email',
     error: '/auth/error',
   },
   callbacks: {
-    async jwt({ token, user }) {
+    async signIn({ user }) {
+      // Разрешаем вход всем верифицированным пользователям
+      console.log(`[NextAuth] signIn callback for: ${user.email}`)
+      return true
+    },
+
+    async jwt({ token, user, account }) {
       if (user) {
+        console.log(`[NextAuth] JWT callback - creating token for user: ${user.email}`)
         token.id = user.id
         token.email = user.email
         token.emailVerified = user.emailVerified
@@ -264,6 +282,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     },
 
     async redirect({ url, baseUrl }) {
+      console.log(`[NextAuth] Redirect callback - url: ${url}, baseUrl: ${baseUrl}`)
       // После успешной верификации редиректим на /account
       if (url.startsWith('/')) return `${baseUrl}${url}`
       if (new URL(url).origin === baseUrl) return url
