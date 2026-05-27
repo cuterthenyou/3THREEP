@@ -134,10 +134,12 @@ function PostgresAdapter(): Adapter {
     },
 
     async createVerificationToken({ identifier, expires, token }) {
-      // Создаём magic link
+      // Создаём magic link (с ON CONFLICT для повторных запросов)
       await query(
         `INSERT INTO magic_links (email, token, expires_at) 
-         VALUES ($1, $2, $3)`,
+         VALUES ($1, $2, $3)
+         ON CONFLICT (email) DO UPDATE 
+         SET token = $2, expires_at = $3, used = false`,
         [identifier, token, expires]
       )
       
