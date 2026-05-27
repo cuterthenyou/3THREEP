@@ -42,21 +42,19 @@ export default function AuthForm() {
     setError('')
 
     try {
-      const result = await signIn('email', {
-        email,
-        token: code,
-        redirect: false,
-        callbackUrl,
-      })
-
-      if (result?.error) {
+      // Вызываем callback URL напрямую с токеном
+      const response = await fetch(`/api/auth/callback/email?token=${code}&email=${encodeURIComponent(email)}`)
+      
+      if (!response.ok) {
         setError('Неверный код. Попробуй ещё раз.')
-      } else if (result?.ok) {
-        router.push(callbackUrl)
+        setLoading(false)
+        return
       }
+
+      // Перезагружаем страницу для применения сессии
+      window.location.href = callbackUrl
     } catch (err) {
       setError('Произошла ошибка. Попробуй ещё раз.')
-    } finally {
       setLoading(false)
     }
   }
