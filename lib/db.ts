@@ -5,7 +5,10 @@ const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   max: 20,
   idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 2000,
+  connectionTimeoutMillis: 10000, // Увеличиваем до 10 секунд для Amvera
+  ssl: process.env.NODE_ENV === 'production' ? {
+    rejectUnauthorized: false // Для Amvera PostgreSQL
+  } : false,
 })
 
 // Универсальная функция для выполнения SQL запросов
