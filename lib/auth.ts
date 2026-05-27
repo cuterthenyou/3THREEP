@@ -139,8 +139,9 @@ function PostgresAdapter(): Adapter {
     },
 
     async createVerificationToken({ identifier, expires, token }) {
-      // NextAuth передаёт уже хешированный токен
-      console.log(`[NextAuth] Creating token for ${identifier}, hash: ${token.substring(0, 10)}...`)
+      // NextAuth передаёт УЖЕ ХЕШИРОВАННЫЙ токен (SHA-256)
+      // Просто сохраняем его как есть
+      console.log(`[Adapter] Saving hashed token for ${identifier}: ${token.substring(0, 10)}...`)
       
       await query(
         `INSERT INTO magic_links (email, token, expires_at) 
@@ -211,32 +212,22 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       from: process.env.SMTP_FROM || process.env.SMTP_USER,
       maxAge: 15 * 60, // 15 минут
       
-      async sendVerificationRequest({ identifier: email }) {
+      async sendVerificationRequest({ identifier: email, url, token }) {
         try {
           console.log(`[NextAuth] Sending magic link to: ${email}`)
+          console.log(`[NextAuth] Token from NextAuth: ${token.substring(0, 10)}...`)
+          console.log(`[NextAuth] URL: ${url}`)
           
-          // Генерируем токен (оригинальный для письма)
-          const token = randomBytes(32).toString('hex')
-          const hashedToken = hashToken(token) // Хешируем для БД
-          const expires = new Date(Date.now() + 15 * 60 * 1000)
+          // НЕ генерируем свой токен! Используем токен из NextAuth.
+          // NextAuth сам сохранит хеш в БД через createVerificationToken адаптера.
+          // Извлекаем токен из URL для письма
+          const urlObj = new URL(url)
+          const urlToken = urlObj.searchParams.get('token') || token
           
-          console.log(`[NextAuth] Token generated, saving to DB...`)
-          console.log(`[NextAuth] Original token: ${token.substring(0, 10)}...`)
-          console.log(`[NextAuth] Hashed token: ${hashedToken.substring(0, 10)}...`)
+          console.log(`[NextAuth] Sending email with token: ${urlToken.substring(0, 10)}...`)
           
-          // Сохраняем ХЕШИРОВАННЫЙ токен в БД
-          await query(
-            `INSERT INTO magic_links (email, token, expires_at) 
-             VALUES ($1, $2, $3)
-             ON CONFLICT (email) DO UPDATE 
-             SET token = $2, expires_at = $3, used = false`,
-            [email, hashedToken, expires]
-          )
-          
-          console.log(`[NextAuth] Token saved, sending email...`)
-          
-          // Отправляем письмо с ОРИГИНАЛЬНЫМ токеном
-          await sendMagicLink(email, token)
+          // Отправляем письмо с токеном из NextAuth
+          await sendMagicLink(email, urlToken)
           
           console.log(`[NextAuth] Magic link sent successfully to ${email}`)
         } catch (error) {
