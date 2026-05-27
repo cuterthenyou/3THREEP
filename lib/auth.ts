@@ -1,7 +1,7 @@
 import NextAuth, { type DefaultSession } from 'next-auth'
 import type { Adapter } from 'next-auth/adapters'
 import { query, queryOne } from './db'
-import { sendMagicLinkDirect } from './email'
+import { sendOTP } from './email'
 import { randomBytes, createHash } from 'crypto'
 
 // Хеширование токена (NextAuth использует SHA-256)
@@ -138,26 +138,24 @@ function PostgresAdapter(): Adapter {
       // Используем JWT сессии
     },
 
-    async createVerificationToken({ identifier, expires, token }) {
-      // NextAuth передаёт УЖЕ ХЕШИРОВАННЫЙ токен (SHA-256)
-      // Просто сохраняем его как есть
-      console.log(`[Adapter] Saving hashed token for ${identifier}: ${token.substring(0, 10)}...`)
+    async createVerificationToken({ identifier, expires }) {
+      // Генерируем 6-значный OTP код
+      const otp = Math.floor(100000 + Math.random() * 900000).toString()
+      console.log(`[Adapter] Creating OTP for ${identifier}: ${otp}`)
       
       await query(
         `INSERT INTO magic_links (email, token, expires_at) 
          VALUES ($1, $2, $3)
          ON CONFLICT (email) DO UPDATE 
          SET token = $2, expires_at = $3, used = false`,
-        [identifier, token, expires]
+        [identifier, otp, expires]
       )
       
-      return { identifier, token, expires }
+      return { identifier, token: otp, expires }
     },
 
     async useVerificationToken({ identifier, token }) {
-      // NextAuth УЖЕ ХЕШИРУЕТ токен перед передачей сюда! Не хешируем второй раз.
-      console.log(`[NextAuth] Verifying token for: ${identifier}`)
-      console.log(`[NextAuth] Token (already hashed by NextAuth): ${token.substring(0, 10)}...`)
+      console.log(`[Adapter] Verifying OTP for: ${identifier}, code: ${token}`)
       
       const link = await queryOne<{ email: string; token: string; expires_at: Date; used: boolean }>(
         `SELECT email, token, expires_at, used 
@@ -167,17 +165,17 @@ function PostgresAdapter(): Adapter {
       )
       
       if (!link) {
-        console.log(`[NextAuth] Token not found in database`)
+        console.log(`[Adapter] OTP not found`)
         return null
       }
       
       if (link.used) {
-        console.log(`[NextAuth] Token already used`)
+        console.log(`[Adapter] OTP already used`)
         return null
       }
       
       if (new Date() > new Date(link.expires_at)) {
-        console.log(`[NextAuth] Token expired at ${link.expires_at}`)
+        console.log(`[Adapter] OTP expired`)
         return null
       }
       
@@ -187,7 +185,7 @@ function PostgresAdapter(): Adapter {
         [identifier, token]
       )
       
-      console.log(`[NextAuth] Token verified successfully for ${identifier}`)
+      console.log(`[Adapter] OTP verified successfully for ${identifier}`)
       
       return {
         identifier: link.email,
@@ -210,17 +208,16 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       from: process.env.SMTP_FROM || process.env.SMTP_USER,
       maxAge: 15 * 60, // 15 минут
       
-      async sendVerificationRequest({ identifier: email, url }) {
+      async sendVerificationRequest({ identifier: email, token }) {
         try {
-          console.log(`[NextAuth] Sending magic link to: ${email}`)
-          console.log(`[NextAuth] Callback URL: ${url}`)
+          console.log(`[NextAuth] Sending OTP to: ${email}, code: ${token}`)
           
-          // Используем URL напрямую от NextAuth (прямой callback без промежуточной страницы)
-          await sendMagicLinkDirect(email, url)
+          // Отправляем OTP код (не ссылку!)
+          await sendOTP(email, token)
           
-          console.log(`[NextAuth] Magic link sent successfully to ${email}`)
+          console.log(`[NextAuth] OTP sent successfully to ${email}`)
         } catch (error) {
-          console.error(`[NextAuth] Error sending magic link:`, error)
+          console.error(`[NextAuth] Error sending OTP:`, error)
           throw error
         }
       },
