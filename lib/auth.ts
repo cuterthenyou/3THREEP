@@ -2,7 +2,12 @@ import NextAuth, { type DefaultSession } from 'next-auth'
 import type { Adapter } from 'next-auth/adapters'
 import { query, queryOne } from './db'
 import { sendMagicLink } from './email'
-import { randomBytes } from 'crypto'
+import { randomBytes, createHash } from 'crypto'
+
+// Хеширование токена (NextAuth использует SHA-256)
+function hashToken(token: string) {
+  return createHash('sha256').update(token).digest('hex')
+}
 
 // Расширяем типы NextAuth для наших полей
 declare module 'next-auth' {
@@ -134,7 +139,9 @@ function PostgresAdapter(): Adapter {
     },
 
     async createVerificationToken({ identifier, expires, token }) {
-      // Создаём magic link (с ON CONFLICT для повторных запросов)
+      // NextAuth передаёт уже хешированный токен
+      console.log(`[NextAuth] Creating token for ${identifier}, hash: ${token.substring(0, 10)}...`)
+      
       await query(
         `INSERT INTO magic_links (email, token, expires_at) 
          VALUES ($1, $2, $3)
@@ -147,13 +154,17 @@ function PostgresAdapter(): Adapter {
     },
 
     async useVerificationToken({ identifier, token }) {
+      // NextAuth передаёт НЕхешированный токен из URL, нужно хешировать
+      const hashedToken = hashToken(token)
       console.log(`[NextAuth] Verifying token for: ${identifier}`)
+      console.log(`[NextAuth] Original token: ${token.substring(0, 10)}...`)
+      console.log(`[NextAuth] Hashed token: ${hashedToken.substring(0, 10)}...`)
       
       const link = await queryOne<{ email: string; token: string; expires_at: Date; used: boolean }>(
         `SELECT email, token, expires_at, used 
          FROM magic_links 
          WHERE email = $1 AND token = $2`,
-        [identifier, token]
+        [identifier, hashedToken]
       )
       
       if (!link) {
@@ -171,10 +182,10 @@ function PostgresAdapter(): Adapter {
         return null
       }
       
-      // Помечаем как использованный
+      // Помечаем как использованный (используем хешированный токен)
       await query(
         `UPDATE magic_links SET used = true WHERE email = $1 AND token = $2`,
-        [identifier, token]
+        [identifier, hashedToken]
       )
       
       console.log(`[NextAuth] Token verified successfully for ${identifier}`)
