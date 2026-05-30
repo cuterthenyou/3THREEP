@@ -7,8 +7,6 @@ meta:
 build:
   skip: false
   additionalCommands: npm run build
-  artifacts:
-    "*": /
 
 run:
   command: npm run start
