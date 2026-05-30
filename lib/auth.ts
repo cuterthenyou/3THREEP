@@ -187,12 +187,23 @@ function PostgresAdapter(): Adapter {
       
       // NextAuth хеширует токен перед передачей сюда
       // Проверяем: token == hash(storedOtp)?
-      const hashedStoredOtp = hashToken(storedOtp)
+      const hashedStoredOtp = createHash("sha256")
+      .update(`${storedOtp}${process.env.NEXTAUTH_SECRET}`)
+      .digest("hex")
+
+    if (token !== hashedStoredOtp) {
+      console.log(
+        `[Adapter] Token mismatch: expected hash ${hashedStoredOtp.substring(0, 10)}..., got ${token.substring(0, 10)}...`
+      )
+      return null
+    }
+
+      // const hashedStoredOtp = hashToken(storedOtp)
       
-      if (token !== hashedStoredOtp) {
-        console.log(`[Adapter] Token mismatch: expected hash ${hashedStoredOtp.substring(0, 10)}..., got ${token.substring(0, 10)}...`)
-        return null
-      }
+      // if (token !== hashedStoredOtp) {
+      //   console.log(`[Adapter] Token mismatch: expected hash ${hashedStoredOtp.substring(0, 10)}..., got ${token.substring(0, 10)}...`)
+      //   return null
+      // }
       
       // Проверяем в БД
       const link = await queryOne<{ email: string; token: string; expires_at: Date; used: boolean }>(
