@@ -167,7 +167,7 @@ function PostgresAdapter(): Adapter {
       }
       
       console.log(`[Adapter] Stored OTP: ${storedOtp}`)
-      console.log("SECRET:", process.env.AUTH_SECRET)
+      console.log("SECRET:", process.env.NEXTAUTH_SECRET)
       console.log("TOKEN:", token)
       console.log("OTP:", storedOtp)
 
@@ -181,7 +181,7 @@ function PostgresAdapter(): Adapter {
       console.log(
         "OTP+SECRET HASH:",
         createHash("sha256")
-          .update(`${storedOtp}${process.env.AUTH_SECRET}`)
+          .update(`${storedOtp}${process.env.NEXTAUTH_SECRET}`)
           .digest("hex")
       )
       
