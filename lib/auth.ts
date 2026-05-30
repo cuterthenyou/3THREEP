@@ -167,6 +167,23 @@ function PostgresAdapter(): Adapter {
       }
       
       console.log(`[Adapter] Stored OTP: ${storedOtp}`)
+      console.log("SECRET:", process.env.AUTH_SECRET)
+      console.log("TOKEN:", token)
+      console.log("OTP:", storedOtp)
+
+      console.log(
+        "OTP HASH:",
+        createHash("sha256")
+          .update(storedOtp)
+          .digest("hex")
+      )
+
+      console.log(
+        "OTP+SECRET HASH:",
+        createHash("sha256")
+          .update(`${storedOtp}${process.env.AUTH_SECRET}`)
+          .digest("hex")
+      )
       
       // NextAuth хеширует токен перед передачей сюда
       // Проверяем: token == hash(storedOtp)?
