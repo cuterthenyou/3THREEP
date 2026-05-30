@@ -9,7 +9,6 @@ function buildUrl(endpoint: string, params?: Record<string, string>) {
   url.searchParams.set('rest_route', `/wc/v3/${endpoint}`)
   url.searchParams.set('consumer_key', WC_KEY)
   url.searchParams.set('consumer_secret', WC_SECRET)
-  url.searchParams.set('consumer_secret', WC_SECRET)
   if (params) {
     for (const [k, v] of Object.entries(params)) {
       url.searchParams.set(k, v)
