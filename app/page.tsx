@@ -1,17 +1,22 @@
-import Header from '@/components/Header'
-import Hero from '@/components/Hero'
-import CatalogSection from '@/components/CatalogSection'
-import Footer from '@/components/Footer'
-import { queryMany } from '@/lib/db'
-import { staticProducts, staticCategories } from '@/lib/staticData'
-import type { ProductCategory, Category } from '@/lib/types'
+import Header from '@/components/Header';
+import Hero from '@/components/Hero';
+import CatalogSection from '@/components/CatalogSection';
+import Footer from '@/components/Footer';
+import { queryMany } from '@/lib/db';
+import { auth } from '@/lib/auth';
+import { isAdmin } from '@/lib/isAdmin';
+import { staticProducts, staticCategories } from '@/lib/staticData';
+import type { ProductCategory, Category } from '@/lib/types';
 
 export const revalidate = 60
 
 export default async function HomePage() {
-  let products = staticProducts
-  let categories = staticCategories
-  let categoryData: Record<string, Category> = {}
+  const session = await auth();
+  const isAdminUser = isAdmin(session?.user?.email);
+
+  let products = staticProducts;
+  let categories = staticCategories;
+  let categoryData: Record<string, Category> = {};
 
   try {
     const [productsData, categoriesData] = await Promise.all([
@@ -54,7 +59,7 @@ export default async function HomePage() {
 
   return (
     <main className="min-h-screen">
-      <Header />
+      <Header isAdminUser={isAdminUser} />
       <Hero />
       <CatalogSection products={products} categories={categories} categoryData={categoryData} />
       <Footer />

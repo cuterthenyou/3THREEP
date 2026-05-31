@@ -1,0 +1,254 @@
+.page {
+  min-height: 100vh;
+  padding: 2.5rem 1rem;
+  background: #1a1a1a;
+}
+
+.container {
+  max-width: 42rem;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.backLink {
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--color-accent);
+  opacity: 0.6;
+  font-family: var(--font-onder);
+  text-decoration: none;
+}
+
+.orderCard {
+  border-radius: 0.75rem;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  background: var(--color-primary);
+}
+
+.orderHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.orderId {
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--color-accent);
+  font-family: var(--font-onder);
+}
+
+.orderDate {
+  font-size: 0.75rem;
+  color: var(--color-accent);
+  opacity: 0.5;
+  font-family: var(--font-involve);
+}
+
+.itemRow {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.itemThumb {
+  position: relative;
+  width: 3.5rem;
+  height: 3.5rem;
+  border-radius: 0.25rem;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.itemName {
+  color: var(--color-accent);
+  font-family: var(--font-onder);
+  font-size: 0.9rem;
+}
+
+.itemMeta {
+  font-size: 0.75rem;
+  color: var(--color-accent);
+  opacity: 0.6;
+  font-family: var(--font-involve);
+}
+
+.itemPrice {
+  color: var(--color-accent);
+  font-family: var(--font-onder);
+}
+
+.totalRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 0.5rem;
+  border-top: 1px solid rgba(242, 151, 116, 0.2);
+}
+
+.totalLabel {
+  font-size: 0.875rem;
+  color: var(--color-accent);
+  opacity: 0.6;
+  font-family: var(--font-involve);
+}
+
+.totalAmount {
+  font-size: 1.25rem;
+  color: var(--color-accent);
+  font-family: var(--font-onder);
+}
+
+.deliveryRow {
+  font-size: 0.875rem;
+  color: var(--color-accent);
+  opacity: 0.7;
+  font-family: var(--font-involve);
+}
+
+.deliveryLabel {
+  opacity: 0.5;
+}
+
+.trackingRow {
+  font-size: 0.875rem;
+  color: var(--color-accent);
+  font-family: var(--font-involve);
+}
+
+.paymentInfo {
+  border-radius: 0.5rem;
+  padding: 1rem;
+  font-size: 0.875rem;
+  background: rgba(242, 151, 116, 0.1);
+  border: 1px solid rgba(242, 151, 116, 0.3);
+  color: var(--color-accent);
+  font-family: var(--font-involve);
+}
+
+/* Chat */
+.chatSection {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.chatTitle {
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--color-accent);
+  opacity: 0.6;
+  font-family: var(--font-onder);
+}
+
+.chatMessages {
+  border-radius: 0.75rem;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  min-height: 200px;
+  max-height: 400px;
+  overflow-y: auto;
+  background: #111;
+}
+
+.chatEmpty {
+  font-size: 0.875rem;
+  text-align: center;
+  margin: auto;
+  color: var(--color-accent);
+  opacity: 0.4;
+  font-family: var(--font-involve);
+}
+
+.msgAdmin {
+  display: flex;
+  justify-content: flex-start;
+}
+
+.msgUser {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.msgBubbleAdmin {
+  max-width: 75%;
+  border-radius: 0.75rem;
+  padding: 0.5rem 1rem;
+  background: var(--color-primary);
+}
+
+.msgBubbleUser {
+  max-width: 75%;
+  border-radius: 0.75rem;
+  padding: 0.5rem 1rem;
+  background: rgba(242, 151, 116, 0.15);
+  border: 1px solid rgba(242, 151, 116, 0.3);
+}
+
+.msgSender {
+  font-size: 0.75rem;
+  margin-bottom: 0.25rem;
+  color: var(--color-accent);
+  opacity: 0.6;
+  font-family: var(--font-onder);
+}
+
+.msgText {
+  font-size: 0.875rem;
+  color: var(--color-accent);
+  font-family: var(--font-involve);
+}
+
+.msgTime {
+  font-size: 0.75rem;
+  margin-top: 0.25rem;
+  color: var(--color-accent);
+  opacity: 0.4;
+  font-family: var(--font-involve);
+}
+
+.chatInputRow {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.chatInput {
+  flex: 1;
+  padding: 0.75rem 1rem;
+  outline: none;
+  font-size: 0.875rem;
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--color-accent);
+  border: 2px solid rgba(242, 151, 116, 0.3);
+  border-radius: 5px;
+  font-family: var(--font-involve);
+}
+
+.chatSendBtn {
+  padding: 0.75rem 1.25rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  background: var(--color-accent);
+  color: var(--color-primary);
+  border-radius: 5px;
+  font-family: var(--font-onder);
+  font-size: 0.75rem;
+  border: none;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.chatSendBtn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}

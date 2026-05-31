@@ -1,127 +1,81 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
-import { signIn } from 'next-auth/react'
-import { useSearchParams, useRouter } from 'next/navigation'
+import { useState } from 'react';
+import { signIn } from 'next-auth/react';
+import { useSearchParams } from 'next/navigation';
+import s from './auth.module.css';
 
 export default function AuthForm() {
-  const [email, setEmail] = useState('')
-  const [code, setCode] = useState('')
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState('')
-  const [step, setStep] = useState<'email' | 'code'>('email')
+  const [email, setEmail] = useState('');
+  const [code, setCode] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [step, setStep] = useState<'email' | 'code'>('email');
 
-  const searchParams = useSearchParams()
-  const router = useRouter()
-  const callbackUrl = searchParams.get('callbackUrl') || '/account'
+  const searchParams = useSearchParams();
+  const callbackUrl = searchParams.get('callbackUrl') || '/account';
 
   async function requestCode() {
-    setLoading(true)
-    setError('')
-
+    setLoading(true);
+    setError('');
     try {
-      const result = await signIn('email', {
-        email,
-        redirect: false,
-      })
-
+      const result = await signIn('email', { email, redirect: false });
       if (result?.error) {
-        setError('Не удалось отправить код. Попробуй ещё раз.')
+        setError('Не удалось отправить код. Попробуй ещё раз.');
       } else {
-        setStep('code')
+        setStep('code');
       }
-    } catch (err) {
-      setError('Произошла ошибка. Попробуй ещё раз.')
+    } catch {
+      setError('Произошла ошибка. Попробуй ещё раз.');
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
   }
 
   async function verifyCode() {
-    setLoading(true)
-    setError('')
-
+    setLoading(true);
+    setError('');
     try {
-      // Вызываем callback URL напрямую с токеном
-      const response = await fetch(`/api/auth/callback/email?token=${code}&email=${encodeURIComponent(email)}`)
-      
+      const response = await fetch(
+        `/api/auth/callback/email?token=${code}&email=${encodeURIComponent(email)}`
+      );
       if (!response.ok) {
-        setError('Неверный код. Попробуй ещё раз.')
-        setLoading(false)
-        return
+        setError('Неверный код. Попробуй ещё раз.');
+        setLoading(false);
+        return;
       }
-
-      // Перезагружаем страницу для применения сессии
-      window.location.href = callbackUrl
-    } catch (err) {
-      setError('Произошла ошибка. Попробуй ещё раз.')
-      setLoading(false)
+      window.location.href = callbackUrl;
+    } catch {
+      setError('Произошла ошибка. Попробуй ещё раз.');
+      setLoading(false);
     }
   }
 
   return (
-    <main
-      className="min-h-screen flex items-center justify-center px-4"
-      style={{ background: '#1a1a1a' }}
-    >
-      <div
-        className="w-full max-w-sm rounded-xl p-8 flex flex-col gap-6"
-        style={{ background: '#A9342A' }}
-      >
-        <h1
-          className="text-2xl text-center uppercase tracking-widest"
-          style={{ color: '#F29774', fontFamily: "'ONDER', sans-serif" }}
-        >
-          Вход
-        </h1>
+    <main className={s.page}>
+      <div className={s.card}>
+        <h1 className={s.title}>Вход</h1>
 
         {step === 'email' ? (
           <>
-            <p
-              className="text-sm text-center"
-              style={{ color: '#F29774', opacity: 0.8, fontFamily: "'Involve', sans-serif" }}
-            >
-              Введи email — пришлём код для входа
-            </p>
+            <p className={s.hint}>Введи email — пришлём код для входа</p>
             <input
               type="email"
               placeholder="твой@email.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && !loading && email && requestCode()}
-              className="w-full px-4 py-3 rounded outline-none text-sm"
-              style={{
-                background: 'rgba(255,255,255,0.1)',
-                color: '#F29774',
-                border: '2px solid #F29774',
-                borderRadius: '5px',
-                fontFamily: "'Involve', sans-serif",
-              }}
+              className={s.input}
               autoFocus
               disabled={loading}
             />
-            <button
-              onClick={requestCode}
-              disabled={loading || !email}
-              className="w-full py-3 uppercase tracking-widest transition-opacity"
-              style={{
-                background: '#F29774',
-                color: '#A9342A',
-                borderRadius: '5px',
-                fontFamily: "'ONDER', sans-serif",
-                fontSize: '0.8rem',
-                opacity: loading || !email ? 0.5 : 1,
-              }}
-            >
+            <button onClick={requestCode} disabled={loading || !email} className={s.btn}>
               {loading ? 'Отправляем...' : 'Получить код'}
             </button>
           </>
         ) : (
           <>
-            <p
-              className="text-sm text-center"
-              style={{ color: '#F29774', opacity: 0.9, fontFamily: "'Involve', sans-serif" }}
-            >
+            <p className={s.hint} style={{ opacity: 0.9 }}>
               Код отправлен на <strong>{email}</strong>
             </p>
             <input
@@ -130,14 +84,7 @@ export default function AuthForm() {
               value={code}
               onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
               onKeyDown={(e) => e.key === 'Enter' && !loading && code.length === 6 && verifyCode()}
-              className="w-full px-4 py-3 rounded outline-none text-center text-2xl tracking-widest"
-              style={{
-                background: 'rgba(255,255,255,0.1)',
-                color: '#F29774',
-                border: '2px solid #F29774',
-                borderRadius: '5px',
-                fontFamily: "'ONDER', sans-serif",
-              }}
+              className={s.inputCode}
               autoFocus
               disabled={loading}
               maxLength={6}
@@ -145,37 +92,25 @@ export default function AuthForm() {
             <button
               onClick={verifyCode}
               disabled={loading || code.length !== 6}
-              className="w-full py-3 uppercase tracking-widest transition-opacity"
-              style={{
-                background: '#F29774',
-                color: '#A9342A',
-                borderRadius: '5px',
-                fontFamily: "'ONDER', sans-serif",
-                fontSize: '0.8rem',
-                opacity: loading || code.length !== 6 ? 0.5 : 1,
-              }}
+              className={s.btn}
             >
               {loading ? 'Проверяем...' : 'Войти'}
             </button>
             <button
-              onClick={() => { setStep('email'); setCode(''); setError(''); }}
-              className="text-sm text-center underline"
-              style={{ color: '#F29774', opacity: 0.6, fontFamily: "'Involve', sans-serif" }}
+              onClick={() => {
+                setStep('email');
+                setCode('');
+                setError('');
+              }}
+              className={s.backLink}
             >
               Изменить email
             </button>
           </>
         )}
 
-        {error && (
-          <p
-            className="text-sm text-center"
-            style={{ color: '#ffcccc', fontFamily: "'Involve', sans-serif" }}
-          >
-            {error}
-          </p>
-        )}
+        {error && <p className={s.error}>{error}</p>}
       </div>
     </main>
-  )
+  );
 }

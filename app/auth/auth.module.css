@@ -1,0 +1,99 @@
+.page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 1rem;
+  background: #1a1a1a;
+}
+
+.card {
+  width: 100%;
+  max-width: 24rem;
+  border-radius: 0.75rem;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  background: var(--color-primary);
+}
+
+.title {
+  font-size: 1.5rem;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--color-accent);
+  font-family: var(--font-onder);
+}
+
+.hint {
+  font-size: 0.875rem;
+  text-align: center;
+  color: var(--color-accent);
+  font-family: var(--font-involve);
+}
+
+.input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  outline: none;
+  font-size: 0.875rem;
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--color-accent);
+  border: 2px solid var(--color-accent);
+  border-radius: 5px;
+  font-family: var(--font-involve);
+}
+
+.inputCode {
+  composes: input;
+  text-align: center;
+  font-size: 1.5rem;
+  letter-spacing: 0.1em;
+  font-family: var(--font-onder);
+}
+
+.input:disabled,
+.inputCode:disabled {
+  opacity: 0.6;
+}
+
+.btn {
+  width: 100%;
+  padding: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  background: var(--color-accent);
+  color: var(--color-primary);
+  border-radius: 5px;
+  font-family: var(--font-onder);
+  font-size: 0.8rem;
+  transition: opacity 0.15s;
+  border: none;
+  cursor: pointer;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.backLink {
+  font-size: 0.875rem;
+  text-align: center;
+  text-decoration: underline;
+  color: var(--color-accent);
+  opacity: 0.6;
+  font-family: var(--font-involve);
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.error {
+  font-size: 0.875rem;
+  text-align: center;
+  color: #ffcccc;
+  font-family: var(--font-involve);
+}
