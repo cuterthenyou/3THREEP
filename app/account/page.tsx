@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation'
 import { auth } from '@/lib/auth'
 import { createClient } from '@/lib/supabase/server'
 import AccountClient from './AccountClient'
+import { queryOne, queryMany } from '@/lib/db'
 
 export default async function AccountPage() {
   const session = await auth()
@@ -23,11 +24,18 @@ export default async function AccountPage() {
     .eq('user_id', user.id)
     .order('created_at', { ascending: false })
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('*')
-    .eq('id', user.id)
-    .single()
+  // const { data: profile } = await supabase
+  //   .from('profiles')
+  //   .select('*')
+  //   .eq('id', user.id)
+  //   .single()
+
+   const profile = await queryOne(
+    `SELECT * FROM profiles WHERE id = $1`,
+    [user.id]
+  )
+
+  console.log('PROFILE FROM POSTGRES:', profile)
 
   console.log('ACCOUNT PAGE')
   console.log('USER ID:', user.id)
