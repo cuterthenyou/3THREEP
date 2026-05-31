@@ -39,6 +39,10 @@ function PostgresAdapter(): Adapter {
          RETURNING id, email, email_confirmed_at`,
         [user.email, null]
       )
+
+      console.log('[CREATE USER]')
+      console.log('ID:', result?.id)
+      console.log('EMAIL:', result?.email)
       
       if (!result) throw new Error('Failed to create user')
       
