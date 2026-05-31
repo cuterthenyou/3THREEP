@@ -44,11 +44,11 @@ export async function POST(req: NextRequest) {
     itemParams
   )
 
-  const total = Number(order.total).toLocaleString('ru-RU')
+  const totalFormatted = Number(order.total).toLocaleString('ru-RU')
   sendTelegram(
     `🛒 <b>Новый заказ!</b>\n\n` +
     `Заказ: <code>#${String(order.id).slice(0, 8)}</code>\n` +
-    `Сумма: ${total} ₽\n` +
+    `Сумма: ${totalFormatted} ₽\n` +
     `Адрес: ${order.delivery_address || '—'}\n\n` +
     `👉 https://3threep.ru/admin/orders/${order.id}`
   ).catch(() => {})
