@@ -47,7 +47,13 @@
 }
 
 .inputCode {
-  composes: input;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  outline: none;
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--color-accent);
+  border: 2px solid var(--color-accent);
+  border-radius: 5px;
   text-align: center;
   font-size: 1.5rem;
   letter-spacing: 0.1em;

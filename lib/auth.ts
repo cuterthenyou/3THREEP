@@ -344,11 +344,13 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     },
     
     async session({ session, token }) {
+      console.log('[NextAuth] session callback | token.id:', token.id ?? 'MISSING', '| token.email:', token.email ?? 'MISSING')
       if (token && session.user) {
         session.user.id = token.id as string
         session.user.email = token.email as string
         session.user.emailVerified = token.emailVerified as Date | null
       }
+      console.log('[NextAuth] session result | user.id:', session.user?.id ?? 'none', '| user.email:', session.user?.email ?? 'none')
       return session
     },
 

@@ -5,9 +5,11 @@ import { queryOne, queryMany } from '@/lib/db'
 
 export default async function AccountPage() {
   const session = await auth()
+  console.log('[ACCOUNT] session exists:', !!session, '| user id:', session?.user?.id ?? 'none', '| email:', session?.user?.email ?? 'none')
 
   if (!session?.user) {
-    redirect('/auth?next=/account')
+    console.log('[ACCOUNT] no session → redirect to auth')
+    redirect('/auth?callbackUrl=/account')
   }
 
   const user = {

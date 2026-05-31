@@ -12,6 +12,7 @@ export default async function AdminLayout({ children }: { children: ReactNode })
   }
 
   const email = session.user.email ?? null;
+  console.log('[ADMIN] session email:', email, '| ADMIN_EMAIL env:', process.env.ADMIN_EMAIL ?? 'NOT SET', '| isAdmin:', isAdmin(email))
 
   if (!isAdmin(email)) {
     const adminEnvHint = process.env.ADMIN_EMAIL

@@ -8,11 +8,12 @@ import { isAdmin } from '@/lib/isAdmin';
 import { staticProducts, staticCategories } from '@/lib/staticData';
 import type { ProductCategory, Category } from '@/lib/types';
 
-export const revalidate = 60
+export const dynamic = 'force-dynamic'
 
 export default async function HomePage() {
   const session = await auth();
   const isAdminUser = isAdmin(session?.user?.email);
+  console.log('[HOME] session email:', session?.user?.email ?? 'none', '| isAdminUser:', isAdminUser)
 
   let products = staticProducts;
   let categories = staticCategories;
