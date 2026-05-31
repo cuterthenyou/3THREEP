@@ -2,7 +2,7 @@ import Header from '@/components/Header'
 import Hero from '@/components/Hero'
 import CatalogSection from '@/components/CatalogSection'
 import Footer from '@/components/Footer'
-import { createClient } from '@/lib/supabase/server'
+import { queryMany } from '@/lib/db'
 import { staticProducts, staticCategories } from '@/lib/staticData'
 import type { ProductCategory, Category } from '@/lib/types'
 
@@ -14,20 +14,19 @@ export default async function HomePage() {
   let categoryData: Record<string, Category> = {}
 
   try {
-    const supabase = await createClient()
-    const [productsRes, categoriesRes] = await Promise.all([
-      supabase.from('products').select('*').eq('active', true).order('created_at', { ascending: false }),
-      supabase.from('categories').select('*'),
+    const [productsData, categoriesData] = await Promise.all([
+      queryMany(`SELECT * FROM products WHERE active = true ORDER BY created_at DESC`),
+      queryMany(`SELECT * FROM categories`),
     ])
 
     const inactiveCatSlugs = new Set(
-      (categoriesRes.data ?? [])
+      categoriesData
         .filter((c: Category) => c.active === false)
         .map((c: Category) => c.slug)
     )
 
-    if (productsRes.data && productsRes.data.length > 0) {
-      products = productsRes.data.filter(p => !inactiveCatSlugs.has(p.category))
+    if (productsData.length > 0) {
+      products = productsData.filter(p => !inactiveCatSlugs.has(p.category))
       const slugs = [...new Set(products.map((p) => p.category as string))]
       categories = [
         { name: 'Все', slug: 'all' },
@@ -35,8 +34,8 @@ export default async function HomePage() {
       ]
     }
 
-    if (categoriesRes.data) {
-      categoryData = Object.fromEntries(categoriesRes.data.map((c: Category) => [c.slug, c]))
+    if (categoriesData.length > 0) {
+      categoryData = Object.fromEntries(categoriesData.map((c: Category) => [c.slug, c]))
       if (categories.length > 1) {
         categories = [
           { name: 'Все', slug: 'all' },

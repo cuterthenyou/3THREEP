@@ -1,26 +1,48 @@
-import { createAdminClient } from '@/lib/supabase/server'
+import { queryOne, queryMany } from '@/lib/db'
 import { notFound } from 'next/navigation'
+import { requireAdmin } from '@/lib/adminAuth'
+import { redirect } from 'next/navigation'
 import OrderAdminClient from './OrderAdminClient'
 
 export const revalidate = 0
 
 export default async function AdminOrderPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
-  const admin = await createAdminClient()
 
-  const { data: order } = await admin
-    .from('orders')
-    .select('*, order_items(*), profiles(email, name)')
-    .eq('id', id)
-    .single()
+  const admin = await requireAdmin()
+  if (!admin) redirect('/auth')
+
+  const [order, messages] = await Promise.all([
+    queryOne(
+      `SELECT o.*,
+        COALESCE(
+          json_agg(
+            DISTINCT jsonb_build_object(
+              'id', oi.id,
+              'product_name', oi.product_name,
+              'size', oi.size,
+              'color', oi.color,
+              'quantity', oi.quantity,
+              'price', oi.price
+            )
+          ) FILTER (WHERE oi.id IS NOT NULL),
+          '[]'
+        ) AS order_items,
+        json_build_object('email', p.email, 'name', p.name) AS profiles
+       FROM orders o
+       LEFT JOIN order_items oi ON oi.order_id = o.id
+       LEFT JOIN profiles p ON p.id = o.user_id
+       WHERE o.id = $1
+       GROUP BY o.id, p.email, p.name`,
+      [id]
+    ),
+    queryMany(
+      'SELECT * FROM messages WHERE order_id = $1 ORDER BY created_at ASC',
+      [id]
+    ),
+  ])
 
   if (!order) notFound()
 
-  const { data: messages } = await admin
-    .from('messages')
-    .select('*')
-    .eq('order_id', id)
-    .order('created_at', { ascending: true })
-
-  return <OrderAdminClient order={order} messages={messages ?? []} />
+  return <OrderAdminClient order={order} messages={messages} adminId={admin.id} />
 }

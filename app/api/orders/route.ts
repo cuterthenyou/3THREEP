@@ -1,13 +1,10 @@
-import { createClient, createAdminClient } from '@/lib/supabase/server'
+import { auth } from '@/lib/auth'
+import { query } from '@/lib/db'
 import { NextResponse, type NextRequest } from 'next/server'
 
 export async function POST(req: NextRequest) {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
+  const session = await auth()
+  if (!session?.user?.id) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const body = await req.json()
   const { items, total, delivery_address, comment } = body
@@ -16,25 +13,35 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Invalid data' }, { status: 400 })
   }
 
-  const admin = await createAdminClient()
+  const { rows: [order] } = await query(
+    `INSERT INTO orders (user_id, total, delivery_address, comment, status)
+     VALUES ($1, $2, $3, $4, 'new') RETURNING *`,
+    [session.user.id, total, delivery_address, comment ?? null]
+  )
 
-  const { data: order, error: orderError } = await admin
-    .from('orders')
-    .insert({ user_id: user.id, total, delivery_address, comment, status: 'new' })
-    .select()
-    .single()
+  if (!order) return NextResponse.json({ error: 'Failed to create order' }, { status: 500 })
 
-  if (orderError || !order) {
-    return NextResponse.json({ error: orderError?.message }, { status: 500 })
-  }
+  const itemValues = items.map((_: unknown, i: number) => {
+    const base = i * 8
+    return `($${base + 1}, $${base + 2}, $${base + 3}, $${base + 4}, $${base + 5}, $${base + 6}, $${base + 7}, $${base + 8})`
+  }).join(', ')
 
-  const { error: itemsError } = await admin
-    .from('order_items')
-    .insert(items.map((i: Record<string, unknown>) => ({ ...i, order_id: order.id })))
+  const itemParams = items.flatMap((item: Record<string, unknown>) => [
+    order.id,
+    item.product_id ?? null,
+    item.product_name,
+    item.product_image ?? null,
+    item.size ?? null,
+    item.color ?? null,
+    item.quantity ?? 1,
+    item.price,
+  ])
 
-  if (itemsError) {
-    return NextResponse.json({ error: itemsError.message }, { status: 500 })
-  }
+  await query(
+    `INSERT INTO order_items (order_id, product_id, product_name, product_image, size, color, quantity, price)
+     VALUES ${itemValues}`,
+    itemParams
+  )
 
   return NextResponse.json({ id: order.id })
 }

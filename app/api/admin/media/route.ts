@@ -1,41 +1,42 @@
+import { requireAdmin } from '@/lib/adminAuth'
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient, createAdminClient } from '@/lib/supabase/server'
-import { isAdmin } from '@/lib/isAdmin'
+import { yandexS3 } from '@/lib/yandex-storage'
+import { ListObjectsV2Command, DeleteObjectCommand } from '@aws-sdk/client-s3'
 import fs from 'fs'
 import path from 'path'
 
-export async function GET() {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user || !isAdmin(user.email)) {
-    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
-  }
+const BUCKET = process.env.YANDEX_STORAGE_BUCKET || 'threep-media'
+const BASE_URL = process.env.NEXT_PUBLIC_STORAGE_BASE_URL || 'https://storage.yandexcloud.net/threep-media'
 
-  const admin = await createAdminClient()
+export async function GET() {
+  const admin = await requireAdmin()
+  if (!admin) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+
   const files: Array<{ bucket: string; name: string; url: string; size: number; created_at: string; mime: string }> = []
 
-  const { data: buckets } = await admin.storage.listBuckets()
-  const bucketNames = (buckets ?? []).map((b: { name: string }) => b.name)
-
-  for (const bucket of bucketNames) {
-    const { data } = await admin.storage.from(bucket).list('', {
-      limit: 500,
-      sortBy: { column: 'created_at', order: 'desc' },
-    })
-    if (data) {
-      for (const file of data) {
-        if (!file.name || file.name === '.emptyFolderPlaceholder') continue
-        const { data: { publicUrl } } = admin.storage.from(bucket).getPublicUrl(file.name)
-        files.push({
-          bucket,
-          name: file.name,
-          url: publicUrl,
-          size: file.metadata?.size ?? 0,
-          created_at: file.created_at ?? '',
-          mime: file.metadata?.mimetype ?? '',
-        })
+  try {
+    const { Contents } = await yandexS3.send(
+      new ListObjectsV2Command({ Bucket: BUCKET, MaxKeys: 500 })
+    )
+    for (const obj of Contents ?? []) {
+      if (!obj.Key) continue
+      const ext = path.extname(obj.Key).toLowerCase()
+      const mimeMap: Record<string, string> = {
+        '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.png': 'image/png',
+        '.gif': 'image/gif', '.webp': 'image/webp', '.svg': 'image/svg+xml',
+        '.mp4': 'video/mp4', '.webm': 'video/webm',
       }
+      files.push({
+        bucket: 'yandex',
+        name: obj.Key,
+        url: `${BASE_URL}/${obj.Key}`,
+        size: obj.Size ?? 0,
+        created_at: obj.LastModified?.toISOString() ?? '',
+        mime: mimeMap[ext] ?? 'application/octet-stream',
+      })
     }
+  } catch (err) {
+    console.error('Yandex listing error:', err)
   }
 
   // Static files from public/images
@@ -64,23 +65,25 @@ export async function GET() {
     }
   }
 
-  return NextResponse.json({ files, buckets: [...bucketNames, 'static'] })
+  return NextResponse.json({ files, buckets: ['yandex', 'static'] })
 }
 
 export async function DELETE(req: NextRequest) {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user || !isAdmin(user.email)) {
-    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
-  }
+  const admin = await requireAdmin()
+  if (!admin) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
   const { bucket, name } = await req.json()
-  if (!bucket || !name) {
-    return NextResponse.json({ error: 'Invalid params' }, { status: 400 })
+  if (!bucket || !name) return NextResponse.json({ error: 'Invalid params' }, { status: 400 })
+
+  if (bucket === 'static') {
+    return NextResponse.json({ error: 'Cannot delete static files via API' }, { status: 400 })
   }
 
-  const admin = await createAdminClient()
-  const { error } = await admin.storage.from(bucket).remove([name])
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-  return NextResponse.json({ ok: true })
+  try {
+    await yandexS3.send(new DeleteObjectCommand({ Bucket: BUCKET, Key: name }))
+    return NextResponse.json({ ok: true })
+  } catch (error) {
+    console.error('Delete error:', error)
+    return NextResponse.json({ error: 'Delete failed' }, { status: 500 })
+  }
 }

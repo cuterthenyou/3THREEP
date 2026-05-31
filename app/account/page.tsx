@@ -1,6 +1,5 @@
 import { redirect } from 'next/navigation'
 import { auth } from '@/lib/auth'
-import { createClient } from '@/lib/supabase/server'
 import AccountClient from './AccountClient'
 import { queryOne, queryMany } from '@/lib/db'
 
@@ -11,41 +10,33 @@ export default async function AccountPage() {
     redirect('/auth?next=/account')
   }
 
-  const supabase = await createClient()
-
   const user = {
     id: session.user.id,
     email: session.user.email ?? '',
   }
 
-  const { data: orders } = await supabase
-    .from('orders')
-    .select('*, order_items(*)')
-    .eq('user_id', user.id)
-    .order('created_at', { ascending: false })
-
-  // const { data: profile } = await supabase
-  //   .from('profiles')
-  //   .select('*')
-  //   .eq('id', user.id)
-  //   .single()
-
-   const profile = await queryOne(
-    `SELECT * FROM profiles WHERE id = $1`,
-    [user.id]
-  )
-
-  console.log('PROFILE FROM POSTGRES:', profile)
-
-  console.log('ACCOUNT PAGE')
-  console.log('USER ID:', user.id)
-  console.log('PROFILE:', profile)
+  const [profile, orders] = await Promise.all([
+    queryOne(`SELECT * FROM profiles WHERE id = $1`, [user.id]),
+    queryMany(
+      `SELECT o.*,
+        COALESCE(
+          json_agg(oi.* ORDER BY oi.created_at) FILTER (WHERE oi.id IS NOT NULL),
+          '[]'
+        ) AS order_items
+       FROM orders o
+       LEFT JOIN order_items oi ON oi.order_id = o.id
+       WHERE o.user_id = $1
+       GROUP BY o.id
+       ORDER BY o.created_at DESC`,
+      [user.id]
+    ),
+  ])
 
   return (
     <AccountClient
-      user={{ id: user.id, email: user.email ?? '' }}
+      user={{ id: user.id, email: user.email }}
       profile={profile}
-      orders={orders ?? []}
+      orders={orders}
     />
   )
 }

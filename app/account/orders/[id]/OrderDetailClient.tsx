@@ -1,7 +1,6 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
-import { createClient } from '@/lib/supabase/client'
+import { useState, useRef, useEffect, useCallback } from 'react'
 import type { Order, Message, OrderStatus } from '@/lib/types'
 import { ORDER_STATUS_LABELS } from '@/lib/types'
 import Link from 'next/link'
@@ -37,45 +36,33 @@ export default function OrderDetailClient({ order, messages: initialMessages, us
   const [text, setText] = useState('')
   const [sending, setSending] = useState(false)
   const bottomRef = useRef<HTMLDivElement>(null)
-  const supabase = createClient()
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
 
+  const fetchMessages = useCallback(async () => {
+    try {
+      const res = await fetch(`/api/orders/${order.id}/messages`)
+      if (!res.ok) return
+      const data: Message[] = await res.json()
+      setMessages(data)
+    } catch {}
+  }, [order.id])
+
   useEffect(() => {
-    const channel = supabase
-      .channel(`order-${order.id}`)
-      .on('postgres_changes', {
-        event: 'INSERT',
-        schema: 'public',
-        table: 'messages',
-        filter: `order_id=eq.${order.id}`,
-      }, (payload) => {
-        const msg = payload.new as Message
-        setMessages((prev) => {
-          if (prev.some((m) => m.id === msg.id)) return prev
-          const tempIdx = prev.findIndex((m) => m.id.startsWith('temp-') && m.text === msg.text && m.sender_id === msg.sender_id)
-          if (tempIdx !== -1) {
-            const updated = [...prev]
-            updated[tempIdx] = msg
-            return updated
-          }
-          return [...prev, msg]
-        })
-      })
-      .subscribe()
-    return () => { supabase.removeChannel(channel) }
-  }, [order.id, supabase])
+    const interval = setInterval(fetchMessages, 3000)
+    return () => clearInterval(interval)
+  }, [fetchMessages])
 
   async function sendMessage() {
     if (!text.trim()) return
     setSending(true)
     const msgText = text.trim()
     setText('')
-    const tempId = `temp-${Date.now()}`
+
     const optimistic: Message = {
-      id: tempId,
+      id: `temp-${Date.now()}`,
       order_id: order.id,
       sender_id: userId,
       is_admin: false,
@@ -83,15 +70,14 @@ export default function OrderDetailClient({ order, messages: initialMessages, us
       created_at: new Date().toISOString(),
     }
     setMessages((prev) => [...prev, optimistic])
-    const { data } = await supabase.from('messages').insert({
-      order_id: order.id,
-      sender_id: userId,
-      is_admin: false,
-      text: msgText,
-    }).select().single()
-    if (data) {
-      setMessages((prev) => prev.map((m) => m.id === tempId ? data as Message : m))
-    }
+
+    await fetch(`/api/orders/${order.id}/messages`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text: msgText }),
+    })
+
+    await fetchMessages()
     setSending(false)
   }
 
@@ -168,7 +154,6 @@ export default function OrderDetailClient({ order, messages: initialMessages, us
             <span className="text-xl" style={{ color: '#F29774', fontFamily: "'ONDER', sans-serif" }}>{formatPrice(order.total)}</span>
           </div>
 
-          {/* Delivery */}
           {order.delivery_address && (
             <div className="text-sm" style={{ color: '#F29774', opacity: 0.7, fontFamily: "'Involve', sans-serif" }}>
               <span style={{ opacity: 0.5 }}>Адрес: </span>{order.delivery_address}
@@ -181,7 +166,6 @@ export default function OrderDetailClient({ order, messages: initialMessages, us
             </div>
           )}
 
-          {/* Payment info for new orders */}
           {order.status === 'new' && (
             <div
               className="rounded-lg p-4 text-sm"

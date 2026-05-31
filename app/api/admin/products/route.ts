@@ -1,20 +1,22 @@
-import { createAdminClient, createClient } from '@/lib/supabase/server'
+import { requireAdmin } from '@/lib/adminAuth'
+import { query } from '@/lib/db'
 import { NextResponse, type NextRequest } from 'next/server'
-import { isAdmin } from '@/lib/isAdmin'
-
-async function checkAdmin() {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  return isAdmin(user?.email) ? user : null
-}
 
 export async function POST(req: NextRequest) {
-  const admin_user = await checkAdmin()
-  if (!admin_user) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  const admin = await requireAdmin()
+  if (!admin) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
   const body = await req.json()
-  const admin = await createAdminClient()
-  const { data, error } = await admin.from('products').insert(body).select().single()
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-  return NextResponse.json(data)
+  const {
+    name, description = '', price, images = [], sizes = [],
+    colors = [], stock = 0, active = true, category = 'general', product_type = null,
+  } = body
+
+  const { rows: [product] } = await query(
+    `INSERT INTO products (name, description, price, images, sizes, colors, stock, active, category, product_type)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *`,
+    [name, description, price, images, sizes, colors, stock, active, category, product_type]
+  )
+
+  return NextResponse.json(product)
 }

@@ -3,7 +3,6 @@
 import { signOut } from 'next-auth/react'
 import { useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
-import { createClient } from '@/lib/supabase/client'
 import type { Order, Profile, OrderStatus } from '@/lib/types'
 import { ORDER_STATUS_LABELS } from '@/lib/types'
 import Link from 'next/link'
@@ -53,7 +52,6 @@ export default function AccountClient({ user, profile, orders }: Props) {
   const [displayName, setDisplayName] = useState(profile?.name ?? null)
   const avatarRef = useRef<HTMLInputElement>(null)
   const router = useRouter()
-  const supabase = createClient()
 
   const allItems = orders.flatMap(o => o.order_items ?? [])
   const sparks = allItems.reduce((sum, i) => sum + i.quantity, 0)
@@ -77,8 +75,12 @@ export default function AccountClient({ user, profile, orders }: Props) {
     if (trimmed.length > 20) { setNicknameError('Максимум 20 символов'); return }
     setSavingNickname(true)
     setNicknameError('')
-    const { error } = await supabase.from('profiles').update({ name: trimmed }).eq('id', user.id)
-    if (error) { setNicknameError('Ошибка сохранения'); setSavingNickname(false); return }
+    const res = await fetch('/api/account/profile', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: trimmed }),
+    })
+    if (!res.ok) { setNicknameError('Ошибка сохранения'); setSavingNickname(false); return }
     setDisplayName(trimmed)
     setShowNicknameModal(false)
     setSavingNickname(false)
@@ -98,7 +100,7 @@ export default function AccountClient({ user, profile, orders }: Props) {
 
   // async function handleLogout() {
   //   setLoggingOut(true)
-  //   await supabase.auth.signOut()
+  //   (old supabase logout removed)
   //   router.push('/')
   //   router.refresh()
   // }

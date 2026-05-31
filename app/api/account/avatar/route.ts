@@ -1,12 +1,11 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
-import { createAdminClient } from '@/lib/supabase/server'
+import { auth } from '@/lib/auth'
+import { query } from '@/lib/db'
 import { uploadToYandex } from '@/lib/upload-to-yandex'
+import { NextRequest, NextResponse } from 'next/server'
 
 export async function POST(req: NextRequest) {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const session = await auth()
+  if (!session?.user?.id) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const formData = await req.formData()
   const file = formData.get('file') as File | null
@@ -14,17 +13,10 @@ export async function POST(req: NextRequest) {
 
   try {
     const ext = file.name.split('.').pop() ?? 'jpg'
-    const customFileName = `${user.id}.${ext}`
-    
+    const customFileName = `${session.user.id}.${ext}`
     const result = await uploadToYandex('avatars', file, customFileName)
 
-    const admin = await createAdminClient()
-    const { error: updateError } = await admin
-      .from('profiles')
-      .update({ avatar_url: result.url })
-      .eq('id', user.id)
-
-    if (updateError) return NextResponse.json({ error: updateError.message }, { status: 500 })
+    await query('UPDATE profiles SET avatar_url = $1 WHERE id = $2', [result.url, session.user.id])
 
     return NextResponse.json({ url: result.url })
   } catch (error) {

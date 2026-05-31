@@ -1,15 +1,10 @@
-import { createClient } from '@/lib/supabase/server'
+import { requireAdmin } from '@/lib/adminAuth'
 import { NextResponse, type NextRequest } from 'next/server'
-import { isAdmin } from '@/lib/isAdmin'
 import { uploadToYandex } from '@/lib/upload-to-yandex'
 
 export async function POST(req: NextRequest) {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user || !isAdmin(user.email)) {
-    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
-  }
+  const admin = await requireAdmin()
+  if (!admin) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
   const formData = await req.formData()
   const file = formData.get('file') as File | null

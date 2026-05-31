@@ -1,14 +1,12 @@
-import { createAdminClient } from '@/lib/supabase/server'
+import { queryMany } from '@/lib/db'
 import ProductsClient from './ProductsClient'
 
 export const revalidate = 0
 
 export default async function AdminProductsPage() {
-  const admin = await createAdminClient()
-  const { data: products } = await admin
-    .from('products')
-    .select('*')
-    .order('created_at', { ascending: false })
+  const products = await queryMany(
+    `SELECT * FROM products ORDER BY created_at DESC`
+  )
 
-  return <ProductsClient products={products ?? []} />
+  return <ProductsClient products={products} />
 }

@@ -9,12 +9,7 @@ const nextConfig: NextConfig = {
         hostname: '3threep.ru',
         pathname: '/wp-content/uploads/**',
       },
-      {
-        protocol: 'https',
-        hostname: 'wfgzofrtiinageegztux.supabase.co',
-        pathname: '/storage/v1/object/public/**',
-      },
-      {
+{
         protocol: 'https',
         hostname: 'storage.yandexcloud.net',
         pathname: '/threep-media/**',

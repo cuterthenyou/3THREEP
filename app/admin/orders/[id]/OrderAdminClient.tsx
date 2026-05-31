@@ -1,8 +1,6 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
-import { createClient } from '@/lib/supabase/client'
+import { useState, useRef, useEffect, useCallback } from 'react'
 import type { OrderStatus, Message } from '@/lib/types'
 import { ORDER_STATUS_LABELS } from '@/lib/types'
 import Link from 'next/link'
@@ -19,9 +17,10 @@ function formatPrice(p: number) { return p.toLocaleString('ru-RU') + ' ₽' }
 interface Props {
   order: Record<string, unknown>
   messages: Message[]
+  adminId: string
 }
 
-export default function OrderAdminClient({ order, messages: init }: Props) {
+export default function OrderAdminClient({ order, messages: init, adminId }: Props) {
   const [status, setStatus] = useState(order.status as OrderStatus)
   const [tracking, setTracking] = useState(String(order.tracking_number ?? ''))
   const [messages, setMessages] = useState<Message[]>(init)
@@ -30,29 +29,24 @@ export default function OrderAdminClient({ order, messages: init }: Props) {
   const [saved, setSaved] = useState(false)
   const [sending, setSending] = useState(false)
   const bottomRef = useRef<HTMLDivElement>(null)
-  const router = useRouter()
-  const supabase = createClient()
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
 
+  const fetchMessages = useCallback(async () => {
+    try {
+      const res = await fetch(`/api/orders/${order.id}/messages`)
+      if (!res.ok) return
+      const data: Message[] = await res.json()
+      setMessages(data)
+    } catch {}
+  }, [order.id])
+
   useEffect(() => {
-    const ch = supabase
-      .channel(`admin-order-${order.id}`)
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages', filter: `order_id=eq.${order.id}` },
-        (p) => {
-          const msg = p.new as Message
-          setMessages(prev => {
-            if (prev.some(m => m.id === msg.id)) return prev
-            const tempIdx = prev.findIndex(m => m.id.startsWith('temp-') && m.text === msg.text && m.sender_id === msg.sender_id)
-            if (tempIdx !== -1) { const u = [...prev]; u[tempIdx] = msg; return u }
-            return [...prev, msg]
-          })
-        }
-      ).subscribe()
-    return () => { supabase.removeChannel(ch) }
-  }, [order.id, supabase])
+    const interval = setInterval(fetchMessages, 3000)
+    return () => clearInterval(interval)
+  }, [fetchMessages])
 
   async function saveOrder() {
     setSaving(true)
@@ -70,17 +64,20 @@ export default function OrderAdminClient({ order, messages: init }: Props) {
     setSending(true)
     const msgText = text.trim()
     setText('')
-    const { data: { user } } = await supabase.auth.getUser()
-    const tempId = `temp-${Date.now()}`
+
     const optimistic: Message = {
-      id: tempId, order_id: String(order.id), sender_id: user?.id ?? '',
+      id: `temp-${Date.now()}`, order_id: String(order.id), sender_id: adminId,
       is_admin: true, text: msgText, created_at: new Date().toISOString(),
     }
     setMessages(prev => [...prev, optimistic])
-    const { data } = await supabase.from('messages').insert({
-      order_id: order.id, sender_id: user?.id, is_admin: true, text: msgText,
-    }).select().single()
-    if (data) setMessages(prev => prev.map(m => m.id === tempId ? data as Message : m))
+
+    await fetch(`/api/admin/orders/${order.id}/messages`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text: msgText }),
+    })
+
+    await fetchMessages()
     setSending(false)
   }
 

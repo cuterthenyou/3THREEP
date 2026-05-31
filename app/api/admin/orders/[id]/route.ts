@@ -1,21 +1,18 @@
-import { createAdminClient, createClient } from '@/lib/supabase/server'
+import { requireAdmin } from '@/lib/adminAuth'
+import { query } from '@/lib/db'
 import { NextResponse, type NextRequest } from 'next/server'
-import { isAdmin } from '@/lib/isAdmin'
 
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const admin = await requireAdmin()
+  if (!admin) return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
 
-  if (!user || !isAdmin(user.email)) {
-    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
-  }
+  const { status, tracking_number } = await req.json()
 
-  const body = await req.json()
-  const admin = await createAdminClient()
+  await query(
+    'UPDATE orders SET status = COALESCE($1, status), tracking_number = COALESCE($2, tracking_number) WHERE id = $3',
+    [status ?? null, tracking_number ?? null, id]
+  )
 
-  const { error } = await admin.from('orders').update(body).eq('id', id)
-
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   return NextResponse.json({ ok: true })
 }
