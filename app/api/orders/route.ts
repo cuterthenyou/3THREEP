@@ -1,5 +1,6 @@
 import { auth } from '@/lib/auth'
 import { query } from '@/lib/db'
+import { sendTelegram } from '@/lib/telegram'
 import { NextResponse, type NextRequest } from 'next/server'
 
 export async function POST(req: NextRequest) {
@@ -42,6 +43,15 @@ export async function POST(req: NextRequest) {
      VALUES ${itemValues}`,
     itemParams
   )
+
+  const total = Number(order.total).toLocaleString('ru-RU')
+  sendTelegram(
+    `🛒 <b>Новый заказ!</b>\n\n` +
+    `Заказ: <code>#${String(order.id).slice(0, 8)}</code>\n` +
+    `Сумма: ${total} ₽\n` +
+    `Адрес: ${order.delivery_address || '—'}\n\n` +
+    `👉 https://3threep.ru/admin/orders/${order.id}`
+  ).catch(() => {})
 
   return NextResponse.json({ id: order.id })
 }

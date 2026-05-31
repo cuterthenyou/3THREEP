@@ -1,7 +1,11 @@
 import type { ReactNode } from 'react'
 import Link from 'next/link'
+import { requireAdmin } from '@/lib/adminAuth'
+import { redirect } from 'next/navigation'
 
-export default function AdminLayout({ children }: { children: ReactNode }) {
+export default async function AdminLayout({ children }: { children: ReactNode }) {
+  const admin = await requireAdmin()
+  if (!admin) redirect('/auth?next=/admin/orders')
   return (
     <div className="min-h-screen" style={{ background: '#0d0505' }}>
       <nav

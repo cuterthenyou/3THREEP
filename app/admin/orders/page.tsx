@@ -23,7 +23,7 @@ export default async function AdminOrdersPage() {
     `SELECT o.*,
       COALESCE(
         json_agg(
-          DISTINCT jsonb_build_object(
+          jsonb_build_object(
             'id', oi.id,
             'product_name', oi.product_name,
             'size', oi.size,

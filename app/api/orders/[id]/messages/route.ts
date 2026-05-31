@@ -1,5 +1,6 @@
 import { auth } from '@/lib/auth'
 import { query, queryMany, queryOne } from '@/lib/db'
+import { sendTelegram } from '@/lib/telegram'
 import { NextResponse, type NextRequest } from 'next/server'
 
 export async function GET(
@@ -44,5 +45,13 @@ export async function POST(
     'INSERT INTO messages (order_id, sender_id, is_admin, text) VALUES ($1, $2, false, $3) RETURNING *',
     [id, session.user.id, text.trim()]
   )
+
+  sendTelegram(
+    `💬 <b>Новое сообщение по заказу</b>\n\n` +
+    `Заказ: <code>#${String(id).slice(0, 8)}</code>\n` +
+    `Текст: ${text.trim().slice(0, 200)}\n\n` +
+    `👉 https://3threep.ru/admin/orders/${id}`
+  ).catch(() => {})
+
   return NextResponse.json(rows[0])
 }

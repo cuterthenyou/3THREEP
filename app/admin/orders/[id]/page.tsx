@@ -1,23 +1,20 @@
 import { queryOne, queryMany } from '@/lib/db'
 import { notFound } from 'next/navigation'
 import { requireAdmin } from '@/lib/adminAuth'
-import { redirect } from 'next/navigation'
 import OrderAdminClient from './OrderAdminClient'
 
 export const revalidate = 0
 
 export default async function AdminOrderPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
-
   const admin = await requireAdmin()
-  if (!admin) redirect('/auth')
 
   const [order, messages] = await Promise.all([
     queryOne(
       `SELECT o.*,
         COALESCE(
           json_agg(
-            DISTINCT jsonb_build_object(
+            jsonb_build_object(
               'id', oi.id,
               'product_name', oi.product_name,
               'size', oi.size,
@@ -44,5 +41,5 @@ export default async function AdminOrderPage({ params }: { params: Promise<{ id:
 
   if (!order) notFound()
 
-  return <OrderAdminClient order={order} messages={messages} adminId={admin.id} />
+  return <OrderAdminClient order={order} messages={messages} adminId={admin!.id} />
 }
