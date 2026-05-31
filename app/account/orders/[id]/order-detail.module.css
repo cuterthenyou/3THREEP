@@ -224,6 +224,7 @@
 
 .chatInput {
   flex: 1;
+  min-width: 0;
   padding: 0.75rem 1rem;
   outline: none;
   font-size: 0.875rem;
@@ -232,6 +233,12 @@
   border: 2px solid rgba(242, 151, 116, 0.3);
   border-radius: 5px;
   font-family: var(--font-involve);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.chatInput:focus {
+  border-color: rgba(242, 151, 116, 0.6);
+  box-shadow: 0 0 0 2px rgba(242, 151, 116, 0.1);
 }
 
 .chatSendBtn {
@@ -245,10 +252,38 @@
   font-size: 0.75rem;
   border: none;
   cursor: pointer;
-  transition: opacity 0.15s;
+  flex-shrink: 0;
+  transition: filter 0.2s, transform 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.chatSendBtn:hover:not(:disabled) {
+  filter: brightness(1.1);
+  transform: scale(1.04);
+}
+
+.chatSendBtn:active:not(:disabled) {
+  transform: scale(0.95);
+  transition-duration: 0.07s;
 }
 
 .chatSendBtn:disabled {
   opacity: 0.5;
   cursor: default;
 }
+
+/* Mobile */
+@media (max-width: 639px) {
+  .page {
+    padding: 1.5rem 0.75rem;
+  }
+
+  .orderCard {
+    padding: 1rem;
+  }
+
+  .totalAmount {
+    font-size: 1.1rem;
+  }
+}
+

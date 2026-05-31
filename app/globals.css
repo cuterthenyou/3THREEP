@@ -61,6 +61,41 @@ h6 {
   box-sizing: border-box;
 }
 
+/* ─── THREEP Brand Animations ─── */
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes glitchFlash {
+  0%, 100% { opacity: 1; transform: translateX(0); filter: none; }
+  15%       { opacity: 0.85; transform: translateX(-2px); clip-path: inset(8% 0 75% 0); filter: hue-rotate(15deg); }
+  35%       { opacity: 1;    transform: translateX(2px);  clip-path: none; }
+  55%       { opacity: 0.9;  transform: translateX(-1px); clip-path: inset(55% 0 25% 0); }
+  75%       { opacity: 1;    transform: translateX(0);    clip-path: none; }
+}
+
+@keyframes pulseGlow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(242, 151, 116, 0); }
+  50%       { box-shadow: 0 0 14px 3px rgba(242, 151, 116, 0.22); }
+}
+
+@keyframes ambientFloat {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-4px); }
+}
+
+@keyframes shimmer {
+  0%   { background-position: -200% center; }
+  100% { background-position:  200% center; }
+}
+
 /* Custom scrollbar */
 ::-webkit-scrollbar {
   width: 4px;

@@ -1,29 +1,71 @@
 .backdrop {
-  background: rgba(0, 0, 0, 0.6);
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(4px);
 }
 
 .inner {
   background: var(--color-primary);
 }
 
+/* Close button */
 .closeBtn {
   background: var(--color-accent);
   color: var(--color-primary);
   border-radius: 5px;
+  cursor: pointer;
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s, box-shadow 0.2s;
 }
 
+.closeBtn:hover {
+  transform: rotate(90deg) scale(1.1);
+  box-shadow: 0 0 12px rgba(242, 151, 116, 0.4);
+}
+
+.closeBtn:active {
+  transform: rotate(90deg) scale(0.92);
+  transition-duration: 0.08s;
+}
+
+/* Gallery arrows */
 .arrowBtn {
   background: rgba(0, 0, 0, 0.5);
   color: var(--color-accent);
+  cursor: pointer;
+  transition: background 0.2s, transform 0.15s, opacity 0.2s;
+  -webkit-tap-highlight-color: transparent;
 }
 
+.arrowBtn:hover {
+  background: rgba(0, 0, 0, 0.8);
+  transform: scale(1.12);
+}
+
+.arrowBtn:active {
+  transform: scale(0.92);
+  transition-duration: 0.08s;
+}
+
+/* Thumbnails */
 .thumbBtn {
   aspect-ratio: 1 / 1;
   border-radius: 4px;
   overflow: hidden;
   position: relative;
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s;
 }
 
+.thumbBtn:hover {
+  transform: scale(1.06);
+  box-shadow: 0 2px 8px rgba(242, 151, 116, 0.35);
+}
+
+.thumbBtn:active {
+  transform: scale(0.96);
+  transition-duration: 0.08s;
+}
+
+/* Text */
 .category {
   color: var(--color-accent);
   font-family: var(--font-involve);
@@ -36,6 +78,7 @@
   font-family: var(--font-onder);
   line-height: 1.3;
   word-break: break-word;
+  overflow-wrap: break-word;
 }
 
 .price {
@@ -48,6 +91,7 @@
   color: var(--color-accent);
   font-family: var(--font-involve);
   line-height: 1.6;
+  word-break: break-word;
 }
 
 .detail {
@@ -55,26 +99,42 @@
   font-family: var(--font-involve);
 }
 
+/* Size buttons */
 .sizeBtn {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 40px;
+  min-width: 44px;
+  height: 44px;
+  padding: 0 8px;
   border: 2px solid var(--color-accent);
   border-radius: 4px;
   font-family: var(--font-involve);
   font-size: 0.65rem;
   color: var(--color-accent);
   background: transparent;
-  transition: background 0.15s, color 0.15s;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, transform 0.12s, box-shadow 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.sizeBtn:hover:not(.sizeBtnActive) {
+  background: rgba(242, 151, 116, 0.18);
+  transform: scale(1.05);
 }
 
 .sizeBtnActive {
   background: var(--color-accent);
   color: var(--color-primary);
+  box-shadow: 0 0 10px rgba(242, 151, 116, 0.3);
 }
 
+.sizeBtn:active {
+  transform: scale(0.93);
+  transition-duration: 0.06s;
+}
+
+/* Add to cart */
 .addBtn {
   display: block;
   width: 100%;
@@ -86,13 +146,55 @@
   font-size: 0.8rem;
   color: var(--color-primary);
   border-radius: 5px;
-  transition: background 0.2s;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.15s, filter 0.2s, box-shadow 0.2s;
+  border: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .addBtnDefault {
   background: var(--color-accent);
 }
 
+.addBtnDefault:hover {
+  filter: brightness(1.1);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(242, 151, 116, 0.4);
+}
+
 .addBtnAdded {
-  background: #7EC8A4;
+  background: #7ec8a4;
+}
+
+.addBtn:active {
+  transform: scale(0.98) translateY(0);
+  transition-duration: 0.08s;
+}
+
+/* ── Mobile (full-screen modal) ── */
+@media (max-width: 639px) {
+  .inner {
+    min-height: 100dvh;
+  }
+
+  .name {
+    font-size: 1.1rem;
+  }
+
+  .price {
+    font-size: 1.1rem;
+  }
+
+  .sizeBtn {
+    min-width: 40px;
+    height: 40px;
+    font-size: 0.6rem;
+  }
+}
+
+/* ── Tablet ── */
+@media (min-width: 640px) and (max-width: 1023px) {
+  .name {
+    font-size: 1.3rem;
+  }
 }

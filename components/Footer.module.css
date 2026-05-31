@@ -6,16 +6,33 @@
   color: var(--color-primary);
   font-family: var(--font-onder);
   font-size: 1.2rem;
+  word-break: break-word;
 }
 
 .socialBtn {
   background: rgba(169, 52, 42, 0.12);
+  cursor: pointer;
+  border-radius: 8px;
+  transition: transform 0.2s, background 0.2s, box-shadow 0.2s;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.socialBtn:hover {
+  background: rgba(169, 52, 42, 0.25);
+  transform: translateY(-3px);
+  box-shadow: 0 4px 12px rgba(169, 52, 42, 0.2);
+}
+
+.socialBtn:active {
+  transform: translateY(0) scale(0.95);
+  transition-duration: 0.08s;
 }
 
 .disclaimer {
   color: var(--color-primary);
   font-family: var(--font-involve);
   opacity: 0.7;
+  word-break: break-word;
 }
 
 .copyright {

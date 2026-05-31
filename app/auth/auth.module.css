@@ -65,6 +65,13 @@
   opacity: 0.6;
 }
 
+.input:focus,
+.inputCode:focus {
+  border-color: rgba(242, 151, 116, 0.9);
+  box-shadow: 0 0 0 3px rgba(242, 151, 116, 0.15);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
 .btn {
   width: 100%;
   padding: 0.75rem;
@@ -75,9 +82,21 @@
   border-radius: 5px;
   font-family: var(--font-onder);
   font-size: 0.8rem;
-  transition: opacity 0.15s;
+  transition: filter 0.2s, transform 0.15s, box-shadow 0.2s;
   border: none;
   cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.btn:hover:not(:disabled) {
+  filter: brightness(1.1);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(242, 151, 116, 0.35);
+}
+
+.btn:active:not(:disabled) {
+  transform: translateY(0) scale(0.98);
+  transition-duration: 0.08s;
 }
 
 .btn:disabled {
@@ -95,6 +114,11 @@
   background: none;
   border: none;
   cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.backLink:hover {
+  opacity: 0.9;
 }
 
 .error {
