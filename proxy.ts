@@ -4,6 +4,9 @@ import { isAdmin } from '@/lib/isAdmin'
 
 export async function proxy(request: NextRequest) {
   // Edge-compatible: используем getToken вместо auth() (без обращения к БД)
+
+  console.log("COOKIES:",request.cookies.getAll().map(c => c.name))
+
   const token = await getToken({
     req: request,
     secret: process.env.NEXTAUTH_SECRET,

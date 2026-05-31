@@ -292,17 +292,17 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     strategy: 'jwt',
     maxAge: 30 * 24 * 60 * 60, // 30 дней
   },
-  cookies: {
-    sessionToken: {
-      name: `next-auth.session-token`,
-      options: {
-        httpOnly: true,
-        sameSite: 'lax',
-        path: '/',
-        secure: process.env.NEXTAUTH_URL?.startsWith('https://') ?? false,
-      },
-    },
-  },
+  // cookies: {
+  //   sessionToken: {
+  //     name: `next-auth.session-token`,
+  //     options: {
+  //       httpOnly: true,
+  //       sameSite: 'lax',
+  //       path: '/',
+  //       secure: process.env.NEXTAUTH_URL?.startsWith('https://') ?? false,
+  //     },
+  //   },
+  // },
   pages: {
     signIn: '/auth',
     verifyRequest: '/auth?check=email',
