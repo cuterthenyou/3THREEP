@@ -20,7 +20,7 @@ export default async function AccountPage() {
     queryMany(
       `SELECT o.*,
         COALESCE(
-          json_agg(oi.* ORDER BY oi.created_at) FILTER (WHERE oi.id IS NOT NULL),
+          json_agg(oi.*) FILTER (WHERE oi.id IS NOT NULL),
           '[]'
         ) AS order_items
        FROM orders o

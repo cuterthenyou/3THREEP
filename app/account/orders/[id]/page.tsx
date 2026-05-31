@@ -12,7 +12,7 @@ export default async function OrderPage({ params }: { params: Promise<{ id: stri
   const order = await queryOne(
     `SELECT o.*,
       COALESCE(
-        json_agg(oi.* ORDER BY oi.created_at) FILTER (WHERE oi.id IS NOT NULL),
+        json_agg(oi.*) FILTER (WHERE oi.id IS NOT NULL),
         '[]'
       ) AS order_items
      FROM orders o
