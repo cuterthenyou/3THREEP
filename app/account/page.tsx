@@ -29,6 +29,10 @@ export default async function AccountPage() {
     .eq('id', user.id)
     .single()
 
+  console.log('ACCOUNT PAGE')
+  console.log('USER ID:', user.id)
+  console.log('PROFILE:', profile)
+
   return (
     <AccountClient
       user={{ id: user.id, email: user.email ?? '' }}

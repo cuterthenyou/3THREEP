@@ -67,6 +67,11 @@ export default function AccountClient({ user, profile, orders }: Props) {
 
   async function handleSaveNickname() {
     const trimmed = nicknameInput.trim()
+
+    console.log('SAVE NICKNAME')
+    console.log('USER ID:', user.id)
+    console.log('NICKNAME:', trimmed)
+
     if (!trimmed) { setNicknameError('Введи никнейм'); return }
     if (trimmed.length < 2) { setNicknameError('Минимум 2 символа'); return }
     if (trimmed.length > 20) { setNicknameError('Максимум 20 символов'); return }
