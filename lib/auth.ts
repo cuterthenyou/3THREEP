@@ -47,10 +47,24 @@ function PostgresAdapter(): Adapter {
       if (!result) throw new Error('Failed to create user')
       
       // Создаём профиль
-      await query(
-        `INSERT INTO profiles (id, email) VALUES ($1, $2)`,
-        [result.id, result.email]
-      )
+      // await query(
+      //   `INSERT INTO profiles (id, email) VALUES ($1, $2)`,
+      //   [result.id, result.email]
+      // )
+
+      try {
+        await query(
+          `INSERT INTO profiles (id, email) VALUES ($1, $2)`,
+          [result.id, result.email]
+        )
+
+        console.log('[PROFILE CREATED]')
+        console.log('PROFILE ID:', result.id)
+
+      } catch (err) {
+        console.error('[PROFILE CREATE ERROR]')
+        console.error(err)
+      }
       
       return {
         id: result.id,
