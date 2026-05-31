@@ -1,12 +1,31 @@
 import { redirect } from 'next/navigation'
+import { auth } from '@/lib/auth'
 import { createClient } from '@/lib/supabase/server'
 import AccountClient from './AccountClient'
 
 export default async function AccountPage() {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const session = await auth()
 
-  if (!user) redirect('/auth?next=/account')
+  if (!session?.user) {
+    redirect('/auth?next=/account')
+  }
+
+  const supabase = await createClient()
+
+  const user = {
+    id: session.user.id,
+    email: session.user.email ?? '',
+  }
+
+// import { redirect } from 'next/navigation'
+// import { createClient } from '@/lib/supabase/server'
+// import AccountClient from './AccountClient'
+
+// export default async function AccountPage() {
+//   const supabase = await createClient()
+//   const { data: { user } } = await supabase.auth.getUser()
+
+//   if (!user) redirect('/auth?next=/account')
 
   const { data: orders } = await supabase
     .from('orders')

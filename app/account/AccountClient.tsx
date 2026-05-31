@@ -1,5 +1,6 @@
 'use client'
 
+import { signOut } from 'next-auth/react'
 import { useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
@@ -90,11 +91,19 @@ export default function AccountClient({ user, profile, orders }: Props) {
     setUploadingAvatar(false)
   }
 
+  // async function handleLogout() {
+  //   setLoggingOut(true)
+  //   await supabase.auth.signOut()
+  //   router.push('/')
+  //   router.refresh()
+  // }
+
   async function handleLogout() {
-    setLoggingOut(true)
-    await supabase.auth.signOut()
-    router.push('/')
-    router.refresh()
+  setLoggingOut(true)
+
+  await signOut({
+    callbackUrl: '/',
+  })
   }
 
   return (
