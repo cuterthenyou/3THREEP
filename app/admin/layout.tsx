@@ -1,11 +1,42 @@
 import type { ReactNode } from 'react'
 import Link from 'next/link'
-import { requireAdmin } from '@/lib/adminAuth'
+import { auth } from '@/lib/auth'
+import { isAdmin } from '@/lib/isAdmin'
 import { redirect } from 'next/navigation'
 
 export default async function AdminLayout({ children }: { children: ReactNode }) {
-  const admin = await requireAdmin()
-  if (!admin) redirect('/auth?next=/admin/orders')
+  const session = await auth()
+
+  if (!session?.user) {
+    redirect('/auth?callbackUrl=/admin/orders')
+  }
+
+  if (!isAdmin(session.user.email)) {
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{ background: '#0d0505' }}>
+        <div className="text-center flex flex-col gap-4 p-8 rounded-xl max-w-sm w-full"
+          style={{ background: 'rgba(242,151,116,0.06)', border: '1px solid rgba(242,151,116,0.2)' }}>
+          <p className="text-lg uppercase tracking-widest" style={{ color: '#F29774', fontFamily: "'ONDER', sans-serif" }}>
+            Нет доступа
+          </p>
+          <p className="text-sm" style={{ color: '#F29774', opacity: 0.6, fontFamily: "'Involve', sans-serif" }}>
+            Ты вошёл как:
+          </p>
+          <p className="text-sm font-mono px-3 py-2 rounded" style={{ color: '#F29774', background: 'rgba(242,151,116,0.1)', wordBreak: 'break-all' }}>
+            {session.user.email}
+          </p>
+          <p className="text-xs" style={{ color: '#F29774', opacity: 0.4, fontFamily: "'Involve', sans-serif" }}>
+            Этот email не в списке ADMIN_EMAIL
+          </p>
+          <Link href="/account" className="text-xs uppercase tracking-widest mt-2"
+            style={{ color: '#F29774', opacity: 0.5, fontFamily: "'ONDER', sans-serif" }}>
+            ← В аккаунт
+          </Link>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen" style={{ background: '#0d0505' }}>
       <nav
