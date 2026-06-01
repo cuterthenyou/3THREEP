@@ -1,11 +1,13 @@
 'use client';
 
 import { signOut } from 'next-auth/react';
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import type { Order, Profile, OrderStatus } from '@/lib/types';
 import { ORDER_STATUS_LABELS } from '@/lib/types';
 import Link from 'next/link';
 import Image from 'next/image';
+import { IconSun, IconMoon2 } from '@tabler/icons-react';
+import { toggleTheme } from '@/lib/theme';
 import s from './account.module.css';
 
 interface Props {
@@ -51,6 +53,16 @@ export default function AccountClient({ user, profile, orders }: Props) {
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [displayName, setDisplayName] = useState(profile?.name ?? null);
   const avatarRef = useRef<HTMLInputElement>(null);
+  const [isDark, setIsDark] = useState(false);
+
+  useEffect(() => {
+    setIsDark(document.documentElement.dataset.theme === 'dark');
+    const obs = new MutationObserver(() =>
+      setIsDark(document.documentElement.dataset.theme === 'dark')
+    );
+    obs.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+    return () => obs.disconnect();
+  }, []);
 
   const allItems = orders.flatMap((o) => o.order_items ?? []);
   const sparks = allItems.reduce((sum, i) => sum + i.quantity, 0);
@@ -99,6 +111,13 @@ export default function AccountClient({ user, profile, orders }: Props) {
 
   return (
     <div className={s.page}>
+      <button
+        onClick={() => { toggleTheme(); setIsDark(d => !d); }}
+        title={isDark ? 'Светлая тема' : 'Тёмная тема'}
+        style={{ position: 'fixed', top: '1rem', right: '1rem', zIndex: 100, background: 'none', border: 'none', cursor: 'pointer', color: 'var(--accent)', padding: '0.5rem', opacity: 0.75 }}
+      >
+        {isDark ? <IconSun size={20} /> : <IconMoon2 size={20} />}
+      </button>
       {/* Nickname modal */}
       {showNicknameModal && (
         <div className={s.modalOverlay}>

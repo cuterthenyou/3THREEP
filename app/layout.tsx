@@ -4,6 +4,7 @@ import { Unbounded } from 'next/font/google';
 import { CartProvider } from '@/lib/cart';
 import CartDrawer from '@/components/CartDrawer';
 import CookieBanner from '@/components/CookieBanner';
+import GlitterCanvas from '@/components/GlitterCanvas';
 import './globals.css';
 
 const unbounded = Unbounded({
@@ -38,6 +39,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         />
       </head>
       <body className="overflow-x-hidden">
+        <GlitterCanvas />
         {/* Hidden SVG filter for grain/noise effects */}
         <svg
           aria-hidden="true"

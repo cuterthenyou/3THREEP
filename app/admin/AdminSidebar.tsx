@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
@@ -12,7 +12,10 @@ import {
   IconChevronLeft,
   IconChevronRight,
   IconLogout,
+  IconSun,
+  IconMoon2,
 } from '@tabler/icons-react'
+import { toggleTheme } from '@/lib/theme'
 
 const NAV = [
   { href: '/admin',             label: 'Дашборд',   Icon: IconLayoutDashboard, exact: true },
@@ -25,6 +28,16 @@ const NAV = [
 export default function AdminSidebar() {
   const pathname = usePathname()
   const [collapsed, setCollapsed] = useState(false)
+  const [isDark, setIsDark] = useState(false)
+
+  useEffect(() => {
+    setIsDark(document.documentElement.dataset.theme === 'dark')
+    const obs = new MutationObserver(() =>
+      setIsDark(document.documentElement.dataset.theme === 'dark')
+    )
+    obs.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] })
+    return () => obs.disconnect()
+  }, [])
 
   const w = collapsed ? 60 : 220
 
@@ -90,6 +103,13 @@ export default function AdminSidebar() {
             {!collapsed && <span style={{ fontFamily: "'Involve', sans-serif", fontSize: '0.75rem' }}>На сайт</span>}
           </Link>
           <button
+            onClick={() => { toggleTheme(); setIsDark(d => !d) }}
+            title={isDark ? 'Светлая тема' : 'Тёмная тема'}
+            style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: collapsed ? '0.6rem' : '0.55rem 0.75rem', justifyContent: collapsed ? 'center' : 'flex-start', borderRadius: '0.5rem', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--accent)', width: '100%', whiteSpace: 'nowrap', opacity: 0.75 }}>
+            {isDark ? <IconSun size={16} style={{ flexShrink: 0 }} /> : <IconMoon2 size={16} style={{ flexShrink: 0 }} />}
+            {!collapsed && <span style={{ fontFamily: "'Involve', sans-serif", fontSize: '0.75rem' }}>{isDark ? 'Светлая' : 'Тёмная'}</span>}
+          </button>
+          <button
             onClick={() => setCollapsed(v => !v)}
             aria-label={collapsed ? 'Развернуть' : 'Свернуть'}
             style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: collapsed ? '0.6rem' : '0.55rem 0.75rem', justifyContent: collapsed ? 'center' : 'flex-start', borderRadius: '0.5rem', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', width: '100%', whiteSpace: 'nowrap', opacity: 0.6 }}>
@@ -115,7 +135,10 @@ export default function AdminSidebar() {
             </Link>
           )
         })}
-        <Link href="/" style={{ marginLeft: 'auto', flexShrink: 0, color: 'var(--text-muted)', fontFamily: "'ONDER', sans-serif", fontSize: '0.55rem', textDecoration: 'none', letterSpacing: '0.1em', opacity: 0.6 }}>← Сайт</Link>
+        <button onClick={() => { toggleTheme(); setIsDark(d => !d) }} style={{ marginLeft: 'auto', flexShrink: 0, background: 'none', border: 'none', cursor: 'pointer', color: 'var(--accent)', padding: '0.35rem', display: 'flex', alignItems: 'center' }}>
+          {isDark ? <IconSun size={14} /> : <IconMoon2 size={14} />}
+        </button>
+        <Link href="/" style={{ flexShrink: 0, color: 'var(--text-muted)', fontFamily: "'ONDER', sans-serif", fontSize: '0.55rem', textDecoration: 'none', letterSpacing: '0.1em', opacity: 0.6 }}>← Сайт</Link>
       </nav>
 
       {/* Spacer so content doesn't hide under fixed sidebar/bar */}

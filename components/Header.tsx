@@ -29,6 +29,16 @@ export default function Header({ isAdminUser = false }: Props) {
   const [collections, setCollections] = useState<Collection[]>([]);
   const [isDark, setIsDark] = useState(false);
   const collectionsLoaded = useRef(false);
+  const menuHistoryPushed = useRef(false);
+
+  function closeMenu() {
+    if (menuHistoryPushed.current) {
+      menuHistoryPushed.current = false;
+      history.back();
+    } else {
+      setMenuOpen(false);
+    }
+  }
 
   // Sync theme icon with current theme
   useEffect(() => {
@@ -83,12 +93,23 @@ export default function Header({ isAdminUser = false }: Props) {
     };
   }, [menuOpen]);
 
+  // History entry for Android back gesture
+  useEffect(() => {
+    if (!menuOpen) return;
+    history.pushState({ menu: true }, '');
+    menuHistoryPushed.current = true;
+    const onPop = () => { menuHistoryPushed.current = false; setMenuOpen(false); };
+    window.addEventListener('popstate', onPop);
+    return () => window.removeEventListener('popstate', onPop);
+  }, [menuOpen]);
+
   // Close on Escape
   useEffect(() => {
     if (!menuOpen) return;
-    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setMenuOpen(false); };
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') closeMenu(); };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [menuOpen]);
 
   // Load collections lazily on first open
@@ -119,8 +140,10 @@ export default function Header({ isAdminUser = false }: Props) {
         }}
       >
         <div className="flex items-center justify-between px-5 sm:px-8 py-4 sm:py-5">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/images/logo-61.svg" alt="THREEP Logo" className="theme-img h-8 sm:h-12 w-auto flex-shrink-0" />
+          <Link href="/" aria-label="На главную">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/images/logo-61.svg" alt="THREEP Logo" className="theme-img h-8 sm:h-12 w-auto flex-shrink-0" />
+          </Link>
           {/* Center logo text — hidden on mobile */}
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/images/logo-text-63.svg" alt="THREEP" className="theme-img hidden sm:block h-8 w-auto absolute left-1/2 -translate-x-1/2" />
@@ -151,7 +174,7 @@ export default function Header({ isAdminUser = false }: Props) {
 
             {/* Burger — all breakpoints */}
             <button
-              onClick={menuOpen ? () => setMenuOpen(false) : openMenu}
+              onClick={menuOpen ? closeMenu : openMenu}
               className={`flex flex-col items-center justify-center w-9 h-9 rounded-lg gap-1.5 ${s.navBtn}`}
               aria-label={menuOpen ? 'Закрыть меню' : 'Открыть меню'}
             >
@@ -171,8 +194,13 @@ export default function Header({ isAdminUser = false }: Props) {
           pointerEvents: menuOpen ? 'auto' : 'none',
           clipPath: menuOpen ? 'inset(0 0 0 0)' : 'inset(0 0 100% 0)',
         }}
-        onClick={(e) => e.target === e.currentTarget && setMenuOpen(false)}
+        onClick={(e) => e.target === e.currentTarget && closeMenu()}
       >
+        <button className={s.closeBtn} onClick={closeMenu} aria-label="Закрыть меню">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <path d="M1 1L13 13M13 1L1 13" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"/>
+          </svg>
+        </button>
         <nav className={s.nav}>
 
           {/* Главная */}
