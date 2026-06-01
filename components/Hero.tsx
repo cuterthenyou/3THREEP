@@ -19,6 +19,8 @@ export default function Hero() {
 
   return (
     <section className={`${s.hero} w-full relative`}>
+      {/* Theme overlay — tints video in dark mode */}
+      <div className={s.themeOverlay} aria-hidden="true" />
       {/* Transparent shield — blocks long-press context menu on mobile */}
       <div className={s.videoShield} aria-hidden="true" />
       <video

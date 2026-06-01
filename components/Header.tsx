@@ -4,7 +4,7 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 import Link from 'next/link';
 import { useCart } from '@/lib/cart';
 import { toggleTheme } from '@/lib/theme';
-import { IconSun, IconMoon } from '@tabler/icons-react';
+import { IconSun, IconMoon2 } from '@tabler/icons-react';
 import s from './Header.module.css';
 
 interface Props {
@@ -96,17 +96,17 @@ export default function Header({ isAdminUser = false }: Props) {
         ref={headerRef}
         className="fixed top-0 left-0 right-0 z-50"
         style={{
-          backgroundColor: scrolled ? 'rgba(169, 52, 42, 0.75)' : 'transparent',
+          backgroundColor: scrolled ? 'var(--header-scrolled-bg)' : 'transparent',
           backdropFilter: scrolled ? 'blur(12px) saturate(1.4)' : 'none',
           WebkitBackdropFilter: scrolled ? 'blur(12px) saturate(1.4)' : 'none',
         }}
       >
         <div className="flex items-center justify-between px-5 sm:px-8 py-4 sm:py-5">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/images/logo-61.svg" alt="THREEP Logo" className="h-8 sm:h-12 w-auto flex-shrink-0" />
+          <img src="/images/logo-61.svg" alt="THREEP Logo" className="theme-img h-8 sm:h-12 w-auto flex-shrink-0" />
           {/* Center logo text — hidden on mobile */}
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/images/logo-text-63.svg" alt="THREEP" className="hidden sm:block h-8 w-auto absolute left-1/2 -translate-x-1/2" />
+          <img src="/images/logo-text-63.svg" alt="THREEP" className="theme-img hidden sm:block h-8 w-auto absolute left-1/2 -translate-x-1/2" />
 
           {/* Icons — on mobile spread evenly across a fixed width, on desktop tight gap */}
           <div className="flex items-center justify-between w-32 sm:w-auto sm:gap-3">
@@ -117,7 +117,7 @@ export default function Header({ isAdminUser = false }: Props) {
               aria-label={isDark ? 'Включить светлую тему' : 'Включить тёмную тему'}
               title={isDark ? 'Светлая тема' : 'Тёмная тема'}
             >
-              {isDark ? <IconSun size={16} /> : <IconMoon size={16} />}
+              {isDark ? <IconSun size={16} /> : <IconMoon2 size={16} />}
             </button>
 
             {/* Cart icon — always visible */}

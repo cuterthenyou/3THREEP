@@ -51,6 +51,12 @@
   --accent:     #f29774;
   --accent-2:   rgba(242, 151, 116, 0.25);
   --border:     rgba(242, 151, 116, 0.2);
+
+  /* ── Helper vars for components ── */
+  --header-scrolled-bg: rgba(169, 52, 42, 0.82);
+  --bg-subtle:          rgba(242, 151, 116, 0.08);
+  --border-soft:        rgba(242, 151, 116, 0.12);
+  --overlay-bg:         rgba(13, 2, 2, 0.97);
 }
 
 [data-theme="dark"] {
@@ -68,6 +74,12 @@
   --accent:     #f5d0d8;
   --accent-2:   rgba(245, 208, 216, 0.25);
   --border:     rgba(245, 208, 216, 0.18);
+
+  /* ── Helper vars for components ── */
+  --header-scrolled-bg: rgba(28, 28, 30, 0.88);
+  --bg-subtle:          rgba(245, 208, 216, 0.08);
+  --border-soft:        rgba(245, 208, 216, 0.12);
+  --overlay-bg:         rgba(10, 10, 12, 0.97);
 }
 
 /* Grain/shagreen overlay utility */
@@ -227,15 +239,11 @@ h4 { font-size: var(--fs-h4); }
 }
 
 /* Custom scrollbar */
-::-webkit-scrollbar {
-  width: 4px;
-}
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: var(--bg-2); }
+::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 2px; }
 
-::-webkit-scrollbar-track {
-  background: #111;
-}
-
-::-webkit-scrollbar-thumb {
-  background: #a9342a;
-  border-radius: 2px;
+/* ── Theme image tint — tints logos/images in dark mode toward #f5d0d8 ── */
+[data-theme="dark"] .theme-img {
+  filter: hue-rotate(330deg) saturate(0.7) brightness(1.15);
 }

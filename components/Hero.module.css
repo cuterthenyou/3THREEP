@@ -21,11 +21,30 @@
   pointer-events: none;
 }
 
+/* Dark theme overlay — tints video with soft pink */
+.themeOverlay {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background: transparent;
+  transition: background 0.3s ease;
+}
+
+:global([data-theme="dark"]) .themeOverlay {
+  background: rgba(245, 208, 216, 0.09);
+  mix-blend-mode: screen;
+}
+
+:global([data-theme="dark"]) .video {
+  filter: grayscale(0.35);
+}
+
 /* Visual shield layer — pointer-events always none (context menu blocked via onContextMenu on video) */
 .videoShield {
   position: absolute;
   inset: 0;
-  z-index: 1;
+  z-index: 3;
   background: transparent;
   pointer-events: none;
 }

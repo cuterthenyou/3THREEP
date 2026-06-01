@@ -66,7 +66,7 @@ export default function CatalogSection({ products, categories, categoryData = {}
         return logoTop ? (
           <div className="flex justify-center pt-6 pb-2">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={logoTop} alt="Collection" className="h-16 sm:h-20 lg:h-28 w-auto" />
+            <img src={logoTop} alt="Collection" className="theme-img h-16 sm:h-20 lg:h-28 w-auto" />
           </div>
         ) : null
       })()}
@@ -87,7 +87,7 @@ export default function CatalogSection({ products, categories, categoryData = {}
         return logoBottom ? (
           <div className="flex justify-center pb-16">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={logoBottom} alt="Collection" className="w-32 h-auto" />
+            <img src={logoBottom} alt="Collection" className="theme-img w-32 h-auto" />
           </div>
         ) : null
       })()}
@@ -173,10 +173,13 @@ function ProductCard({
   return (
     <div
       className={`flex flex-col w-full ${s.productCard}`}
-      style={{ background: `url(${texture}) center/cover, #F29774` }}
+      style={{ background: `url(${texture}) center/cover, var(--accent)` }}
       onClick={() => onOpen(product)}
       onMouseEnter={triggerGlitch}
     >
+      {/* Dark theme texture overlay */}
+      <div className={s.themeOverlay} />
+
       {/* Image carousel */}
       <div
         className={`w-full relative overflow-hidden ${s.productImgWrap}`}
@@ -207,6 +210,7 @@ function ProductCard({
         {/* VHS glitch layer */}
         {glitching && (
           <div
+            className={s.vhsGlitch}
             style={{
               position: 'absolute', inset: 0, zIndex: 3, pointerEvents: 'none',
               backgroundImage: `url(${product.images[currentImg]})`,
@@ -229,7 +233,7 @@ function ProductCard({
           <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-1.5" style={{ zIndex: 4 }}>
             {product.images.map((_, i) => (
               <span key={i} className="rounded-full transition-all"
-                style={{ width: i === currentImg ? '16px' : '6px', height: '6px', background: i === currentImg ? '#A9342A' : 'rgba(169,52,42,0.3)' }} />
+                style={{ width: i === currentImg ? '16px' : '6px', height: '6px', background: i === currentImg ? 'var(--accent)' : 'var(--accent-2)' }} />
             ))}
           </div>
         )}

@@ -41,6 +41,28 @@
   -webkit-tap-highlight-color: transparent;
 }
 
+/* Dark theme overlay over card texture */
+.themeOverlay {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: transparent;
+}
+
+:global([data-theme="dark"]) .themeOverlay {
+  background: rgba(245, 208, 216, 0.1);
+  mix-blend-mode: screen;
+}
+
+/* VHS glitch layer — theme-aware in dark mode */
+.vhsGlitch {}
+
+:global([data-theme="dark"]) .vhsGlitch {
+  mix-blend-mode: screen;
+  filter: saturate(0.45) brightness(1.2) sepia(0.25);
+}
+
 .productCard:hover {
   transform: translateY(-5px) scale(1.015);
   box-shadow: 0 12px 40px rgba(169, 52, 42, 0.45), 0 2px 8px rgba(0, 0, 0, 0.3);
