@@ -156,7 +156,7 @@ export default function ProductModal({ product, visible, onClose }: Props) {
           aria-label="Закрыть"
         >
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-            <path d="M2 2L14 14M14 2L2 14" stroke="#A9342A" strokeWidth="2.5" strokeLinecap="round" />
+            <path d="M2 2L14 14M14 2L2 14" stroke="var(--bg-2)" strokeWidth="2.5" strokeLinecap="round" />
           </svg>
         </button>
 
@@ -189,7 +189,7 @@ export default function ProductModal({ product, visible, onClose }: Props) {
               {product.images.length > 1 && (
                 <div className="grid grid-cols-5 gap-2">
                   {product.images.map((img, i) => (
-                    <button key={i} onClick={() => setActiveImg(i)} className={s.thumbBtn} style={{ outline: i === activeImg ? '2px solid #F29774' : '2px solid transparent', outlineOffset: '-2px' }}>
+                    <button key={i} onClick={() => setActiveImg(i)} className={s.thumbBtn} style={{ outline: i === activeImg ? '2px solid var(--accent)' : '2px solid transparent', outlineOffset: '-2px' }}>
                       <Image src={img} alt={product.name} fill className="object-cover" sizes="80px" />
                     </button>
                   ))}

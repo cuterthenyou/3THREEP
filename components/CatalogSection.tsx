@@ -31,15 +31,20 @@ export default function CatalogSection({ products, categories, categoryData = {}
   const openModal = useCallback((product: Product) => {
     setOpenProduct(product)
     requestAnimationFrame(() => setModalVisible(true))
-    document.body.style.overflow = 'hidden'
+    const y = window.scrollY
+    document.body.style.top = `-${y}px`
+    document.body.style.position = 'fixed'
+    document.body.style.width = '100%'
   }, [])
 
   const closeModal = useCallback(() => {
     setModalVisible(false)
-    setTimeout(() => {
-      setOpenProduct(null)
-      document.body.style.overflow = ''
-    }, 300)
+    const top = parseFloat(document.body.style.top || '0')
+    document.body.style.position = ''
+    document.body.style.top = ''
+    document.body.style.width = ''
+    if (top) window.scrollTo(0, -top)
+    setTimeout(() => setOpenProduct(null), 300)
   }, [])
 
   return (

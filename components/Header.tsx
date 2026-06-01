@@ -60,10 +60,27 @@ export default function Header({ isAdminUser = false }: Props) {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  // Lock body scroll when menu open
+  // iOS-safe scroll lock when menu open
   useEffect(() => {
-    document.body.style.overflow = menuOpen ? 'hidden' : '';
-    return () => { document.body.style.overflow = ''; };
+    if (menuOpen) {
+      const y = window.scrollY;
+      document.body.style.top = `-${y}px`;
+      document.body.style.position = 'fixed';
+      document.body.style.width = '100%';
+    } else {
+      const top = parseFloat(document.body.style.top || '0');
+      document.body.style.position = '';
+      document.body.style.top = '';
+      document.body.style.width = '';
+      if (top) window.scrollTo(0, -top);
+    }
+    return () => {
+      const top = parseFloat(document.body.style.top || '0');
+      document.body.style.position = '';
+      document.body.style.top = '';
+      document.body.style.width = '';
+      if (top) window.scrollTo(0, -top);
+    };
   }, [menuOpen]);
 
   // Close on Escape

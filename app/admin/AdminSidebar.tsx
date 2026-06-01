@@ -44,7 +44,7 @@ export default function AdminSidebar() {
         {/* Logo row */}
         <div className="flex items-center px-4" style={{ minHeight: 56, borderBottom: '1px solid var(--border-soft)' }}>
           {!collapsed
-            ? <span style={{ color: 'var(--accent)', fontFamily: "'ONDER', sans-serif", fontSize: '0.7rem', letterSpacing: '0.18em', whiteSpace: 'nowrap' }}>THREEP / ADMIN</span>
+            ? <span style={{ color: 'var(--accent)', fontFamily: "'ONDER', sans-serif", fontSize: '0.7rem', letterSpacing: '0.06em', whiteSpace: 'nowrap' }}>THREEP / ADMIN</span>
             : <span style={{ color: 'var(--accent)', fontFamily: "'ONDER', sans-serif", fontSize: '0.7rem' }}>T</span>
           }
         </div>

@@ -16,12 +16,12 @@ const STATUSES: OrderStatus[] = [
 ];
 
 const STATUS_COLORS: Record<OrderStatus, string> = {
-  new: '#F29774',
-  paid: '#7EC8A4',
-  in_progress: '#F2C46D',
-  shipped: '#74B3F2',
-  delivered: '#A8E6A3',
-  cancelled: '#E08080',
+  new: 'var(--status-new)',
+  paid: 'var(--status-paid)',
+  in_progress: 'var(--status-in-progress)',
+  shipped: 'var(--status-shipped)',
+  delivered: 'var(--status-delivered)',
+  cancelled: 'var(--status-cancelled)',
 };
 
 function formatPrice(p: number) {

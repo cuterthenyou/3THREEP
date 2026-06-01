@@ -18,22 +18,22 @@ function ErrorContent() {
   const message = errorMessages[error || 'Default'] || errorMessages.Default
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4" style={{ background: '#1a1a1a' }}>
+    <div className="min-h-screen flex items-center justify-center p-4" style={{ background: 'var(--bg)' }}>
       <div className="max-w-md w-full space-y-6 text-center">
         <div className="space-y-2">
-          <h1 className="text-4xl font-bold" style={{ color: '#F29774', fontFamily: "'ONDER', sans-serif" }}>
+          <h1 className="text-4xl font-bold" style={{ color: 'var(--accent)', fontFamily: "'ONDER', sans-serif" }}>
             ⚠️
           </h1>
-          <h2 className="text-2xl font-bold" style={{ color: '#F29774', fontFamily: "'ONDER', sans-serif" }}>
+          <h2 className="text-2xl font-bold" style={{ color: 'var(--accent)', fontFamily: "'ONDER', sans-serif" }}>
             ОШИБКА ВХОДА
           </h2>
-          <p className="text-lg" style={{ color: '#F29774', opacity: 0.8, fontFamily: "'Involve', sans-serif" }}>
+          <p className="text-lg" style={{ color: 'var(--accent)', opacity: 0.8, fontFamily: "'Involve', sans-serif" }}>
             {message}
           </p>
         </div>
 
         <div className="space-y-4">
-          <p className="text-sm" style={{ color: '#F29774', opacity: 0.6, fontFamily: "'Involve', sans-serif" }}>
+          <p className="text-sm" style={{ color: 'var(--accent)', opacity: 0.6, fontFamily: "'Involve', sans-serif" }}>
             {error === 'Verification' && 'Возможно, ссылка устарела или уже была использована.'}
             {error === 'AccessDenied' && 'У вас нет доступа к этому ресурсу.'}
             {!error && 'Попробуйте войти снова.'}
@@ -43,8 +43,8 @@ function ErrorContent() {
             href="/auth"
             className="block w-full py-3 uppercase tracking-widest transition-opacity"
             style={{
-              background: '#F29774',
-              color: '#A9342A',
+              background: 'var(--accent)',
+              color: 'var(--bg)',
               borderRadius: '5px',
               fontFamily: "'ONDER', sans-serif",
               fontSize: '0.8rem',
@@ -55,7 +55,7 @@ function ErrorContent() {
         </div>
 
         {error && (
-          <p className="text-xs" style={{ color: '#F29774', opacity: 0.4, fontFamily: "'Involve', sans-serif" }}>
+          <p className="text-xs" style={{ color: 'var(--accent)', opacity: 0.4, fontFamily: "'Involve', sans-serif" }}>
             Код ошибки: {error}
           </p>
         )}
@@ -67,8 +67,8 @@ function ErrorContent() {
 export default function AuthErrorPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center" style={{ background: '#1a1a1a' }}>
-        <div className="text-2xl" style={{ color: '#F29774' }}>Загрузка...</div>
+      <div className="min-h-screen flex items-center justify-center" style={{ background: 'var(--bg)' }}>
+        <div className="text-2xl" style={{ color: 'var(--accent)' }}>Загрузка...</div>
       </div>
     }>
       <ErrorContent />

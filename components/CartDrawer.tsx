@@ -14,11 +14,52 @@ export default function CartDrawer() {
   const { items, removeItem, updateQty, total, count, open, setOpen } = useCart()
   const [dragX, setDragX] = useState(0)
   const touchStartX = useRef<number | null>(null)
+  const historyPushed = useRef(false)
 
+  function closeCart() {
+    if (historyPushed.current) {
+      historyPushed.current = false
+      history.back()
+    } else {
+      setOpen(false)
+    }
+  }
+
+  // iOS-safe scroll lock
   useEffect(() => {
-    document.body.style.overflow = open ? 'hidden' : ''
-    return () => { document.body.style.overflow = '' }
+    if (open) {
+      const y = window.scrollY
+      document.body.style.top = `-${y}px`
+      document.body.style.position = 'fixed'
+      document.body.style.width = '100%'
+    } else {
+      const top = parseFloat(document.body.style.top || '0')
+      document.body.style.position = ''
+      document.body.style.top = ''
+      document.body.style.width = ''
+      if (top) window.scrollTo(0, -top)
+    }
+    return () => {
+      const top = parseFloat(document.body.style.top || '0')
+      document.body.style.position = ''
+      document.body.style.top = ''
+      document.body.style.width = ''
+      if (top) window.scrollTo(0, -top)
+    }
   }, [open])
+
+  // Back gesture / browser back closes cart instead of navigating away
+  useEffect(() => {
+    if (!open) return
+    history.pushState({ cart: true }, '')
+    historyPushed.current = true
+    const onPop = () => {
+      historyPushed.current = false
+      setOpen(false)
+    }
+    window.addEventListener('popstate', onPop)
+    return () => window.removeEventListener('popstate', onPop)
+  }, [open, setOpen])
 
   // Reset drag when drawer closes
   useEffect(() => { if (!open) setDragX(0) }, [open])
@@ -33,7 +74,7 @@ export default function CartDrawer() {
   }
   function onTouchEnd() {
     if (dragX >= 80) {
-      setOpen(false)
+      closeCart()
     } else {
       setDragX(0)
     }
@@ -47,7 +88,7 @@ export default function CartDrawer() {
         <div
           className="fixed inset-0 z-40"
           style={{ background: 'rgba(0,0,0,0.6)' }}
-          onClick={() => setOpen(false)}
+          onClick={closeCart}
         />
       )}
 
@@ -69,7 +110,7 @@ export default function CartDrawer() {
           <h2 className={s.heading}>
             Корзина {count > 0 && <span style={{ opacity: 0.6 }}>({count})</span>}
           </h2>
-          <button onClick={() => setOpen(false)} className={`w-8 h-8 flex items-center justify-center rounded ${s.closeBtn}`}>
+          <button onClick={closeCart} className={`w-8 h-8 flex items-center justify-center rounded ${s.closeBtn}`}>
             ✕
           </button>
         </div>
@@ -79,7 +120,7 @@ export default function CartDrawer() {
           {items.length === 0 ? (
             <div className="flex-1 flex flex-col items-center justify-center gap-4 py-16">
               <p className={s.emptyText}>Корзина пуста</p>
-              <button onClick={() => setOpen(false)} className={`px-6 py-2 uppercase tracking-widest ${s.backToShopBtn}`}>
+              <button onClick={closeCart} className={`px-6 py-2 uppercase tracking-widest ${s.backToShopBtn}`}>
                 В каталог
               </button>
             </div>
@@ -116,7 +157,7 @@ export default function CartDrawer() {
               <span className={s.totalLabel}>Итого</span>
               <span className={s.totalValue}>{formatPrice(total)}</span>
             </div>
-            <Link href="/checkout" onClick={() => setOpen(false)} className={`w-full py-3 transition-opacity hover:opacity-90 ${s.checkoutLink}`}>
+            <Link href="/checkout" onClick={closeCart} className={`w-full py-3 transition-opacity hover:opacity-90 ${s.checkoutLink}`}>
               Оформить заказ
             </Link>
           </div>

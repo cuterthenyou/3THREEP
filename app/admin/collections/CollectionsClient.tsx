@@ -9,12 +9,12 @@ const EMPTY: Omit<Category, never> = {
 }
 
 const INPUT_STYLE = {
-  background: 'rgba(242,151,116,0.08)',
-  color: '#F29774',
-  border: '1px solid rgba(242,151,116,0.2)',
+  background: 'var(--bg-subtle)',
+  color: 'var(--accent)',
+  border: '1px solid var(--border)',
   fontFamily: "'Involve', sans-serif",
 }
-const LABEL_STYLE = { color: '#F29774', opacity: 0.5, fontFamily: "'ONDER', sans-serif" }
+const LABEL_STYLE = { color: 'var(--accent)', opacity: 0.5, fontFamily: "'ONDER', sans-serif" }
 
 type UploadField = 'texture_url' | 'texture_url_2' | 'texture_url_3' | 'logo_top_url' | 'logo_bottom_url'
 
@@ -99,7 +99,7 @@ export default function CollectionsClient({ collections }: { collections: Catego
             type="button"
             onClick={() => refEl.current?.click()}
             className="px-3 py-2 text-xs rounded-lg uppercase tracking-widest"
-            style={{ background: 'rgba(242,151,116,0.12)', color: '#F29774', fontFamily: "'ONDER', sans-serif", fontSize: '0.65rem' }}
+            style={{ background: 'var(--bg-subtle)', color: 'var(--accent)', fontFamily: "'ONDER', sans-serif", fontSize: '0.65rem' }}
           >
             {uploading === field ? 'Загружаем...' : 'Загрузить'}
           </button>
@@ -111,17 +111,17 @@ export default function CollectionsClient({ collections }: { collections: Catego
             onChange={e => e.target.files?.[0] && uploadFile(e.target.files[0], field)}
           />
           {val && (
-            <span className="text-xs truncate max-w-[180px]" style={{ color: '#F29774', opacity: 0.6, fontFamily: "'Involve', sans-serif" }}>
+            <span className="text-xs truncate max-w-[180px]" style={{ color: 'var(--accent)', opacity: 0.6, fontFamily: "'Involve', sans-serif" }}>
               {val.split('/').pop()}
             </span>
           )}
           {val && (
             <button type="button" onClick={() => setEditing(e => e ? { ...e, [field]: null } : e)}
-              style={{ color: '#F29774', opacity: 0.4, fontSize: '0.8rem' }}>✕</button>
+              style={{ color: 'var(--accent)', opacity: 0.4, fontSize: '0.8rem' }}>✕</button>
           )}
         </div>
         {val && (
-          <div className="w-16 h-10 rounded overflow-hidden mt-1" style={{ background: 'rgba(242,151,116,0.08)' }}>
+          <div className="w-16 h-10 rounded overflow-hidden mt-1" style={{ background: 'var(--bg-subtle)' }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={val} alt="" className="w-full h-full object-cover" />
           </div>
@@ -133,25 +133,25 @@ export default function CollectionsClient({ collections }: { collections: Catego
   return (
     <div className="px-6 py-6 max-w-3xl mx-auto">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-xl uppercase tracking-widest" style={{ color: '#F29774', fontFamily: "'ONDER', sans-serif" }}>
+        <h1 className="text-xl uppercase tracking-widest" style={{ color: 'var(--accent)', fontFamily: "'ONDER', sans-serif" }}>
           Коллекции ({collections.length})
         </h1>
         <button onClick={openNew}
           className="px-4 py-2 uppercase tracking-widest transition-opacity hover:opacity-80"
-          style={{ background: '#F29774', color: '#A9342A', borderRadius: '8px', fontFamily: "'ONDER', sans-serif", fontSize: '0.75rem' }}>
+          style={{ background: 'var(--accent)', color: 'var(--bg)', borderRadius: '8px', fontFamily: "'ONDER', sans-serif", fontSize: '0.75rem' }}>
           + Добавить
         </button>
       </div>
 
       <div className="flex flex-col gap-3">
         {collections.length === 0 && (
-          <p className="text-sm" style={{ color: '#F29774', opacity: 0.4, fontFamily: "'Involve', sans-serif" }}>
+          <p className="text-sm" style={{ color: 'var(--accent)', opacity: 0.4, fontFamily: "'Involve', sans-serif" }}>
             Коллекций нет. Создай первую — slug должен совпадать с category у товаров.
           </p>
         )}
         {collections.map(c => (
           <div key={c.slug} className="rounded-xl p-4 flex items-center gap-4"
-            style={{ background: 'rgba(242,151,116,0.06)', border: '1px solid rgba(242,151,116,0.15)' }}>
+            style={{ background: 'var(--bg-subtle)', border: '1px solid var(--border-soft)' }}>
             {c.texture_url && (
               <div className="w-14 h-14 rounded-lg overflow-hidden flex-shrink-0">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -159,9 +159,9 @@ export default function CollectionsClient({ collections }: { collections: Catego
               </div>
             )}
             <div className="flex-1 min-w-0">
-              <p style={{ color: '#F29774', fontFamily: "'ONDER', sans-serif" }}>{c.name}</p>
-              <p className="text-xs" style={{ color: '#F29774', opacity: 0.45, fontFamily: "'Involve', sans-serif" }}>
-                {!c.active && <span style={{ color: '#E08080', opacity: 0.8 }}>● скрыта · </span>}
+              <p style={{ color: 'var(--accent)', fontFamily: "'ONDER', sans-serif" }}>{c.name}</p>
+              <p className="text-xs" style={{ color: 'var(--accent)', opacity: 0.45, fontFamily: "'Involve', sans-serif" }}>
+                {!c.active && <span style={{ color: 'var(--status-error)', opacity: 0.8 }}>● скрыта · </span>}
                 slug: {c.slug}
                 {c.logo_top_url ? ' · лого-топ ✓' : ''}
                 {c.logo_bottom_url ? ' · лого-боттом ✓' : ''}
@@ -171,17 +171,17 @@ export default function CollectionsClient({ collections }: { collections: Catego
             <div className="flex gap-2 flex-shrink-0">
               <button onClick={() => toggleActive(c)}
                 className="px-3 py-1.5 text-xs uppercase tracking-widest rounded-lg"
-                style={{ background: c.active ? 'rgba(242,151,116,0.08)' : 'rgba(242,151,116,0.25)', color: '#F29774', fontFamily: "'ONDER', sans-serif", fontSize: '0.65rem' }}>
+                style={{ background: c.active ? 'var(--bg-subtle)' : 'var(--accent-2)', color: 'var(--accent)', fontFamily: "'ONDER', sans-serif", fontSize: '0.65rem' }}>
                 {c.active ? 'Скрыть' : 'Показать'}
               </button>
               <button onClick={() => openEdit(c)}
                 className="px-3 py-1.5 text-xs uppercase tracking-widest rounded-lg"
-                style={{ background: 'rgba(242,151,116,0.15)', color: '#F29774', fontFamily: "'ONDER', sans-serif", fontSize: '0.65rem' }}>
+                style={{ background: 'var(--border)', color: 'var(--accent)', fontFamily: "'ONDER', sans-serif", fontSize: '0.65rem' }}>
                 Ред.
               </button>
               <button onClick={() => remove(c.slug)}
                 className="px-3 py-1.5 text-xs uppercase tracking-widest rounded-lg"
-                style={{ background: 'rgba(242,151,116,0.08)', color: '#F29774', opacity: 0.5, fontFamily: "'ONDER', sans-serif", fontSize: '0.65rem' }}>
+                style={{ background: 'var(--bg-subtle)', color: 'var(--accent)', opacity: 0.5, fontFamily: "'ONDER', sans-serif", fontSize: '0.65rem' }}>
                 Удалить
               </button>
             </div>
@@ -192,13 +192,13 @@ export default function CollectionsClient({ collections }: { collections: Catego
       {editing && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.75)' }}>
           <div className="w-full max-w-lg rounded-2xl p-6 flex flex-col gap-4 overflow-y-auto max-h-[92vh]"
-            style={{ background: '#1a0808', border: '1px solid rgba(242,151,116,0.25)' }}>
+            style={{ background: 'var(--bg-2)', border: '1px solid var(--border)' }}>
 
             <div className="flex items-center justify-between">
-              <h2 className="text-lg uppercase tracking-widest" style={{ color: '#F29774', fontFamily: "'ONDER', sans-serif" }}>
+              <h2 className="text-lg uppercase tracking-widest" style={{ color: 'var(--accent)', fontFamily: "'ONDER', sans-serif" }}>
                 {editing.slug ? 'Редактировать' : 'Новая коллекция'}
               </h2>
-              <button onClick={() => setEditing(null)} style={{ color: '#F29774', opacity: 0.4, fontSize: '1.2rem' }}>✕</button>
+              <button onClick={() => setEditing(null)} style={{ color: 'var(--accent)', opacity: 0.4, fontSize: '1.2rem' }}>✕</button>
             </div>
 
             <div className="flex flex-col gap-1">
@@ -221,17 +221,17 @@ export default function CollectionsClient({ collections }: { collections: Catego
             <UploadBtn field="logo_top_url" label="Лого TOP (над каталогом)" refEl={logoTopRef} />
             <UploadBtn field="logo_bottom_url" label="Лого BOTTOM (под каталогом)" refEl={logoBottomRef} />
 
-            {error && <p className="text-sm" style={{ color: '#E08080', fontFamily: "'Involve', sans-serif" }}>{error}</p>}
+            {error && <p className="text-sm" style={{ color: 'var(--status-error)', fontFamily: "'Involve', sans-serif" }}>{error}</p>}
 
             <div className="flex gap-3">
               <button onClick={save} disabled={saving || !!uploading}
                 className="flex-1 py-3 uppercase tracking-widest transition-opacity"
-                style={{ background: '#F29774', color: '#A9342A', borderRadius: '8px', fontFamily: "'ONDER', sans-serif", fontSize: '0.75rem', opacity: saving ? 0.5 : 1 }}>
+                style={{ background: 'var(--accent)', color: 'var(--bg)', borderRadius: '8px', fontFamily: "'ONDER', sans-serif", fontSize: '0.75rem', opacity: saving ? 0.5 : 1 }}>
                 {saving ? 'Сохраняем...' : 'Сохранить'}
               </button>
               <button onClick={() => setEditing(null)}
                 className="px-4 py-3 uppercase tracking-widest"
-                style={{ background: 'rgba(242,151,116,0.1)', color: '#F29774', borderRadius: '8px', fontFamily: "'ONDER', sans-serif", fontSize: '0.75rem' }}>
+                style={{ background: 'var(--bg-subtle)', color: 'var(--accent)', borderRadius: '8px', fontFamily: "'ONDER', sans-serif", fontSize: '0.75rem' }}>
                 Отмена
               </button>
             </div>

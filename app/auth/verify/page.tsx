@@ -11,7 +11,7 @@ function VerifyContent() {
 
   if (!token || !email) {
     return (
-      <div style={{ textAlign: 'center', color: '#F29774' }}>
+      <div style={{ textAlign: 'center', color: 'var(--accent)' }}>
         <h1 style={{ fontSize: 28, marginBottom: 20 }}>⚠️ ОШИБКА</h1>
         <p>Некорректная ссылка для входа.</p>
         <a
@@ -20,8 +20,8 @@ function VerifyContent() {
             display: 'inline-block',
             marginTop: 20,
             padding: '12px 32px',
-            background: '#F29774',
-            color: '#A9342A',
+            background: 'var(--accent)',
+            color: 'var(--bg)',
             borderRadius: 8,
             textDecoration: 'none',
             fontWeight: 'bold',
@@ -42,7 +42,7 @@ function VerifyContent() {
   }
 
   return (
-    <div style={{ textAlign: 'center', color: '#F29774' }}>
+    <div style={{ textAlign: 'center', color: 'var(--accent)' }}>
       <h1 style={{ fontSize: 28, marginBottom: 20, textTransform: 'uppercase', letterSpacing: 2 }}>
         🔐 Подтверждение входа
       </h1>
@@ -55,8 +55,8 @@ function VerifyContent() {
         style={{
           display: 'inline-block',
           padding: '16px 48px',
-          background: loading ? '#888' : '#F29774',
-          color: '#A9342A',
+          background: loading ? '#888' : 'var(--accent)',
+          color: 'var(--bg)',
           borderRadius: 8,
           border: 'none',
           fontSize: 18,
@@ -84,7 +84,7 @@ export default function VerifyPage() {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        background: '#1a1a1a',
+        background: 'var(--bg)',
         padding: 20,
       }}
     >
@@ -92,14 +92,14 @@ export default function VerifyPage() {
         style={{
           maxWidth: 600,
           width: '100%',
-          background: '#A9342A',
+          background: 'var(--bg)',
           borderRadius: 12,
           padding: 40,
         }}
       >
         <Suspense
           fallback={
-            <div style={{ textAlign: 'center', color: '#F29774', fontSize: 20 }}>Загрузка...</div>
+            <div style={{ textAlign: 'center', color: 'var(--accent)', fontSize: 20 }}>Загрузка...</div>
           }
         >
           <VerifyContent />

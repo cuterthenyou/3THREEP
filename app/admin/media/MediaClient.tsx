@@ -49,7 +49,7 @@ function VideoCard({ file }: { file: MediaFile }) {
       />
       {duration !== null && (
         <span className="absolute bottom-1.5 right-1.5 px-1.5 py-0.5 rounded text-xs"
-          style={{ background: 'rgba(0,0,0,0.7)', color: '#F29774', fontFamily: "'ONDER', sans-serif", fontSize: '0.55rem' }}>
+          style={{ background: 'rgba(0,0,0,0.7)', color: 'var(--accent)', fontFamily: "'ONDER', sans-serif", fontSize: '0.55rem' }}>
           {formatDuration(duration)}
         </span>
       )}

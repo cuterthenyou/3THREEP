@@ -15,12 +15,12 @@ interface Props {
 }
 
 const STATUS_COLORS: Record<OrderStatus, string> = {
-  new: '#F29774',
-  paid: '#7EC8A4',
-  in_progress: '#F2C46D',
-  shipped: '#74B3F2',
-  delivered: '#A8E6A3',
-  cancelled: '#E08080',
+  new: 'var(--status-new)',
+  paid: 'var(--status-paid)',
+  in_progress: 'var(--status-in-progress)',
+  shipped: 'var(--status-shipped)',
+  delivered: 'var(--status-delivered)',
+  cancelled: 'var(--status-cancelled)',
 };
 
 function formatPrice(price: number) {
@@ -131,19 +131,6 @@ export default function AccountClient({ user, profile, orders }: Props) {
         </div>
       )}
 
-      {/* Background video */}
-      <video className={s.bgVideo} autoPlay muted loop playsInline>
-        <source src="/images/фон 2.mp4" type="video/mp4" />
-      </video>
-
-      {/* Grain overlay */}
-      <div
-        className={s.grain}
-        style={{
-          backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 256 256\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'noise\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.9\' numOctaves=\'4\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23noise)\' opacity=\'0.04\'/%3E%3C/svg%3E")',
-        }}
-      />
-
       <div className={s.content}>
         <div className={s.inner}>
           {/* Profile card */}
@@ -170,7 +157,7 @@ export default function AccountClient({ user, profile, orders }: Props) {
                     ) : (
                       <div
                         className="w-full h-full flex items-center justify-center text-xs"
-                        style={{ background: 'rgba(242,151,116,0.2)', color: '#F29774' }}
+                        style={{ background: 'var(--bg-subtle)', color: 'var(--accent)' }}
                       >
                         {item.product_name[0]}
                       </div>
@@ -242,7 +229,7 @@ export default function AccountClient({ user, profile, orders }: Props) {
                   width={32}
                   height={32}
                   className="rounded-lg"
-                  style={{ border: '2px solid rgba(242,151,116,0.4)' }}
+                  style={{ border: '2px solid var(--accent-2)' }}
                 />
               )}
               {[...Array(7)].map((_, i) => (
@@ -298,9 +285,9 @@ export default function AccountClient({ user, profile, orders }: Props) {
                       ) : (
                         <div
                           className="w-full h-full flex items-center justify-center"
-                          style={{ background: 'rgba(242,151,116,0.15)' }}
+                          style={{ background: 'var(--bg-subtle)' }}
                         >
-                          <span style={{ color: '#F29774', fontFamily: "'ONDER', sans-serif", fontSize: '0.55rem' }}>
+                          <span style={{ color: 'var(--accent)', fontFamily: "'ONDER', sans-serif", fontSize: '0.55rem' }}>
                             {item.product_name}
                           </span>
                         </div>
