@@ -111,6 +111,7 @@ export default async function AdminLayout({ children }: { children: ReactNode })
         </span>
         <div className="flex gap-4 ml-4">
           {[
+            { href: '/admin', label: 'Дашборд' },
             { href: '/admin/orders', label: 'Заказы' },
             { href: '/admin/products', label: 'Товары' },
             { href: '/admin/collections', label: 'Коллекции' },

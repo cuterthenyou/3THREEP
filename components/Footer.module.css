@@ -40,3 +40,17 @@
   font-family: var(--font-involve);
   opacity: 0.6;
 }
+
+.privacyLink {
+  color: var(--color-accent);
+  font-family: var(--font-involve);
+  font-size: 0.75rem;
+  opacity: 0.35;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  transition: opacity 0.2s;
+}
+
+.privacyLink:hover {
+  opacity: 0.65;
+}

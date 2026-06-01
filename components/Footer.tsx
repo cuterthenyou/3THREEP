@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import s from './Footer.module.css'
 
 export default function Footer() {
@@ -69,12 +70,18 @@ export default function Footer() {
           </div>
         </div>
 
-        {/* Copyright */}
-        <p
-          className={`mt-8 text-sm text-center ${s.copyright}`}
-        >
-          © 2024 THREEP. All rights reserved. Custom streetwear for the bold.
-        </p>
+        {/* Copyright + legal links */}
+        <div className="mt-8 flex flex-col items-center gap-2">
+          <p className={`text-sm text-center ${s.copyright}`}>
+            © 2024 THREEP. All rights reserved. Custom streetwear for the bold.
+          </p>
+          <Link
+            href="/privacy"
+            className={s.privacyLink}
+          >
+            Политика конфиденциальности
+          </Link>
+        </div>
 
       </div>
     </footer>

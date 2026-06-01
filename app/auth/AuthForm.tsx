@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { signIn } from 'next-auth/react';
 import { useSearchParams } from 'next/navigation';
+import Link from 'next/link';
 import s from './auth.module.css';
 
 export default function AuthForm() {
@@ -11,9 +12,13 @@ export default function AuthForm() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [step, setStep] = useState<'email' | 'code'>('email');
+  const [consent, setConsent] = useState(false);
+  const [emailTouched, setEmailTouched] = useState(false);
 
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get('callbackUrl') || '/account';
+
+  const isEmailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
   async function requestCode() {
     setLoading(true);
@@ -59,17 +64,37 @@ export default function AuthForm() {
         {step === 'email' ? (
           <>
             <p className={s.hint}>Введи email — пришлём код для входа</p>
-            <input
-              type="email"
-              placeholder="твой@email.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && !loading && email && requestCode()}
-              className={s.input}
-              autoFocus
-              disabled={loading}
-            />
-            <button onClick={requestCode} disabled={loading || !email} className={s.btn}>
+            <div>
+              <input
+                type="email"
+                placeholder="твой@email.com"
+                value={email}
+                onChange={(e) => { setEmail(e.target.value); setEmailTouched(true); }}
+                onKeyDown={(e) => e.key === 'Enter' && !loading && isEmailValid && consent && requestCode()}
+                className={`${s.input} ${emailTouched && email ? (isEmailValid ? s.inputValid : s.inputError) : ''}`}
+                autoFocus
+                disabled={loading}
+              />
+              {emailTouched && email && !isEmailValid && (
+                <p className={s.fieldError}>Введите действительный email</p>
+              )}
+            </div>
+            <label className={s.consent}>
+              <input
+                type="checkbox"
+                checked={consent}
+                onChange={(e) => setConsent(e.target.checked)}
+                className={s.consentCheck}
+              />
+              <span>
+                Я соглашаюсь с{' '}
+                <Link href="/privacy" target="_blank" className={s.consentLink}>
+                  Политикой конфиденциальности
+                </Link>{' '}
+                и обработкой персональных данных
+              </span>
+            </label>
+            <button onClick={requestCode} disabled={loading || !isEmailValid || !consent} className={s.btn}>
               {loading ? 'Отправляем...' : 'Получить код'}
             </button>
           </>

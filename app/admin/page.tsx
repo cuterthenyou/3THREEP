@@ -1,5 +1,7 @@
-import { redirect } from 'next/navigation'
+import DashboardClient from './DashboardClient'
+
+export const revalidate = 0
 
 export default function AdminPage() {
-  redirect('/admin/orders')
+  return <DashboardClient />
 }

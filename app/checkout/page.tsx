@@ -19,6 +19,7 @@ export default function CheckoutPage() {
   const [comment, setComment] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [addressTouched, setAddressTouched] = useState(false)
 
   async function handleSubmit() {
     if (!address.trim()) { setError('Укажи адрес доставки'); return }
@@ -179,9 +180,12 @@ export default function CheckoutPage() {
                 type="text"
                 placeholder="Город, улица, дом, квартира, индекс"
                 value={address}
-                onChange={e => setAddress(e.target.value)}
-                className={`px-4 py-3 sm:py-4 ${s.input}`}
+                onChange={e => { setAddress(e.target.value); setAddressTouched(true); }}
+                className={`px-4 py-3 sm:py-4 ${s.input} ${addressTouched ? (address.trim() ? s.inputValid : s.inputError) : ''}`}
               />
+              {addressTouched && !address.trim() && (
+                <p className={s.fieldError}>Укажите адрес доставки</p>
+              )}
             </div>
 
             <div className="flex flex-col gap-2">

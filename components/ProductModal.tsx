@@ -35,8 +35,17 @@ function AddToCartButton({ product, size, onClose }: { product: Product; size: s
 export default function ProductModal({ product, visible, onClose }: Props) {
   const [activeImg, setActiveImg] = useState(0)
   const [selectedSize, setSelectedSize] = useState('S')
-  const [touchStart, setTouchStart] = useState<number | null>(null)
+  const [touchStart, setTouchStart] = useState<{ x: number; y: number } | null>(null)
   const [touchDelta, setTouchDelta] = useState(0)
+  const [slideOut, setSlideOut] = useState(false)
+
+  function closeWithAnimation() {
+    setSlideOut(true)
+    setTimeout(() => {
+      setSlideOut(false)
+      onClose()
+    }, 280)
+  }
 
   useEffect(() => {
     if (product) {
@@ -47,14 +56,23 @@ export default function ProductModal({ product, visible, onClose }: Props) {
 
   useEffect(() => {
     if (!visible) return
+
+    history.pushState({ modal: product?.id }, '')
+
+    const onPopState = () => { onClose() }
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose()
+      if (e.key === 'Escape') { history.back(); }
       if (!product) return
       if (e.key === 'ArrowLeft') setActiveImg((i) => Math.max(0, i - 1))
       if (e.key === 'ArrowRight') setActiveImg((i) => Math.min(product.images.length - 1, i + 1))
     }
+
     window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
+    window.addEventListener('popstate', onPopState)
+    return () => {
+      window.removeEventListener('keydown', onKey)
+      window.removeEventListener('popstate', onPopState)
+    }
   }, [visible, product, onClose])
 
   if (!product) return null
@@ -62,12 +80,44 @@ export default function ProductModal({ product, visible, onClose }: Props) {
   const sizes = product.sizes?.length ? product.sizes : ['S', 'M', 'L', 'XL', '2XL']
 
   const touchHandlers = {
-    onTouchStart: (e: React.TouchEvent) => { setTouchStart(e.changedTouches[0].clientX); setTouchDelta(0) },
-    onTouchMove: (e: React.TouchEvent) => { if (touchStart !== null) setTouchDelta(e.changedTouches[0].clientX - touchStart) },
+    onTouchStart: (e: React.TouchEvent) => {
+      setTouchStart({ x: e.changedTouches[0].clientX, y: e.changedTouches[0].clientY })
+      setTouchDelta(0)
+    },
+    onTouchMove: (e: React.TouchEvent) => {
+      if (touchStart !== null) {
+        const dx = e.changedTouches[0].clientX - touchStart.x
+        setTouchDelta(dx)
+      }
+    },
     onTouchEnd: () => {
       if (Math.abs(touchDelta) > 50) {
         if (touchDelta < 0) setActiveImg((i) => Math.min(product.images.length - 1, i + 1))
         else setActiveImg((i) => Math.max(0, i - 1))
+      }
+      setTouchStart(null); setTouchDelta(0)
+    },
+  }
+
+  const modalTouchHandlers = {
+    onTouchStart: (e: React.TouchEvent) => {
+      setTouchStart({ x: e.changedTouches[0].clientX, y: e.changedTouches[0].clientY })
+    },
+    onTouchMove: (e: React.TouchEvent) => {
+      if (touchStart !== null) {
+        const dx = e.changedTouches[0].clientX - touchStart.x
+        const dy = Math.abs(e.changedTouches[0].clientY - touchStart.y)
+        if (dx > 0 && dx > dy) {
+          e.preventDefault()
+          setTouchDelta(dx)
+        }
+      }
+    },
+    onTouchEnd: () => {
+      if (touchDelta >= 80) {
+        setTouchStart(null); setTouchDelta(0)
+        closeWithAnimation()
+        return
       }
       setTouchStart(null); setTouchDelta(0)
     },
@@ -81,11 +131,12 @@ export default function ProductModal({ product, visible, onClose }: Props) {
         transition: 'opacity 0.3s ease',
         pointerEvents: visible ? 'auto' : 'none',
       }}
-      onClick={(e) => e.target === e.currentTarget && onClose()}
+      onClick={(e) => e.target === e.currentTarget && closeWithAnimation()}
+      {...modalTouchHandlers}
     >
       <div className={`absolute inset-0 overflow-y-auto ${s.inner}`}>
         <button
-          onClick={onClose}
+          onClick={closeWithAnimation}
           className={`fixed top-5 right-5 z-50 flex items-center justify-center w-9 h-9 ${s.closeBtn}`}
           aria-label="Закрыть"
         >
@@ -97,9 +148,9 @@ export default function ProductModal({ product, visible, onClose }: Props) {
         <div
           className="w-full max-w-6xl mx-auto px-6 py-20 sm:py-16"
           style={{
-            transform: visible ? 'translateY(0)' : 'translateY(30px)',
+            transform: slideOut ? 'translateX(100%)' : visible ? 'translateY(0)' : 'translateY(30px)',
             opacity: visible ? 1 : 0,
-            transition: 'transform 0.3s ease, opacity 0.3s ease',
+            transition: slideOut ? 'transform 0.28s ease-in' : 'transform 0.3s ease, opacity 0.3s ease',
           }}
         >
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-start">

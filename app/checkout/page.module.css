@@ -127,6 +127,23 @@
   opacity: 0.4;
 }
 
+.inputValid {
+  border-color: #7ec89a !important;
+  box-shadow: 0 0 0 3px rgba(126, 200, 154, 0.12) !important;
+}
+
+.inputError {
+  border-color: #e05555 !important;
+  box-shadow: 0 0 0 3px rgba(224, 85, 85, 0.12) !important;
+}
+
+.fieldError {
+  color: #e08080;
+  font-family: var(--font-involve);
+  font-size: 0.75rem;
+  margin-top: -0.25rem;
+}
+
 .errorText {
   color: #e08080;
   font-family: var(--font-involve);

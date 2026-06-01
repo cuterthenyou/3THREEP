@@ -1,7 +1,7 @@
 'use client'
 
-import { useState, useRef } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState, useRef, useEffect, useMemo } from 'react'
+import { useRouter, useSearchParams, usePathname } from 'next/navigation'
 import Image from 'next/image'
 import type { Product } from '@/lib/types'
 
@@ -38,6 +38,9 @@ function Inp({ label, value, onChange, type = 'text' }: { label: string; value: 
   )
 }
 
+type SortKey = 'name' | 'price' | 'stock'
+type SortDir = 'asc' | 'desc'
+
 export default function ProductsClient({ products }: { products: Product[] }) {
   const [editing, setEditing] = useState<Partial<Product> | null>(null)
   const [images, setImages] = useState<string[]>([])
@@ -49,6 +52,56 @@ export default function ProductsClient({ products }: { products: Product[] }) {
   const [dragOver, setDragOver] = useState(false)
   const fileRef = useRef<HTMLInputElement>(null)
   const router = useRouter()
+  const pathname = usePathname()
+  const searchParams = useSearchParams()
+
+  const [search, setSearch] = useState(searchParams.get('q') ?? '')
+  const [filterActive, setFilterActive] = useState(searchParams.get('active') ?? 'all')
+  const [filterStock, setFilterStock] = useState(searchParams.get('stock') ?? 'all')
+  const [sortKey, setSortKey] = useState<SortKey>((searchParams.get('sort') as SortKey) ?? 'name')
+  const [sortDir, setSortDir] = useState<SortDir>((searchParams.get('dir') as SortDir) ?? 'asc')
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      const params = new URLSearchParams()
+      if (search) params.set('q', search)
+      if (filterActive !== 'all') params.set('active', filterActive)
+      if (filterStock !== 'all') params.set('stock', filterStock)
+      if (sortKey !== 'name') params.set('sort', sortKey)
+      if (sortDir !== 'asc') params.set('dir', sortDir)
+      const qs = params.toString()
+      router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false })
+    }, 300)
+    return () => clearTimeout(timer)
+  }, [search, filterActive, filterStock, sortKey, sortDir, pathname, router])
+
+  function toggleSort(key: SortKey) {
+    if (sortKey === key) setSortDir(d => d === 'asc' ? 'desc' : 'asc')
+    else { setSortKey(key); setSortDir('asc') }
+  }
+
+  const filtered = useMemo(() => {
+    let list = [...products]
+    if (search) list = list.filter(p => p.name.toLowerCase().includes(search.toLowerCase()))
+    if (filterActive === 'active') list = list.filter(p => p.active)
+    if (filterActive === 'hidden') list = list.filter(p => !p.active)
+    if (filterStock === 'in') list = list.filter(p => p.stock > 0)
+    if (filterStock === 'out') list = list.filter(p => p.stock === 0)
+    list.sort((a, b) => {
+      const v = sortKey === 'name' ? a.name.localeCompare(b.name) : sortKey === 'price' ? a.price - b.price : a.stock - b.stock
+      return sortDir === 'asc' ? v : -v
+    })
+    return list
+  }, [products, search, filterActive, filterStock, sortKey, sortDir])
+
+  function SortHeader({ label, k }: { label: string; k: SortKey }) {
+    const active = sortKey === k
+    return (
+      <button onClick={() => toggleSort(k)} style={{ color: '#F29774', opacity: active ? 1 : 0.4, fontFamily: "'ONDER', sans-serif", fontSize: '0.65rem', letterSpacing: '0.1em', textTransform: 'uppercase', cursor: 'pointer', background: 'none', border: 'none', display: 'flex', alignItems: 'center', gap: '4px' }}>
+        {label} {active ? (sortDir === 'asc' ? '↑' : '↓') : ''}
+      </button>
+    )
+  }
 
   function openNew() {
     setEditing({ ...EMPTY })
@@ -138,10 +191,10 @@ export default function ProductsClient({ products }: { products: Product[] }) {
 
   return (
     <div className="px-6 py-6 max-w-4xl mx-auto">
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-4">
         <h1 className="text-xl uppercase tracking-widest"
           style={{ color: '#F29774', fontFamily: "'ONDER', sans-serif" }}>
-          Товары ({products.length})
+          Товары ({filtered.length}/{products.length})
         </h1>
         <button onClick={openNew}
           className="px-4 py-2 uppercase tracking-widest transition-opacity hover:opacity-80"
@@ -150,13 +203,49 @@ export default function ProductsClient({ products }: { products: Product[] }) {
         </button>
       </div>
 
+      {/* Search + Filters */}
+      <div className="flex flex-wrap gap-2 mb-4">
+        <input
+          type="search"
+          placeholder="Поиск по названию..."
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          className="flex-1 min-w-[180px] px-3 py-2 rounded-lg text-sm outline-none"
+          style={{ background: 'rgba(242,151,116,0.08)', color: '#F29774', border: '1px solid rgba(242,151,116,0.2)', fontFamily: "'Involve', sans-serif" }}
+        />
+        <select value={filterActive} onChange={e => setFilterActive(e.target.value)}
+          className="px-3 py-2 rounded-lg text-xs outline-none"
+          style={{ background: 'rgba(242,151,116,0.08)', color: '#F29774', border: '1px solid rgba(242,151,116,0.2)', fontFamily: "'Involve', sans-serif" }}>
+          <option value="all">Все статусы</option>
+          <option value="active">Активные</option>
+          <option value="hidden">Скрытые</option>
+        </select>
+        <select value={filterStock} onChange={e => setFilterStock(e.target.value)}
+          className="px-3 py-2 rounded-lg text-xs outline-none"
+          style={{ background: 'rgba(242,151,116,0.08)', color: '#F29774', border: '1px solid rgba(242,151,116,0.2)', fontFamily: "'Involve', sans-serif" }}>
+          <option value="all">Любой остаток</option>
+          <option value="in">В наличии</option>
+          <option value="out">Нет в наличии</option>
+        </select>
+      </div>
+
+      {/* Sort headers */}
+      <div className="flex gap-4 mb-2 px-1">
+        <div className="w-14 flex-shrink-0" />
+        <SortHeader label="Название" k="name" />
+        <div className="flex-1" />
+        <SortHeader label="Цена" k="price" />
+        <SortHeader label="Остаток" k="stock" />
+        <div className="w-28 flex-shrink-0" />
+      </div>
+
       <div className="flex flex-col gap-3">
-        {products.length === 0 && (
+        {filtered.length === 0 && (
           <p className="text-sm" style={{ color: '#F29774', opacity: 0.4, fontFamily: "'Involve', sans-serif" }}>
-            Товаров нет. Добавь первый!
+            Ничего не найдено
           </p>
         )}
-        {products.map(p => (
+        {filtered.map(p => (
           <div key={p.id} className="rounded-xl p-4 flex items-center gap-4"
             style={{ background: 'rgba(242,151,116,0.06)', border: '1px solid rgba(242,151,116,0.15)', opacity: p.active ? 1 : 0.5 }}>
             <div className="relative w-14 h-14 rounded-lg overflow-hidden flex-shrink-0">
