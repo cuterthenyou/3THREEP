@@ -21,17 +21,11 @@
   pointer-events: none;
 }
 
-/* Transparent overlay that catches long-press on mobile */
+/* Visual shield layer — pointer-events always none (context menu blocked via onContextMenu on video) */
 .videoShield {
   position: absolute;
   inset: 0;
   z-index: 1;
   background: transparent;
   pointer-events: none;
-}
-
-@media (max-width: 767px) {
-  .videoShield {
-    pointer-events: auto;
-  }
 }

@@ -24,11 +24,11 @@
 }
 
 :root {
-  /* ── Legacy color vars (keep for compatibility) ── */
+  /* ── Legacy color vars (light/default = original THREEP terracotta) ── */
   --color-primary: #a9342a;
-  --color-accent: #f29774;
-  --color-bg: #000000;
-  --color-bg-dark: #1a0808;
+  --color-accent:  #f29774;
+  --color-bg:      #a9342a;
+  --color-bg-dark: #8b2820;
 
   /* ── Font families ── */
   --font-onder: 'ONDER', sans-serif;
@@ -36,32 +36,38 @@
   --font-deutsch: 'DeutschGothic', sans-serif;
   --font-heading: var(--font-heading, 'Unbounded', 'ONDER', sans-serif);
 
-  /* ── Fluid typography (Stage 03) ── */
+  /* ── Fluid typography ── */
   --fs-h1: clamp(1.6rem, 5vw, 3.5rem);
   --fs-h2: clamp(1.3rem, 4vw, 2.5rem);
   --fs-h3: clamp(1.1rem, 3vw, 1.8rem);
   --fs-h4: clamp(1rem, 2.5vw, 1.4rem);
 
-  /* ── Theme tokens: light (default) ── */
-  --bg:         #f5f3ef;
-  --bg-2:       #ffffff;
-  --bg-card:    #ffffff;
-  --text:       #1a0808;
-  --text-muted: #6b4f4f;
-  --accent:     #a9342a;
-  --accent-2:   #f29774;
-  --border:     rgba(169, 52, 42, 0.2);
+  /* ── Theme tokens: light = оригинальный THREEP терракот ── */
+  --bg:         #a9342a;
+  --bg-2:       #8b2820;
+  --bg-card:    #a9342a;
+  --text:       #f29774;
+  --text-muted: rgba(242, 151, 116, 0.6);
+  --accent:     #f29774;
+  --accent-2:   rgba(242, 151, 116, 0.25);
+  --border:     rgba(242, 151, 116, 0.2);
 }
 
 [data-theme="dark"] {
-  --bg:         #0d0505;
-  --bg-2:       #1a0808;
-  --bg-card:    #1a0808;
-  --text:       #f29774;
-  --text-muted: rgba(242, 151, 116, 0.55);
-  --accent:     #f29774;
-  --accent-2:   rgba(242, 151, 116, 0.3);
-  --border:     rgba(242, 151, 116, 0.2);
+  /* dark = тёмно-серый + нежно-розовый */
+  --color-primary: #2c2c2e;
+  --color-accent:  #f5d0d8;
+  --color-bg:      #1c1c1e;
+  --color-bg-dark: #0e0e10;
+
+  --bg:         #1c1c1e;
+  --bg-2:       #2c2c2e;
+  --bg-card:    #2c2c2e;
+  --text:       #f5d0d8;
+  --text-muted: rgba(245, 208, 216, 0.55);
+  --accent:     #f5d0d8;
+  --accent-2:   rgba(245, 208, 216, 0.25);
+  --border:     rgba(245, 208, 216, 0.18);
 }
 
 /* Grain/shagreen overlay utility */

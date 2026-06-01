@@ -2,6 +2,8 @@
 
 import { useEffect, useRef } from 'react'
 
+const HEIGHT = 200
+
 export default function HeroTransition() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
 
@@ -11,53 +13,46 @@ export default function HeroTransition() {
 
     const dpr = window.devicePixelRatio || 1
     const W = canvas.offsetWidth
-    const H = canvas.offsetHeight
-    canvas.width = W * dpr
-    canvas.height = H * dpr
+    const H = HEIGHT
+    const rawW = Math.round(W * dpr)
+    const rawH = Math.round(H * dpr)
+    canvas.width = rawW
+    canvas.height = rawH
     const ctx = canvas.getContext('2d')
     if (!ctx) return
-    ctx.scale(dpr, dpr)
 
-    // The catalog bg color — match globals.css --bg (light default)
-    // We read the CSS variable so it works in both themes
-    function getCatalogColor() {
+    function getBgColor() {
       const v = getComputedStyle(document.documentElement).getPropertyValue('--bg').trim()
-      return v || '#f5f3ef'
+      return v || '#a9342a'
+    }
+
+    function hexToRgb(hex: string) {
+      const h = hex.replace('#', '').trim()
+      if (h.length !== 6) return { r: 169, g: 52, b: 42 }
+      return {
+        r: parseInt(h.slice(0, 2), 16),
+        g: parseInt(h.slice(2, 4), 16),
+        b: parseInt(h.slice(4, 6), 16),
+      }
     }
 
     function draw() {
-      const bgColor = getCatalogColor()
-      ctx!.clearRect(0, 0, W, H)
-
-      // Parse hex/rgb to rgba with alpha
-      function hexToRgb(hex: string) {
-        const h = hex.replace('#', '')
-        return {
-          r: parseInt(h.slice(0, 2), 16),
-          g: parseInt(h.slice(2, 4), 16),
-          b: parseInt(h.slice(4, 6), 16),
-        }
-      }
-
-      const rgb = hexToRgb(bgColor.startsWith('#') ? bgColor : '#f5f3ef')
-
-      const imageData = ctx!.createImageData(W * dpr, H * dpr)
+      ctx!.clearRect(0, 0, rawW, rawH)
+      const rgb = hexToRgb(getBgColor())
+      const imageData = ctx!.createImageData(rawW, rawH)
       const data = imageData.data
-      const PIXEL_SIZE = 3
+      const PIXEL_SIZE = Math.max(2, Math.round(3 * dpr))
 
-      for (let y = 0; y < H; y += PIXEL_SIZE) {
-        for (let x = 0; x < W; x += PIXEL_SIZE) {
-          // Density increases towards bottom (y=H is dense, y=0 is sparse)
-          const normalizedY = y / H
-          // Non-linear: pixels more dense in lower 40% of canvas
-          const density = Math.pow(normalizedY, 1.8)
-
+      for (let y = 0; y < rawH; y += PIXEL_SIZE) {
+        for (let x = 0; x < rawW; x += PIXEL_SIZE) {
+          const normalizedY = y / rawH
+          // Dense at bottom (blends into catalog), sparse at top (hero side)
+          const density = Math.pow(normalizedY, 1.6)
           if (Math.random() < density) {
-            const alpha = density * 0.9 + Math.random() * 0.1
-            // Fill the pixel block
-            for (let py = 0; py < PIXEL_SIZE && y + py < H; py++) {
-              for (let px = 0; px < PIXEL_SIZE && x + px < W; px++) {
-                const idx = ((y + py) * W + (x + px)) * 4
+            const alpha = Math.min(1, density * 0.95 + Math.random() * 0.1)
+            for (let py = 0; py < PIXEL_SIZE && y + py < rawH; py++) {
+              for (let px = 0; px < PIXEL_SIZE && x + px < rawW; px++) {
+                const idx = ((y + py) * rawW + (x + px)) * 4
                 data[idx]     = rgb.r
                 data[idx + 1] = rgb.g
                 data[idx + 2] = rgb.b
@@ -67,13 +62,11 @@ export default function HeroTransition() {
           }
         }
       }
-
       ctx!.putImageData(imageData, 0, 0)
     }
 
     draw()
 
-    // Redraw on theme change
     const obs = new MutationObserver(draw)
     obs.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] })
     return () => obs.disconnect()
@@ -81,13 +74,16 @@ export default function HeroTransition() {
 
   return (
     <div
+      aria-hidden="true"
       style={{
         position: 'relative',
         width: '100%',
-        height: 80,
-        marginTop: -40,
+        height: HEIGHT,
+        marginTop: -HEIGHT / 2,
+        marginBottom: 0,
         zIndex: 5,
         pointerEvents: 'none',
+        display: 'block',
       }}
     >
       <canvas

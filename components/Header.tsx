@@ -101,13 +101,15 @@ export default function Header({ isAdminUser = false }: Props) {
           WebkitBackdropFilter: scrolled ? 'blur(12px) saturate(1.4)' : 'none',
         }}
       >
-        <div className="flex items-center justify-between px-6 sm:px-8 py-5">
+        <div className="flex items-center justify-between px-5 sm:px-8 py-4 sm:py-5">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/images/logo-61.svg" alt="THREEP Logo" className="h-8 sm:h-12 w-auto" />
+          <img src="/images/logo-61.svg" alt="THREEP Logo" className="h-8 sm:h-12 w-auto flex-shrink-0" />
+          {/* Center logo text — hidden on mobile */}
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/images/logo-text-63.svg" alt="THREEP" className="h-4 sm:h-8 w-auto absolute left-1/2 -translate-x-1/2" />
+          <img src="/images/logo-text-63.svg" alt="THREEP" className="hidden sm:block h-8 w-auto absolute left-1/2 -translate-x-1/2" />
 
-          <div className="flex items-center gap-3">
+          {/* Icons — on mobile spread evenly across a fixed width, on desktop tight gap */}
+          <div className="flex items-center justify-between w-32 sm:w-auto sm:gap-3">
             {/* Theme toggle */}
             <button
               onClick={toggleTheme}
