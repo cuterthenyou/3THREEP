@@ -82,6 +82,25 @@
   width: 100%;
 }
 
+/* Transparent overlay — blocks right-click/drag on images */
+.productImgWrap::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+}
+
+/* Disable image drag */
+.productImgWrap img,
+.productImgWrap [data-nimg] {
+  pointer-events: none;
+  -webkit-user-drag: none;
+  user-drag: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
 /* Product info */
 .productInfo {
   display: flex;
@@ -113,6 +132,8 @@
   word-break: break-word;
   overflow-wrap: break-word;
   min-width: 0;
+  -webkit-user-select: none;
+  user-select: none;
 }
 
 .productPrice {
@@ -123,6 +144,37 @@
   flex-shrink: 0;
   margin-bottom: 2px;
   white-space: nowrap;
+}
+
+/* Desktop nav arrows on card image — visible on card hover */
+.imgArrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 4;
+  width: 2rem;
+  height: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  font-size: 1.4rem;
+  line-height: 1;
+  background: rgba(169, 52, 42, 0.65);
+  color: #F29774;
+  border: none;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.productCard:hover .imgArrow {
+  opacity: 1;
+}
+
+.imgArrow:hover {
+  background: rgba(169, 52, 42, 0.9);
 }
 
 /* Mobile */

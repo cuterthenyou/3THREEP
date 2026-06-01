@@ -112,9 +112,12 @@ function ProductCard({
   const [currentImg, setCurrentImg] = useState(0)
   const [btnText, setBtnText] = useState('Посмотреть')
   const [btnFade, setBtnFade] = useState(false)
+  const [glitching, setGlitching] = useState(false)
+  const touchStartX = React.useRef<number | null>(null)
 
   const TEXTS = ['Посмотреть', 'чекнуть', 'чё, по чём?', 'скок стоит?', 'сколько денег?', 'чё по цене?']
 
+  // Button text rotation
   useEffect(() => {
     let cur = 'Посмотреть'
     const offset = index * 500
@@ -129,15 +132,36 @@ function ProductCard({
       }, 200)
     }, 2000 + offset)
     return () => clearInterval(id)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [index])
 
+  // Staggered auto-slide — random start offset 0–4000ms
   useEffect(() => {
     if (product.images.length <= 1) return
-    const id = setInterval(() => {
-      setCurrentImg((i) => (i + 1) % product.images.length)
-    }, 3000)
-    return () => clearInterval(id)
+    let id: ReturnType<typeof setInterval>
+    const startId = setTimeout(() => {
+      id = setInterval(() => {
+        setCurrentImg((i) => (i + 1) % product.images.length)
+      }, 3000)
+    }, Math.random() * 4000)
+    return () => { clearTimeout(startId); clearInterval(id) }
   }, [product.images.length])
+
+  function prevImg(e: React.MouseEvent | React.TouchEvent) {
+    e.stopPropagation()
+    setCurrentImg(i => (i - 1 + product.images.length) % product.images.length)
+  }
+
+  function nextImg(e: React.MouseEvent | React.TouchEvent) {
+    e.stopPropagation()
+    setCurrentImg(i => (i + 1) % product.images.length)
+  }
+
+  function triggerGlitch() {
+    if (glitching) return
+    setGlitching(true)
+    setTimeout(() => setGlitching(false), 420)
+  }
 
   const col = index % 3
   const row = Math.floor(index / 3)
@@ -151,10 +175,21 @@ function ProductCard({
       className={`flex flex-col w-full ${s.productCard}`}
       style={{ background: `url(${texture}) center/cover, #F29774` }}
       onClick={() => onOpen(product)}
+      onMouseEnter={triggerGlitch}
     >
       {/* Image carousel */}
       <div
         className={`w-full relative overflow-hidden ${s.productImgWrap}`}
+        onTouchStart={e => { touchStartX.current = e.changedTouches[0].clientX }}
+        onTouchEnd={e => {
+          if (touchStartX.current === null || product.images.length <= 1) return
+          const dx = e.changedTouches[0].clientX - touchStartX.current
+          if (Math.abs(dx) > 30) {
+            e.stopPropagation()
+            dx < 0 ? nextImg(e) : prevImg(e)
+          }
+          touchStartX.current = null
+        }}
       >
         {product.images.map((img, i) => (
           <Image
@@ -165,28 +200,36 @@ function ProductCard({
             className="object-cover select-none"
             draggable={false}
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-            style={{
-              opacity: i === currentImg ? 1 : 0,
-              transition: 'opacity 0.6s cubic-bezier(0.4,0,0.2,1)',
-              position: 'absolute',
-              top: 0,
-              left: 0,
-            }}
+            style={{ opacity: i === currentImg ? 1 : 0, transition: 'opacity 0.6s cubic-bezier(0.4,0,0.2,1)', position: 'absolute', top: 0, left: 0 }}
           />
         ))}
+
+        {/* VHS glitch layer */}
+        {glitching && (
+          <div
+            style={{
+              position: 'absolute', inset: 0, zIndex: 3, pointerEvents: 'none',
+              backgroundImage: `url(${product.images[currentImg]})`,
+              backgroundSize: 'cover', backgroundPosition: 'center',
+              animation: 'vhs-glitch 0.42s steps(1) forwards',
+            }}
+          />
+        )}
+
+        {/* Desktop arrow buttons — shown on card hover via CSS */}
+        {product.images.length > 1 && (
+          <>
+            <button className={s.imgArrow} style={{ left: 8 }} onClick={prevImg} aria-label="Предыдущее фото">‹</button>
+            <button className={s.imgArrow} style={{ right: 8 }} onClick={nextImg} aria-label="Следующее фото">›</button>
+          </>
+        )}
+
         {/* Dot indicators */}
         {product.images.length > 1 && (
-          <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-1.5">
+          <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-1.5" style={{ zIndex: 4 }}>
             {product.images.map((_, i) => (
-              <span
-                key={i}
-                className="rounded-full transition-all"
-                style={{
-                  width: i === currentImg ? '16px' : '6px',
-                  height: '6px',
-                  background: i === currentImg ? '#A9342A' : 'rgba(169,52,42,0.3)',
-                }}
-              />
+              <span key={i} className="rounded-full transition-all"
+                style={{ width: i === currentImg ? '16px' : '6px', height: '6px', background: i === currentImg ? '#A9342A' : 'rgba(169,52,42,0.3)' }} />
             ))}
           </div>
         )}
@@ -194,19 +237,10 @@ function ProductCard({
 
       {/* Info */}
       <div className={s.productInfo}>
-        {/* Category */}
-        <p className={s.productType}>
-          {product.product_type || 'T-SHIRT'}
-        </p>
-
-        {/* Name + Price row */}
+        <p className={s.productType}>{product.product_type || 'T-SHIRT'}</p>
         <div className="flex items-end justify-between gap-2">
-          <h3 className={s.productName}>
-            {product.name}
-          </h3>
-          <span className={s.productPrice}>
-            {Number(product.price).toLocaleString('ru-RU')}
-          </span>
+          <h3 className={s.productName}>{product.name}</h3>
+          <span className={s.productPrice}>{Number(product.price).toLocaleString('ru-RU')}</span>
         </div>
       </div>
     </div>

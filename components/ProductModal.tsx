@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Image from 'next/image'
 import type { Product } from '@/lib/types'
 import { useCart } from '@/lib/cart'
@@ -23,10 +23,7 @@ function AddToCartButton({ product, size, onClose }: { product: Product; size: s
   }
 
   return (
-    <button
-      onClick={handleAdd}
-      className={`${s.addBtn} ${added ? s.addBtnAdded : s.addBtnDefault}`}
-    >
+    <button onClick={handleAdd} className={`${s.addBtn} ${added ? s.addBtnAdded : s.addBtnDefault}`}>
       {added ? '✓ Добавлено' : 'В корзину'}
     </button>
   )
@@ -38,13 +35,33 @@ export default function ProductModal({ product, visible, onClose }: Props) {
   const [touchStart, setTouchStart] = useState<{ x: number; y: number } | null>(null)
   const [touchDelta, setTouchDelta] = useState(0)
   const [slideOut, setSlideOut] = useState(false)
+  const [isTouch, setIsTouch] = useState(false)
+  const historyPushed = useRef(false)
+
+  useEffect(() => {
+    setIsTouch(window.matchMedia('(pointer: coarse)').matches)
+  }, [])
 
   function closeWithAnimation() {
-    setSlideOut(true)
-    setTimeout(() => {
-      setSlideOut(false)
-      onClose()
-    }, 280)
+    if (isTouch) {
+      setSlideOut(true)
+      setTimeout(() => {
+        setSlideOut(false)
+        if (historyPushed.current) {
+          historyPushed.current = false
+          history.back()
+        } else {
+          onClose()
+        }
+      }, 280)
+    } else {
+      if (historyPushed.current) {
+        historyPushed.current = false
+        history.back()
+      } else {
+        onClose()
+      }
+    }
   }
 
   useEffect(() => {
@@ -58,10 +75,14 @@ export default function ProductModal({ product, visible, onClose }: Props) {
     if (!visible) return
 
     history.pushState({ modal: product?.id }, '')
+    historyPushed.current = true
 
-    const onPopState = () => { onClose() }
+    const onPopState = () => {
+      historyPushed.current = false
+      onClose()
+    }
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') { history.back(); }
+      if (e.key === 'Escape') closeWithAnimation()
       if (!product) return
       if (e.key === 'ArrowLeft') setActiveImg((i) => Math.max(0, i - 1))
       if (e.key === 'ArrowRight') setActiveImg((i) => Math.min(product.images.length - 1, i + 1))
@@ -73,6 +94,7 @@ export default function ProductModal({ product, visible, onClose }: Props) {
       window.removeEventListener('keydown', onKey)
       window.removeEventListener('popstate', onPopState)
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [visible, product, onClose])
 
   if (!product) return null
@@ -85,10 +107,7 @@ export default function ProductModal({ product, visible, onClose }: Props) {
       setTouchDelta(0)
     },
     onTouchMove: (e: React.TouchEvent) => {
-      if (touchStart !== null) {
-        const dx = e.changedTouches[0].clientX - touchStart.x
-        setTouchDelta(dx)
-      }
+      if (touchStart !== null) setTouchDelta(e.changedTouches[0].clientX - touchStart.x)
     },
     onTouchEnd: () => {
       if (Math.abs(touchDelta) > 50) {
@@ -99,7 +118,7 @@ export default function ProductModal({ product, visible, onClose }: Props) {
     },
   }
 
-  const modalTouchHandlers = {
+  const modalTouchHandlers = isTouch ? {
     onTouchStart: (e: React.TouchEvent) => {
       setTouchStart({ x: e.changedTouches[0].clientX, y: e.changedTouches[0].clientY })
     },
@@ -107,10 +126,7 @@ export default function ProductModal({ product, visible, onClose }: Props) {
       if (touchStart !== null) {
         const dx = e.changedTouches[0].clientX - touchStart.x
         const dy = Math.abs(e.changedTouches[0].clientY - touchStart.y)
-        if (dx > 0 && dx > dy) {
-          e.preventDefault()
-          setTouchDelta(dx)
-        }
+        if (dx > 0 && dx > dy) { e.preventDefault(); setTouchDelta(dx) }
       }
     },
     onTouchEnd: () => {
@@ -121,16 +137,12 @@ export default function ProductModal({ product, visible, onClose }: Props) {
       }
       setTouchStart(null); setTouchDelta(0)
     },
-  }
+  } : {}
 
   return (
     <div
       className={`fixed inset-0 z-50 ${s.backdrop}`}
-      style={{
-        opacity: visible ? 1 : 0,
-        transition: 'opacity 0.3s ease',
-        pointerEvents: visible ? 'auto' : 'none',
-      }}
+      style={{ opacity: visible ? 1 : 0, transition: 'opacity 0.3s ease', pointerEvents: visible ? 'auto' : 'none' }}
       onClick={(e) => e.target === e.currentTarget && closeWithAnimation()}
       {...modalTouchHandlers}
     >
@@ -148,9 +160,9 @@ export default function ProductModal({ product, visible, onClose }: Props) {
         <div
           className="w-full max-w-6xl mx-auto px-6 py-20 sm:py-16"
           style={{
-            transform: slideOut ? 'translateX(100%)' : visible ? 'translateY(0)' : 'translateY(30px)',
+            transform: (isTouch && slideOut) ? 'translateX(100%)' : visible ? 'translateY(0)' : 'translateY(30px)',
             opacity: visible ? 1 : 0,
-            transition: slideOut ? 'transform 0.28s ease-in' : 'transform 0.3s ease, opacity 0.3s ease',
+            transition: (isTouch && slideOut) ? 'transform 0.28s ease-in' : 'transform 0.3s ease, opacity 0.3s ease',
           }}
         >
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-start">
@@ -162,24 +174,11 @@ export default function ProductModal({ product, visible, onClose }: Props) {
                 style={{ aspectRatio: '1/1', position: 'relative', background: '#000' }}
                 {...touchHandlers}
               >
-                <Image
-                  src={product.images[activeImg] || product.images[0]}
-                  alt={product.name}
-                  fill
-                  className="object-cover select-none"
-                  draggable={false}
-                  sizes="(max-width: 768px) 100vw, 50vw"
-                />
+                <Image src={product.images[activeImg] || product.images[0]} alt={product.name} fill className="object-cover select-none" draggable={false} sizes="(max-width: 768px) 100vw, 50vw" />
                 {product.images.length > 1 && (
                   <>
-                    <button
-                      className={`absolute left-3 top-1/2 -translate-y-1/2 flex items-center justify-center w-8 h-8 rounded text-xl ${s.arrowBtn}`}
-                      onClick={() => setActiveImg((i) => Math.max(0, i - 1))}
-                    >‹</button>
-                    <button
-                      className={`absolute right-3 top-1/2 -translate-y-1/2 flex items-center justify-center w-8 h-8 rounded text-xl ${s.arrowBtn}`}
-                      onClick={() => setActiveImg((i) => Math.min(product.images.length - 1, i + 1))}
-                    >›</button>
+                    <button className={`absolute left-3 top-1/2 -translate-y-1/2 flex items-center justify-center w-8 h-8 rounded text-xl ${s.arrowBtn}`} onClick={() => setActiveImg((i) => Math.max(0, i - 1))}>‹</button>
+                    <button className={`absolute right-3 top-1/2 -translate-y-1/2 flex items-center justify-center w-8 h-8 rounded text-xl ${s.arrowBtn}`} onClick={() => setActiveImg((i) => Math.min(product.images.length - 1, i + 1))}>›</button>
                   </>
                 )}
               </div>
@@ -187,15 +186,7 @@ export default function ProductModal({ product, visible, onClose }: Props) {
               {product.images.length > 1 && (
                 <div className="grid grid-cols-5 gap-2">
                   {product.images.map((img, i) => (
-                    <button
-                      key={i}
-                      onClick={() => setActiveImg(i)}
-                      className={s.thumbBtn}
-                      style={{
-                        outline: i === activeImg ? '2px solid #F29774' : '2px solid transparent',
-                        outlineOffset: '-2px',
-                      }}
-                    >
+                    <button key={i} onClick={() => setActiveImg(i)} className={s.thumbBtn} style={{ outline: i === activeImg ? '2px solid #F29774' : '2px solid transparent', outlineOffset: '-2px' }}>
                       <Image src={img} alt={product.name} fill className="object-cover" sizes="80px" />
                     </button>
                   ))}
@@ -209,47 +200,25 @@ export default function ProductModal({ product, visible, onClose }: Props) {
                 <Image src="/images/aqua+.png" alt="AQUA+" width={0} height={0} sizes="15vw" className="h-10 w-auto" />
               </div>
 
-              <p
-                className={`uppercase tracking-widest text-xs ${s.category}`}
-              >
+              <p className={`uppercase tracking-widest text-xs ${s.category}`}>
                 {product.category?.toUpperCase() || 'T-SHIRT'}
               </p>
 
               <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-2">
-                <h2
-                  className={`text-xl sm:text-2xl lg:text-3xl ${s.name}`}
-                >
-                  {product.name}
-                </h2>
-                <p
-                  className={`text-lg sm:text-xl ${s.price}`}
-                >
-                  {product.price.toLocaleString('ru-RU')} ₽
-                </p>
+                <h2 className={`text-xl sm:text-2xl lg:text-3xl ${s.name}`}>{product.name}</h2>
+                <p className={`text-lg sm:text-xl ${s.price}`}>{product.price.toLocaleString('ru-RU')} ₽</p>
               </div>
 
-              <p
-                className={`text-sm ${s.description}`}
-              >
-                {product.description}
-              </p>
+              <p className={`text-sm ${s.description}`}>{product.description}</p>
 
               <div className="flex items-center justify-between gap-4">
                 <div className="flex flex-col gap-1">
-                  <p className={`text-sm ${s.detail}`}>
-                    <span style={{ opacity: 0.7 }}>Состав:</span> хлопок 100%
-                  </p>
-                  <p className={`text-sm ${s.detail}`}>
-                    <span style={{ opacity: 0.7 }}>Посадка:</span> oversize
-                  </p>
+                  <p className={`text-sm ${s.detail}`}><span style={{ opacity: 0.7 }}>Состав:</span> хлопок 100%</p>
+                  <p className={`text-sm ${s.detail}`}><span style={{ opacity: 0.7 }}>Посадка:</span> oversize</p>
                 </div>
                 <div className="flex gap-2 flex-wrap justify-end">
                   {sizes.map((size) => (
-                    <button
-                      key={size}
-                      className={`${s.sizeBtn} ${selectedSize === size ? s.sizeBtnActive : ''}`}
-                      onClick={() => setSelectedSize(size)}
-                    >
+                    <button key={size} className={`${s.sizeBtn} ${selectedSize === size ? s.sizeBtnActive : ''}`} onClick={() => setSelectedSize(size)}>
                       {size}
                     </button>
                   ))}

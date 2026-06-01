@@ -29,6 +29,14 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="ru" className={unbounded.variable}>
+      {/* Inline theme init — runs before paint to prevent FOUC */}
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var t=localStorage.getItem('threep-theme')||(matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light');document.documentElement.dataset.theme=t;}catch(e){}})();`,
+          }}
+        />
+      </head>
       <body className="overflow-x-hidden">
         {/* Hidden SVG filter for grain/noise effects */}
         <svg

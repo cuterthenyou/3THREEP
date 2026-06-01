@@ -1,5 +1,6 @@
 import Header from '@/components/Header';
 import Hero from '@/components/Hero';
+import HeroTransition from '@/components/HeroTransition';
 import CatalogSection from '@/components/CatalogSection';
 import Footer from '@/components/Footer';
 import { queryMany } from '@/lib/db';
@@ -62,6 +63,7 @@ export default async function HomePage() {
     <main className="min-h-screen">
       <Header isAdminUser={isAdminUser} />
       <Hero />
+      <HeroTransition />
       <CatalogSection products={products} categories={categories} categoryData={categoryData} />
       <Footer />
     </main>

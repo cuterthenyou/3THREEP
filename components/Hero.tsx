@@ -19,6 +19,8 @@ export default function Hero() {
 
   return (
     <section className={`${s.hero} w-full relative`}>
+      {/* Transparent shield — blocks long-press context menu on mobile */}
+      <div className={s.videoShield} aria-hidden="true" />
       <video
         ref={videoRef}
         className={s.video}
@@ -26,6 +28,9 @@ export default function Hero() {
         muted
         loop
         playsInline
+        controlsList="nodownload nofullscreen noremoteplayback"
+        disablePictureInPicture
+        onContextMenu={e => e.preventDefault()}
         onMouseDown={handlePause}
         onMouseUp={handleResume}
         onMouseLeave={handleResume}

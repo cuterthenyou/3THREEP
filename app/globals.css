@@ -24,15 +24,44 @@
 }
 
 :root {
+  /* ── Legacy color vars (keep for compatibility) ── */
   --color-primary: #a9342a;
   --color-accent: #f29774;
   --color-bg: #000000;
   --color-bg-dark: #1a0808;
+
+  /* ── Font families ── */
   --font-onder: 'ONDER', sans-serif;
   --font-involve: 'Involve', sans-serif;
   --font-deutsch: 'DeutschGothic', sans-serif;
-  /* Кириллический заголовочный шрифт (загружается через next/font) */
   --font-heading: var(--font-heading, 'Unbounded', 'ONDER', sans-serif);
+
+  /* ── Fluid typography (Stage 03) ── */
+  --fs-h1: clamp(1.6rem, 5vw, 3.5rem);
+  --fs-h2: clamp(1.3rem, 4vw, 2.5rem);
+  --fs-h3: clamp(1.1rem, 3vw, 1.8rem);
+  --fs-h4: clamp(1rem, 2.5vw, 1.4rem);
+
+  /* ── Theme tokens: light (default) ── */
+  --bg:         #f5f3ef;
+  --bg-2:       #ffffff;
+  --bg-card:    #ffffff;
+  --text:       #1a0808;
+  --text-muted: #6b4f4f;
+  --accent:     #a9342a;
+  --accent-2:   #f29774;
+  --border:     rgba(169, 52, 42, 0.2);
+}
+
+[data-theme="dark"] {
+  --bg:         #0d0505;
+  --bg-2:       #1a0808;
+  --bg-card:    #1a0808;
+  --text:       #f29774;
+  --text-muted: rgba(242, 151, 116, 0.55);
+  --accent:     #f29774;
+  --accent-2:   rgba(242, 151, 116, 0.3);
+  --border:     rgba(242, 151, 116, 0.2);
 }
 
 /* Grain/shagreen overlay utility */
@@ -58,12 +87,13 @@
 
 html,
 body {
-  background-color: #a9342a;
-  color: #f29774;
+  background-color: var(--bg);
+  color: var(--text);
   margin: 0;
   padding: 0;
   overflow-x: hidden;
   scroll-behavior: smooth;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 h1,
@@ -73,6 +103,19 @@ h4,
 h5,
 h6 {
   font-family: 'ONDER', sans-serif;
+}
+
+h1 { font-size: var(--fs-h1); }
+h2 { font-size: var(--fs-h2); }
+h3 { font-size: var(--fs-h3); }
+h4 { font-size: var(--fs-h4); }
+
+/* Utility: safe heading container — no overflow on narrow screens */
+.heading-safe {
+  overflow-wrap: break-word;
+  word-break: break-word;
+  hyphens: auto;
+  max-width: 100%;
 }
 
 * {
@@ -112,6 +155,17 @@ h6 {
 @keyframes shimmer {
   0%   { background-position: -200% center; }
   100% { background-position:  200% center; }
+}
+
+/* ─── VHS Glitch (Stage 07) ─── */
+
+@keyframes vhs-glitch {
+  0%   { clip-path: inset(20% 0 60% 0); transform: translate(-4px, 0); filter: hue-rotate(90deg) brightness(1.2); }
+  20%  { clip-path: inset(60% 0 10% 0); transform: translate(4px, 0);  filter: hue-rotate(200deg); }
+  40%  { clip-path: inset(40% 0 40% 0); transform: translate(-2px, 0); filter: hue-rotate(0deg); }
+  60%  { clip-path: inset(10% 0 70% 0); transform: translate(3px, 0);  filter: hue-rotate(150deg) brightness(1.15); }
+  80%  { clip-path: inset(70% 0 5% 0);  transform: translate(-3px, 0); filter: hue-rotate(60deg); }
+  100% { clip-path: inset(0); transform: translate(0); filter: none; }
 }
 
 /* ─── Pixel Decay ─── */

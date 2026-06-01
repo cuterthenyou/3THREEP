@@ -1,44 +1,54 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import Link from 'next/link';
 import { useCart } from '@/lib/cart';
+import { toggleTheme } from '@/lib/theme';
+import { IconSun, IconMoon } from '@tabler/icons-react';
 import s from './Header.module.css';
 
 interface Props {
   isAdminUser?: boolean;
 }
 
-const NAV_LINKS = [
-  { href: '/', label: 'Главная' },
-  { href: '/#catalog', label: 'Каталог' },
-  { href: '/account', label: 'Аккаунт' },
-];
-
 const ADMIN_LINKS = [
+  { href: '/admin', label: 'Дашборд' },
   { href: '/admin/orders', label: 'Заказы' },
   { href: '/admin/products', label: 'Товары' },
-  { href: '/admin/collections', label: 'Коллекции' },
   { href: '/admin/media', label: 'Медиа' },
 ];
+
+interface Collection { slug: string; name: string }
 
 export default function Header({ isAdminUser = false }: Props) {
   const headerRef = useRef<HTMLElement>(null);
   const { count, setOpen } = useCart();
-  const [adminOpen, setAdminOpen] = useState(false);
-  const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const adminRef = useRef<HTMLDivElement>(null);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [expanded, setExpanded] = useState<string | null>(null);
+  const [collections, setCollections] = useState<Collection[]>([]);
+  const [isDark, setIsDark] = useState(false);
+  const collectionsLoaded = useRef(false);
 
+  // Sync theme icon with current theme
+  useEffect(() => {
+    setIsDark(document.documentElement.dataset.theme === 'dark');
+    const obs = new MutationObserver(() => {
+      setIsDark(document.documentElement.dataset.theme === 'dark');
+    });
+    obs.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+    return () => obs.disconnect();
+  }, []);
+
+  // Sticky + backdrop-filter on scroll
   useEffect(() => {
     const header = headerRef.current;
     const footer = document.querySelector('footer');
     if (!header || !footer) return;
+    header.style.transition = 'transform 0.3s ease, backdrop-filter 0.3s ease';
 
-    const handleScroll = () => {
-      const footerRect = footer.getBoundingClientRect();
-      const footerVisible = footerRect.top < window.innerHeight && footerRect.bottom > 0;
-
+    const onScroll = () => {
+      const footerVisible = footer.getBoundingClientRect().top < window.innerHeight;
       if (footerVisible) {
         header.style.transform = 'translateY(-100%)';
       } else {
@@ -46,31 +56,39 @@ export default function Header({ isAdminUser = false }: Props) {
         setScrolled(window.scrollY > 50);
       }
     };
-
-    header.style.transition = 'transform 0.3s ease-in-out, background-color 0.3s ease-in-out, backdrop-filter 0.3s ease-in-out';
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
+  // Lock body scroll when menu open
   useEffect(() => {
-    if (!adminOpen) return;
-    const handleClickOutside = (e: MouseEvent) => {
-      if (adminRef.current && !adminRef.current.contains(e.target as Node)) {
-        setAdminOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [adminOpen]);
-
-  useEffect(() => {
-    if (menuOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = '';
-    }
+    document.body.style.overflow = menuOpen ? 'hidden' : '';
     return () => { document.body.style.overflow = ''; };
   }, [menuOpen]);
+
+  // Close on Escape
+  useEffect(() => {
+    if (!menuOpen) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setMenuOpen(false); };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [menuOpen]);
+
+  // Load collections lazily on first open
+  const openMenu = useCallback(() => {
+    setMenuOpen(true);
+    if (!collectionsLoaded.current) {
+      collectionsLoaded.current = true;
+      fetch('/api/collections')
+        .then(r => r.ok ? r.json() : { collections: [] })
+        .then(d => setCollections(d.collections ?? []))
+        .catch(() => {});
+    }
+  }, []);
+
+  function toggle(section: string) {
+    setExpanded(v => v === section ? null : section);
+  }
 
   return (
     <>
@@ -87,52 +105,20 @@ export default function Header({ isAdminUser = false }: Props) {
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/images/logo-61.svg" alt="THREEP Logo" className="h-8 sm:h-12 w-auto" />
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src="/images/logo-text-63.svg"
-            alt="THREEP"
-            className="h-4 sm:h-8 w-auto absolute left-1/2 -translate-x-1/2"
-          />
+          <img src="/images/logo-text-63.svg" alt="THREEP" className="h-4 sm:h-8 w-auto absolute left-1/2 -translate-x-1/2" />
 
           <div className="flex items-center gap-3">
-            {isAdminUser && (
-              <div ref={adminRef} className="relative hidden sm:block">
-                <button
-                  onClick={() => setAdminOpen((v) => !v)}
-                  className={`flex items-center justify-center w-9 h-9 rounded-lg transition-opacity hover:opacity-80 ${s.navBtn}`}
-                  aria-label="Панель администратора"
-                  title="Панель администратора"
-                >
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <circle cx="12" cy="12" r="3" />
-                    <path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14" />
-                    <path d="M12 2v2M12 20v2M2 12h2M20 12h2" />
-                  </svg>
-                </button>
-                {adminOpen && (
-                  <div
-                    className="absolute right-0 top-full mt-2 w-44 rounded-xl overflow-hidden"
-                    style={{ background: '#1a0808', border: '1px solid rgba(242,151,116,0.2)', boxShadow: '0 8px 32px rgba(0,0,0,0.6)' }}
-                  >
-                    <div className="px-3 py-2 text-xs uppercase tracking-widest" style={{ color: '#F29774', opacity: 0.4, fontFamily: "'ONDER', sans-serif", borderBottom: '1px solid rgba(242,151,116,0.1)' }}>
-                      Admin
-                    </div>
-                    {ADMIN_LINKS.map(({ href, label }) => (
-                      <Link key={href} href={href} onClick={() => setAdminOpen(false)} className="block px-4 py-2.5 text-sm transition-colors hover:bg-[rgba(242,151,116,0.08)]" style={{ color: '#F29774', fontFamily: "'Involve', sans-serif", textDecoration: 'none' }}>
-                        {label}
-                      </Link>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
+            {/* Theme toggle */}
+            <button
+              onClick={toggleTheme}
+              className={`flex items-center justify-center w-9 h-9 rounded-lg ${s.navBtn}`}
+              aria-label={isDark ? 'Включить светлую тему' : 'Включить тёмную тему'}
+              title={isDark ? 'Светлая тема' : 'Тёмная тема'}
+            >
+              {isDark ? <IconSun size={16} /> : <IconMoon size={16} />}
+            </button>
 
-            <Link href="/account" className={`hidden sm:flex items-center justify-center w-9 h-9 rounded-lg transition-opacity hover:opacity-80 ${s.navBtn}`} aria-label="Личный кабинет">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                <circle cx="12" cy="7" r="4" />
-              </svg>
-            </Link>
-
+            {/* Cart icon — always visible */}
             <button onClick={() => setOpen(true)} className={`relative flex items-center justify-center w-9 h-9 rounded-lg transition-opacity hover:opacity-80 ${s.navBtn}`} aria-label="Корзина">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
@@ -140,16 +126,14 @@ export default function Header({ isAdminUser = false }: Props) {
                 <path d="M16 10a4 4 0 0 1-8 0" />
               </svg>
               {count > 0 && (
-                <span className={`absolute -top-1 -right-1 w-4 h-4 flex items-center justify-center rounded-full ${s.cartBadge}`}>
-                  {count}
-                </span>
+                <span className={`absolute -top-1 -right-1 w-4 h-4 flex items-center justify-center rounded-full ${s.cartBadge}`}>{count}</span>
               )}
             </button>
 
-            {/* Burger button — mobile only */}
+            {/* Burger — all breakpoints */}
             <button
-              onClick={() => setMenuOpen((v) => !v)}
-              className={`flex sm:hidden flex-col items-center justify-center w-9 h-9 rounded-lg gap-1.5 ${s.navBtn} ${s.burger}`}
+              onClick={menuOpen ? () => setMenuOpen(false) : openMenu}
+              className={`flex flex-col items-center justify-center w-9 h-9 rounded-lg gap-1.5 ${s.navBtn}`}
               aria-label={menuOpen ? 'Закрыть меню' : 'Открыть меню'}
             >
               <span className={`${s.burgerLine} ${menuOpen ? s.burgerLine1Open : ''}`} />
@@ -160,40 +144,67 @@ export default function Header({ isAdminUser = false }: Props) {
         </div>
       </header>
 
-      {/* Fullscreen mobile overlay */}
+      {/* Fullscreen overlay */}
       <div
-        className={s.mobileOverlay}
+        className={s.overlay}
         style={{
           opacity: menuOpen ? 1 : 0,
           pointerEvents: menuOpen ? 'auto' : 'none',
           clipPath: menuOpen ? 'inset(0 0 0 0)' : 'inset(0 0 100% 0)',
         }}
+        onClick={(e) => e.target === e.currentTarget && setMenuOpen(false)}
       >
-        <nav className={s.mobileNav}>
-          {NAV_LINKS.map(({ href, label }, i) => (
-            <Link
-              key={href}
-              href={href}
-              onClick={() => setMenuOpen(false)}
-              className={s.mobileNavLink}
-              style={{ animationDelay: menuOpen ? `${i * 0.07}s` : '0s' }}
-            >
-              {label}
-            </Link>
-          ))}
+        <nav className={s.nav}>
+
+          {/* Главная */}
+          <Link href="/" onClick={() => setMenuOpen(false)} className={s.navLink}>Главная</Link>
+
+          {/* Коллекции — accordion */}
+          <div className={s.accordion}>
+            <button className={s.navLink} onClick={() => toggle('collections')}>
+              Коллекции <span className={`${s.arrow} ${expanded === 'collections' ? s.arrowOpen : ''}`}>▸</span>
+            </button>
+            <div className={`${s.sub} ${expanded === 'collections' ? s.subOpen : ''}`}>
+              {collections.length === 0
+                ? <Link href="/#catalog" onClick={() => setMenuOpen(false)} className={s.subLink}>Все коллекции</Link>
+                : collections.map(c => (
+                    <Link key={c.slug} href={`/?collection=${c.slug}`} onClick={() => setMenuOpen(false)} className={s.subLink}>{c.name}</Link>
+                  ))
+              }
+            </div>
+          </div>
+
+          {/* Каталог */}
+          <Link href="/#catalog" onClick={() => setMenuOpen(false)} className={s.navLink}>Каталог</Link>
+
+          {/* О доставке */}
+          <Link href="/delivery" onClick={() => setMenuOpen(false)} className={s.navLink}>О доставке и оплате</Link>
+
+          {/* Контакты */}
+          <Link href="/contacts" onClick={() => setMenuOpen(false)} className={s.navLink}>Контакты</Link>
+
+          {/* Личный кабинет */}
+          <Link href="/account" onClick={() => setMenuOpen(false)} className={s.navLink}>Личный кабинет</Link>
+
+          {/* Admin accordion */}
           {isAdminUser && (
-            <>
-              <div className={s.mobileNavDivider}>Admin</div>
-              {ADMIN_LINKS.map(({ href, label }, i) => (
-                <Link key={href} href={href} onClick={() => setMenuOpen(false)} className={s.mobileNavLink} style={{ animationDelay: menuOpen ? `${(NAV_LINKS.length + i) * 0.07}s` : '0s', fontSize: '1rem' }}>
-                  {label}
-                </Link>
-              ))}
-            </>
+            <div className={s.accordion}>
+              <div className={s.adminDivider}>Admin</div>
+              <button className={`${s.navLink} ${s.navLinkSmall}`} onClick={() => toggle('admin')}>
+                Панель управления <span className={`${s.arrow} ${expanded === 'admin' ? s.arrowOpen : ''}`}>▸</span>
+              </button>
+              <div className={`${s.sub} ${expanded === 'admin' ? s.subOpen : ''}`}>
+                {ADMIN_LINKS.map(({ href, label }) => (
+                  <Link key={href} href={href} onClick={() => setMenuOpen(false)} className={s.subLink}>{label}</Link>
+                ))}
+              </div>
+            </div>
           )}
         </nav>
-        <div className={s.mobileOverlayFooter}>
-          <Link href="/privacy" onClick={() => setMenuOpen(false)} className={s.mobileOverlaySmall}>Политика конфиденциальности</Link>
+
+        {/* Footer links */}
+        <div className={s.overlayFooter}>
+          <Link href="/privacy" onClick={() => setMenuOpen(false)} className={s.footerLink}>Политика конфиденциальности</Link>
         </div>
       </div>
     </>
