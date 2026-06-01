@@ -154,8 +154,8 @@ export default function MediaClient() {
     })
   }
 
-  const accent = '#F29774'
-  const accentDim = 'rgba(242,151,116,0.08)'
+  const accent = 'var(--accent)'
+  const accentDim = 'var(--bg-subtle)'
 
   return (
     <div className="p-6 max-w-7xl mx-auto">
@@ -164,7 +164,7 @@ export default function MediaClient() {
           Медиабиблиотека
         </h1>
         <button onClick={load} className="text-xs uppercase tracking-widest px-4 py-2 rounded"
-          style={{ background: accentDim, color: accent, border: '1px solid rgba(242,151,116,0.3)', fontFamily: "'ONDER', sans-serif" }}>
+          style={{ background: accentDim, color: accent, border: '1px solid var(--border)', fontFamily: "'ONDER', sans-serif" }}>
           Обновить
         </button>
       </div>
@@ -180,7 +180,7 @@ export default function MediaClient() {
       <div className="flex flex-wrap gap-2 mb-4">
         {(['all', ...KNOWN_BUCKETS] as string[]).concat(otherBuckets.length ? ['other'] : []).map((b) => (
           <button key={b} onClick={() => setBucket(b)} className="px-4 py-1.5 rounded uppercase tracking-widest"
-            style={{ fontFamily: "'ONDER', sans-serif", fontSize: '0.65rem', background: bucket === b ? accent : accentDim, color: bucket === b ? '#A9342A' : accent, border: '1px solid rgba(242,151,116,0.3)' }}>
+            style={{ fontFamily: "'ONDER', sans-serif", fontSize: '0.65rem', background: bucket === b ? accent : accentDim, color: bucket === b ? 'var(--bg)' : accent, border: '1px solid var(--border)' }}>
             {b === 'all' ? 'Все' : b === 'other' ? 'Другое' : b}
           </button>
         ))}
@@ -192,7 +192,7 @@ export default function MediaClient() {
       {/* Mass action panel */}
       {selected.size > 0 && (
         <div className="flex items-center gap-3 mb-4 px-4 py-3 rounded-xl"
-          style={{ background: 'rgba(242,151,116,0.12)', border: '1px solid rgba(242,151,116,0.3)' }}>
+          style={{ background: 'rgba(242,151,116,0.12)', border: '1px solid var(--border)' }}>
           <span style={{ color: accent, fontFamily: "'Involve', sans-serif", fontSize: '0.8rem' }}>
             Выбрано: {selected.size}
           </span>
@@ -264,7 +264,7 @@ export default function MediaClient() {
                   )}
 
                   <span className="absolute top-1.5 right-1.5 px-1.5 py-0.5 rounded text-xs uppercase"
-                    style={{ background: '#A9342A', color: accent, fontFamily: "'ONDER', sans-serif", fontSize: '0.55rem' }}>
+                    style={{ background: 'var(--bg)', color: accent, fontFamily: "'ONDER', sans-serif", fontSize: '0.55rem' }}>
                     {file.bucket}
                   </span>
                 </div>

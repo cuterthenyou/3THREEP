@@ -109,15 +109,15 @@ export default function Header({ isAdminUser = false }: Props) {
           <img src="/images/logo-text-63.svg" alt="THREEP" className="theme-img hidden sm:block h-8 w-auto absolute left-1/2 -translate-x-1/2" />
 
           {/* Icons — on mobile spread evenly across a fixed width, on desktop tight gap */}
-          <div className="flex items-center justify-between w-32 sm:w-auto sm:gap-3">
-            {/* Theme toggle */}
+          <div className="flex items-center justify-between gap-2 sm:gap-3">
+            {/* Theme toggle — pill badge */}
             <button
               onClick={toggleTheme}
-              className={`flex items-center justify-center w-9 h-9 rounded-lg ${s.navBtn}`}
+              className={s.themeBadge}
               aria-label={isDark ? 'Включить светлую тему' : 'Включить тёмную тему'}
-              title={isDark ? 'Светлая тема' : 'Тёмная тема'}
             >
-              {isDark ? <IconSun size={16} /> : <IconMoon2 size={16} />}
+              {isDark ? <IconSun size={12} /> : <IconMoon2 size={12} />}
+              <span>{isDark ? 'Light' : 'Dark'}</span>
             </button>
 
             {/* Cart icon — always visible */}

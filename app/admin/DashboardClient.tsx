@@ -34,8 +34,8 @@ const PERIODS: { value: Period; label: string }[] = [
   { value: 'all', label: 'Всё время' },
 ]
 
-const accent = '#F29774'
-const accentDim = 'rgba(242,151,116,0.15)'
+const accent = 'var(--accent)'
+const accentDim = 'var(--accent-2)'
 
 export default function DashboardClient() {
   const [period, setPeriod] = useState<Period>('30d')
@@ -79,8 +79,8 @@ export default function DashboardClient() {
                 fontSize: '0.72rem',
                 padding: '0.3rem 0.75rem',
                 borderRadius: '6px',
-                border: `1px solid ${period === p.value ? accent : 'rgba(242,151,116,0.2)'}`,
-                background: period === p.value ? 'rgba(242,151,116,0.18)' : 'transparent',
+                border: `1px solid ${period === p.value ? accent : 'var(--border)'}`,
+                background: period === p.value ? 'var(--accent-2)' : 'transparent',
                 color: accent,
                 cursor: 'pointer',
                 transition: 'all 0.18s',
@@ -97,10 +97,10 @@ export default function DashboardClient() {
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {loading
           ? Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} style={{ background: accentDim, border: `1px solid rgba(242,151,116,0.12)`, borderRadius: '12px', padding: '1.1rem', opacity: 0.4, height: '80px' }} />
+              <div key={i} style={{ background: accentDim, border: `1px solid var(--border-soft)`, borderRadius: '12px', padding: '1.1rem', opacity: 0.4, height: '80px' }} />
             ))
           : kpiCards.map((card) => (
-              <div key={card.label} style={{ background: accentDim, border: `1px solid rgba(242,151,116,0.18)`, borderRadius: '12px', padding: '1.1rem', display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+              <div key={card.label} style={{ background: accentDim, border: `1px solid var(--accent-2)`, borderRadius: '12px', padding: '1.1rem', display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
                 <span style={{ fontFamily: "'Involve', sans-serif", fontSize: '0.65rem', color: accent, opacity: 0.5, textTransform: 'uppercase', letterSpacing: '0.1em' }}>{card.label}</span>
                 <span style={{ fontFamily: "'ONDER', sans-serif", fontSize: '1.15rem', color: accent }}>{card.value}</span>
               </div>
@@ -109,7 +109,7 @@ export default function DashboardClient() {
 
       {/* Revenue chart */}
       {!loading && chartData.length > 0 && (
-        <div style={{ background: accentDim, border: `1px solid rgba(242,151,116,0.15)`, borderRadius: '12px', padding: '1.25rem' }}>
+        <div style={{ background: accentDim, border: `1px solid var(--border-soft)`, borderRadius: '12px', padding: '1.25rem' }}>
           <p style={{ fontFamily: "'ONDER', sans-serif", fontSize: '0.68rem', color: accent, opacity: 0.5, textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: '1rem' }}>
             График выручки
           </p>
@@ -119,7 +119,7 @@ export default function DashboardClient() {
               datasets: [{
                 data: chartData,
                 borderColor: accent,
-                backgroundColor: 'rgba(242,151,116,0.08)',
+                backgroundColor: 'var(--bg-subtle)',
                 borderWidth: 2,
                 pointRadius: 3,
                 pointBackgroundColor: accent,
@@ -129,10 +129,10 @@ export default function DashboardClient() {
             }}
             options={{
               responsive: true,
-              plugins: { legend: { display: false }, tooltip: { backgroundColor: '#1a0808', titleColor: accent, bodyColor: accent, borderColor: 'rgba(242,151,116,0.3)', borderWidth: 1, callbacks: { label: (ctx) => ' ' + fmt(ctx.parsed.y ?? 0) } } },
+              plugins: { legend: { display: false }, tooltip: { backgroundColor: 'var(--bg-2)', titleColor: accent, bodyColor: accent, borderColor: 'var(--border)', borderWidth: 1, callbacks: { label: (ctx) => ' ' + fmt(ctx.parsed.y ?? 0) } } },
               scales: {
-                x: { ticks: { color: 'rgba(242,151,116,0.5)', font: { size: 10 } }, grid: { color: 'rgba(242,151,116,0.07)' } },
-                y: { ticks: { color: 'rgba(242,151,116,0.5)', font: { size: 10 }, callback: (v) => (Number(v) / 1000).toFixed(0) + 'k' }, grid: { color: 'rgba(242,151,116,0.07)' } },
+                x: { ticks: { color: 'var(--text-muted)', font: { size: 10 } }, grid: { color: 'var(--bg-subtle)' } },
+                y: { ticks: { color: 'var(--text-muted)', font: { size: 10 }, callback: (v) => (Number(v) / 1000).toFixed(0) + 'k' }, grid: { color: 'var(--bg-subtle)' } },
               },
             }}
           />
@@ -141,13 +141,13 @@ export default function DashboardClient() {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
         {/* Top products */}
-        <div style={{ background: accentDim, border: `1px solid rgba(242,151,116,0.15)`, borderRadius: '12px', padding: '1.25rem' }}>
+        <div style={{ background: accentDim, border: `1px solid var(--border-soft)`, borderRadius: '12px', padding: '1.25rem' }}>
           <p style={{ fontFamily: "'ONDER', sans-serif", fontSize: '0.68rem', color: accent, opacity: 0.5, textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: '0.75rem' }}>Топ позиций</p>
           {!loading && data?.topProducts.length === 0 && (
             <p style={{ color: accent, opacity: 0.3, fontFamily: "'Involve', sans-serif", fontSize: '0.8rem' }}>Нет данных</p>
           )}
           {!loading && data?.topProducts.map((p, i) => (
-            <div key={p.product_name} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.45rem 0', borderBottom: i < (data.topProducts.length - 1) ? '1px solid rgba(242,151,116,0.08)' : 'none' }}>
+            <div key={p.product_name} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.45rem 0', borderBottom: i < (data.topProducts.length - 1) ? '1px solid var(--bg-subtle)' : 'none' }}>
               <span style={{ fontFamily: "'ONDER', sans-serif", fontSize: '0.65rem', color: accent, opacity: 0.3, minWidth: '1.2rem' }}>{i + 1}</span>
               <span style={{ fontFamily: "'Involve', sans-serif", fontSize: '0.78rem', color: accent, flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.product_name}</span>
               <span style={{ fontFamily: "'ONDER', sans-serif", fontSize: '0.72rem', color: accent, opacity: 0.6 }}>{p.units_sold} шт</span>
@@ -157,7 +157,7 @@ export default function DashboardClient() {
         </div>
 
         {/* Size breakdown */}
-        <div style={{ background: accentDim, border: `1px solid rgba(242,151,116,0.15)`, borderRadius: '12px', padding: '1.25rem' }}>
+        <div style={{ background: accentDim, border: `1px solid var(--border-soft)`, borderRadius: '12px', padding: '1.25rem' }}>
           <p style={{ fontFamily: "'ONDER', sans-serif", fontSize: '0.68rem', color: accent, opacity: 0.5, textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: '0.75rem' }}>Разбивка по размерам</p>
           {!loading && data?.sizeBreakdown.length === 0 && (
             <p style={{ color: accent, opacity: 0.3, fontFamily: "'Involve', sans-serif", fontSize: '0.8rem' }}>Нет данных</p>
@@ -168,7 +168,7 @@ export default function DashboardClient() {
             return (
               <div key={s.size} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.4rem 0' }}>
                 <span style={{ fontFamily: "'ONDER', sans-serif", fontSize: '0.7rem', color: accent, minWidth: '2rem' }}>{s.size}</span>
-                <div style={{ flex: 1, height: '6px', background: 'rgba(242,151,116,0.1)', borderRadius: '3px', overflow: 'hidden' }}>
+                <div style={{ flex: 1, height: '6px', background: 'var(--bg-subtle)', borderRadius: '3px', overflow: 'hidden' }}>
                   <div style={{ width: `${pct}%`, height: '100%', background: accent, borderRadius: '3px', transition: 'width 0.5s ease' }} />
                 </div>
                 <span style={{ fontFamily: "'Involve', sans-serif", fontSize: '0.72rem', color: accent, opacity: 0.6, minWidth: '2rem', textAlign: 'right' }}>{s.total_sold}</span>

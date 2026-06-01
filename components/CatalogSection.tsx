@@ -163,17 +163,10 @@ function ProductCard({
     setTimeout(() => setGlitching(false), 420)
   }
 
-  const col = index % 3
-  const row = Math.floor(index / 3)
-  const cat = categoryData[product.category]
-  const catTextures = [cat?.texture_url, cat?.texture_url_2, cat?.texture_url_3].filter(Boolean) as string[]
-  const texturePool = catTextures.length > 0 ? catTextures : FALLBACK_TEXTURES
-  const texture = texturePool[(col + row) % texturePool.length]
-
   return (
     <div
       className={`flex flex-col w-full ${s.productCard}`}
-      style={{ background: `url(${texture}) center/cover, var(--accent)` }}
+      style={{ background: 'var(--accent)' }}
       onClick={() => onOpen(product)}
       onMouseEnter={triggerGlitch}
     >

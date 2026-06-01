@@ -24,6 +24,37 @@
   animation: pulseGlow 2s ease-in-out infinite;
 }
 
+/* ── Theme badge button ── */
+.themeBadge {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.3rem 0.65rem;
+  border-radius: 100px;
+  font-family: 'ONDER', sans-serif;
+  font-size: 0.58rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  background: var(--bg-subtle);
+  color: var(--accent);
+  border: 1px solid var(--border-soft);
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s, transform 0.15s;
+  white-space: nowrap;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.themeBadge:hover {
+  background: var(--accent-2);
+  border-color: var(--accent);
+  transform: scale(1.04);
+}
+
+.themeBadge:active {
+  transform: scale(0.96);
+  transition-duration: 0.08s;
+}
+
 /* ── Burger lines ── */
 .burgerLine {
   display: block;

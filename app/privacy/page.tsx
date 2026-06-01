@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 const SECTION = ({ title, children }: { title: string; children: React.ReactNode }) => (
   <div style={{ marginBottom: '2rem' }}>
     <h2 style={{
-      color: '#F29774',
+      color: 'var(--text)',
       fontFamily: "'ONDER', sans-serif",
       fontSize: '1rem',
       textTransform: 'uppercase',
@@ -19,7 +19,7 @@ const SECTION = ({ title, children }: { title: string; children: React.ReactNode
       {title}
     </h2>
     <div style={{
-      color: '#F29774',
+      color: 'var(--text)',
       fontFamily: "'Involve', sans-serif",
       fontSize: '0.875rem',
       lineHeight: '1.7',
@@ -32,7 +32,7 @@ const SECTION = ({ title, children }: { title: string; children: React.ReactNode
 
 export default function PrivacyPage() {
   return (
-    <main style={{ background: '#0d0505', minHeight: '100vh', padding: '2rem 1rem' }}>
+    <main style={{ background: 'var(--bg)', minHeight: '100vh', padding: '2rem 1rem' }}>
       <div style={{ maxWidth: '720px', margin: '0 auto' }}>
 
         {/* Back */}
@@ -41,7 +41,7 @@ export default function PrivacyPage() {
           style={{
             display: 'inline-block',
             marginBottom: '2rem',
-            color: '#F29774',
+            color: 'var(--text)',
             fontFamily: "'ONDER', sans-serif",
             fontSize: '0.75rem',
             textTransform: 'uppercase',
@@ -54,7 +54,7 @@ export default function PrivacyPage() {
         </Link>
 
         <h1 style={{
-          color: '#F29774',
+          color: 'var(--text)',
           fontFamily: "'ONDER', sans-serif",
           fontSize: '1.5rem',
           textTransform: 'uppercase',
@@ -64,7 +64,7 @@ export default function PrivacyPage() {
           Политика конфиденциальности
         </h1>
         <p style={{
-          color: '#F29774',
+          color: 'var(--text)',
           fontFamily: "'Involve', sans-serif",
           fontSize: '0.8rem',
           opacity: 0.45,
@@ -76,7 +76,7 @@ export default function PrivacyPage() {
         <SECTION title="1. Оператор персональных данных">
           <p>
             Оператором персональных данных является интернет-магазин THREEP, расположенный по адресу:
-            <strong style={{ color: '#F29774' }}> 3threep.ru</strong>.
+            <strong style={{ color: 'var(--text)' }}> 3threep.ru</strong>.
           </p>
           <p style={{ marginTop: '0.5rem' }}>
             Контактный email: <strong>iakimow2@yandex.ru</strong>
@@ -196,7 +196,7 @@ export default function PrivacyPage() {
           style={{
             display: 'inline-block',
             marginTop: '2rem',
-            color: '#F29774',
+            color: 'var(--text)',
             fontFamily: "'ONDER', sans-serif",
             fontSize: '0.75rem',
             textTransform: 'uppercase',

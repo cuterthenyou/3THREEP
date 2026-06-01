@@ -31,13 +31,8 @@
   transition: background 0.3s ease;
 }
 
-:global([data-theme="dark"]) .themeOverlay {
-  background: rgba(245, 208, 216, 0.09);
-  mix-blend-mode: screen;
-}
-
 :global([data-theme="dark"]) .video {
-  filter: grayscale(0.35);
+  filter: grayscale(0.9) brightness(0.82);
 }
 
 /* Visual shield layer — pointer-events always none (context menu blocked via onContextMenu on video) */

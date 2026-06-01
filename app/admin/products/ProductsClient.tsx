@@ -14,14 +14,14 @@ const EMPTY: Omit<Product, 'id' | 'created_at'> = {
 }
 
 const INPUT_STYLE = {
-  background: 'rgba(242,151,116,0.08)',
-  color: '#F29774',
-  border: '1px solid rgba(242,151,116,0.2)',
+  background: 'var(--bg-subtle)',
+  color: 'var(--accent)',
+  border: '1px solid var(--border)',
   fontFamily: "'Involve', sans-serif",
 }
 
 const LABEL_STYLE = {
-  color: '#F29774',
+  color: 'var(--accent)',
   opacity: 0.5,
   fontFamily: "'ONDER', sans-serif",
 }
@@ -97,7 +97,7 @@ export default function ProductsClient({ products }: { products: Product[] }) {
   function SortHeader({ label, k }: { label: string; k: SortKey }) {
     const active = sortKey === k
     return (
-      <button onClick={() => toggleSort(k)} style={{ color: '#F29774', opacity: active ? 1 : 0.4, fontFamily: "'ONDER', sans-serif", fontSize: '0.65rem', letterSpacing: '0.1em', textTransform: 'uppercase', cursor: 'pointer', background: 'none', border: 'none', display: 'flex', alignItems: 'center', gap: '4px' }}>
+      <button onClick={() => toggleSort(k)} style={{ color: 'var(--accent)', opacity: active ? 1 : 0.4, fontFamily: "'ONDER', sans-serif", fontSize: '0.65rem', letterSpacing: '0.1em', textTransform: 'uppercase', cursor: 'pointer', background: 'none', border: 'none', display: 'flex', alignItems: 'center', gap: '4px' }}>
         {label} {active ? (sortDir === 'asc' ? '↑' : '↓') : ''}
       </button>
     )
@@ -193,12 +193,12 @@ export default function ProductsClient({ products }: { products: Product[] }) {
     <div className="px-6 py-6 max-w-4xl mx-auto">
       <div className="flex items-center justify-between mb-4">
         <h1 className="text-xl uppercase tracking-widest"
-          style={{ color: '#F29774', fontFamily: "'ONDER', sans-serif" }}>
+          style={{ color: 'var(--accent)', fontFamily: "'ONDER', sans-serif" }}>
           Товары ({filtered.length}/{products.length})
         </h1>
         <button onClick={openNew}
           className="px-4 py-2 uppercase tracking-widest transition-opacity hover:opacity-80"
-          style={{ background: '#F29774', color: '#A9342A', borderRadius: '8px', fontFamily: "'ONDER', sans-serif", fontSize: '0.75rem' }}>
+          style={{ background: 'var(--accent)', color: 'var(--bg)', borderRadius: '8px', fontFamily: "'ONDER', sans-serif", fontSize: '0.75rem' }}>
           + Добавить товар
         </button>
       </div>
@@ -211,18 +211,18 @@ export default function ProductsClient({ products }: { products: Product[] }) {
           value={search}
           onChange={e => setSearch(e.target.value)}
           className="flex-1 min-w-[180px] px-3 py-2 rounded-lg text-sm outline-none"
-          style={{ background: 'rgba(242,151,116,0.08)', color: '#F29774', border: '1px solid rgba(242,151,116,0.2)', fontFamily: "'Involve', sans-serif" }}
+          style={{ background: 'rgba(242,151,116,0.08)', color: 'var(--accent)', border: '1px solid rgba(242,151,116,0.2)', fontFamily: "'Involve', sans-serif" }}
         />
         <select value={filterActive} onChange={e => setFilterActive(e.target.value)}
           className="px-3 py-2 rounded-lg text-xs outline-none"
-          style={{ background: 'rgba(242,151,116,0.08)', color: '#F29774', border: '1px solid rgba(242,151,116,0.2)', fontFamily: "'Involve', sans-serif" }}>
+          style={{ background: 'rgba(242,151,116,0.08)', color: 'var(--accent)', border: '1px solid rgba(242,151,116,0.2)', fontFamily: "'Involve', sans-serif" }}>
           <option value="all">Все статусы</option>
           <option value="active">Активные</option>
           <option value="hidden">Скрытые</option>
         </select>
         <select value={filterStock} onChange={e => setFilterStock(e.target.value)}
           className="px-3 py-2 rounded-lg text-xs outline-none"
-          style={{ background: 'rgba(242,151,116,0.08)', color: '#F29774', border: '1px solid rgba(242,151,116,0.2)', fontFamily: "'Involve', sans-serif" }}>
+          style={{ background: 'rgba(242,151,116,0.08)', color: 'var(--accent)', border: '1px solid rgba(242,151,116,0.2)', fontFamily: "'Involve', sans-serif" }}>
           <option value="all">Любой остаток</option>
           <option value="in">В наличии</option>
           <option value="out">Нет в наличии</option>
@@ -241,7 +241,7 @@ export default function ProductsClient({ products }: { products: Product[] }) {
 
       <div className="flex flex-col gap-3">
         {filtered.length === 0 && (
-          <p className="text-sm" style={{ color: '#F29774', opacity: 0.4, fontFamily: "'Involve', sans-serif" }}>
+          <p className="text-sm" style={{ color: 'var(--accent)', opacity: 0.4, fontFamily: "'Involve', sans-serif" }}>
             Ничего не найдено
           </p>
         )}
@@ -253,24 +253,24 @@ export default function ProductsClient({ products }: { products: Product[] }) {
                 <Image src={p.images[0]} alt={p.name} fill className="object-cover" sizes="56px" />
               ) : (
                 <div className="w-full h-full flex items-center justify-center"
-                  style={{ background: 'rgba(242,151,116,0.15)', color: '#F29774', fontSize: '1.2rem' }}>?</div>
+                  style={{ background: 'rgba(242,151,116,0.15)', color: 'var(--accent)', fontSize: '1.2rem' }}>?</div>
               )}
             </div>
             <div className="flex-1 min-w-0">
-              <p style={{ color: '#F29774', fontFamily: "'ONDER', sans-serif" }}>{p.name}</p>
-              <p className="text-sm truncate" style={{ color: '#F29774', opacity: 0.5, fontFamily: "'Involve', sans-serif" }}>
+              <p style={{ color: 'var(--accent)', fontFamily: "'ONDER', sans-serif" }}>{p.name}</p>
+              <p className="text-sm truncate" style={{ color: 'var(--accent)', opacity: 0.5, fontFamily: "'Involve', sans-serif" }}>
                 {formatPrice(p.price)} · {p.sizes.join(', ')} · Остаток: {p.stock}
               </p>
             </div>
             <div className="flex gap-2 flex-shrink-0">
               <button onClick={() => openEdit(p)}
                 className="px-3 py-1.5 text-xs uppercase tracking-widest rounded-lg"
-                style={{ background: 'rgba(242,151,116,0.15)', color: '#F29774', fontFamily: "'ONDER', sans-serif", fontSize: '0.65rem' }}>
+                style={{ background: 'rgba(242,151,116,0.15)', color: 'var(--accent)', fontFamily: "'ONDER', sans-serif", fontSize: '0.65rem' }}>
                 Ред.
               </button>
               <button onClick={() => toggleActive(p.id, p.active)}
                 className="px-3 py-1.5 text-xs uppercase tracking-widest rounded-lg"
-                style={{ background: 'rgba(242,151,116,0.1)', color: '#F29774', opacity: 0.6, fontFamily: "'ONDER', sans-serif", fontSize: '0.65rem' }}>
+                style={{ background: 'rgba(242,151,116,0.1)', color: 'var(--accent)', opacity: 0.6, fontFamily: "'ONDER', sans-serif", fontSize: '0.65rem' }}>
                 {p.active ? 'Скрыть' : 'Показать'}
               </button>
             </div>
@@ -282,14 +282,14 @@ export default function ProductsClient({ products }: { products: Product[] }) {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4"
           style={{ background: 'rgba(0,0,0,0.75)' }}>
           <div className="w-full max-w-lg rounded-2xl p-6 flex flex-col gap-4 overflow-y-auto max-h-[92vh]"
-            style={{ background: '#1a0808', border: '1px solid rgba(242,151,116,0.25)' }}>
+            style={{ background: 'var(--bg-2)', border: '1px solid rgba(242,151,116,0.25)' }}>
 
             <div className="flex items-center justify-between">
               <h2 className="text-lg uppercase tracking-widest"
-                style={{ color: '#F29774', fontFamily: "'ONDER', sans-serif" }}>
+                style={{ color: 'var(--accent)', fontFamily: "'ONDER', sans-serif" }}>
                 {editing.id ? 'Редактировать' : 'Новый товар'}
               </h2>
-              <button onClick={() => setEditing(null)} style={{ color: '#F29774', opacity: 0.4, fontSize: '1.2rem' }}>✕</button>
+              <button onClick={() => setEditing(null)} style={{ color: 'var(--accent)', opacity: 0.4, fontSize: '1.2rem' }}>✕</button>
             </div>
 
             <Inp label="Название *" value={editing.name ?? ''} onChange={v => setEditing(e => ({ ...e, name: v }))} />
@@ -346,18 +346,18 @@ export default function ProductsClient({ products }: { products: Product[] }) {
                 onDrop={handleDrop}
                 className="flex flex-col items-center justify-center gap-2 rounded-xl cursor-pointer transition-all py-5"
                 style={{
-                  border: `2px dashed ${dragOver ? '#F29774' : 'rgba(242,151,116,0.25)'}`,
+                  border: `2px dashed ${dragOver ? 'var(--accent)' : 'rgba(242,151,116,0.25)'}`,
                   background: dragOver ? 'rgba(242,151,116,0.08)' : 'transparent',
                 }}
               >
                 {uploading ? (
-                  <p className="text-sm" style={{ color: '#F29774', fontFamily: "'Involve', sans-serif" }}>Загружаем...</p>
+                  <p className="text-sm" style={{ color: 'var(--accent)', fontFamily: "'Involve', sans-serif" }}>Загружаем...</p>
                 ) : (
                   <>
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#F29774" strokeWidth="1.5" opacity={0.5}>
                       <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="17 8 12 3 7 8" /><line x1="12" y1="3" x2="12" y2="15" />
                     </svg>
-                    <p className="text-xs" style={{ color: '#F29774', opacity: 0.5, fontFamily: "'Involve', sans-serif" }}>
+                    <p className="text-xs" style={{ color: 'var(--accent)', opacity: 0.5, fontFamily: "'Involve', sans-serif" }}>
                       Перетащи или кликни для загрузки
                     </p>
                   </>
@@ -375,7 +375,7 @@ export default function ProductsClient({ products }: { products: Product[] }) {
                       <button
                         onClick={() => removeImage(i)}
                         className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                        style={{ background: 'rgba(0,0,0,0.6)', color: '#F29774', fontSize: '1rem' }}
+                        style={{ background: 'rgba(0,0,0,0.6)', color: 'var(--accent)', fontSize: '1rem' }}
                       >✕</button>
                     </div>
                   ))}
@@ -387,7 +387,7 @@ export default function ProductsClient({ products }: { products: Product[] }) {
               <input type="checkbox" id="prod-active" checked={editing.active ?? true}
                 onChange={e => setEditing(ed => ({ ...ed, active: e.target.checked }))} />
               <label htmlFor="prod-active" className="text-sm"
-                style={{ color: '#F29774', fontFamily: "'Involve', sans-serif" }}>
+                style={{ color: 'var(--accent)', fontFamily: "'Involve', sans-serif" }}>
                 Показывать в каталоге
               </label>
             </div>
@@ -399,12 +399,12 @@ export default function ProductsClient({ products }: { products: Product[] }) {
             <div className="flex gap-3">
               <button onClick={save} disabled={saving || uploading}
                 className="flex-1 py-3 uppercase tracking-widest transition-opacity"
-                style={{ background: '#F29774', color: '#A9342A', borderRadius: '8px', fontFamily: "'ONDER', sans-serif", fontSize: '0.75rem', opacity: saving || uploading ? 0.5 : 1 }}>
+                style={{ background: 'var(--accent)', color: 'var(--bg)', borderRadius: '8px', fontFamily: "'ONDER', sans-serif", fontSize: '0.75rem', opacity: saving || uploading ? 0.5 : 1 }}>
                 {saving ? 'Сохраняем...' : 'Сохранить'}
               </button>
               <button onClick={() => setEditing(null)}
                 className="px-4 py-3 uppercase tracking-widest"
-                style={{ background: 'rgba(242,151,116,0.1)', color: '#F29774', borderRadius: '8px', fontFamily: "'ONDER', sans-serif", fontSize: '0.75rem' }}>
+                style={{ background: 'rgba(242,151,116,0.1)', color: 'var(--accent)', borderRadius: '8px', fontFamily: "'ONDER', sans-serif", fontSize: '0.75rem' }}>
                 Отмена
               </button>
             </div>

@@ -71,6 +71,9 @@ export default function ProductModal({ product, visible, onClose }: Props) {
     }
   }, [product])
 
+  // Ensure body scroll is restored on unmount
+  useEffect(() => () => { document.body.style.overflow = '' }, [])
+
   useEffect(() => {
     if (!visible) return
 
@@ -197,7 +200,7 @@ export default function ProductModal({ product, visible, onClose }: Props) {
             {/* Product info */}
             <div className="flex flex-col gap-5 pt-2 pb-24 lg:pt-0 lg:pb-0">
               <div className="flex justify-center lg:justify-start">
-                <Image src="/images/aqua+.png" alt="AQUA+" width={0} height={0} sizes="15vw" className="h-10 w-auto" />
+                <Image src="/images/aqua+.png" alt="AQUA+" width={0} height={0} sizes="15vw" className="theme-img h-10 w-auto" />
               </div>
 
               <p className={`uppercase tracking-widest text-xs ${s.category}`}>
