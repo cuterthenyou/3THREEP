@@ -143,7 +143,7 @@ export default function Header({ isAdminUser = false }: Props) {
           </Link>
           {/* Center logo text — hidden on mobile */}
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/images/logo-text-63.svg" alt="THREEP" className="theme-img hidden sm:block h-8 w-auto absolute left-1/2 -translate-x-1/2" />
+          <img src="/images/logo-text-63.svg" alt="THREEP" className="theme-img hidden xl:block h-8 w-auto absolute left-1/2 -translate-x-1/2" />
 
           {/* Icons — on mobile spread evenly across a fixed width, on desktop tight gap */}
           <div className="flex items-center justify-between gap-2 sm:gap-3">

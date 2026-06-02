@@ -62,29 +62,12 @@ export default function UserButton() {
 
   return (
     <div ref={ref} style={{ position: 'relative' }}>
-      {/* Mobile: icon only */}
       <button
         onClick={() => setOpen(v => !v)}
-        className={`xl:hidden flex items-center justify-center w-9 h-9 rounded-lg ${s.navBtn}`}
+        className={`flex items-center justify-center w-9 h-9 rounded-lg ${s.navBtn}`}
         aria-label="Аккаунт"
       >
         <PersonIcon />
-      </button>
-
-      {/* Desktop: full pill with name + level */}
-      <button
-        onClick={() => setOpen(v => !v)}
-        className={`hidden xl:flex items-center ${s.themeBadge}`}
-        aria-label="Аккаунт"
-        style={{ gap: '0.3rem' }}
-      >
-        <PersonIcon />
-        <span style={{ whiteSpace: 'nowrap' }}>
-          {user.name}
-        </span>
-        <span style={{ opacity: 0.45, fontSize: '0.48rem', letterSpacing: '0.15em', flexShrink: 0 }}>
-          LVL {user.level}
-        </span>
       </button>
 
       {open && (
