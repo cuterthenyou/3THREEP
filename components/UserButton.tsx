@@ -44,6 +44,7 @@ export default function UserButton() {
 
   async function handleSignOut() {
     setOpen(false)
+    setUser(null)
     await signOut({ redirect: false })
     router.push('/')
     router.refresh()
@@ -64,7 +65,7 @@ export default function UserButton() {
       {/* Mobile: icon only */}
       <button
         onClick={() => setOpen(v => !v)}
-        className={`md:hidden flex items-center justify-center w-9 h-9 rounded-lg ${s.navBtn}`}
+        className={`xl:hidden flex items-center justify-center w-9 h-9 rounded-lg ${s.navBtn}`}
         aria-label="Аккаунт"
       >
         <PersonIcon />
@@ -73,7 +74,7 @@ export default function UserButton() {
       {/* Desktop: full pill with name + level */}
       <button
         onClick={() => setOpen(v => !v)}
-        className={`hidden md:flex items-center ${s.themeBadge}`}
+        className={`hidden xl:flex items-center ${s.themeBadge}`}
         aria-label="Аккаунт"
         style={{ gap: '0.3rem' }}
       >

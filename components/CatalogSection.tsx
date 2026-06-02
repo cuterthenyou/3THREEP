@@ -127,7 +127,7 @@ export default function CatalogSection({ products, categories, categoryData = {}
 }
 
 
-function ProductCard({
+const ProductCard = React.memo(function ProductCard({
   product,
   index,
   onOpen,
@@ -302,4 +302,4 @@ function ProductCard({
       </div>
     </div>
   )
-}
+})

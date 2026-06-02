@@ -62,7 +62,7 @@
 }
 
 .totalDivider {
-  border-top: 1px solid rgba(242, 151, 116, 0.3);
+  border-top: 1px solid var(--border-mid);
 }
 
 .totalLabel {
@@ -78,8 +78,8 @@
 }
 
 .notice {
-  background: rgba(242, 151, 116, 0.07);
-  border: 1px solid rgba(242, 151, 116, 0.18);
+  background: var(--bg-subtle);
+  border: 1px solid var(--border);
   border-radius: 0.75rem;
   padding: 1rem;
 }
@@ -107,9 +107,9 @@
 }
 
 .input {
-  background: rgba(242, 151, 116, 0.08);
+  background: var(--bg-subtle);
   color: var(--color-accent);
-  border: 1px solid rgba(242, 151, 116, 0.3);
+  border: 1px solid var(--border-mid);
   font-family: var(--font-involve);
   font-size: 0.9rem;
   border-radius: 0.75rem;
@@ -119,8 +119,8 @@
 }
 
 .input:focus {
-  border-color: rgba(242, 151, 116, 0.7);
-  box-shadow: 0 0 0 3px rgba(242, 151, 116, 0.12);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--border-soft);
 }
 
 .input::placeholder {

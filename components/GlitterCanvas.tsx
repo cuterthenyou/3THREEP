@@ -81,10 +81,20 @@ export default function GlitterCanvas() {
       animId = requestAnimationFrame(draw)
     }
 
+    const onVis = () => {
+      if (document.hidden) {
+        cancelAnimationFrame(animId)
+      } else {
+        animId = requestAnimationFrame(draw)
+      }
+    }
+    document.addEventListener('visibilitychange', onVis)
+
     animId = requestAnimationFrame(draw)
     return () => {
       cancelAnimationFrame(animId)
       window.removeEventListener('resize', resize)
+      document.removeEventListener('visibilitychange', onVis)
     }
   }, [isDark])
 

@@ -39,7 +39,7 @@
   padding: 0.75rem 1rem;
   outline: none;
   font-size: 0.875rem;
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--bg-subtle);
   color: var(--color-accent);
   border: 2px solid var(--color-accent);
   border-radius: 5px;
@@ -50,7 +50,7 @@
   width: 100%;
   padding: 0.75rem 1rem;
   outline: none;
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--bg-subtle);
   color: var(--color-accent);
   border: 2px solid var(--color-accent);
   border-radius: 5px;
@@ -67,8 +67,8 @@
 
 .input:focus,
 .inputCode:focus {
-  border-color: rgba(242, 151, 116, 0.9);
-  box-shadow: 0 0 0 3px rgba(242, 151, 116, 0.15);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--border-soft);
   transition: border-color 0.2s, box-shadow 0.2s;
 }
 

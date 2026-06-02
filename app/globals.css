@@ -45,7 +45,6 @@
   /* ── Theme tokens: light = оригинальный THREEP терракот ── */
   --bg:         #a9342a;
   --bg-2:       #8b2820;
-  --bg-card:    #a9342a;
   --text:       #f29774;
   --text-muted: rgba(242, 151, 116, 0.6);
   --accent:     #f29774;
@@ -56,10 +55,12 @@
   --header-scrolled-bg: rgba(169, 52, 42, 0.82);
   --bg-subtle:          rgba(242, 151, 116, 0.08);
   --border-soft:        rgba(242, 151, 116, 0.12);
+  --border-mid:         rgba(242, 151, 116, 0.30);
   --overlay-bg:         rgba(13, 2, 2, 0.97);
 
-  /* ── Card theming ── */
-  --text-on-card: var(--text);
+  /* ── Card theming — matches footer card: accent bg + dark text ── */
+  --bg-card:      var(--accent);
+  --text-on-card: var(--bg);
 
   /* ── Overlay backdrops (theme-agnostic black tints) ── */
   --overlay-heavy:  rgba(0, 0, 0, 0.75);
@@ -95,6 +96,7 @@
   --header-scrolled-bg: rgba(28, 28, 30, 0.88);
   --bg-subtle:          rgba(252, 176, 178, 0.08);
   --border-soft:        rgba(252, 176, 178, 0.12);
+  --border-mid:         rgba(252, 176, 178, 0.30);
   --overlay-bg:         rgba(10, 10, 12, 0.97);
 
   /* ── Card theming — dark bg contrasts on pink card ── */
