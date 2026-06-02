@@ -12,9 +12,9 @@ const INPUT_STYLE = {
   background: 'var(--bg-subtle)',
   color: 'var(--accent)',
   border: '1px solid var(--border)',
-  fontFamily: "'Involve', sans-serif",
+  fontFamily: "var(--font-involve)",
 }
-const LABEL_STYLE = { color: 'var(--accent)', opacity: 0.5, fontFamily: "'ONDER', sans-serif" }
+const LABEL_STYLE = { color: 'var(--accent)', opacity: 0.5, fontFamily: "var(--font-onder)" }
 
 type UploadField = 'texture_url' | 'texture_url_2' | 'texture_url_3' | 'logo_top_url' | 'logo_bottom_url'
 
@@ -99,7 +99,7 @@ export default function CollectionsClient({ collections }: { collections: Catego
             type="button"
             onClick={() => refEl.current?.click()}
             className="px-3 py-2 text-xs rounded-lg uppercase tracking-widest"
-            style={{ background: 'var(--bg-subtle)', color: 'var(--accent)', fontFamily: "'ONDER', sans-serif", fontSize: '0.65rem' }}
+            style={{ background: 'var(--bg-subtle)', color: 'var(--accent)', fontFamily: "var(--font-onder)", fontSize: '0.65rem' }}
           >
             {uploading === field ? 'Загружаем...' : 'Загрузить'}
           </button>
@@ -111,7 +111,7 @@ export default function CollectionsClient({ collections }: { collections: Catego
             onChange={e => e.target.files?.[0] && uploadFile(e.target.files[0], field)}
           />
           {val && (
-            <span className="text-xs truncate max-w-[180px]" style={{ color: 'var(--accent)', opacity: 0.6, fontFamily: "'Involve', sans-serif" }}>
+            <span className="text-xs truncate max-w-[180px]" style={{ color: 'var(--accent)', opacity: 0.6, fontFamily: "var(--font-involve)" }}>
               {val.split('/').pop()}
             </span>
           )}
@@ -133,19 +133,19 @@ export default function CollectionsClient({ collections }: { collections: Catego
   return (
     <div className="px-6 py-6 max-w-3xl mx-auto">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="uppercase tracking-widest" style={{ color: 'var(--accent)', fontFamily: "'ONDER', sans-serif", fontSize: 'clamp(0.9rem, 3vw, 1.1rem)' }}>
+        <h1 className="uppercase tracking-widest" style={{ color: 'var(--accent)', fontFamily: "var(--font-onder)", fontSize: 'clamp(0.9rem, 3vw, 1.1rem)' }}>
           Коллекции ({collections.length})
         </h1>
         <button onClick={openNew}
           className="uppercase tracking-widest transition-opacity hover:opacity-80"
-          style={{ background: 'var(--accent)', color: 'var(--bg)', borderRadius: '8px', fontFamily: "'ONDER', sans-serif", fontSize: '0.68rem', padding: '0.4rem 0.8rem' }}>
+          style={{ background: 'var(--accent)', color: 'var(--bg)', borderRadius: '8px', fontFamily: "var(--font-onder)", fontSize: '0.68rem', padding: '0.4rem 0.8rem' }}>
           + Добавить
         </button>
       </div>
 
       <div className="flex flex-col gap-3">
         {collections.length === 0 && (
-          <p className="text-sm" style={{ color: 'var(--accent)', opacity: 0.4, fontFamily: "'Involve', sans-serif" }}>
+          <p className="text-sm" style={{ color: 'var(--accent)', opacity: 0.4, fontFamily: "var(--font-involve)" }}>
             Коллекций нет. Создай первую — slug должен совпадать с category у товаров.
           </p>
         )}
@@ -159,8 +159,8 @@ export default function CollectionsClient({ collections }: { collections: Catego
               )}
             </div>
             <div className="min-w-0">
-              <p className="truncate font-bold" style={{ color: 'var(--accent)', fontFamily: "'Involve', sans-serif", fontWeight: 700 }}>{c.name}</p>
-              <p className="text-xs mt-0.5 truncate" style={{ color: 'var(--accent)', opacity: 0.45, fontFamily: "'Involve', sans-serif" }}>
+              <p className="truncate font-bold" style={{ color: 'var(--accent)', fontFamily: "var(--font-involve)", fontWeight: 700 }}>{c.name}</p>
+              <p className="text-xs mt-0.5 truncate" style={{ color: 'var(--accent)', opacity: 0.45, fontFamily: "var(--font-involve)" }}>
                 {!c.active && <span style={{ color: 'var(--status-error)', opacity: 0.8 }}>● скрыта · </span>}
                 slug: {c.slug}
                 {c.logo_top_url ? ' · лого-топ ✓' : ''}
@@ -170,17 +170,17 @@ export default function CollectionsClient({ collections }: { collections: Catego
               <div className="flex gap-2 flex-wrap mt-2">
                 <button onClick={() => toggleActive(c)}
                   className="px-2.5 py-1 text-xs uppercase tracking-widest rounded-lg"
-                  style={{ background: c.active ? 'var(--bg-subtle)' : 'var(--accent-2)', color: 'var(--accent)', fontFamily: "'Involve', sans-serif", fontWeight: 700, fontSize: '0.62rem', border: '1px solid var(--border-soft)' }}>
+                  style={{ background: c.active ? 'var(--bg-subtle)' : 'var(--accent-2)', color: 'var(--accent)', fontFamily: "var(--font-involve)", fontWeight: 700, fontSize: '0.62rem', border: '1px solid var(--border-soft)' }}>
                   {c.active ? 'Скрыть' : 'Показать'}
                 </button>
                 <button onClick={() => openEdit(c)}
                   className="px-2.5 py-1 text-xs uppercase tracking-widest rounded-lg"
-                  style={{ background: 'var(--accent-2)', color: 'var(--accent)', fontFamily: "'Involve', sans-serif", fontWeight: 700, fontSize: '0.62rem' }}>
+                  style={{ background: 'var(--accent-2)', color: 'var(--accent)', fontFamily: "var(--font-involve)", fontWeight: 700, fontSize: '0.62rem' }}>
                   Ред.
                 </button>
                 <button onClick={() => remove(c.slug)}
                   className="px-2.5 py-1 text-xs uppercase tracking-widest rounded-lg"
-                  style={{ background: 'var(--bg-subtle)', color: 'var(--accent)', opacity: 0.5, fontFamily: "'Involve', sans-serif", fontWeight: 700, fontSize: '0.62rem', border: '1px solid var(--border-soft)' }}>
+                  style={{ background: 'var(--bg-subtle)', color: 'var(--accent)', opacity: 0.5, fontFamily: "var(--font-involve)", fontWeight: 700, fontSize: '0.62rem', border: '1px solid var(--border-soft)' }}>
                   Удалить
                 </button>
               </div>
@@ -190,12 +190,12 @@ export default function CollectionsClient({ collections }: { collections: Catego
       </div>
 
       {editing && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.75)' }}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'var(--overlay-heavy)' }}>
           <div className="w-full max-w-lg rounded-2xl p-6 flex flex-col gap-4 overflow-y-auto max-h-[92vh]"
             style={{ background: 'var(--bg-2)', border: '1px solid var(--border)' }}>
 
             <div className="flex items-center justify-between">
-              <h2 className="text-lg uppercase tracking-widest" style={{ color: 'var(--accent)', fontFamily: "'Involve', sans-serif", fontWeight: 800 }}>
+              <h2 className="text-lg uppercase tracking-widest" style={{ color: 'var(--accent)', fontFamily: "var(--font-involve)", fontWeight: 800 }}>
                 {editing.slug ? 'Редактировать' : 'Новая коллекция'}
               </h2>
               <button onClick={() => setEditing(null)} style={{ color: 'var(--accent)', opacity: 0.4, fontSize: '1.2rem' }}>✕</button>
@@ -221,17 +221,17 @@ export default function CollectionsClient({ collections }: { collections: Catego
             <UploadBtn field="logo_top_url" label="Лого TOP (над каталогом)" refEl={logoTopRef} />
             <UploadBtn field="logo_bottom_url" label="Лого BOTTOM (под каталогом)" refEl={logoBottomRef} />
 
-            {error && <p className="text-sm" style={{ color: 'var(--status-error)', fontFamily: "'Involve', sans-serif" }}>{error}</p>}
+            {error && <p className="text-sm" style={{ color: 'var(--status-error)', fontFamily: "var(--font-involve)" }}>{error}</p>}
 
             <div className="flex gap-3">
               <button onClick={save} disabled={saving || !!uploading}
                 className="flex-1 py-3 uppercase tracking-widest transition-opacity"
-                style={{ background: 'var(--accent)', color: 'var(--bg)', borderRadius: '8px', fontFamily: "'ONDER', sans-serif", fontSize: '0.75rem', opacity: saving ? 0.5 : 1 }}>
+                style={{ background: 'var(--accent)', color: 'var(--bg)', borderRadius: '8px', fontFamily: "var(--font-onder)", fontSize: '0.75rem', opacity: saving ? 0.5 : 1 }}>
                 {saving ? 'Сохраняем...' : 'Сохранить'}
               </button>
               <button onClick={() => setEditing(null)}
                 className="px-4 py-3 uppercase tracking-widest"
-                style={{ background: 'var(--bg-subtle)', color: 'var(--accent)', borderRadius: '8px', fontFamily: "'ONDER', sans-serif", fontSize: '0.75rem' }}>
+                style={{ background: 'var(--bg-subtle)', color: 'var(--accent)', borderRadius: '8px', fontFamily: "var(--font-onder)", fontSize: '0.75rem' }}>
                 Отмена
               </button>
             </div>

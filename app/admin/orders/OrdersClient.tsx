@@ -80,7 +80,7 @@ export default function OrdersClient({ orders }: { orders: Order[] }) {
   function SortBtn({ label, k }: { label: string; k: SortKey }) {
     const active = sortKey === k
     return (
-      <button onClick={() => toggleSort(k)} style={{ color: 'var(--accent)', opacity: active ? 1 : 0.4, fontFamily: "'ONDER', sans-serif", fontSize: '0.62rem', letterSpacing: '0.1em', textTransform: 'uppercase', cursor: 'pointer', background: 'none', border: 'none' }}>
+      <button onClick={() => toggleSort(k)} style={{ color: 'var(--accent)', opacity: active ? 1 : 0.4, fontFamily: "var(--font-onder)", fontSize: '0.62rem', letterSpacing: '0.1em', textTransform: 'uppercase', cursor: 'pointer', background: 'none', border: 'none' }}>
         {label} {active ? (sortDir === 'asc' ? '↑' : '↓') : ''}
       </button>
     )
@@ -89,7 +89,7 @@ export default function OrdersClient({ orders }: { orders: Order[] }) {
   return (
     <div className="px-6 py-6 max-w-4xl mx-auto">
       <div className="flex items-center justify-between mb-4">
-        <h1 className="text-xl uppercase tracking-widest" style={{ color: 'var(--accent)', fontFamily: "'ONDER', sans-serif" }}>
+        <h1 className="text-xl uppercase tracking-widest" style={{ color: 'var(--accent)', fontFamily: "var(--font-onder)" }}>
           Заказы ({filtered.length}/{orders.length})
         </h1>
       </div>
@@ -102,11 +102,11 @@ export default function OrdersClient({ orders }: { orders: Order[] }) {
           value={search}
           onChange={e => setSearch(e.target.value)}
           className="flex-1 min-w-[200px] px-3 py-2 rounded-lg text-sm outline-none"
-          style={{ background: 'var(--bg-subtle)', color: 'var(--accent)', border: '1px solid var(--border)', fontFamily: "'Involve', sans-serif" }}
+          style={{ background: 'var(--bg-subtle)', color: 'var(--accent)', border: '1px solid var(--border)', fontFamily: "var(--font-involve)" }}
         />
         <select value={filterStatus} onChange={e => setFilterStatus(e.target.value)}
           className="px-3 py-2 rounded-lg text-xs outline-none"
-          style={{ background: 'var(--bg-subtle)', color: 'var(--accent)', border: '1px solid var(--border)', fontFamily: "'Involve', sans-serif" }}>
+          style={{ background: 'var(--bg-subtle)', color: 'var(--accent)', border: '1px solid var(--border)', fontFamily: "var(--font-involve)" }}>
           <option value="all">Все статусы</option>
           {(Object.keys(ORDER_STATUS_LABELS) as OrderStatus[]).map(s => (
             <option key={s} value={s}>{ORDER_STATUS_LABELS[s]}</option>
@@ -123,7 +123,7 @@ export default function OrdersClient({ orders }: { orders: Order[] }) {
 
       <div className="flex flex-col gap-3">
         {filtered.length === 0 && (
-          <p style={{ color: 'var(--accent)', opacity: 0.4, fontFamily: "'Involve', sans-serif" }}>Ничего не найдено</p>
+          <p style={{ color: 'var(--accent)', opacity: 0.4, fontFamily: "var(--font-involve)" }}>Ничего не найдено</p>
         )}
         {filtered.map((order) => {
           const profile = order.profiles as Record<string, unknown> | null
@@ -138,31 +138,31 @@ export default function OrdersClient({ orders }: { orders: Order[] }) {
             >
               <div className="flex-1">
                 <div className="flex items-center gap-3 flex-wrap">
-                  <span className="text-xs uppercase tracking-widest" style={{ color: 'var(--accent)', opacity: 0.5, fontFamily: "'Involve', sans-serif" }}>
+                  <span className="text-xs uppercase tracking-widest" style={{ color: 'var(--accent)', opacity: 0.5, fontFamily: "var(--font-involve)" }}>
                     #{order.id.slice(0, 8)}
                   </span>
                   <span className="text-xs px-2 py-0.5 rounded-full uppercase tracking-widest"
-                    style={{ background: 'var(--bg-subtle)', color: STATUS_COLORS[order.status as OrderStatus], fontFamily: "'ONDER', sans-serif", fontSize: '0.6rem', border: '1px solid var(--border)' }}>
+                    style={{ background: 'var(--bg-subtle)', color: STATUS_COLORS[order.status as OrderStatus], fontFamily: "var(--font-onder)", fontSize: '0.6rem', border: '1px solid var(--border)' }}>
                     {ORDER_STATUS_LABELS[order.status as OrderStatus]}
                   </span>
-                  <span className="text-xs" style={{ color: 'var(--accent)', opacity: 0.4, fontFamily: "'Involve', sans-serif" }}>
+                  <span className="text-xs" style={{ color: 'var(--accent)', opacity: 0.4, fontFamily: "var(--font-involve)" }}>
                     {new Date(order.created_at).toLocaleDateString('ru-RU')}
                   </span>
                 </div>
                 <div className="mt-1 flex flex-col gap-0.5">
                   {items.map((item) => (
-                    <span key={String(item.id)} className="text-sm" style={{ color: 'var(--accent)', fontFamily: "'Involve', sans-serif" }}>
+                    <span key={String(item.id)} className="text-sm" style={{ color: 'var(--accent)', fontFamily: "var(--font-involve)" }}>
                       {String(item.product_name)}{item.size ? ` / ${item.size}` : ''} × {Number(item.quantity)}
                     </span>
                   ))}
                 </div>
                 {profile && (
-                  <p className="text-xs mt-1" style={{ color: 'var(--accent)', opacity: 0.4, fontFamily: "'Involve', sans-serif" }}>
+                  <p className="text-xs mt-1" style={{ color: 'var(--accent)', opacity: 0.4, fontFamily: "var(--font-involve)" }}>
                     {String(profile.name || profile.email || '')}
                   </p>
                 )}
               </div>
-              <p className="text-lg flex-shrink-0" style={{ color: 'var(--accent)', fontFamily: "'ONDER', sans-serif" }}>
+              <p className="text-lg flex-shrink-0" style={{ color: 'var(--accent)', fontFamily: "var(--font-onder)" }}>
                 {formatPrice(order.total)}
               </p>
             </Link>

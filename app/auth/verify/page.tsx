@@ -55,7 +55,7 @@ function VerifyContent() {
         style={{
           display: 'inline-block',
           padding: '16px 48px',
-          background: loading ? '#888' : 'var(--accent)',
+          background: loading ? 'var(--text-muted)' : 'var(--accent)',
           color: 'var(--bg)',
           borderRadius: 8,
           border: 'none',

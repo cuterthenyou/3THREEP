@@ -49,7 +49,7 @@ function VideoCard({ file }: { file: MediaFile }) {
       />
       {duration !== null && (
         <span className="absolute bottom-1.5 right-1.5 px-1.5 py-0.5 rounded text-xs"
-          style={{ background: 'rgba(0,0,0,0.7)', color: 'var(--accent)', fontFamily: "'ONDER', sans-serif", fontSize: '0.55rem' }}>
+          style={{ background: 'rgba(0,0,0,0.7)', color: 'var(--accent)', fontFamily: "var(--font-onder)", fontSize: '0.55rem' }}>
           {formatDuration(duration)}
         </span>
       )}
@@ -160,11 +160,11 @@ export default function MediaClient() {
   return (
     <div className="p-6 max-w-7xl mx-auto">
       <div className="flex items-center justify-between mb-4">
-        <h1 className="text-lg uppercase tracking-widest" style={{ color: accent, fontFamily: "'ONDER', sans-serif" }}>
+        <h1 className="text-lg uppercase tracking-widest" style={{ color: accent, fontFamily: "var(--font-onder)" }}>
           Медиабиблиотека
         </h1>
         <button onClick={load} className="text-xs uppercase tracking-widest px-4 py-2 rounded"
-          style={{ background: accentDim, color: accent, border: '1px solid var(--border)', fontFamily: "'ONDER', sans-serif" }}>
+          style={{ background: accentDim, color: accent, border: '1px solid var(--border)', fontFamily: "var(--font-onder)" }}>
           Обновить
         </button>
       </div>
@@ -173,18 +173,18 @@ export default function MediaClient() {
       <div className="mb-3">
         <input type="search" placeholder="Поиск по имени файла..." value={search} onChange={e => setSearch(e.target.value)}
           className="w-full sm:w-72 px-3 py-2 rounded-lg text-sm outline-none"
-          style={{ background: accentDim, color: accent, border: '1px solid rgba(242,151,116,0.2)', fontFamily: "'Involve', sans-serif" }} />
+          style={{ background: accentDim, color: accent, border: '1px solid rgba(242,151,116,0.2)', fontFamily: "var(--font-involve)" }} />
       </div>
 
       {/* Bucket tabs */}
       <div className="flex flex-wrap gap-2 mb-4">
         {(['all', ...KNOWN_BUCKETS] as string[]).concat(otherBuckets.length ? ['other'] : []).map((b) => (
           <button key={b} onClick={() => setBucket(b)} className="px-3 py-1.5 rounded uppercase tracking-widest"
-            style={{ fontFamily: "'Involve', sans-serif", fontWeight: 700, fontSize: '0.7rem', letterSpacing: '0.06em', background: bucket === b ? accent : accentDim, color: bucket === b ? 'var(--bg)' : accent, border: '1px solid var(--border)' }}>
+            style={{ fontFamily: "var(--font-involve)", fontWeight: 700, fontSize: '0.7rem', letterSpacing: '0.06em', background: bucket === b ? accent : accentDim, color: bucket === b ? 'var(--bg)' : accent, border: '1px solid var(--border)' }}>
             {b === 'all' ? 'Все' : b === 'other' ? 'Другое' : b}
           </button>
         ))}
-        <span className="ml-auto text-xs self-center" style={{ color: accent, opacity: 0.5, fontFamily: "'Involve', sans-serif" }}>
+        <span className="ml-auto text-xs self-center" style={{ color: accent, opacity: 0.5, fontFamily: "var(--font-involve)" }}>
           {filtered.length} файлов
         </span>
       </div>
@@ -193,21 +193,21 @@ export default function MediaClient() {
       {selected.size > 0 && (
         <div className="flex items-center gap-3 mb-4 px-4 py-3 rounded-xl"
           style={{ background: 'rgba(242,151,116,0.12)', border: '1px solid var(--border)' }}>
-          <span style={{ color: accent, fontFamily: "'Involve', sans-serif", fontSize: '0.8rem' }}>
+          <span style={{ color: accent, fontFamily: "var(--font-involve)", fontSize: '0.8rem' }}>
             Выбрано: {selected.size}
           </span>
           <button onClick={downloadSelected}
             className="px-3 py-1.5 rounded text-xs uppercase tracking-widest"
-            style={{ background: 'rgba(116,179,242,0.18)', color: '#74B3F2', border: '1px solid rgba(116,179,242,0.3)', fontFamily: "'ONDER', sans-serif", fontSize: '0.65rem' }}>
+            style={{ background: 'rgba(116,179,242,0.18)', color: 'var(--status-shipped)', border: '1px solid rgba(116,179,242,0.3)', fontFamily: "var(--font-onder)", fontSize: '0.65rem' }}>
             Скачать
           </button>
           <button onClick={deleteSelected} disabled={massDeleting}
             className="px-3 py-1.5 rounded text-xs uppercase tracking-widest"
-            style={{ background: 'rgba(224,128,128,0.18)', color: '#E08080', border: '1px solid rgba(224,128,128,0.3)', fontFamily: "'ONDER', sans-serif", fontSize: '0.65rem', opacity: massDeleting ? 0.5 : 1 }}>
+            style={{ background: 'rgba(224,128,128,0.18)', color: 'var(--status-error)', border: '1px solid rgba(224,128,128,0.3)', fontFamily: "var(--font-onder)", fontSize: '0.65rem', opacity: massDeleting ? 0.5 : 1 }}>
             {massDeleting ? 'Удаляем...' : 'Удалить'}
           </button>
           <button onClick={() => setSelected(new Set())}
-            className="ml-auto text-xs" style={{ color: accent, opacity: 0.5, fontFamily: "'Involve', sans-serif", background: 'none', border: 'none', cursor: 'pointer' }}>
+            className="ml-auto text-xs" style={{ color: accent, opacity: 0.5, fontFamily: "var(--font-involve)", background: 'none', border: 'none', cursor: 'pointer' }}>
             Снять выбор
           </button>
         </div>
@@ -221,16 +221,16 @@ export default function MediaClient() {
             onChange={selectAll}
             style={{ accentColor: accent, cursor: 'pointer' }}
           />
-          <span style={{ color: accent, opacity: 0.5, fontFamily: "'Involve', sans-serif", fontSize: '0.75rem' }}>
+          <span style={{ color: accent, opacity: 0.5, fontFamily: "var(--font-involve)", fontSize: '0.75rem' }}>
             Выбрать все
           </span>
         </div>
       )}
 
       {loading ? (
-        <div className="text-center py-20" style={{ color: accent, opacity: 0.5, fontFamily: "'Involve', sans-serif" }}>Загрузка...</div>
+        <div className="text-center py-20" style={{ color: accent, opacity: 0.5, fontFamily: "var(--font-involve)" }}>Загрузка...</div>
       ) : filtered.length === 0 ? (
-        <div className="text-center py-20" style={{ color: accent, opacity: 0.4, fontFamily: "'Involve', sans-serif" }}>Нет файлов</div>
+        <div className="text-center py-20" style={{ color: accent, opacity: 0.4, fontFamily: "var(--font-involve)" }}>Нет файлов</div>
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
           {filtered.map((file) => {
@@ -264,30 +264,30 @@ export default function MediaClient() {
                   )}
 
                   <span className="absolute top-1.5 right-1.5 px-1.5 py-0.5 rounded text-xs uppercase"
-                    style={{ background: 'var(--bg)', color: accent, fontFamily: "'ONDER', sans-serif", fontSize: '0.55rem' }}>
+                    style={{ background: 'var(--bg)', color: accent, fontFamily: "var(--font-onder)", fontSize: '0.55rem' }}>
                     {file.bucket}
                   </span>
                 </div>
 
                 {/* Info */}
                 <div className="p-2 flex flex-col gap-1.5 flex-1">
-                  <p className="text-xs leading-tight break-all" style={{ color: accent, fontFamily: "'Involve', sans-serif", opacity: 0.8 }} title={file.name}>
+                  <p className="text-xs leading-tight break-all" style={{ color: accent, fontFamily: "var(--font-involve)", opacity: 0.8 }} title={file.name}>
                     {file.name.length > 24 ? file.name.slice(0, 22) + '…' : file.name}
                   </p>
-                  <p className="text-xs" style={{ color: accent, opacity: 0.4, fontFamily: "'Involve', sans-serif" }}>
+                  <p className="text-xs" style={{ color: accent, opacity: 0.4, fontFamily: "var(--font-involve)" }}>
                     {formatBytes(file.size)} · {new Date(file.created_at).toLocaleDateString('ru-RU')}
                   </p>
                   <div className="flex gap-1 mt-auto pt-1">
                     <button onClick={() => copyUrl(file.url)} className="flex-1 py-1 rounded text-center"
-                      style={{ background: copied === file.url ? 'rgba(126,200,164,0.2)' : 'rgba(242,151,116,0.1)', color: copied === file.url ? '#7EC8A4' : accent, border: '1px solid rgba(242,151,116,0.2)', fontFamily: "'ONDER', sans-serif", fontSize: '0.55rem' }}
+                      style={{ background: copied === file.url ? 'rgba(126,200,164,0.2)' : 'rgba(242,151,116,0.1)', color: copied === file.url ? 'var(--status-paid)' : accent, border: '1px solid rgba(242,151,116,0.2)', fontFamily: "var(--font-onder)", fontSize: '0.55rem' }}
                       title="Копировать URL">
                       {copied === file.url ? '✓' : 'URL'}
                     </button>
                     <button onClick={() => window.open(file.url, '_blank')} className="px-2 py-1 rounded"
-                      style={{ background: 'rgba(242,151,116,0.1)', color: accent, border: '1px solid rgba(242,151,116,0.2)', fontFamily: "'ONDER', sans-serif", fontSize: '0.55rem' }}
+                      style={{ background: 'rgba(242,151,116,0.1)', color: accent, border: '1px solid rgba(242,151,116,0.2)', fontFamily: "var(--font-onder)", fontSize: '0.55rem' }}
                       title="Открыть">↗</button>
                     <button onClick={() => deleteFile(file)} disabled={deleting.has(file.url)} className="px-2 py-1 rounded"
-                      style={{ background: 'rgba(224,128,128,0.1)', color: '#E08080', border: '1px solid rgba(224,128,128,0.2)', fontFamily: "'ONDER', sans-serif", fontSize: '0.55rem', opacity: deleting.has(file.url) ? 0.5 : 1 }}
+                      style={{ background: 'rgba(224,128,128,0.1)', color: 'var(--status-error)', border: '1px solid rgba(224,128,128,0.2)', fontFamily: "var(--font-onder)", fontSize: '0.55rem', opacity: deleting.has(file.url) ? 0.5 : 1 }}
                       title="Удалить">✕</button>
                   </div>
                 </div>

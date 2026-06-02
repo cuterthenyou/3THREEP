@@ -128,24 +128,24 @@
 }
 
 .inputValid {
-  border-color: #7ec89a !important;
+  border-color: var(--status-paid) !important;
   box-shadow: 0 0 0 3px rgba(126, 200, 154, 0.12) !important;
 }
 
 .inputError {
-  border-color: #e05555 !important;
+  border-color: var(--status-error) !important;
   box-shadow: 0 0 0 3px rgba(224, 85, 85, 0.12) !important;
 }
 
 .fieldError {
-  color: #e08080;
+  color: var(--status-error);
   font-family: var(--font-involve);
   font-size: 0.75rem;
   margin-top: -0.25rem;
 }
 
 .errorText {
-  color: #e08080;
+  color: var(--status-error);
   font-family: var(--font-involve);
   font-size: 0.875rem;
 }

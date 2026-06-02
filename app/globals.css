@@ -58,6 +58,13 @@
   --border-soft:        rgba(242, 151, 116, 0.12);
   --overlay-bg:         rgba(13, 2, 2, 0.97);
 
+  /* ── Card theming ── */
+  --text-on-card: var(--text);
+
+  /* ── Overlay backdrops (theme-agnostic black tints) ── */
+  --overlay-heavy:  rgba(0, 0, 0, 0.75);
+  --overlay-medium: rgba(0, 0, 0, 0.55);
+
   /* ── Status colors (semantic, same across themes) ── */
   --status-new:         #F29774;
   --status-paid:        #7EC8A4;
@@ -77,7 +84,7 @@
 
   --bg:         #1c1c1e;
   --bg-2:       #2c2c2e;
-  --bg-card:    #2c2c2e;
+  --bg-card:    #FCB0B2;
   --text:       #FCB0B2;
   --text-muted: rgba(252, 176, 178, 0.55);
   --accent:     #FCB0B2;
@@ -89,6 +96,9 @@
   --bg-subtle:          rgba(252, 176, 178, 0.08);
   --border-soft:        rgba(252, 176, 178, 0.12);
   --overlay-bg:         rgba(10, 10, 12, 0.97);
+
+  /* ── Card theming — dark bg contrasts on pink card ── */
+  --text-on-card: var(--bg);
 
   /* ── Status colors (same as light — semantic meaning unchanged) ── */
   --status-new:         #F29774;
@@ -138,7 +148,7 @@ h3,
 h4,
 h5,
 h6 {
-  font-family: 'ONDER', sans-serif;
+  font-family: var(--font-onder);
 }
 
 h1 { font-size: var(--fs-h1); }

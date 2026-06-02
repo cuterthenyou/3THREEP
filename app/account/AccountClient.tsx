@@ -306,7 +306,7 @@ export default function AccountClient({ user, profile, orders }: Props) {
                           className="w-full h-full flex items-center justify-center"
                           style={{ background: 'var(--bg-subtle)' }}
                         >
-                          <span style={{ color: 'var(--accent)', fontFamily: "'ONDER', sans-serif", fontSize: '0.55rem' }}>
+                          <span style={{ color: 'var(--accent)', fontFamily: "var(--font-onder)", fontSize: '0.55rem' }}>
                             {item.product_name}
                           </span>
                         </div>
@@ -339,7 +339,7 @@ export default function AccountClient({ user, profile, orders }: Props) {
                         style={{
                           background: STATUS_COLORS[order.status] + '22',
                           color: STATUS_COLORS[order.status],
-                          fontFamily: "'ONDER', sans-serif",
+                          fontFamily: "var(--font-onder)",
                           fontSize: '0.6rem',
                           border: `1px solid ${STATUS_COLORS[order.status]}55`,
                         }}

@@ -28,9 +28,9 @@ export default function Header({ isAdminUser = false }: Props) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [expanded, setExpanded] = useState<string | null>(null);
   const [collections, setCollections] = useState<Collection[]>([]);
+  const [collectionsLoading, setCollectionsLoading] = useState(true);
   const [isDark, setIsDark] = useState(false);
   const [menuUser, setMenuUser] = useState<{ name: string; level: number } | null>(null);
-  const collectionsLoaded = useRef(false);
   const menuHistoryPushed = useRef(false);
 
   function closeMenu() {
@@ -48,6 +48,14 @@ export default function Header({ isAdminUser = false }: Props) {
       .then(r => r.ok ? r.json() : { user: null })
       .then(d => setMenuUser(d.user ?? null))
       .catch(() => {});
+  }, []);
+
+  // Eager-load collections on mount so they're ready when menu opens
+  useEffect(() => {
+    fetch('/api/collections')
+      .then(r => r.ok ? r.json() : { collections: [] })
+      .then(d => { setCollections(d.collections ?? []); setCollectionsLoading(false); })
+      .catch(() => setCollectionsLoading(false));
   }, []);
 
   // Sync theme icon with current theme
@@ -109,16 +117,8 @@ export default function Header({ isAdminUser = false }: Props) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [menuOpen]);
 
-  // Load collections lazily on first open
   const openMenu = useCallback(() => {
     setMenuOpen(true);
-    if (!collectionsLoaded.current) {
-      collectionsLoaded.current = true;
-      fetch('/api/collections')
-        .then(r => r.ok ? r.json() : { collections: [] })
-        .then(d => setCollections(d.collections ?? []))
-        .catch(() => {});
-    }
   }, []);
 
   function toggle(section: string) {
@@ -217,14 +217,17 @@ export default function Header({ isAdminUser = false }: Props) {
             </button>
             <div className={`${s.sub} ${expanded === 'collections' ? s.subOpen : ''}`}>
               <Link href="/#catalog" onClick={() => setMenuOpen(false)} className={s.subLink}>Все коллекции</Link>
-              {collections.map(c => (
-                <div key={c.slug}>
-                  <Link href={`/?collection=${c.slug}`} onClick={() => setMenuOpen(false)} className={s.subLink}>{c.name}</Link>
-                  {c.types?.map(type => (
-                    <Link key={type} href={`/?collection=${c.slug}`} onClick={() => setMenuOpen(false)} className={s.subLinkType}>{type}</Link>
-                  ))}
-                </div>
-              ))}
+              {collectionsLoading
+                ? <span className={s.subLink} style={{ opacity: 0.3, cursor: 'default' }}>...</span>
+                : collections.map(c => (
+                  <div key={c.slug}>
+                    <Link href={`/?collection=${c.slug}`} onClick={() => setMenuOpen(false)} className={s.subLink}>{c.name}</Link>
+                    {c.types?.map(type => (
+                      <Link key={type} href={`/?collection=${c.slug}`} onClick={() => setMenuOpen(false)} className={s.subLinkType}>{type}</Link>
+                    ))}
+                  </div>
+                ))
+              }
             </div>
           </div>
 

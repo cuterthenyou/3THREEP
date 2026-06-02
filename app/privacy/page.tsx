@@ -10,7 +10,7 @@ const SECTION = ({ title, children }: { title: string; children: React.ReactNode
   <div style={{ marginBottom: '2rem' }}>
     <h2 style={{
       color: 'var(--text)',
-      fontFamily: "'ONDER', sans-serif",
+      fontFamily: "var(--font-onder)",
       fontSize: '1rem',
       textTransform: 'uppercase',
       letterSpacing: '0.08em',
@@ -20,7 +20,7 @@ const SECTION = ({ title, children }: { title: string; children: React.ReactNode
     </h2>
     <div style={{
       color: 'var(--text)',
-      fontFamily: "'Involve', sans-serif",
+      fontFamily: "var(--font-involve)",
       fontSize: '0.875rem',
       lineHeight: '1.7',
       opacity: 0.85,
@@ -42,7 +42,7 @@ export default function PrivacyPage() {
             display: 'inline-block',
             marginBottom: '2rem',
             color: 'var(--text)',
-            fontFamily: "'ONDER', sans-serif",
+            fontFamily: "var(--font-onder)",
             fontSize: '0.75rem',
             textTransform: 'uppercase',
             letterSpacing: '0.1em',
@@ -55,7 +55,7 @@ export default function PrivacyPage() {
 
         <h1 style={{
           color: 'var(--text)',
-          fontFamily: "'ONDER', sans-serif",
+          fontFamily: "var(--font-onder)",
           fontSize: '1.5rem',
           textTransform: 'uppercase',
           letterSpacing: '0.05em',
@@ -65,7 +65,7 @@ export default function PrivacyPage() {
         </h1>
         <p style={{
           color: 'var(--text)',
-          fontFamily: "'Involve', sans-serif",
+          fontFamily: "var(--font-involve)",
           fontSize: '0.8rem',
           opacity: 0.45,
           marginBottom: '2.5rem',
@@ -197,7 +197,7 @@ export default function PrivacyPage() {
             display: 'inline-block',
             marginTop: '2rem',
             color: 'var(--text)',
-            fontFamily: "'ONDER', sans-serif",
+            fontFamily: "var(--font-onder)",
             fontSize: '0.75rem',
             textTransform: 'uppercase',
             letterSpacing: '0.1em',

@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { signOut } from 'next-auth/react'
 import s from './Header.module.css'
 
 interface UserData {
@@ -43,7 +44,7 @@ export default function UserButton() {
 
   async function handleSignOut() {
     setOpen(false)
-    await fetch('/api/auth/signout', { method: 'POST' })
+    await signOut({ redirect: false })
     router.push('/')
     router.refresh()
   }
@@ -63,7 +64,7 @@ export default function UserButton() {
       {/* Mobile: icon only */}
       <button
         onClick={() => setOpen(v => !v)}
-        className={`sm:hidden flex items-center justify-center w-9 h-9 rounded-lg ${s.navBtn}`}
+        className={`md:hidden flex items-center justify-center w-9 h-9 rounded-lg ${s.navBtn}`}
         aria-label="Аккаунт"
       >
         <PersonIcon />
@@ -72,12 +73,12 @@ export default function UserButton() {
       {/* Desktop: full pill with name + level */}
       <button
         onClick={() => setOpen(v => !v)}
-        className={`hidden sm:flex items-center ${s.themeBadge}`}
+        className={`hidden md:flex items-center ${s.themeBadge}`}
         aria-label="Аккаунт"
         style={{ gap: '0.3rem' }}
       >
         <PersonIcon />
-        <span style={{ maxWidth: '7rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+        <span style={{ whiteSpace: 'nowrap' }}>
           {user.name}
         </span>
         <span style={{ opacity: 0.45, fontSize: '0.48rem', letterSpacing: '0.15em', flexShrink: 0 }}>

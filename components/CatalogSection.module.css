@@ -12,7 +12,7 @@
 
 .filterBtnActive {
   background: var(--color-accent);
-  color: var(--text);
+  color: var(--bg);
   animation: pulseGlow 2.5s ease-in-out infinite;
 }
 
@@ -50,10 +50,7 @@
   background: transparent;
 }
 
-:global([data-theme="dark"]) .themeOverlay {
-  background: rgba(245, 208, 216, 0.1);
-  mix-blend-mode: screen;
-}
+/* themeOverlay disabled — card bg is already themed via --bg-card */
 
 /* VHS glitch layer — theme-aware in dark mode */
 .vhsGlitch {}
@@ -134,7 +131,7 @@
 }
 
 .productType {
-  color: var(--text);
+  color: var(--text-on-card);
   font-family: var(--font-involve);
   font-size: 0.6rem;
   text-transform: uppercase;
@@ -146,7 +143,7 @@
 }
 
 .productName {
-  color: var(--text);
+  color: var(--text-on-card);
   font-family: var(--font-onder);
   font-size: 0.78rem;
   line-height: 1.5;
@@ -159,7 +156,7 @@
 }
 
 .productPrice {
-  color: var(--text);
+  color: var(--text-on-card);
   font-family: var(--font-deutsch);
   font-size: 1.25rem;
   line-height: 1;
@@ -186,7 +183,7 @@
   padding: 0.32rem 0.9rem;
   font-size: 0.62rem;
   border-radius: 6px;
-  font-family: 'Involve', sans-serif;
+  font-family: var(--font-involve);
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -216,7 +213,7 @@
 .typeBtnSoon {
   padding: 0.32rem 0.9rem;
   font-size: 0.62rem;
-  font-family: 'Involve', sans-serif;
+  font-family: var(--font-involve);
   font-weight: 400;
   letter-spacing: 0.1em;
   text-transform: uppercase;

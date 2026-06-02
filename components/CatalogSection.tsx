@@ -179,9 +179,10 @@ function ProductCard({
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  // Staggered auto-slide — pauses 5s after user interaction
+  // Staggered auto-slide — pauses 5s after user interaction; skips if reduce-motion enabled
   useEffect(() => {
     if (product.images.length <= 1) return
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
     let id: ReturnType<typeof setInterval>
     const startId = setTimeout(() => {
       id = setInterval(() => {
@@ -213,7 +214,7 @@ function ProductCard({
   return (
     <div
       className={`flex flex-col w-full ${s.productCard}`}
-      style={{ background: 'var(--bg)' }}
+      style={{ background: 'var(--bg-card)' }}
       onClick={() => onOpen(product)}
       onMouseEnter={triggerGlitch}
     >

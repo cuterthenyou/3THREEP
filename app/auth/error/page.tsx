@@ -21,19 +21,19 @@ function ErrorContent() {
     <div className="min-h-screen flex items-center justify-center p-4" style={{ background: 'var(--bg)' }}>
       <div className="max-w-md w-full space-y-6 text-center">
         <div className="space-y-2">
-          <h1 className="text-4xl font-bold" style={{ color: 'var(--accent)', fontFamily: "'ONDER', sans-serif" }}>
+          <h1 className="text-4xl font-bold" style={{ color: 'var(--accent)', fontFamily: "var(--font-onder)" }}>
             ⚠️
           </h1>
-          <h2 className="text-2xl font-bold" style={{ color: 'var(--accent)', fontFamily: "'ONDER', sans-serif" }}>
+          <h2 className="text-2xl font-bold" style={{ color: 'var(--accent)', fontFamily: "var(--font-onder)" }}>
             ОШИБКА ВХОДА
           </h2>
-          <p className="text-lg" style={{ color: 'var(--accent)', opacity: 0.8, fontFamily: "'Involve', sans-serif" }}>
+          <p className="text-lg" style={{ color: 'var(--accent)', opacity: 0.8, fontFamily: "var(--font-involve)" }}>
             {message}
           </p>
         </div>
 
         <div className="space-y-4">
-          <p className="text-sm" style={{ color: 'var(--accent)', opacity: 0.6, fontFamily: "'Involve', sans-serif" }}>
+          <p className="text-sm" style={{ color: 'var(--accent)', opacity: 0.6, fontFamily: "var(--font-involve)" }}>
             {error === 'Verification' && 'Возможно, ссылка устарела или уже была использована.'}
             {error === 'AccessDenied' && 'У вас нет доступа к этому ресурсу.'}
             {!error && 'Попробуйте войти снова.'}
@@ -46,7 +46,7 @@ function ErrorContent() {
               background: 'var(--accent)',
               color: 'var(--bg)',
               borderRadius: '5px',
-              fontFamily: "'ONDER', sans-serif",
+              fontFamily: "var(--font-onder)",
               fontSize: '0.8rem',
             }}
           >
@@ -55,7 +55,7 @@ function ErrorContent() {
         </div>
 
         {error && (
-          <p className="text-xs" style={{ color: 'var(--accent)', opacity: 0.4, fontFamily: "'Involve', sans-serif" }}>
+          <p className="text-xs" style={{ color: 'var(--accent)', opacity: 0.4, fontFamily: "var(--font-involve)" }}>
             Код ошибки: {error}
           </p>
         )}

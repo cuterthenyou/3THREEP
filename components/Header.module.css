@@ -31,7 +31,7 @@
   gap: 0.3rem;
   padding: 0.3rem 0.65rem;
   border-radius: 100px;
-  font-family: 'ONDER', sans-serif;
+  font-family: var(--font-onder);
   font-size: 0.58rem;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -101,7 +101,7 @@
 }
 
 .navLink {
-  font-family: 'Involve', sans-serif;
+  font-family: var(--font-involve);
   font-weight: 800;
   font-size: clamp(1.3rem, 5vw, 1.8rem);
   text-transform: uppercase;
@@ -145,7 +145,7 @@
 .navLink:hover { opacity: 0.65; }
 
 .navLinkSmall {
-  font-family: 'Involve', sans-serif;
+  font-family: var(--font-involve);
   font-weight: 800;
   font-size: clamp(1.3rem, 5vw, 1.8rem);
   opacity: 0.8;
@@ -185,7 +185,7 @@
 
 /* ── Burger menu user info ── */
 .menuUserInfo {
-  font-family: 'Involve', sans-serif;
+  font-family: var(--font-involve);
   font-size: 0.62rem;
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -200,7 +200,7 @@
 }
 
 .subLink {
-  font-family: 'Involve', sans-serif;
+  font-family: var(--font-involve);
   font-weight: 400;
   font-size: clamp(0.9rem, 3.5vw, 1.15rem);
   color: var(--accent);
@@ -214,7 +214,7 @@
 .subLink:hover { opacity: 1; }
 
 .subLinkType {
-  font-family: 'Involve', sans-serif;
+  font-family: var(--font-involve);
   font-weight: 400;
   font-size: clamp(0.72rem, 2.5vw, 0.88rem);
   color: var(--accent);
@@ -230,7 +230,7 @@
 .subLinkType:hover { opacity: 0.7; }
 
 .adminDivider {
-  font-family: 'Involve', sans-serif;
+  font-family: var(--font-involve);
   font-size: 0.65rem;
   letter-spacing: 0.25em;
   text-transform: uppercase;
@@ -247,7 +247,7 @@
 }
 
 .footerLink {
-  font-family: 'Involve', sans-serif;
+  font-family: var(--font-involve);
   font-size: 0.68rem;
   color: var(--accent);
   opacity: 0.3;
@@ -275,7 +275,7 @@
   display: block;
   width: 100%;
   padding: 0.6rem 1rem;
-  font-family: 'Involve', sans-serif;
+  font-family: var(--font-involve);
   font-size: 0.72rem;
   letter-spacing: 0.06em;
   text-transform: uppercase;

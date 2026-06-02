@@ -15,13 +15,22 @@ export async function GET() {
       ),
     ])
 
+    // Fallback: if categories table has no rows, derive slugs from products directly
+    const effectiveCategories = categories.length > 0
+      ? categories
+      : await queryMany<{ slug: string; name: string }>(
+          `SELECT DISTINCT category AS slug, category AS name
+           FROM products WHERE active = true AND category IS NOT NULL
+           ORDER BY category ASC`
+        )
+
     const typeMap: Record<string, string[]> = {}
     for (const row of productTypes) {
       typeMap[row.category] = row.types ?? []
     }
 
     return NextResponse.json({
-      collections: categories.map(c => ({ ...c, types: typeMap[c.slug] ?? [] })),
+      collections: effectiveCategories.map(c => ({ ...c, types: typeMap[c.slug] ?? [] })),
     })
   } catch {
     return NextResponse.json({ collections: [] })

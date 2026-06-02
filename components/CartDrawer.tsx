@@ -87,7 +87,7 @@ export default function CartDrawer() {
       {open && (
         <div
           className="fixed inset-0 z-40"
-          style={{ background: 'rgba(0,0,0,0.6)' }}
+          style={{ background: 'var(--overlay-medium)' }}
           onClick={closeCart}
         />
       )}

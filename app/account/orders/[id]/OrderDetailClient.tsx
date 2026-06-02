@@ -101,7 +101,7 @@ export default function OrderDetailClient({ order, messages: initialMessages, us
               style={{
                 background: statusColor + '22',
                 color: statusColor,
-                fontFamily: "'ONDER', sans-serif",
+                fontFamily: "var(--font-onder)",
                 fontSize: '0.65rem',
                 border: `1px solid ${statusColor}`,
               }}

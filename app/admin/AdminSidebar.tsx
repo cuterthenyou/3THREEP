@@ -50,7 +50,7 @@ function NavItems({ pathname, collapsed, onNavigate }: { pathname: string; colla
           >
             <Icon size={18} style={{ flexShrink: 0 }} />
             {!collapsed && (
-              <span style={{ fontFamily: "'Involve', sans-serif", fontSize: '0.82rem', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              <span style={{ fontFamily: "var(--font-involve)", fontSize: '0.82rem', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                 {label}
               </span>
             )}
@@ -107,21 +107,21 @@ export default function AdminSidebar() {
             title={collapsed ? 'На сайт' : undefined}
             style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: collapsed ? '0.6rem' : '0.55rem 0.75rem', justifyContent: collapsed ? 'center' : 'flex-start', borderRadius: '0.5rem', color: 'var(--text-muted)', textDecoration: 'none', whiteSpace: 'nowrap' }}>
             <IconLogout size={16} style={{ flexShrink: 0 }} />
-            {!collapsed && <span style={{ fontFamily: "'Involve', sans-serif", fontSize: '0.75rem' }}>На сайт</span>}
+            {!collapsed && <span style={{ fontFamily: "var(--font-involve)", fontSize: '0.75rem' }}>На сайт</span>}
           </Link>
           <button
             onClick={() => { toggleTheme(); setIsDark(d => !d) }}
             title={isDark ? 'Светлая тема' : 'Тёмная тема'}
             style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: collapsed ? '0.6rem' : '0.55rem 0.75rem', justifyContent: collapsed ? 'center' : 'flex-start', borderRadius: '0.5rem', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--accent)', width: '100%', whiteSpace: 'nowrap', opacity: 0.75 }}>
             {isDark ? <IconSun size={16} style={{ flexShrink: 0 }} /> : <IconMoon2 size={16} style={{ flexShrink: 0 }} />}
-            {!collapsed && <span style={{ fontFamily: "'Involve', sans-serif", fontSize: '0.75rem' }}>{isDark ? 'Светлая' : 'Тёмная'}</span>}
+            {!collapsed && <span style={{ fontFamily: "var(--font-involve)", fontSize: '0.75rem' }}>{isDark ? 'Светлая' : 'Тёмная'}</span>}
           </button>
           <button
             onClick={() => setCollapsed(v => !v)}
             aria-label={collapsed ? 'Развернуть' : 'Свернуть'}
             style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: collapsed ? '0.6rem' : '0.55rem 0.75rem', justifyContent: collapsed ? 'center' : 'flex-start', borderRadius: '0.5rem', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', width: '100%', whiteSpace: 'nowrap', opacity: 0.6 }}>
             {collapsed ? <IconChevronRight size={16} /> : <IconChevronLeft size={16} />}
-            {!collapsed && <span style={{ fontFamily: "'Involve', sans-serif", fontSize: '0.7rem' }}>Свернуть</span>}
+            {!collapsed && <span style={{ fontFamily: "var(--font-involve)", fontSize: '0.7rem' }}>Свернуть</span>}
           </button>
         </div>
       </aside>
@@ -140,7 +140,7 @@ export default function AdminSidebar() {
       {mobileOpen && (
         <div
           className="md:hidden fixed inset-0 z-40"
-          style={{ background: 'rgba(0,0,0,0.55)' }}
+          style={{ background: 'var(--overlay-medium)' }}
           onClick={() => setMobileOpen(false)}
         />
       )}
@@ -168,13 +168,13 @@ export default function AdminSidebar() {
           <Link href="/" onClick={() => setMobileOpen(false)}
             style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.55rem 0.75rem', borderRadius: '0.5rem', color: 'var(--text-muted)', textDecoration: 'none', whiteSpace: 'nowrap' }}>
             <IconLogout size={16} style={{ flexShrink: 0 }} />
-            <span style={{ fontFamily: "'Involve', sans-serif", fontSize: '0.75rem' }}>На сайт</span>
+            <span style={{ fontFamily: "var(--font-involve)", fontSize: '0.75rem' }}>На сайт</span>
           </Link>
           <button
             onClick={() => { toggleTheme(); setIsDark(d => !d) }}
             style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.55rem 0.75rem', borderRadius: '0.5rem', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--accent)', width: '100%', whiteSpace: 'nowrap', opacity: 0.75 }}>
             {isDark ? <IconSun size={16} style={{ flexShrink: 0 }} /> : <IconMoon2 size={16} style={{ flexShrink: 0 }} />}
-            <span style={{ fontFamily: "'Involve', sans-serif", fontSize: '0.75rem' }}>{isDark ? 'Светлая' : 'Тёмная'}</span>
+            <span style={{ fontFamily: "var(--font-involve)", fontSize: '0.75rem' }}>{isDark ? 'Светлая' : 'Тёмная'}</span>
           </button>
         </div>
       </aside>

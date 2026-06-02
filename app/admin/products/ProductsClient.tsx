@@ -17,13 +17,13 @@ const INPUT_STYLE = {
   background: 'var(--bg-subtle)',
   color: 'var(--accent)',
   border: '1px solid var(--border)',
-  fontFamily: "'Involve', sans-serif",
+  fontFamily: "var(--font-involve)",
 }
 
 const LABEL_STYLE = {
   color: 'var(--accent)',
   opacity: 0.5,
-  fontFamily: "'ONDER', sans-serif",
+  fontFamily: "var(--font-onder)",
 }
 
 function formatPrice(p: number) { return p.toLocaleString('ru-RU') + ' ₽' }
@@ -97,7 +97,7 @@ export default function ProductsClient({ products }: { products: Product[] }) {
   function SortHeader({ label, k }: { label: string; k: SortKey }) {
     const active = sortKey === k
     return (
-      <button onClick={() => toggleSort(k)} style={{ color: 'var(--accent)', opacity: active ? 1 : 0.4, fontFamily: "'ONDER', sans-serif", fontSize: '0.65rem', letterSpacing: '0.1em', textTransform: 'uppercase', cursor: 'pointer', background: 'none', border: 'none', display: 'flex', alignItems: 'center', gap: '4px' }}>
+      <button onClick={() => toggleSort(k)} style={{ color: 'var(--accent)', opacity: active ? 1 : 0.4, fontFamily: "var(--font-onder)", fontSize: '0.65rem', letterSpacing: '0.1em', textTransform: 'uppercase', cursor: 'pointer', background: 'none', border: 'none', display: 'flex', alignItems: 'center', gap: '4px' }}>
         {label} {active ? (sortDir === 'asc' ? '↑' : '↓') : ''}
       </button>
     )
@@ -193,12 +193,12 @@ export default function ProductsClient({ products }: { products: Product[] }) {
     <div className="px-6 py-6 max-w-4xl mx-auto">
       <div className="flex items-center justify-between mb-4">
         <h1 className="uppercase tracking-widest"
-          style={{ color: 'var(--accent)', fontFamily: "'ONDER', sans-serif", fontSize: 'clamp(0.9rem, 3vw, 1.1rem)' }}>
+          style={{ color: 'var(--accent)', fontFamily: "var(--font-onder)", fontSize: 'clamp(0.9rem, 3vw, 1.1rem)' }}>
           Товары ({filtered.length}/{products.length})
         </h1>
         <button onClick={openNew}
           className="uppercase tracking-widest transition-opacity hover:opacity-80"
-          style={{ background: 'var(--accent)', color: 'var(--bg)', borderRadius: '8px', fontFamily: "'ONDER', sans-serif", fontSize: '0.68rem', padding: '0.4rem 0.8rem' }}>
+          style={{ background: 'var(--accent)', color: 'var(--bg)', borderRadius: '8px', fontFamily: "var(--font-onder)", fontSize: '0.68rem', padding: '0.4rem 0.8rem' }}>
           + Добавить товар
         </button>
       </div>
@@ -211,18 +211,18 @@ export default function ProductsClient({ products }: { products: Product[] }) {
           value={search}
           onChange={e => setSearch(e.target.value)}
           className="flex-1 min-w-[180px] px-3 py-2 rounded-lg text-sm outline-none"
-          style={{ background: 'rgba(242,151,116,0.08)', color: 'var(--accent)', border: '1px solid rgba(242,151,116,0.2)', fontFamily: "'Involve', sans-serif" }}
+          style={{ background: 'rgba(242,151,116,0.08)', color: 'var(--accent)', border: '1px solid rgba(242,151,116,0.2)', fontFamily: "var(--font-involve)" }}
         />
         <select value={filterActive} onChange={e => setFilterActive(e.target.value)}
           className="px-3 py-2 rounded-lg text-xs outline-none"
-          style={{ background: 'rgba(242,151,116,0.08)', color: 'var(--accent)', border: '1px solid rgba(242,151,116,0.2)', fontFamily: "'Involve', sans-serif" }}>
+          style={{ background: 'rgba(242,151,116,0.08)', color: 'var(--accent)', border: '1px solid rgba(242,151,116,0.2)', fontFamily: "var(--font-involve)" }}>
           <option value="all">Все статусы</option>
           <option value="active">Активные</option>
           <option value="hidden">Скрытые</option>
         </select>
         <select value={filterStock} onChange={e => setFilterStock(e.target.value)}
           className="px-3 py-2 rounded-lg text-xs outline-none"
-          style={{ background: 'rgba(242,151,116,0.08)', color: 'var(--accent)', border: '1px solid rgba(242,151,116,0.2)', fontFamily: "'Involve', sans-serif" }}>
+          style={{ background: 'rgba(242,151,116,0.08)', color: 'var(--accent)', border: '1px solid rgba(242,151,116,0.2)', fontFamily: "var(--font-involve)" }}>
           <option value="all">Любой остаток</option>
           <option value="in">В наличии</option>
           <option value="out">Нет в наличии</option>
@@ -241,7 +241,7 @@ export default function ProductsClient({ products }: { products: Product[] }) {
 
       <div className="flex flex-col gap-3">
         {filtered.length === 0 && (
-          <p className="text-sm" style={{ color: 'var(--accent)', opacity: 0.4, fontFamily: "'Involve', sans-serif" }}>
+          <p className="text-sm" style={{ color: 'var(--accent)', opacity: 0.4, fontFamily: "var(--font-involve)" }}>
             Ничего не найдено
           </p>
         )}
@@ -257,20 +257,20 @@ export default function ProductsClient({ products }: { products: Product[] }) {
               )}
             </div>
             <div className="min-w-0">
-              <p className="truncate font-bold" style={{ color: 'var(--accent)', fontFamily: "'Involve', sans-serif", fontWeight: 700 }}>{p.name}</p>
-              <p className="truncate text-xs mt-0.5" style={{ color: 'var(--accent)', opacity: 0.5, fontFamily: "'Involve', sans-serif" }}>
+              <p className="truncate font-bold" style={{ color: 'var(--accent)', fontFamily: "var(--font-involve)", fontWeight: 700 }}>{p.name}</p>
+              <p className="truncate text-xs mt-0.5" style={{ color: 'var(--accent)', opacity: 0.5, fontFamily: "var(--font-involve)" }}>
                 <span style={{ fontFamily: 'var(--font-deutsch)', opacity: 1 }}>{formatPrice(p.price)}</span>
                 {' · '}Остаток: {p.stock}
               </p>
               <div className="flex gap-2 flex-wrap mt-2">
                 <button onClick={() => openEdit(p)}
                   className="px-2.5 py-1 text-xs uppercase tracking-widest rounded-lg"
-                  style={{ background: 'var(--accent-2)', color: 'var(--accent)', fontFamily: "'Involve', sans-serif", fontWeight: 700, fontSize: '0.62rem' }}>
+                  style={{ background: 'var(--accent-2)', color: 'var(--accent)', fontFamily: "var(--font-involve)", fontWeight: 700, fontSize: '0.62rem' }}>
                   Ред.
                 </button>
                 <button onClick={() => toggleActive(p.id, p.active)}
                   className="px-2.5 py-1 text-xs uppercase tracking-widest rounded-lg"
-                  style={{ background: 'var(--bg-subtle)', color: 'var(--accent)', opacity: 0.7, fontFamily: "'Involve', sans-serif", fontWeight: 700, fontSize: '0.62rem', border: '1px solid var(--border-soft)' }}>
+                  style={{ background: 'var(--bg-subtle)', color: 'var(--accent)', opacity: 0.7, fontFamily: "var(--font-involve)", fontWeight: 700, fontSize: '0.62rem', border: '1px solid var(--border-soft)' }}>
                   {p.active ? 'Скрыть' : 'Показать'}
                 </button>
               </div>
@@ -281,13 +281,13 @@ export default function ProductsClient({ products }: { products: Product[] }) {
 
       {editing && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4"
-          style={{ background: 'rgba(0,0,0,0.75)' }}>
+          style={{ background: 'var(--overlay-heavy)' }}>
           <div className="w-full max-w-lg rounded-2xl p-6 flex flex-col gap-4 overflow-y-auto max-h-[92vh]"
             style={{ background: 'var(--bg-2)', border: '1px solid rgba(242,151,116,0.25)' }}>
 
             <div className="flex items-center justify-between">
               <h2 className="text-lg uppercase tracking-widest"
-                style={{ color: 'var(--accent)', fontFamily: "'Involve', sans-serif", fontWeight: 800 }}>
+                style={{ color: 'var(--accent)', fontFamily: "var(--font-involve)", fontWeight: 800 }}>
                 {editing.id ? 'Редактировать' : 'Новый товар'}
               </h2>
               <button onClick={() => setEditing(null)} style={{ color: 'var(--accent)', opacity: 0.4, fontSize: '1.2rem' }}>✕</button>
@@ -352,13 +352,13 @@ export default function ProductsClient({ products }: { products: Product[] }) {
                 }}
               >
                 {uploading ? (
-                  <p className="text-sm" style={{ color: 'var(--accent)', fontFamily: "'Involve', sans-serif" }}>Загружаем...</p>
+                  <p className="text-sm" style={{ color: 'var(--accent)', fontFamily: "var(--font-involve)" }}>Загружаем...</p>
                 ) : (
                   <>
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" strokeWidth="1.5" opacity={0.5}>
                       <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="17 8 12 3 7 8" /><line x1="12" y1="3" x2="12" y2="15" />
                     </svg>
-                    <p className="text-xs" style={{ color: 'var(--accent)', opacity: 0.5, fontFamily: "'Involve', sans-serif" }}>
+                    <p className="text-xs" style={{ color: 'var(--accent)', opacity: 0.5, fontFamily: "var(--font-involve)" }}>
                       Перетащи или кликни для загрузки
                     </p>
                   </>
@@ -376,7 +376,7 @@ export default function ProductsClient({ products }: { products: Product[] }) {
                       <button
                         onClick={() => removeImage(i)}
                         className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                        style={{ background: 'rgba(0,0,0,0.6)', color: 'var(--accent)', fontSize: '1rem' }}
+                        style={{ background: 'var(--overlay-medium)', color: 'var(--accent)', fontSize: '1rem' }}
                       >✕</button>
                     </div>
                   ))}
@@ -388,24 +388,24 @@ export default function ProductsClient({ products }: { products: Product[] }) {
               <input type="checkbox" id="prod-active" checked={editing.active ?? true}
                 onChange={e => setEditing(ed => ({ ...ed, active: e.target.checked }))} />
               <label htmlFor="prod-active" className="text-sm"
-                style={{ color: 'var(--accent)', fontFamily: "'Involve', sans-serif" }}>
+                style={{ color: 'var(--accent)', fontFamily: "var(--font-involve)" }}>
                 Показывать в каталоге
               </label>
             </div>
 
             {error && (
-              <p className="text-sm" style={{ color: '#E08080', fontFamily: "'Involve', sans-serif" }}>{error}</p>
+              <p className="text-sm" style={{ color: 'var(--status-error)', fontFamily: "var(--font-involve)" }}>{error}</p>
             )}
 
             <div className="flex gap-3">
               <button onClick={save} disabled={saving || uploading}
                 className="flex-1 py-3 uppercase tracking-widest transition-opacity"
-                style={{ background: 'var(--accent)', color: 'var(--bg)', borderRadius: '8px', fontFamily: "'ONDER', sans-serif", fontSize: '0.75rem', opacity: saving || uploading ? 0.5 : 1 }}>
+                style={{ background: 'var(--accent)', color: 'var(--bg)', borderRadius: '8px', fontFamily: "var(--font-onder)", fontSize: '0.75rem', opacity: saving || uploading ? 0.5 : 1 }}>
                 {saving ? 'Сохраняем...' : 'Сохранить'}
               </button>
               <button onClick={() => setEditing(null)}
                 className="px-4 py-3 uppercase tracking-widest"
-                style={{ background: 'rgba(242,151,116,0.1)', color: 'var(--accent)', borderRadius: '8px', fontFamily: "'ONDER', sans-serif", fontSize: '0.75rem' }}>
+                style={{ background: 'rgba(242,151,116,0.1)', color: 'var(--accent)', borderRadius: '8px', fontFamily: "var(--font-onder)", fontSize: '0.75rem' }}>
                 Отмена
               </button>
             </div>

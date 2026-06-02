@@ -50,8 +50,8 @@ function SocialRow({
       onMouseLeave={e => (e.currentTarget.style.opacity = '1')}
     >
       <span style={{ color: 'var(--accent)', opacity: 0.8, flexShrink: 0, display: 'flex' }}>{icon}</span>
-      <span style={{ fontFamily: "'ONDER', sans-serif", fontSize: '0.58rem', letterSpacing: '0.16em', opacity: 0.4, minWidth: '2.2rem', textTransform: 'uppercase' }}>{label}</span>
-      <span style={{ fontFamily: "'Involve', sans-serif", fontSize: '0.88rem' }}>{handle}</span>
+      <span style={{ fontFamily: "var(--font-onder)", fontSize: '0.58rem', letterSpacing: '0.16em', opacity: 0.4, minWidth: '2.2rem', textTransform: 'uppercase' }}>{label}</span>
+      <span style={{ fontFamily: "var(--font-involve)", fontSize: '0.88rem' }}>{handle}</span>
     </a>
   )
 }
@@ -59,7 +59,7 @@ function SocialRow({
 function InfoSection({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div>
-      <p style={{ fontFamily: "'ONDER', sans-serif", fontSize: '0.6rem', letterSpacing: '0.16em', opacity: 0.4, marginBottom: '0.6rem', textTransform: 'uppercase' }}>{label}</p>
+      <p style={{ fontFamily: "var(--font-onder)", fontSize: '0.6rem', letterSpacing: '0.16em', opacity: 0.4, marginBottom: '0.6rem', textTransform: 'uppercase' }}>{label}</p>
       {children}
     </div>
   )
@@ -72,11 +72,11 @@ export default function InfoPage() {
     <main style={{ background: 'var(--bg)', minHeight: '100vh', padding: '2rem 1rem 4rem' }}>
       <div style={{ maxWidth: '560px', margin: '0 auto' }}>
 
-        <Link href="/" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', color: 'var(--text)', fontFamily: "'ONDER', sans-serif", fontSize: '0.62rem', letterSpacing: '0.14em', textTransform: 'uppercase', textDecoration: 'none', opacity: 0.4, marginBottom: '2.5rem' }}>
+        <Link href="/" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', color: 'var(--text)', fontFamily: "var(--font-onder)", fontSize: '0.62rem', letterSpacing: '0.14em', textTransform: 'uppercase', textDecoration: 'none', opacity: 0.4, marginBottom: '2.5rem' }}>
           ← Главная
         </Link>
 
-        <h1 style={{ color: 'var(--text)', fontFamily: "'ONDER', sans-serif", fontSize: 'clamp(2rem, 8vw, 3.2rem)', marginBottom: '0.5rem', letterSpacing: '0.05em', lineHeight: 1 }}>
+        <h1 style={{ color: 'var(--text)', fontFamily: "var(--font-onder)", fontSize: 'clamp(2rem, 8vw, 3.2rem)', marginBottom: '0.5rem', letterSpacing: '0.05em', lineHeight: 1 }}>
           ИНФА
         </h1>
         <div style={{ height: '2px', background: 'var(--accent)', opacity: 0.25, marginBottom: '2rem', width: '3rem' }} />
@@ -89,7 +89,7 @@ export default function InfoPage() {
               onClick={() => setTab(t.id)}
               style={{
                 padding: '0.55rem 1.1rem',
-                fontFamily: "'ONDER', sans-serif",
+                fontFamily: "var(--font-onder)",
                 fontSize: '0.62rem',
                 letterSpacing: '0.1em',
                 textTransform: 'uppercase',
@@ -111,7 +111,7 @@ export default function InfoPage() {
         </div>
 
         {/* Content */}
-        <div style={{ color: 'var(--text)', fontFamily: "'Involve', sans-serif", fontSize: '0.9rem', lineHeight: 1.8 }}>
+        <div style={{ color: 'var(--text)', fontFamily: "var(--font-involve)", fontSize: '0.9rem', lineHeight: 1.8 }}>
 
           {tab === 'delivery' && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1.75rem' }}>
@@ -129,7 +129,7 @@ export default function InfoPage() {
           {tab === 'contacts' && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
               <div>
-                <p style={{ fontFamily: "'ONDER', sans-serif", fontSize: '0.6rem', letterSpacing: '0.16em', opacity: 0.4, marginBottom: '0.25rem', textTransform: 'uppercase' }}>Написать нам</p>
+                <p style={{ fontFamily: "var(--font-onder)", fontSize: '0.6rem', letterSpacing: '0.16em', opacity: 0.4, marginBottom: '0.25rem', textTransform: 'uppercase' }}>Написать нам</p>
                 <div style={{ borderTop: '1px solid var(--border)' }}>
                   <SocialRow href="https://vk.me/3threep_shop" icon={<IconBrandVk size={18} />} label="VK" handle="vk.me/3threep_shop" />
                   <SocialRow href="http://t.me/arasuka333" icon={<IconBrandTelegram size={18} />} label="TG" handle="@arasuka333" />
@@ -137,13 +137,13 @@ export default function InfoPage() {
                 </div>
               </div>
               <div>
-                <p style={{ fontFamily: "'ONDER', sans-serif", fontSize: '0.6rem', letterSpacing: '0.16em', opacity: 0.4, marginBottom: '0.25rem', textTransform: 'uppercase' }}>Следить за нами</p>
+                <p style={{ fontFamily: "var(--font-onder)", fontSize: '0.6rem', letterSpacing: '0.16em', opacity: 0.4, marginBottom: '0.25rem', textTransform: 'uppercase' }}>Следить за нами</p>
                 <div style={{ borderTop: '1px solid var(--border)' }}>
                   <SocialRow href="https://vk.com/3threep_shop" icon={<IconBrandVk size={18} />} label="VK" handle="vk.com/3threep_shop" />
                   <SocialRow href="https://www.tiktok.com/@3threep.shop" icon={<IconBrandTiktok size={18} />} label="TT" handle="@3threep.shop" />
                   <SocialRow href="https://www.instagram.com/3threep.shop/" icon={<IconBrandInstagram size={18} />} label="IG*" handle="@3threep.shop" last />
                 </div>
-                <p style={{ fontSize: '0.7rem', opacity: 0.3, marginTop: '0.75rem', fontFamily: "'Involve', sans-serif" }}>* Meta признана экстремистской организацией в РФ</p>
+                <p style={{ fontSize: '0.7rem', opacity: 0.3, marginTop: '0.75rem', fontFamily: "var(--font-involve)" }}>* Meta признана экстремистской организацией в РФ</p>
               </div>
             </div>
           )}

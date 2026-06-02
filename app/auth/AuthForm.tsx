@@ -105,7 +105,10 @@ export default function AuthForm() {
             </p>
             <input
               type="text"
-              placeholder="123456"
+              inputMode="numeric"
+              pattern="[0-9]*"
+              autoComplete="one-time-code"
+              placeholder="——————"
               value={code}
               onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
               onKeyDown={(e) => e.key === 'Enter' && !loading && code.length === 6 && verifyCode()}
