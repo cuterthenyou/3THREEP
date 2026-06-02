@@ -19,7 +19,7 @@ const ADMIN_LINKS = [
   { href: '/admin/media', label: 'Медиа' },
 ];
 
-interface Collection { slug: string; name: string }
+interface Collection { slug: string; name: string; types?: string[] }
 
 export default function Header({ isAdminUser = false }: Props) {
   const headerRef = useRef<HTMLElement>(null);
@@ -29,6 +29,7 @@ export default function Header({ isAdminUser = false }: Props) {
   const [expanded, setExpanded] = useState<string | null>(null);
   const [collections, setCollections] = useState<Collection[]>([]);
   const [isDark, setIsDark] = useState(false);
+  const [menuUser, setMenuUser] = useState<{ name: string; level: number } | null>(null);
   const collectionsLoaded = useRef(false);
   const menuHistoryPushed = useRef(false);
 
@@ -40,6 +41,14 @@ export default function Header({ isAdminUser = false }: Props) {
       setMenuOpen(false);
     }
   }
+
+  // Fetch current user for burger menu display
+  useEffect(() => {
+    fetch('/api/user/me')
+      .then(r => r.ok ? r.json() : { user: null })
+      .then(d => setMenuUser(d.user ?? null))
+      .catch(() => {});
+  }, []);
 
   // Sync theme icon with current theme
   useEffect(() => {
@@ -194,18 +203,28 @@ export default function Header({ isAdminUser = false }: Props) {
         </button>
         <nav className={s.nav}>
 
+          {/* Burger user info */}
+          {menuUser && (
+            <div className={s.menuUserInfo}>
+              {menuUser.name}<span> · LVL {menuUser.level}</span>
+            </div>
+          )}
+
           {/* Коллекции — accordion */}
           <div className={s.accordion}>
             <button className={s.navLink} onClick={() => toggle('collections')}>
               Коллекции <span className={`${s.arrow} ${expanded === 'collections' ? s.arrowOpen : ''}`}>▸</span>
             </button>
             <div className={`${s.sub} ${expanded === 'collections' ? s.subOpen : ''}`}>
-              {collections.length === 0
-                ? <Link href="/#catalog" onClick={() => setMenuOpen(false)} className={s.subLink}>Все коллекции</Link>
-                : collections.map(c => (
-                    <Link key={c.slug} href={`/?collection=${c.slug}`} onClick={() => setMenuOpen(false)} className={s.subLink}>{c.name}</Link>
-                  ))
-              }
+              <Link href="/#catalog" onClick={() => setMenuOpen(false)} className={s.subLink}>Все коллекции</Link>
+              {collections.map(c => (
+                <div key={c.slug}>
+                  <Link href={`/?collection=${c.slug}`} onClick={() => setMenuOpen(false)} className={s.subLink}>{c.name}</Link>
+                  {c.types?.map(type => (
+                    <Link key={type} href={`/?collection=${c.slug}`} onClick={() => setMenuOpen(false)} className={s.subLinkType}>{type}</Link>
+                  ))}
+                </div>
+              ))}
             </div>
           </div>
 

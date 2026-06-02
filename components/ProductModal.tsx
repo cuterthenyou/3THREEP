@@ -178,12 +178,6 @@ export default function ProductModal({ product, visible, onClose }: Props) {
                 {...touchHandlers}
               >
                 <Image src={product.images[activeImg] || product.images[0]} alt={product.name} fill className="object-cover select-none" draggable={false} sizes="(max-width: 768px) 100vw, 50vw" />
-                {product.images.length > 1 && (
-                  <>
-                    <button className={`absolute left-3 top-1/2 -translate-y-1/2 flex items-center justify-center w-8 h-8 rounded text-xl ${s.arrowBtn}`} onClick={() => setActiveImg((i) => Math.max(0, i - 1))}>‹</button>
-                    <button className={`absolute right-3 top-1/2 -translate-y-1/2 flex items-center justify-center w-8 h-8 rounded text-xl ${s.arrowBtn}`} onClick={() => setActiveImg((i) => Math.min(product.images.length - 1, i + 1))}>›</button>
-                  </>
-                )}
               </div>
 
               {product.images.length > 1 && (

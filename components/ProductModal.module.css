@@ -26,27 +26,6 @@
   transition-duration: 0.08s;
 }
 
-/* Gallery arrows */
-.arrowBtn {
-  background: var(--bg-2);
-  color: var(--accent);
-  cursor: pointer;
-  transition: background 0.2s, transform 0.15s, opacity 0.2s;
-  -webkit-tap-highlight-color: transparent;
-  opacity: 0.85;
-}
-
-.arrowBtn:hover {
-  background: var(--bg);
-  transform: scale(1.12);
-  opacity: 1;
-}
-
-.arrowBtn:active {
-  transform: scale(0.92);
-  transition-duration: 0.08s;
-}
-
 /* Thumbnails */
 .thumbBtn {
   aspect-ratio: 1 / 1;

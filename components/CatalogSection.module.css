@@ -12,7 +12,7 @@
 
 .filterBtnActive {
   background: var(--color-accent);
-  color: var(--color-primary);
+  color: var(--text);
   animation: pulseGlow 2.5s ease-in-out infinite;
 }
 
@@ -134,7 +134,7 @@
 }
 
 .productType {
-  color: var(--color-primary);
+  color: var(--text);
   font-family: var(--font-involve);
   font-size: 0.6rem;
   text-transform: uppercase;
@@ -146,7 +146,7 @@
 }
 
 .productName {
-  color: var(--color-primary);
+  color: var(--text);
   font-family: var(--font-onder);
   font-size: 0.78rem;
   line-height: 1.5;
@@ -159,7 +159,7 @@
 }
 
 .productPrice {
-  color: var(--color-primary);
+  color: var(--text);
   font-family: var(--font-deutsch);
   font-size: 1.25rem;
   line-height: 1;
@@ -220,7 +220,7 @@
   font-weight: 400;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  opacity: 0.22;
+  opacity: 0.38;
   cursor: default;
   border: 1px dashed var(--border);
   border-radius: 6px;

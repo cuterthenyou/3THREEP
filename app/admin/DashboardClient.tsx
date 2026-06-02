@@ -102,7 +102,7 @@ export default function DashboardClient() {
           : kpiCards.map((card) => (
               <div key={card.label} style={{ background: accentDim, border: `1px solid var(--accent-2)`, borderRadius: '12px', padding: '1.1rem', display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
                 <span style={{ fontFamily: "'Involve', sans-serif", fontSize: '0.65rem', color: accent, opacity: 0.5, textTransform: 'uppercase', letterSpacing: '0.1em' }}>{card.label}</span>
-                <span style={{ fontFamily: "'ONDER', sans-serif", fontSize: '1.15rem', color: accent }}>{card.value}</span>
+                <span style={{ fontFamily: "var(--font-deutsch)", fontSize: '1.15rem', color: accent }}>{card.value}</span>
               </div>
             ))}
       </div>

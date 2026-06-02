@@ -86,7 +86,7 @@ export default function CatalogSection({ products, categories, categoryData = {}
 
       {/* Type filter tabs */}
       {activeCategory !== 'all' && types.length > 0 && (
-        <div className="flex gap-2 justify-center px-4 overflow-x-auto" style={{ padding: '0.25rem 1rem 1.5rem' }}>
+        <div className="flex gap-2 justify-center px-4 overflow-x-auto" style={{ padding: '0.75rem 1rem 1.5rem' }}>
           {types.map(type => (
             <button key={type}
               onClick={() => setActiveType(t => t === type ? 'all' : type)}
@@ -213,7 +213,7 @@ function ProductCard({
   return (
     <div
       className={`flex flex-col w-full ${s.productCard}`}
-      style={{ background: 'var(--accent)' }}
+      style={{ background: 'var(--bg)' }}
       onClick={() => onOpen(product)}
       onMouseEnter={triggerGlitch}
     >

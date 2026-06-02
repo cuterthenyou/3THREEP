@@ -89,8 +89,8 @@
 
 .productPrice {
   color: var(--accent);
-  font-family: var(--font-onder);
-  font-size: 0.85rem;
+  font-family: var(--font-deutsch);
+  font-size: 1rem;
   white-space: nowrap;
 }
 
@@ -144,8 +144,8 @@
 
 .totalValue {
   color: var(--accent);
-  font-family: var(--font-onder);
-  font-size: 1.1rem;
+  font-family: var(--font-deutsch);
+  font-size: 1.2rem;
 }
 
 .checkoutLink {

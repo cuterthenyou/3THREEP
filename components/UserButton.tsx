@@ -7,6 +7,16 @@ import s from './Header.module.css'
 
 interface UserData {
   name: string
+  level: number
+}
+
+function PersonIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
+      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+      <circle cx="12" cy="7" r="4" />
+    </svg>
+  )
 }
 
 export default function UserButton() {
@@ -43,28 +53,35 @@ export default function UserButton() {
   if (!user) {
     return (
       <Link href="/auth" aria-label="Войти" className={`flex items-center justify-center w-9 h-9 rounded-lg ${s.navBtn}`}>
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-          <circle cx="12" cy="7" r="4" />
-        </svg>
+        <PersonIcon />
       </Link>
     )
   }
 
   return (
     <div ref={ref} style={{ position: 'relative' }}>
+      {/* Mobile: icon only */}
       <button
         onClick={() => setOpen(v => !v)}
-        className={s.themeBadge}
+        className={`sm:hidden flex items-center justify-center w-9 h-9 rounded-lg ${s.navBtn}`}
+        aria-label="Аккаунт"
+      >
+        <PersonIcon />
+      </button>
+
+      {/* Desktop: full pill with name + level */}
+      <button
+        onClick={() => setOpen(v => !v)}
+        className={`hidden sm:flex items-center ${s.themeBadge}`}
         aria-label="Аккаунт"
         style={{ gap: '0.3rem' }}
       >
-        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
-          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-          <circle cx="12" cy="7" r="4" />
-        </svg>
-        <span style={{ maxWidth: '5rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+        <PersonIcon />
+        <span style={{ maxWidth: '7rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
           {user.name}
+        </span>
+        <span style={{ opacity: 0.45, fontSize: '0.48rem', letterSpacing: '0.15em', flexShrink: 0 }}>
+          LVL {user.level}
         </span>
       </button>
 

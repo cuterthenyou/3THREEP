@@ -185,7 +185,7 @@ export default function AdminSidebar() {
           .admin-content { margin-left: ${w}px; transition: margin-left 0.25s cubic-bezier(0.4,0,0.2,1); }
         }
         @media (max-width: 767px) {
-          .admin-content { padding-top: 1rem; }
+          .admin-content { padding-top: 3.5rem; }
         }
       `}</style>
     </>

@@ -183,6 +183,22 @@
   max-height: 600px;
 }
 
+/* ── Burger menu user info ── */
+.menuUserInfo {
+  font-family: 'Involve', sans-serif;
+  font-size: 0.62rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent);
+  opacity: 0.28;
+  margin-bottom: 0.75rem;
+  text-align: center;
+}
+
+.menuUserInfo span {
+  opacity: 0.75;
+}
+
 .subLink {
   font-family: 'Involve', sans-serif;
   font-weight: 400;
@@ -196,6 +212,22 @@
 }
 
 .subLink:hover { opacity: 1; }
+
+.subLinkType {
+  font-family: 'Involve', sans-serif;
+  font-weight: 400;
+  font-size: clamp(0.72rem, 2.5vw, 0.88rem);
+  color: var(--accent);
+  opacity: 0.38;
+  text-decoration: none;
+  padding: 0.1rem 3rem;
+  display: block;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  transition: opacity 0.15s;
+}
+
+.subLinkType:hover { opacity: 0.7; }
 
 .adminDivider {
   font-family: 'Involve', sans-serif;

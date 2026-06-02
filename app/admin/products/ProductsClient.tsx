@@ -259,7 +259,8 @@ export default function ProductsClient({ products }: { products: Product[] }) {
             <div className="min-w-0">
               <p className="truncate font-bold" style={{ color: 'var(--accent)', fontFamily: "'Involve', sans-serif", fontWeight: 700 }}>{p.name}</p>
               <p className="truncate text-xs mt-0.5" style={{ color: 'var(--accent)', opacity: 0.5, fontFamily: "'Involve', sans-serif" }}>
-                {formatPrice(p.price)} · Остаток: {p.stock}
+                <span style={{ fontFamily: 'var(--font-deutsch)', opacity: 1 }}>{formatPrice(p.price)}</span>
+                {' · '}Остаток: {p.stock}
               </p>
               <div className="flex gap-2 flex-wrap mt-2">
                 <button onClick={() => openEdit(p)}
