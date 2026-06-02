@@ -175,6 +175,59 @@
   75%       { transform: translateX(5px); }
 }
 
+/* Swipe gesture hint overlay (fades out) */
+@keyframes fadeOutHint {
+  0%, 60% { opacity: 0.65; }
+  100%    { opacity: 0; }
+}
+
+/* Product type filter tabs */
+.typeBtn {
+  padding: 0.32rem 0.9rem;
+  font-size: 0.62rem;
+  border-radius: 6px;
+  font-family: 'Involve', sans-serif;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  border: none;
+  transition: background 0.18s, color 0.18s, opacity 0.18s;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.typeBtnActive {
+  background: var(--accent);
+  color: var(--bg);
+}
+
+.typeBtnInactive {
+  background: transparent;
+  color: var(--text);
+  border: 1px solid var(--border);
+  opacity: 0.6;
+}
+
+.typeBtnInactive:hover {
+  opacity: 0.9;
+}
+
+.typeBtnSoon {
+  padding: 0.32rem 0.9rem;
+  font-size: 0.62rem;
+  font-family: 'Involve', sans-serif;
+  font-weight: 400;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  opacity: 0.22;
+  cursor: default;
+  border: 1px dashed var(--border);
+  border-radius: 6px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
 /* Mobile */
 @media (max-width: 639px) {
   .productInfo {

@@ -192,13 +192,13 @@ export default function ProductsClient({ products }: { products: Product[] }) {
   return (
     <div className="px-6 py-6 max-w-4xl mx-auto">
       <div className="flex items-center justify-between mb-4">
-        <h1 className="text-xl uppercase tracking-widest"
-          style={{ color: 'var(--accent)', fontFamily: "'ONDER', sans-serif" }}>
+        <h1 className="uppercase tracking-widest"
+          style={{ color: 'var(--accent)', fontFamily: "'ONDER', sans-serif", fontSize: 'clamp(0.9rem, 3vw, 1.1rem)' }}>
           Товары ({filtered.length}/{products.length})
         </h1>
         <button onClick={openNew}
-          className="px-4 py-2 uppercase tracking-widest transition-opacity hover:opacity-80"
-          style={{ background: 'var(--accent)', color: 'var(--bg)', borderRadius: '8px', fontFamily: "'ONDER', sans-serif", fontSize: '0.75rem' }}>
+          className="uppercase tracking-widest transition-opacity hover:opacity-80"
+          style={{ background: 'var(--accent)', color: 'var(--bg)', borderRadius: '8px', fontFamily: "'ONDER', sans-serif", fontSize: '0.68rem', padding: '0.4rem 0.8rem' }}>
           + Добавить товар
         </button>
       </div>

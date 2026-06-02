@@ -20,13 +20,21 @@ function formatPrice(price: number) {
 
 export default function CatalogSection({ products, categories, categoryData = {} }: Props) {
   const [activeCategory, setActiveCategory] = useState<string>('all')
+  const [activeType, setActiveType] = useState<string>('all')
   const [openProduct, setOpenProduct] = useState<Product | null>(null)
   const [modalVisible, setModalVisible] = useState(false)
 
-  const filtered =
-    activeCategory === 'all'
-      ? products
-      : products.filter((p) => p.category === activeCategory)
+  useEffect(() => { setActiveType('all') }, [activeCategory])
+
+  const categoryFiltered = activeCategory === 'all'
+    ? products
+    : products.filter(p => p.category === activeCategory)
+
+  const types = [...new Set(categoryFiltered.map(p => p.product_type).filter(Boolean))] as string[]
+
+  const filtered = activeType === 'all'
+    ? categoryFiltered
+    : categoryFiltered.filter(p => p.product_type === activeType)
 
   const openModal = useCallback((product: Product) => {
     setOpenProduct(product)
@@ -76,6 +84,22 @@ export default function CatalogSection({ products, categories, categoryData = {}
         ) : null
       })()}
 
+      {/* Type filter tabs */}
+      {activeCategory !== 'all' && types.length > 0 && (
+        <div className="flex gap-2 justify-center px-4 overflow-x-auto" style={{ padding: '0.25rem 1rem 1.5rem' }}>
+          {types.map(type => (
+            <button key={type}
+              onClick={() => setActiveType(t => t === type ? 'all' : type)}
+              className={`${s.typeBtn} ${activeType === type || (activeType === 'all' && type === types[0]) ? s.typeBtnActive : s.typeBtnInactive}`}>
+              {type}
+            </button>
+          ))}
+          {Array.from({ length: Math.max(0, 3 - types.length) }).map((_, i) => (
+            <span key={`soon-${i}`} className={s.typeBtnSoon}>СКОРО</span>
+          ))}
+        </div>
+      )}
+
       {/* Product grid */}
       <section className="w-full px-6 sm:px-8 py-10">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-y-8 gap-x-6 max-w-6xl mx-auto">
@@ -118,7 +142,9 @@ function ProductCard({
   const [btnText, setBtnText] = useState('Посмотреть')
   const [btnFade, setBtnFade] = useState(false)
   const [glitching, setGlitching] = useState(false)
+  const [showHint, setShowHint] = useState(false)
   const touchStartX = React.useRef<number | null>(null)
+  const lastInteractionRef = React.useRef<number>(0)
 
   const TEXTS = ['Посмотреть', 'чекнуть', 'чё, по чём?', 'скок стоит?', 'сколько денег?', 'чё по цене?']
 
@@ -140,12 +166,26 @@ function ProductCard({
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [index])
 
-  // Staggered auto-slide — random start offset 0–4000ms
+  // Swipe hint — show once on first card
+  useEffect(() => {
+    if (index !== 0 || product.images.length <= 1) return
+    try {
+      if (!sessionStorage.getItem('catalogSwipeHintShown')) {
+        setShowHint(true)
+        sessionStorage.setItem('catalogSwipeHintShown', '1')
+        setTimeout(() => setShowHint(false), 1800)
+      }
+    } catch { /* sessionStorage unavailable */ }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  // Staggered auto-slide — pauses 5s after user interaction
   useEffect(() => {
     if (product.images.length <= 1) return
     let id: ReturnType<typeof setInterval>
     const startId = setTimeout(() => {
       id = setInterval(() => {
+        if (Date.now() - lastInteractionRef.current < 5000) return
         setCurrentImg((i) => (i + 1) % product.images.length)
       }, 3000)
     }, Math.random() * 4000)
@@ -154,11 +194,13 @@ function ProductCard({
 
   function prevImg(e: React.MouseEvent | React.TouchEvent) {
     e.stopPropagation()
+    lastInteractionRef.current = Date.now()
     setCurrentImg(i => (i - 1 + product.images.length) % product.images.length)
   }
 
   function nextImg(e: React.MouseEvent | React.TouchEvent) {
     e.stopPropagation()
+    lastInteractionRef.current = Date.now()
     setCurrentImg(i => (i + 1) % product.images.length)
   }
 
@@ -181,6 +223,16 @@ function ProductCard({
       {/* Image carousel */}
       <div
         className={`w-full relative overflow-hidden ${s.productImgWrap}`}
+        onMouseMove={e => {
+          if (product.images.length <= 1) return
+          const rect = e.currentTarget.getBoundingClientRect()
+          const idx = Math.max(0, Math.min(
+            Math.floor((e.clientX - rect.left) / rect.width * product.images.length),
+            product.images.length - 1
+          ))
+          setCurrentImg(idx)
+          lastInteractionRef.current = Date.now()
+        }}
         onTouchStart={e => { touchStartX.current = e.changedTouches[0].clientX }}
         onTouchEnd={e => {
           if (touchStartX.current === null || product.images.length <= 1) return
@@ -189,6 +241,7 @@ function ProductCard({
             e.stopPropagation()
             dx < 0 ? nextImg(e) : prevImg(e)
           }
+          lastInteractionRef.current = Date.now()
           touchStartX.current = null
         }}
       >
@@ -216,6 +269,14 @@ function ProductCard({
               animation: 'vhs-glitch 0.42s steps(1) forwards',
             }}
           />
+        )}
+
+        {/* Swipe hint overlay — mobile, once per session */}
+        {showHint && (
+          <div className="sm:hidden absolute inset-0 z-10 flex items-center justify-center pointer-events-none"
+            style={{ animation: 'fadeOutHint 1.8s ease forwards' }}>
+            <span style={{ fontSize: '1.4rem', opacity: 0.65, letterSpacing: '0.5em' }}>← →</span>
+          </div>
         )}
 
         {/* Swipe dot indicators */}

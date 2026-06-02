@@ -25,9 +25,46 @@ const NAV = [
   { href: '/admin/media',       label: 'Медиа',     Icon: IconPhoto },
 ]
 
+function NavItems({ pathname, collapsed, onNavigate }: { pathname: string; collapsed: boolean; onNavigate?: () => void }) {
+  return (
+    <nav className="flex flex-col flex-1 py-3 gap-0.5 px-2">
+      {NAV.map(({ href, label, Icon, exact }) => {
+        const active = exact ? pathname === href : pathname.startsWith(href)
+        return (
+          <Link
+            key={href}
+            href={href}
+            onClick={onNavigate}
+            title={collapsed ? label : undefined}
+            style={{
+              display: 'flex', alignItems: 'center', gap: '0.75rem',
+              padding: collapsed ? '0.6rem' : '0.55rem 0.75rem',
+              justifyContent: collapsed ? 'center' : 'flex-start',
+              borderRadius: '0.5rem',
+              background: active ? 'var(--accent-2)' : 'transparent',
+              color: active ? 'var(--accent)' : 'var(--text-muted)',
+              textDecoration: 'none',
+              whiteSpace: 'nowrap',
+              transition: 'background 0.15s, color 0.15s',
+            }}
+          >
+            <Icon size={18} style={{ flexShrink: 0 }} />
+            {!collapsed && (
+              <span style={{ fontFamily: "'Involve', sans-serif", fontSize: '0.82rem', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                {label}
+              </span>
+            )}
+          </Link>
+        )
+      })}
+    </nav>
+  )
+}
+
 export default function AdminSidebar() {
   const pathname = usePathname()
   const [collapsed, setCollapsed] = useState(false)
+  const [mobileOpen, setMobileOpen] = useState(false)
   const [isDark, setIsDark] = useState(false)
 
   useEffect(() => {
@@ -43,7 +80,7 @@ export default function AdminSidebar() {
 
   return (
     <>
-      {/* Desktop sidebar */}
+      {/* ── Desktop sidebar ── */}
       <aside
         className="hidden md:flex fixed top-0 left-0 bottom-0 z-50 flex-col"
         style={{
@@ -55,44 +92,14 @@ export default function AdminSidebar() {
         }}
       >
         {/* Logo row */}
-        <div className="flex items-center px-4" style={{ minHeight: 56, borderBottom: '1px solid var(--border-soft)' }}>
+        <div className="flex items-center justify-center px-4" style={{ minHeight: 56, borderBottom: '1px solid var(--border-soft)' }}>
           {!collapsed
-            ? <span style={{ color: 'var(--accent)', fontFamily: "'ONDER', sans-serif", fontSize: '0.7rem', letterSpacing: '0.06em', whiteSpace: 'nowrap' }}>THREEP / ADMIN</span>
-            : <span style={{ color: 'var(--accent)', fontFamily: "'ONDER', sans-serif", fontSize: '0.7rem' }}>T</span>
+            ? <img src="/images/logo-text-63.svg" alt="THREEP" className="theme-img h-5 w-auto" />
+            : <img src="/images/logo-61.svg" alt="T" className="theme-img h-5 w-auto" />
           }
         </div>
 
-        {/* Nav */}
-        <nav className="flex flex-col flex-1 py-3 gap-0.5 px-2">
-          {NAV.map(({ href, label, Icon, exact }) => {
-            const active = exact ? pathname === href : pathname.startsWith(href)
-            return (
-              <Link
-                key={href}
-                href={href}
-                title={collapsed ? label : undefined}
-                style={{
-                  display: 'flex', alignItems: 'center', gap: '0.75rem',
-                  padding: collapsed ? '0.6rem' : '0.55rem 0.75rem',
-                  justifyContent: collapsed ? 'center' : 'flex-start',
-                  borderRadius: '0.5rem',
-                  background: active ? 'var(--accent-2)' : 'transparent',
-                  color: active ? 'var(--accent)' : 'var(--text-muted)',
-                  textDecoration: 'none',
-                  whiteSpace: 'nowrap',
-                  transition: 'background 0.15s, color 0.15s',
-                }}
-              >
-                <Icon size={18} style={{ flexShrink: 0 }} />
-                {!collapsed && (
-                  <span style={{ fontFamily: "'Involve', sans-serif", fontSize: '0.82rem', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                    {label}
-                  </span>
-                )}
-              </Link>
-            )
-          })}
-        </nav>
+        <NavItems pathname={pathname} collapsed={collapsed} />
 
         {/* Footer */}
         <div className="px-2 py-3 flex flex-col gap-1" style={{ borderTop: '1px solid var(--border-soft)' }}>
@@ -119,27 +126,58 @@ export default function AdminSidebar() {
         </div>
       </aside>
 
-      {/* Mobile top bar */}
-      <nav
-        className="md:hidden fixed top-0 left-0 right-0 z-50 flex items-center gap-2 px-3 py-2 overflow-x-auto"
-        style={{ background: 'var(--bg-2)', borderBottom: '1px solid var(--border-soft)' }}
+      {/* ── Mobile toggle button ── */}
+      <button
+        className="md:hidden fixed top-3 left-3 z-50 flex items-center justify-center p-1.5 rounded-lg"
+        style={{ background: 'var(--bg-2)', border: '1px solid var(--border-soft)', cursor: 'pointer' }}
+        onClick={() => setMobileOpen(v => !v)}
+        aria-label="Открыть меню"
       >
-        <span style={{ color: 'var(--accent)', fontFamily: "'ONDER', sans-serif", fontSize: '0.65rem', letterSpacing: '0.15em', flexShrink: 0 }}>ADMIN</span>
-        {NAV.map(({ href, label, Icon, exact }) => {
-          const active = exact ? pathname === href : pathname.startsWith(href)
-          return (
-            <Link key={href} href={href}
-              style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', borderRadius: '0.5rem', padding: '0.35rem 0.5rem', flexShrink: 0, background: active ? 'var(--accent-2)' : 'transparent', color: active ? 'var(--accent)' : 'var(--text-muted)', textDecoration: 'none' }}>
-              <Icon size={13} />
-              <span style={{ fontFamily: "'Involve', sans-serif", fontSize: '0.65rem', whiteSpace: 'nowrap' }}>{label}</span>
-            </Link>
-          )
-        })}
-        <button onClick={() => { toggleTheme(); setIsDark(d => !d) }} style={{ marginLeft: 'auto', flexShrink: 0, background: 'none', border: 'none', cursor: 'pointer', color: 'var(--accent)', padding: '0.35rem', display: 'flex', alignItems: 'center' }}>
-          {isDark ? <IconSun size={14} /> : <IconMoon2 size={14} />}
-        </button>
-        <Link href="/" style={{ flexShrink: 0, color: 'var(--text-muted)', fontFamily: "'ONDER', sans-serif", fontSize: '0.55rem', textDecoration: 'none', letterSpacing: '0.1em', opacity: 0.6 }}>← Сайт</Link>
-      </nav>
+        <img src="/images/logo-61.svg" alt="menu" className="theme-img h-6 w-auto" />
+      </button>
+
+      {/* ── Mobile backdrop ── */}
+      {mobileOpen && (
+        <div
+          className="md:hidden fixed inset-0 z-40"
+          style={{ background: 'rgba(0,0,0,0.55)' }}
+          onClick={() => setMobileOpen(false)}
+        />
+      )}
+
+      {/* ── Mobile sidebar ── */}
+      <aside
+        className="md:hidden fixed top-0 left-0 bottom-0 z-50 flex flex-col"
+        style={{
+          width: 220,
+          background: 'var(--bg-2)',
+          borderRight: '1px solid var(--border-soft)',
+          transform: mobileOpen ? 'translateX(0)' : 'translateX(-100%)',
+          transition: 'transform 0.25s cubic-bezier(0.4,0,0.2,1)',
+        }}
+      >
+        {/* Logo row */}
+        <div className="flex items-center justify-center px-4" style={{ minHeight: 56, borderBottom: '1px solid var(--border-soft)' }}>
+          <img src="/images/logo-text-63.svg" alt="THREEP" className="theme-img h-5 w-auto" />
+        </div>
+
+        <NavItems pathname={pathname} collapsed={false} onNavigate={() => setMobileOpen(false)} />
+
+        {/* Footer */}
+        <div className="px-2 py-3 flex flex-col gap-1" style={{ borderTop: '1px solid var(--border-soft)' }}>
+          <Link href="/" onClick={() => setMobileOpen(false)}
+            style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.55rem 0.75rem', borderRadius: '0.5rem', color: 'var(--text-muted)', textDecoration: 'none', whiteSpace: 'nowrap' }}>
+            <IconLogout size={16} style={{ flexShrink: 0 }} />
+            <span style={{ fontFamily: "'Involve', sans-serif", fontSize: '0.75rem' }}>На сайт</span>
+          </Link>
+          <button
+            onClick={() => { toggleTheme(); setIsDark(d => !d) }}
+            style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.55rem 0.75rem', borderRadius: '0.5rem', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--accent)', width: '100%', whiteSpace: 'nowrap', opacity: 0.75 }}>
+            {isDark ? <IconSun size={16} style={{ flexShrink: 0 }} /> : <IconMoon2 size={16} style={{ flexShrink: 0 }} />}
+            <span style={{ fontFamily: "'Involve', sans-serif", fontSize: '0.75rem' }}>{isDark ? 'Светлая' : 'Тёмная'}</span>
+          </button>
+        </div>
+      </aside>
 
       {/* Spacer so content doesn't hide under fixed sidebar/bar */}
       <style>{`
@@ -147,7 +185,7 @@ export default function AdminSidebar() {
           .admin-content { margin-left: ${w}px; transition: margin-left 0.25s cubic-bezier(0.4,0,0.2,1); }
         }
         @media (max-width: 767px) {
-          .admin-content { padding-top: 3rem; }
+          .admin-content { padding-top: 1rem; }
         }
       `}</style>
     </>

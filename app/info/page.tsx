@@ -27,16 +27,16 @@ export default function InfoPage() {
         </h1>
 
         {/* Tabs */}
-        <div style={{ display: 'flex', gap: '0', marginBottom: '2.5rem', borderBottom: '1px solid var(--border)' }}>
+        <div style={{ display: 'flex', gap: '0', marginBottom: '2.5rem', borderBottom: '1px solid var(--border)', overflowX: 'auto' }}>
           {TABS.map(t => (
             <button
               key={t.id}
               onClick={() => setTab(t.id)}
               style={{
-                padding: '0.6rem 1.25rem',
+                padding: '0.5rem 1rem',
                 fontFamily: "'ONDER', sans-serif",
-                fontSize: '0.72rem',
-                letterSpacing: '0.12em',
+                fontSize: '0.62rem',
+                letterSpacing: '0.1em',
                 textTransform: 'uppercase',
                 color: 'var(--text)',
                 background: 'none',
@@ -46,6 +46,8 @@ export default function InfoPage() {
                 opacity: tab === t.id ? 1 : 0.45,
                 transition: 'opacity 0.15s, border-color 0.15s',
                 marginBottom: '-1px',
+                whiteSpace: 'nowrap',
+                flexShrink: 0,
               }}
             >
               {t.label}

@@ -103,13 +103,13 @@
 .navLink {
   font-family: 'Involve', sans-serif;
   font-weight: 800;
-  font-size: clamp(0.75rem, 3.5vw, 1.4rem);
+  font-size: clamp(1.3rem, 5vw, 1.8rem);
   text-transform: uppercase;
-  letter-spacing: 0.07em;
+  letter-spacing: 0.03em;
   white-space: nowrap;
   color: var(--accent);
   text-decoration: none;
-  padding: 0.3rem 1rem;
+  padding: 0.25rem 1rem;
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -147,7 +147,7 @@
 .navLinkSmall {
   font-family: 'Involve', sans-serif;
   font-weight: 800;
-  font-size: clamp(0.8rem, 2.5vw, 1rem);
+  font-size: clamp(1.3rem, 5vw, 1.8rem);
   opacity: 0.8;
 }
 
@@ -185,11 +185,12 @@
 
 .subLink {
   font-family: 'Involve', sans-serif;
-  font-size: clamp(0.75rem, 2vw, 0.9rem);
+  font-weight: 400;
+  font-size: clamp(0.9rem, 3.5vw, 1.15rem);
   color: var(--accent);
   opacity: 0.65;
   text-decoration: none;
-  padding: 0.25rem 1.5rem;
+  padding: 0.2rem 1.5rem;
   transition: opacity 0.15s;
   animation: fadeInUp 0.3s ease both;
 }
@@ -223,3 +224,39 @@
 }
 
 .footerLink:hover { opacity: 0.55; }
+
+/* ── User dropdown ── */
+.userDropdown {
+  position: absolute;
+  top: calc(100% + 0.4rem);
+  right: 0;
+  min-width: 11rem;
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: 0.6rem;
+  overflow: hidden;
+  z-index: 100;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+}
+
+.userDropdownItem {
+  display: block;
+  width: 100%;
+  padding: 0.6rem 1rem;
+  font-family: 'Involve', sans-serif;
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--accent);
+  text-decoration: none;
+  text-align: left;
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: background 0.15s;
+  white-space: nowrap;
+}
+
+.userDropdownItem:hover {
+  background: var(--accent-2);
+}

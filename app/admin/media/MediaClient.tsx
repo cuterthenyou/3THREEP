@@ -179,8 +179,8 @@ export default function MediaClient() {
       {/* Bucket tabs */}
       <div className="flex flex-wrap gap-2 mb-4">
         {(['all', ...KNOWN_BUCKETS] as string[]).concat(otherBuckets.length ? ['other'] : []).map((b) => (
-          <button key={b} onClick={() => setBucket(b)} className="px-4 py-1.5 rounded uppercase tracking-widest"
-            style={{ fontFamily: "'ONDER', sans-serif", fontSize: '0.65rem', background: bucket === b ? accent : accentDim, color: bucket === b ? 'var(--bg)' : accent, border: '1px solid var(--border)' }}>
+          <button key={b} onClick={() => setBucket(b)} className="px-3 py-1.5 rounded uppercase tracking-widest"
+            style={{ fontFamily: "'Involve', sans-serif", fontWeight: 700, fontSize: '0.7rem', letterSpacing: '0.06em', background: bucket === b ? accent : accentDim, color: bucket === b ? 'var(--bg)' : accent, border: '1px solid var(--border)' }}>
             {b === 'all' ? 'Все' : b === 'other' ? 'Другое' : b}
           </button>
         ))}

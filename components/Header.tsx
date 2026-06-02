@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useCart } from '@/lib/cart';
 import { toggleTheme } from '@/lib/theme';
 import { IconSun, IconMoon2 } from '@tabler/icons-react';
+import UserButton from './UserButton';
 import s from './Header.module.css';
 
 interface Props {
@@ -52,20 +53,7 @@ export default function Header({ isAdminUser = false }: Props) {
 
   // Sticky + backdrop-filter on scroll
   useEffect(() => {
-    const header = headerRef.current;
-    const footer = document.querySelector('footer');
-    if (!header || !footer) return;
-    header.style.transition = 'transform 0.3s ease, backdrop-filter 0.3s ease';
-
-    const onScroll = () => {
-      const footerVisible = footer.getBoundingClientRect().top < window.innerHeight;
-      if (footerVisible) {
-        header.style.transform = 'translateY(-100%)';
-      } else {
-        header.style.transform = 'translateY(0)';
-        setScrolled(window.scrollY > 50);
-      }
-    };
+    const onScroll = () => setScrolled(window.scrollY > 50);
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
@@ -159,6 +147,9 @@ export default function Header({ isAdminUser = false }: Props) {
               {isDark ? <IconSun size={12} /> : <IconMoon2 size={12} />}
               <span>{isDark ? 'Light' : 'Dark'}</span>
             </button>
+
+            {/* User button */}
+            <UserButton />
 
             {/* Cart icon — always visible */}
             <button onClick={() => setOpen(true)} className={`relative flex items-center justify-center w-9 h-9 rounded-lg transition-opacity hover:opacity-80 ${s.navBtn}`} aria-label="Корзина">

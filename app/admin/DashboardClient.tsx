@@ -119,7 +119,7 @@ export default function DashboardClient() {
               datasets: [{
                 data: chartData,
                 borderColor: accent,
-                backgroundColor: 'var(--bg-subtle)',
+                backgroundColor: 'var(--accent-2)',
                 borderWidth: 2,
                 pointRadius: 3,
                 pointBackgroundColor: accent,
@@ -131,8 +131,8 @@ export default function DashboardClient() {
               responsive: true,
               plugins: { legend: { display: false }, tooltip: { backgroundColor: 'var(--bg-2)', titleColor: accent, bodyColor: accent, borderColor: 'var(--border)', borderWidth: 1, callbacks: { label: (ctx) => ' ' + fmt(ctx.parsed.y ?? 0) } } },
               scales: {
-                x: { ticks: { color: 'var(--text-muted)', font: { size: 10 } }, grid: { color: 'var(--bg-subtle)' } },
-                y: { ticks: { color: 'var(--text-muted)', font: { size: 10 }, callback: (v) => (Number(v) / 1000).toFixed(0) + 'k' }, grid: { color: 'var(--bg-subtle)' } },
+                x: { ticks: { color: 'var(--text-muted)', font: { size: 10 } }, grid: { color: 'var(--border-soft)' } },
+                y: { ticks: { color: 'var(--text-muted)', font: { size: 10 }, callback: (v) => (Number(v) / 1000).toFixed(0) + 'k' }, grid: { color: 'var(--border-soft)' } },
               },
             }}
           />
