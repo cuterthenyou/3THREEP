@@ -168,35 +168,11 @@
   white-space: nowrap;
 }
 
-/* Desktop nav arrows on card image — visible on card hover */
-.imgArrow {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  z-index: 4;
-  width: 2rem;
-  height: 2rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 6px;
-  font-size: 1.4rem;
-  line-height: 1;
-  background: var(--bg-2);
-  color: var(--accent);
-  border: none;
-  cursor: pointer;
-  opacity: 0;
-  transition: opacity 0.2s ease;
-  -webkit-tap-highlight-color: transparent;
-}
-
-.productCard:hover .imgArrow {
-  opacity: 1;
-}
-
-.imgArrow:hover {
-  background: var(--bg);
+/* Swipe dot indicator animation hint */
+@keyframes swipeHint {
+  0%, 100% { transform: translateX(0); }
+  25%       { transform: translateX(-5px); }
+  75%       { transform: translateX(5px); }
 }
 
 /* Mobile */

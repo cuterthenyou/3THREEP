@@ -5,6 +5,7 @@ import { CartProvider } from '@/lib/cart';
 import CartDrawer from '@/components/CartDrawer';
 import CookieBanner from '@/components/CookieBanner';
 import GlitterCanvas from '@/components/GlitterCanvas';
+import ScrollToTop from '@/components/ScrollToTop';
 import './globals.css';
 
 const unbounded = Unbounded({
@@ -62,6 +63,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           {children}
           <CartDrawer />
         </CartProvider>
+        <ScrollToTop />
         <CookieBanner />
       </body>
     </html>

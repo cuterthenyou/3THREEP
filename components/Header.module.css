@@ -101,7 +101,8 @@
 }
 
 .navLink {
-  font-family: 'ONDER', sans-serif;
+  font-family: 'Involve', sans-serif;
+  font-weight: 800;
   font-size: clamp(0.75rem, 3.5vw, 1.4rem);
   text-transform: uppercase;
   letter-spacing: 0.07em;
@@ -144,6 +145,8 @@
 .navLink:hover { opacity: 0.65; }
 
 .navLinkSmall {
+  font-family: 'Involve', sans-serif;
+  font-weight: 800;
   font-size: clamp(0.8rem, 2.5vw, 1rem);
   opacity: 0.8;
 }

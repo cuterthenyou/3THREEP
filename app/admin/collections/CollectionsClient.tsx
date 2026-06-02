@@ -150,40 +150,40 @@ export default function CollectionsClient({ collections }: { collections: Catego
           </p>
         )}
         {collections.map(c => (
-          <div key={c.slug} className="rounded-xl p-4 flex items-center gap-4"
-            style={{ background: 'var(--bg-subtle)', border: '1px solid var(--border-soft)' }}>
-            {c.texture_url && (
-              <div className="w-14 h-14 rounded-lg overflow-hidden flex-shrink-0">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
+          <div key={c.slug} className="rounded-xl p-3"
+            style={{ display: 'grid', gridTemplateColumns: '3.5rem 1fr', gap: '0.75rem', alignItems: 'start', background: 'var(--bg-subtle)', border: '1px solid var(--border-soft)' }}>
+            <div className="w-14 h-14 rounded-lg overflow-hidden" style={{ background: 'var(--accent-2)' }}>
+              {c.texture_url && (
+                // eslint-disable-next-line @next/next/no-img-element
                 <img src={c.texture_url} alt="" className="w-full h-full object-cover" />
-              </div>
-            )}
-            <div className="flex-1 min-w-0">
-              <p style={{ color: 'var(--accent)', fontFamily: "'ONDER', sans-serif" }}>{c.name}</p>
-              <p className="text-xs" style={{ color: 'var(--accent)', opacity: 0.45, fontFamily: "'Involve', sans-serif" }}>
+              )}
+            </div>
+            <div className="min-w-0">
+              <p className="truncate font-bold" style={{ color: 'var(--accent)', fontFamily: "'Involve', sans-serif", fontWeight: 700 }}>{c.name}</p>
+              <p className="text-xs mt-0.5 truncate" style={{ color: 'var(--accent)', opacity: 0.45, fontFamily: "'Involve', sans-serif" }}>
                 {!c.active && <span style={{ color: 'var(--status-error)', opacity: 0.8 }}>● скрыта · </span>}
                 slug: {c.slug}
                 {c.logo_top_url ? ' · лого-топ ✓' : ''}
                 {c.logo_bottom_url ? ' · лого-боттом ✓' : ''}
                 {c.texture_url ? ' · текстура ✓' : ''}
               </p>
-            </div>
-            <div className="flex gap-2 flex-shrink-0">
-              <button onClick={() => toggleActive(c)}
-                className="px-3 py-1.5 text-xs uppercase tracking-widest rounded-lg"
-                style={{ background: c.active ? 'var(--bg-subtle)' : 'var(--accent-2)', color: 'var(--accent)', fontFamily: "'ONDER', sans-serif", fontSize: '0.65rem' }}>
-                {c.active ? 'Скрыть' : 'Показать'}
-              </button>
-              <button onClick={() => openEdit(c)}
-                className="px-3 py-1.5 text-xs uppercase tracking-widest rounded-lg"
-                style={{ background: 'var(--border)', color: 'var(--accent)', fontFamily: "'ONDER', sans-serif", fontSize: '0.65rem' }}>
-                Ред.
-              </button>
-              <button onClick={() => remove(c.slug)}
-                className="px-3 py-1.5 text-xs uppercase tracking-widest rounded-lg"
-                style={{ background: 'var(--bg-subtle)', color: 'var(--accent)', opacity: 0.5, fontFamily: "'ONDER', sans-serif", fontSize: '0.65rem' }}>
-                Удалить
-              </button>
+              <div className="flex gap-2 flex-wrap mt-2">
+                <button onClick={() => toggleActive(c)}
+                  className="px-2.5 py-1 text-xs uppercase tracking-widest rounded-lg"
+                  style={{ background: c.active ? 'var(--bg-subtle)' : 'var(--accent-2)', color: 'var(--accent)', fontFamily: "'Involve', sans-serif", fontWeight: 700, fontSize: '0.62rem', border: '1px solid var(--border-soft)' }}>
+                  {c.active ? 'Скрыть' : 'Показать'}
+                </button>
+                <button onClick={() => openEdit(c)}
+                  className="px-2.5 py-1 text-xs uppercase tracking-widest rounded-lg"
+                  style={{ background: 'var(--accent-2)', color: 'var(--accent)', fontFamily: "'Involve', sans-serif", fontWeight: 700, fontSize: '0.62rem' }}>
+                  Ред.
+                </button>
+                <button onClick={() => remove(c.slug)}
+                  className="px-2.5 py-1 text-xs uppercase tracking-widest rounded-lg"
+                  style={{ background: 'var(--bg-subtle)', color: 'var(--accent)', opacity: 0.5, fontFamily: "'Involve', sans-serif", fontWeight: 700, fontSize: '0.62rem', border: '1px solid var(--border-soft)' }}>
+                  Удалить
+                </button>
+              </div>
             </div>
           </div>
         ))}
@@ -195,7 +195,7 @@ export default function CollectionsClient({ collections }: { collections: Catego
             style={{ background: 'var(--bg-2)', border: '1px solid var(--border)' }}>
 
             <div className="flex items-center justify-between">
-              <h2 className="text-lg uppercase tracking-widest" style={{ color: 'var(--accent)', fontFamily: "'ONDER', sans-serif" }}>
+              <h2 className="text-lg uppercase tracking-widest" style={{ color: 'var(--accent)', fontFamily: "'Involve', sans-serif", fontWeight: 800 }}>
                 {editing.slug ? 'Редактировать' : 'Новая коллекция'}
               </h2>
               <button onClick={() => setEditing(null)} style={{ color: 'var(--accent)', opacity: 0.4, fontSize: '1.2rem' }}>✕</button>

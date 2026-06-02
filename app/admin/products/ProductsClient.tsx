@@ -246,33 +246,33 @@ export default function ProductsClient({ products }: { products: Product[] }) {
           </p>
         )}
         {filtered.map(p => (
-          <div key={p.id} className="rounded-xl p-4 flex items-center gap-4"
-            style={{ background: 'rgba(242,151,116,0.06)', border: '1px solid rgba(242,151,116,0.15)', opacity: p.active ? 1 : 0.5 }}>
-            <div className="relative w-14 h-14 rounded-lg overflow-hidden flex-shrink-0">
+          <div key={p.id} className="rounded-xl p-3"
+            style={{ display: 'grid', gridTemplateColumns: '3.5rem 1fr', gap: '0.75rem', alignItems: 'start', background: 'var(--bg-subtle)', border: '1px solid var(--border-soft)', opacity: p.active ? 1 : 0.5 }}>
+            <div className="relative w-14 h-14 rounded-lg overflow-hidden">
               {p.images[0] ? (
                 <Image src={p.images[0]} alt={p.name} fill className="object-cover" sizes="56px" />
               ) : (
                 <div className="w-full h-full flex items-center justify-center"
-                  style={{ background: 'rgba(242,151,116,0.15)', color: 'var(--accent)', fontSize: '1.2rem' }}>?</div>
+                  style={{ background: 'var(--accent-2)', color: 'var(--accent)', fontSize: '1.2rem' }}>?</div>
               )}
             </div>
-            <div className="flex-1 min-w-0">
-              <p style={{ color: 'var(--accent)', fontFamily: "'ONDER', sans-serif" }}>{p.name}</p>
-              <p className="text-sm truncate" style={{ color: 'var(--accent)', opacity: 0.5, fontFamily: "'Involve', sans-serif" }}>
-                {formatPrice(p.price)} · {p.sizes.join(', ')} · Остаток: {p.stock}
+            <div className="min-w-0">
+              <p className="truncate font-bold" style={{ color: 'var(--accent)', fontFamily: "'Involve', sans-serif", fontWeight: 700 }}>{p.name}</p>
+              <p className="truncate text-xs mt-0.5" style={{ color: 'var(--accent)', opacity: 0.5, fontFamily: "'Involve', sans-serif" }}>
+                {formatPrice(p.price)} · Остаток: {p.stock}
               </p>
-            </div>
-            <div className="flex gap-2 flex-shrink-0">
-              <button onClick={() => openEdit(p)}
-                className="px-3 py-1.5 text-xs uppercase tracking-widest rounded-lg"
-                style={{ background: 'rgba(242,151,116,0.15)', color: 'var(--accent)', fontFamily: "'ONDER', sans-serif", fontSize: '0.65rem' }}>
-                Ред.
-              </button>
-              <button onClick={() => toggleActive(p.id, p.active)}
-                className="px-3 py-1.5 text-xs uppercase tracking-widest rounded-lg"
-                style={{ background: 'rgba(242,151,116,0.1)', color: 'var(--accent)', opacity: 0.6, fontFamily: "'ONDER', sans-serif", fontSize: '0.65rem' }}>
-                {p.active ? 'Скрыть' : 'Показать'}
-              </button>
+              <div className="flex gap-2 flex-wrap mt-2">
+                <button onClick={() => openEdit(p)}
+                  className="px-2.5 py-1 text-xs uppercase tracking-widest rounded-lg"
+                  style={{ background: 'var(--accent-2)', color: 'var(--accent)', fontFamily: "'Involve', sans-serif", fontWeight: 700, fontSize: '0.62rem' }}>
+                  Ред.
+                </button>
+                <button onClick={() => toggleActive(p.id, p.active)}
+                  className="px-2.5 py-1 text-xs uppercase tracking-widest rounded-lg"
+                  style={{ background: 'var(--bg-subtle)', color: 'var(--accent)', opacity: 0.7, fontFamily: "'Involve', sans-serif", fontWeight: 700, fontSize: '0.62rem', border: '1px solid var(--border-soft)' }}>
+                  {p.active ? 'Скрыть' : 'Показать'}
+                </button>
+              </div>
             </div>
           </div>
         ))}
@@ -286,7 +286,7 @@ export default function ProductsClient({ products }: { products: Product[] }) {
 
             <div className="flex items-center justify-between">
               <h2 className="text-lg uppercase tracking-widest"
-                style={{ color: 'var(--accent)', fontFamily: "'ONDER', sans-serif" }}>
+                style={{ color: 'var(--accent)', fontFamily: "'Involve', sans-serif", fontWeight: 800 }}>
                 {editing.id ? 'Редактировать' : 'Новый товар'}
               </h2>
               <button onClick={() => setEditing(null)} style={{ color: 'var(--accent)', opacity: 0.4, fontSize: '1.2rem' }}>✕</button>

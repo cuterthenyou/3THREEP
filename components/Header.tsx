@@ -203,9 +203,6 @@ export default function Header({ isAdminUser = false }: Props) {
         </button>
         <nav className={s.nav}>
 
-          {/* Главная */}
-          <Link href="/" onClick={() => setMenuOpen(false)} className={s.navLink}>Главная</Link>
-
           {/* Коллекции — accordion */}
           <div className={s.accordion}>
             <button className={s.navLink} onClick={() => toggle('collections')}>
@@ -221,14 +218,8 @@ export default function Header({ isAdminUser = false }: Props) {
             </div>
           </div>
 
-          {/* Каталог */}
-          <Link href="/#catalog" onClick={() => setMenuOpen(false)} className={s.navLink}>Каталог</Link>
-
-          {/* О доставке */}
-          <Link href="/delivery" onClick={() => setMenuOpen(false)} className={s.navLink}>О доставке и оплате</Link>
-
-          {/* Контакты */}
-          <Link href="/contacts" onClick={() => setMenuOpen(false)} className={s.navLink}>Контакты</Link>
+          {/* Инфа */}
+          <Link href="/info" onClick={() => setMenuOpen(false)} className={s.navLink}>Инфа</Link>
 
           {/* Личный кабинет */}
           <Link href="/account" onClick={() => setMenuOpen(false)} className={s.navLink}>Личный кабинет</Link>

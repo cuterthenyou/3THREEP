@@ -36,7 +36,7 @@ export default function GlitterCanvas() {
     resize()
     window.addEventListener('resize', resize)
 
-    const count = Math.min(500, Math.floor(window.innerWidth * window.innerHeight / 3000))
+    const count = Math.min(700, Math.floor(window.innerWidth * window.innerHeight / 2500))
     const particles: Particle[] = Array.from({ length: count }, () => ({
       x: Math.random() * window.innerWidth,
       y: Math.random() * window.innerHeight,
@@ -64,15 +64,15 @@ export default function GlitterCanvas() {
 
         // Sweep boost: particles in the sweep band get extra brightness
         const dist = Math.abs(p.x - sweepX)
-        const sweep = Math.max(0, 1 - dist / sweepRange) * 0.35
+        const sweep = Math.max(0, 1 - dist / sweepRange) * 0.45
 
         const brightness = Math.min(1, base + sweep)
         if (brightness < 0.02) continue
 
-        ctx.globalAlpha = brightness * 0.9
-        // Color varies per particle: white to pink
-        const g = Math.floor(195 + p.colorShift * 50)
-        const b = Math.floor(220 + p.colorShift * 30)
+        ctx.globalAlpha = brightness * 0.95
+        // Color varies per particle: warm pink tones matching #FCB0B2
+        const g = Math.floor(160 + p.colorShift * 50)
+        const b = Math.floor(170 + p.colorShift * 30)
         ctx.fillStyle = `rgb(255,${g},${b})`
         ctx.fillRect(Math.floor(p.x), Math.floor(p.y), p.size, p.size)
       }

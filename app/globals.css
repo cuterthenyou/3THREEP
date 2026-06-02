@@ -71,23 +71,23 @@
 [data-theme="dark"] {
   /* dark = тёмно-серый + тёплый розовый (совпадает с PNG filter output) */
   --color-primary: #2c2c2e;
-  --color-accent:  #e8a4b8;
+  --color-accent:  #FCB0B2;
   --color-bg:      #1c1c1e;
   --color-bg-dark: #0e0e10;
 
   --bg:         #1c1c1e;
   --bg-2:       #2c2c2e;
   --bg-card:    #2c2c2e;
-  --text:       #e8a4b8;
-  --text-muted: rgba(232, 164, 184, 0.55);
-  --accent:     #e8a4b8;
-  --accent-2:   rgba(232, 164, 184, 0.25);
-  --border:     rgba(232, 164, 184, 0.18);
+  --text:       #FCB0B2;
+  --text-muted: rgba(252, 176, 178, 0.55);
+  --accent:     #FCB0B2;
+  --accent-2:   rgba(252, 176, 178, 0.25);
+  --border:     rgba(252, 176, 178, 0.18);
 
   /* ── Helper vars for components ── */
   --header-scrolled-bg: rgba(28, 28, 30, 0.88);
-  --bg-subtle:          rgba(232, 164, 184, 0.08);
-  --border-soft:        rgba(232, 164, 184, 0.12);
+  --bg-subtle:          rgba(252, 176, 178, 0.08);
+  --border-soft:        rgba(252, 176, 178, 0.12);
   --overlay-bg:         rgba(10, 10, 12, 0.97);
 
   /* ── Status colors (same as light — semantic meaning unchanged) ── */
@@ -261,8 +261,8 @@ h4 { font-size: var(--fs-h4); }
 ::-webkit-scrollbar-track { background: var(--bg-2); }
 ::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 2px; }
 
-/* ── Theme image tint — tints logos/images in dark mode toward #e8a4b8 ── */
+/* ── Theme image tint — tints logos/images in dark mode toward #FCB0B2 ── */
 [data-theme="dark"] .theme-img {
-  filter: hue-rotate(330deg) saturate(0.7) brightness(1.15);
+  filter: hue-rotate(350deg) saturate(1.8) brightness(1.25);
 }
 

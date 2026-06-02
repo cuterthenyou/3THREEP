@@ -218,20 +218,13 @@ function ProductCard({
           />
         )}
 
-        {/* Desktop arrow buttons — shown on card hover via CSS */}
+        {/* Swipe dot indicators */}
         {product.images.length > 1 && (
-          <>
-            <button className={s.imgArrow} style={{ left: 8 }} onClick={prevImg} aria-label="Предыдущее фото">‹</button>
-            <button className={s.imgArrow} style={{ right: 8 }} onClick={nextImg} aria-label="Следующее фото">›</button>
-          </>
-        )}
-
-        {/* Dot indicators */}
-        {product.images.length > 1 && (
-          <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-1.5" style={{ zIndex: 4 }}>
+          <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-1.5"
+            style={{ zIndex: 4, animation: 'swipeHint 0.9s ease 0.8s 1' }}>
             {product.images.map((_, i) => (
-              <span key={i} className="rounded-full transition-all"
-                style={{ width: i === currentImg ? '16px' : '6px', height: '6px', background: i === currentImg ? 'var(--accent)' : 'var(--accent-2)' }} />
+              <span key={i} className="transition-all"
+                style={{ width: i === currentImg ? '14px' : '5px', height: '5px', borderRadius: '2px', background: i === currentImg ? 'var(--accent)' : 'var(--accent-2)', transition: 'width 0.2s, background 0.2s' }} />
             ))}
           </div>
         )}
