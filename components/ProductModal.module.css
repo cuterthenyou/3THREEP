@@ -88,30 +88,33 @@
   min-width: 44px;
   height: 44px;
   padding: 0 8px;
-  border: 2px solid var(--accent);
+  border: 1px solid var(--accent);
   border-radius: 2px;
+  box-shadow: 2px 2px 0 var(--accent);
   font-family: var(--font-involve);
   font-size: 0.65rem;
   color: var(--accent);
   background: transparent;
   cursor: pointer;
-  transition: background 0.15s, color 0.15s, transform 0.12s, box-shadow 0.15s;
+  transition: box-shadow 0.12s, transform 0.1s, background 0.15s;
   -webkit-tap-highlight-color: transparent;
 }
 
 .sizeBtn:hover:not(.sizeBtnActive) {
   background: var(--accent-2);
-  transform: scale(1.05);
+  box-shadow: 3px 3px 0 var(--accent);
+  transform: translate(-1px, -1px);
 }
 
 .sizeBtnActive {
   background: var(--accent);
   color: var(--bg);
-  box-shadow: 0 0 10px var(--border);
+  box-shadow: 2px 2px 0 var(--border);
 }
 
 .sizeBtn:active {
-  transform: scale(0.93);
+  box-shadow: 1px 1px 0 var(--accent);
+  transform: translate(1px, 1px);
   transition-duration: 0.06s;
 }
 
@@ -128,8 +131,9 @@
   color: var(--bg);
   border-radius: 3px;
   cursor: pointer;
-  transition: background 0.2s, transform 0.15s, filter 0.2s, box-shadow 0.2s;
-  border: none;
+  border: 1px solid var(--accent);
+  box-shadow: 2px 2px 0 var(--accent);
+  transition: box-shadow 0.12s, transform 0.1s, background 0.15s;
   -webkit-tap-highlight-color: transparent;
 }
 
@@ -138,18 +142,20 @@
 }
 
 .addBtnDefault:hover {
-  filter: brightness(1.1);
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px var(--accent-2);
+  box-shadow: 3px 3px 0 var(--accent);
+  transform: translate(-1px, -1px);
 }
 
 .addBtnAdded {
   background: var(--status-paid);
+  border-color: var(--status-paid);
+  box-shadow: 2px 2px 0 var(--status-paid);
 }
 
 .addBtn:active {
-  transform: scale(0.98) translateY(0);
-  transition-duration: 0.08s;
+  box-shadow: 1px 1px 0 var(--accent);
+  transform: translate(1px, 1px);
+  transition-duration: 0.06s;
 }
 
 /* ── Mobile (full-screen modal) ── */

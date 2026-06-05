@@ -25,7 +25,7 @@ function BrutalMoon() {
 
 function IconGrid() {
   return (
-    <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor" style={{ opacity: 0.55, flexShrink: 0 }}>
+    <svg width="1em" height="1em" viewBox="0 0 14 14" fill="currentColor" style={{ opacity: 0.55, flexShrink: 0 }}>
       <rect x="0" y="0" width="6" height="6"/>
       <rect x="8" y="0" width="6" height="6"/>
       <rect x="0" y="8" width="6" height="6"/>
@@ -36,7 +36,7 @@ function IconGrid() {
 
 function IconDiamond() {
   return (
-    <svg width="13" height="14" viewBox="0 0 13 14" fill="currentColor" style={{ opacity: 0.55, flexShrink: 0 }}>
+    <svg width="1em" height="1em" viewBox="0 0 13 14" fill="currentColor" style={{ opacity: 0.55, flexShrink: 0 }}>
       <polygon points="6.5,0 13,7 6.5,14 0,7"/>
     </svg>
   )
@@ -44,7 +44,7 @@ function IconDiamond() {
 
 function IconUser() {
   return (
-    <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor" style={{ opacity: 0.55, flexShrink: 0 }}>
+    <svg width="1em" height="1em" viewBox="0 0 14 14" fill="currentColor" style={{ opacity: 0.55, flexShrink: 0 }}>
       <polygon points="7,0.5 9.5,3 9.5,6 7,8.5 4.5,6 4.5,3"/>
       <path d="M1,14 L3.5,8.5 H10.5 L13,14 Z"/>
     </svg>
@@ -53,7 +53,7 @@ function IconUser() {
 
 function IconHex() {
   return (
-    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ opacity: 0.55, flexShrink: 0 }}>
+    <svg width="1em" height="1em" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ opacity: 0.55, flexShrink: 0 }}>
       <polygon points="7,0.5 13,3.5 13,10.5 7,13.5 1,10.5 1,3.5"/>
     </svg>
   )
@@ -61,6 +61,7 @@ function IconHex() {
 
 interface Props {
   isAdminUser?: boolean;
+  initialCollections?: Collection[];
 }
 
 const ADMIN_LINKS = [
@@ -68,22 +69,23 @@ const ADMIN_LINKS = [
   { href: '/admin/orders', label: 'Заказы' },
   { href: '/admin/products', label: 'Товары' },
   { href: '/admin/collections', label: 'Коллекции' },
+  { href: '/admin/menu', label: 'Меню' },
   { href: '/admin/media', label: 'Медиа' },
   { href: '/admin/texts', label: 'Тексты' },
   { href: '/admin/site', label: 'Настройки сайта' },
   { href: '/admin/emojis', label: 'Эмодзи' },
 ];
 
-interface Collection { slug: string; name: string; types?: string[] }
+interface Collection { slug: string; name: string; types?: string[]; href?: string }
 
-export default function Header({ isAdminUser = false }: Props) {
+export default function Header({ isAdminUser = false, initialCollections }: Props) {
   const headerRef = useRef<HTMLElement>(null);
   const { count, setOpen } = useCart();
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [expanded, setExpanded] = useState<string | null>(null);
-  const [collections, setCollections] = useState<Collection[]>([]);
-  const [collectionsLoading, setCollectionsLoading] = useState(true);
+  const [collections, setCollections] = useState<Collection[]>(initialCollections ?? []);
+  const [collectionsLoading, setCollectionsLoading] = useState(!initialCollections);
   const [isDark, setIsDark] = useState(false);
   const [menuUser, setMenuUser] = useState<{ name: string; level: number } | null>(null);
   const menuHistoryPushed = useRef(false);
@@ -276,8 +278,8 @@ export default function Header({ isAdminUser = false }: Props) {
                 ? <span className={s.subLink} style={{ opacity: 0.3, cursor: 'default' }}>...</span>
                 : collections.map(c => (
                   <div key={c.slug}>
-                    <Link href={`/?category=${c.slug}#catalog`} onClick={() => setMenuOpen(false)} className={s.subLink}>— {c.name}</Link>
-                    {c.types?.map(type => (
+                    <Link href={c.href ?? `/?category=${c.slug}#catalog`} onClick={() => setMenuOpen(false)} className={s.subLink}>— {c.name}</Link>
+                    {!c.href && c.types?.map(type => (
                       <Link key={type} href={`/?category=${c.slug}&type=${encodeURIComponent(type)}#catalog`} onClick={() => setMenuOpen(false)} className={s.subLinkType}>{type}</Link>
                     ))}
                   </div>
@@ -298,7 +300,31 @@ export default function Header({ isAdminUser = false }: Props) {
 
           {/* Admin accordion */}
           {isAdminUser && (
-            <div className={s.accordion} style={{ marginTop: '2rem' }}>
+            <div style={{ width: '100%', textAlign: 'center', margin: '1.5rem 0 0.5rem', position: 'relative' }}>
+              <span style={{
+                fontFamily: 'var(--font-deutsch)',
+                fontSize: '0.55rem',
+                letterSpacing: '0.3em',
+                color: 'var(--accent)',
+                opacity: 0.35,
+                padding: '0 0.75rem',
+                background: 'var(--overlay-bg)',
+                position: 'relative',
+                zIndex: 1,
+              }}>✦ ✦ ✦</span>
+              <div style={{
+                position: 'absolute',
+                top: '50%',
+                left: 0,
+                right: 0,
+                height: '1px',
+                background: 'var(--accent)',
+                opacity: 0.15,
+              }} />
+            </div>
+          )}
+          {isAdminUser && (
+            <div className={s.accordion}>
               <button className={`${s.navLink} ${s.navLinkAdmin}`} onClick={() => toggle('admin')}>
                 <IconHex /> Панель <span className={`${s.arrow} ${expanded === 'admin' ? s.arrowOpen : ''}`}>▸</span>
               </button>

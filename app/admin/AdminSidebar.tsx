@@ -59,6 +59,15 @@ function IcoTexts() {
   </svg>
 }
 
+function IcoMenu() {
+  return <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" style={{ flexShrink: 0 }}>
+    <rect x="0" y="1" width="10" height="2.5"/>
+    <rect x="0" y="6.5" width="16" height="2.5"/>
+    <rect x="0" y="12" width="13" height="2.5"/>
+    <polygon points="12,1 16,3.25 12,5.5"/>
+  </svg>
+}
+
 function IcoEmoji() {
   return <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" style={{ flexShrink: 0 }}>
     <polygon points="8,0.5 15.5,8 8,15.5 0.5,8"/>
@@ -104,6 +113,7 @@ const NAV = [
   { href: '/admin/orders',      label: 'Заказы',    Icon: IcoOrders },
   { href: '/admin/products',    label: 'Товары',    Icon: IcoProducts },
   { href: '/admin/collections', label: 'Коллекции', Icon: IcoCols },
+  { href: '/admin/menu',        label: 'Меню',      Icon: IcoMenu },
   { href: '/admin/media',       label: 'Медиа',     Icon: IcoMedia },
   { href: '/admin/site',        label: 'Сайт',      Icon: IcoSite },
   { href: '/admin/texts',       label: 'Тексты',    Icon: IcoTexts },
@@ -197,14 +207,14 @@ export default function AdminSidebar() {
           <button
             onClick={() => { toggleTheme(); setIsDark(d => !d) }}
             title={isDark ? 'Светлая тема' : 'Тёмная тема'}
-            style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: collapsed ? '0.6rem' : '0.55rem 0.75rem', justifyContent: collapsed ? 'center' : 'flex-start', borderRadius: '3px', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--accent)', width: '100%', whiteSpace: 'nowrap', opacity: 0.75 }}>
+            style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: collapsed ? '0.6rem' : '0.55rem 0.75rem', justifyContent: collapsed ? 'center' : 'flex-start', borderRadius: '3px', background: 'var(--bg-subtle)', border: '1px solid var(--accent)', boxShadow: '2px 2px 0 var(--accent)', cursor: 'pointer', color: 'var(--accent)', width: '100%', whiteSpace: 'nowrap', transition: 'box-shadow 0.12s, transform 0.1s' }}>
             {isDark ? <IcoSun /> : <IcoMoon />}
             {!collapsed && <span style={{ fontFamily: "var(--font-involve)", fontSize: '0.75rem' }}>{isDark ? 'Светлая' : 'Тёмная'}</span>}
           </button>
           <button
             onClick={() => setCollapsed(v => !v)}
             aria-label={collapsed ? 'Развернуть' : 'Свернуть'}
-            style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: collapsed ? '0.6rem' : '0.55rem 0.75rem', justifyContent: collapsed ? 'center' : 'flex-start', borderRadius: '3px', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', width: '100%', whiteSpace: 'nowrap', opacity: 0.6 }}>
+            style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: collapsed ? '0.6rem' : '0.55rem 0.75rem', justifyContent: collapsed ? 'center' : 'flex-start', borderRadius: '3px', background: 'none', border: '1px solid var(--border)', boxShadow: '2px 2px 0 var(--border)', cursor: 'pointer', color: 'var(--text-muted)', width: '100%', whiteSpace: 'nowrap', transition: 'box-shadow 0.12s, transform 0.1s' }}>
             {collapsed ? <IcoChevR /> : <IcoChevL />}
             {!collapsed && <span style={{ fontFamily: "var(--font-involve)", fontSize: '0.7rem' }}>Свернуть</span>}
           </button>
@@ -214,8 +224,7 @@ export default function AdminSidebar() {
       {/* ── Mobile toggle button ── */}
       <button
         className="md:hidden fixed top-3 left-3 z-50 flex items-center justify-center p-1.5"
-        style={{ borderRadius: '2px' }}
-        style={{ background: 'var(--bg-2)', border: '1px solid var(--border-soft)', cursor: 'pointer' }}
+        style={{ borderRadius: '2px', background: 'var(--bg-2)', border: '1px solid var(--border-soft)', cursor: 'pointer' }}
         onClick={() => setMobileOpen(v => !v)}
         aria-label="Открыть меню"
       >
@@ -258,7 +267,7 @@ export default function AdminSidebar() {
           </Link>
           <button
             onClick={() => { toggleTheme(); setIsDark(d => !d) }}
-            style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.55rem 0.75rem', borderRadius: '3px', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--accent)', width: '100%', whiteSpace: 'nowrap', opacity: 0.75 }}>
+            style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.55rem 0.75rem', borderRadius: '3px', background: 'var(--bg-subtle)', border: '1px solid var(--accent)', boxShadow: '2px 2px 0 var(--accent)', cursor: 'pointer', color: 'var(--accent)', width: '100%', whiteSpace: 'nowrap' }}>
             {isDark ? <IcoSun /> : <IcoMoon />}
             <span style={{ fontFamily: "var(--font-involve)", fontSize: '0.75rem' }}>{isDark ? 'Светлая' : 'Тёмная'}</span>
           </button>

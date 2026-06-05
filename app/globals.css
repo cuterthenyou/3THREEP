@@ -268,6 +268,40 @@ h4 { font-size: var(--fs-h4); }
   animation: glitchFlash 0.6s ease;
 }
 
+/* ── Neo-brutal button hover (matches theme badge) ── */
+.neo-btn {
+  border: 1px solid var(--accent);
+  box-shadow: 2px 2px 0 var(--accent);
+  transition: box-shadow 0.12s, transform 0.1s, background 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+.neo-btn:hover {
+  box-shadow: 3px 3px 0 var(--accent);
+  transform: translate(-1px, -1px);
+}
+.neo-btn:active {
+  box-shadow: 1px 1px 0 var(--accent);
+  transform: translate(1px, 1px);
+  transition-duration: 0.06s;
+}
+
+/* ── Neo-brutal card hover ── */
+.neo-card {
+  border: 1px solid var(--border);
+  box-shadow: 2px 2px 0 var(--border);
+  transition: box-shadow 0.15s, transform 0.15s, border-color 0.15s;
+}
+.neo-card:hover {
+  border-color: var(--accent);
+  box-shadow: 3px 3px 0 var(--accent);
+  transform: translate(-1px, -1px);
+}
+.neo-card:active {
+  box-shadow: 1px 1px 0 var(--accent);
+  transform: translate(1px, 1px);
+  transition-duration: 0.06s;
+}
+
 /* Custom scrollbar */
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-track { background: var(--bg-2); }

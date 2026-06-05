@@ -145,7 +145,7 @@
 }
 
 .avatarBtn:hover:not(:disabled) {
-  box-shadow: 5px 5px 0 var(--accent), -1px -1px 0 rgba(0, 0, 0, 0.2);
+  box-shadow: 3px 3px 0 var(--accent);
   transform: translate(-1px, -1px);
 }
 
@@ -245,12 +245,42 @@
 .tab {
   background: var(--bg-subtle);
   color: var(--color-accent);
-  border: 1px solid var(--border);
+  border: 1px solid var(--accent);
+  box-shadow: 2px 2px 0 var(--accent);
+  transition: box-shadow 0.12s, transform 0.1s, background 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.tab:hover {
+  background: var(--accent-2);
+  box-shadow: 3px 3px 0 var(--accent);
+  transform: translate(-1px, -1px);
+}
+
+.tab:active {
+  box-shadow: 1px 1px 0 var(--accent);
+  transform: translate(1px, 1px);
+  transition-duration: 0.06s;
 }
 
 .tabActive {
   background: var(--color-accent);
   color: var(--color-primary);
+  border: 1px solid var(--accent);
+  box-shadow: 2px 2px 0 var(--accent);
+  transition: box-shadow 0.12s, transform 0.1s;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.tabActive:hover {
+  box-shadow: 3px 3px 0 var(--accent);
+  transform: translate(-1px, -1px);
+}
+
+.tabActive:active {
+  box-shadow: 1px 1px 0 var(--accent);
+  transform: translate(1px, 1px);
+  transition-duration: 0.06s;
 }
 
 /* Inventory */
@@ -338,19 +368,21 @@
   font-size: 0.8rem;
   text-decoration: none;
   cursor: pointer;
-  transition: filter 0.2s, transform 0.15s, box-shadow 0.2s;
+  border: 1px solid var(--accent);
+  box-shadow: 2px 2px 0 var(--accent);
+  transition: box-shadow 0.12s, transform 0.1s, filter 0.15s;
   -webkit-tap-highlight-color: transparent;
 }
 
 .ctaBtn:hover {
-  filter: brightness(1.08);
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px var(--accent-2);
+  box-shadow: 3px 3px 0 var(--accent);
+  transform: translate(-1px, -1px);
 }
 
 .ctaBtn:active {
-  transform: translateY(0) scale(0.98);
-  transition-duration: 0.08s;
+  box-shadow: 1px 1px 0 var(--accent);
+  transform: translate(1px, 1px);
+  transition-duration: 0.06s;
 }
 
 /* Orders list */
@@ -361,22 +393,24 @@
   flex-direction: column;
   gap: 0.5rem;
   background: var(--bg-subtle);
-  border: 1px solid var(--border-soft);
+  border: 1px solid var(--border);
+  box-shadow: 2px 2px 0 var(--border);
   text-decoration: none;
   cursor: pointer;
-  transition: transform 0.2s, border-color 0.2s, background 0.2s;
+  transition: box-shadow 0.15s, transform 0.15s, border-color 0.15s;
   -webkit-tap-highlight-color: transparent;
 }
 
 .orderCard:hover {
-  transform: translateY(-2px);
-  border-color: var(--border);
-  background: var(--bg-subtle);
+  border-color: var(--accent);
+  box-shadow: 3px 3px 0 var(--accent);
+  transform: translate(-1px, -1px);
 }
 
 .orderCard:active {
-  transform: translateY(0) scale(0.99);
-  transition-duration: 0.08s;
+  box-shadow: 1px 1px 0 var(--accent);
+  transform: translate(1px, 1px);
+  transition-duration: 0.06s;
 }
 
 .orderMeta {
@@ -506,20 +540,22 @@
   border-radius: 3px;
   font-family: var(--font-onder);
   font-size: 0.8rem;
-  border: none;
+  border: 1px solid var(--accent);
+  box-shadow: 2px 2px 0 var(--accent);
   cursor: pointer;
-  transition: filter 0.2s, transform 0.15s;
+  transition: box-shadow 0.12s, transform 0.1s;
   -webkit-tap-highlight-color: transparent;
 }
 
 .modalBtn:hover:not(:disabled) {
-  filter: brightness(1.1);
-  transform: translateY(-1px);
+  box-shadow: 3px 3px 0 var(--accent);
+  transform: translate(-1px, -1px);
 }
 
 .modalBtn:active:not(:disabled) {
-  transform: scale(0.98);
-  transition-duration: 0.08s;
+  box-shadow: 1px 1px 0 var(--accent);
+  transform: translate(1px, 1px);
+  transition-duration: 0.06s;
 }
 
 .modalBtn:disabled {
@@ -557,19 +593,28 @@
   text-transform: uppercase;
   letter-spacing: 0.1em;
   background: var(--bg-subtle);
-  border: 1px solid var(--border);
+  border: 1px solid var(--accent);
   color: var(--color-accent);
   border-radius: 2px;
+  box-shadow: 2px 2px 0 var(--accent);
   font-family: var(--font-onder);
   cursor: pointer;
-  transition: opacity 0.15s;
+  transition: box-shadow 0.12s, transform 0.1s, background 0.15s;
   display: flex;
   align-items: center;
   gap: 0.3rem;
 }
 
 .topNavBtn:hover:not(:disabled) {
-  opacity: 0.8;
+  background: var(--accent-2);
+  box-shadow: 3px 3px 0 var(--accent);
+  transform: translate(-1px, -1px);
+}
+
+.topNavBtn:active:not(:disabled) {
+  box-shadow: 1px 1px 0 var(--accent);
+  transform: translate(1px, 1px);
+  transition-duration: 0.06s;
 }
 
 .topNavBtn:disabled {

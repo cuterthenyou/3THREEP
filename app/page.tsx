@@ -21,6 +21,7 @@ export default async function HomePage() {
   let categories = staticCategories;
   let categoryData: Record<string, Category> = {};
   let heroVideoUrl: string | null = null;
+  let initialCollections: { slug: string; name: string; types: string[] }[] = [];
 
   try {
     const [productsData, categoriesData, settingsData] = await Promise.all([
@@ -61,13 +62,22 @@ export default async function HomePage() {
         ]
       }
     }
+    // Derive initialCollections from already-fetched products + categoryData
+    const collSlugs = [...new Set(products.map((p) => p.category as string).filter(Boolean))]
+    initialCollections = collSlugs.map(slug => ({
+      slug,
+      name: categoryData[slug]?.name ?? slug.toUpperCase(),
+      types: [...new Set(
+        products.filter(p => p.category === slug).map(p => p.product_type as string).filter(Boolean)
+      )].sort(),
+    }))
   } catch {
     // fallback to static data
   }
 
   return (
     <main className="min-h-screen">
-      <Header isAdminUser={isAdminUser} />
+      <Header isAdminUser={isAdminUser} initialCollections={initialCollections} />
       <Hero videoUrl={heroVideoUrl} />
       <div style={{ position: 'relative', marginTop: '-100px', zIndex: 2, lineHeight: 0 }}>
         <svg viewBox="0 0 1440 100" preserveAspectRatio="none" style={{ display: 'block', width: '100%', height: 100 }}>

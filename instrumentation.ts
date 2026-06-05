@@ -137,10 +137,13 @@ export async function register() {
       );
     `).catch((e: Error) => console.error('[migration] guest/newsletter/emoji failed:', e.message))
 
+    const navConfigDefault = JSON.stringify({ hiddenCollections: [], customItems: [], collectionsOrder: [] })
+
     for (const [key, value] of [
       ['footer_content', footerDefault],
       ['info_content', infoDefault],
       ['privacy_content', privacyDefault],
+      ['nav_config', navConfigDefault],
     ] as [string, string][]) {
       await pool.query(
         `INSERT INTO site_settings (key, value) VALUES ($1, $2) ON CONFLICT (key) DO NOTHING`,

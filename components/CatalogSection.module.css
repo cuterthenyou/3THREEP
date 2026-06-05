@@ -3,17 +3,30 @@
   font-family: var(--font-onder);
   font-size: 0.7rem;
   border-radius: 2px;
-  border: 2px solid var(--color-accent);
+  border: 1px solid var(--color-accent);
+  box-shadow: 2px 2px 0 var(--color-accent);
   word-break: break-word;
   cursor: pointer;
-  transition: background 0.2s, color 0.2s, border-color 0.2s, transform 0.15s, box-shadow 0.2s;
+  transition: box-shadow 0.12s, transform 0.1s, background 0.15s;
   white-space: nowrap;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .filterBtnActive {
   background: var(--color-accent);
   color: var(--bg);
-  animation: pulseGlow 2.5s ease-in-out infinite;
+  box-shadow: 2px 2px 0 var(--color-accent);
+}
+
+.filterBtnActive:hover {
+  box-shadow: 3px 3px 0 var(--color-accent);
+  transform: translate(-1px, -1px);
+}
+
+.filterBtnActive:active {
+  box-shadow: 1px 1px 0 var(--color-accent);
+  transform: translate(1px, 1px);
+  transition-duration: 0.06s;
 }
 
 .filterBtnInactive {
@@ -23,12 +36,14 @@
 
 .filterBtnInactive:hover {
   background: rgba(242, 151, 116, 0.12);
-  transform: translateY(-1px);
+  box-shadow: 3px 3px 0 var(--color-accent);
+  transform: translate(-1px, -1px);
 }
 
 .filterBtnInactive:active {
-  transform: translateY(0) scale(0.96);
-  transition-duration: 0.08s;
+  box-shadow: 1px 1px 0 var(--color-accent);
+  transform: translate(1px, 1px);
+  transition-duration: 0.06s;
 }
 
 /* Product card */
@@ -38,7 +53,9 @@
   cursor: pointer;
   position: relative;
   background: var(--bg-card);
-  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease;
+  border: 1px solid var(--border);
+  box-shadow: 2px 2px 0 var(--border);
+  transition: box-shadow 0.15s, transform 0.15s, border-color 0.15s;
   -webkit-tap-highlight-color: transparent;
 }
 
@@ -62,14 +79,15 @@
 }
 
 .productCard:hover {
-  transform: translateY(-5px) scale(1.015);
-  box-shadow: 0 12px 40px var(--accent-2), 0 2px 8px rgba(0, 0, 0, 0.3);
+  border-color: var(--accent);
+  box-shadow: 3px 3px 0 var(--accent);
+  transform: translate(-1px, -1px);
 }
 
 .productCard:active {
-  transform: translateY(-2px) scale(0.99);
-  transition-duration: 0.1s;
-  box-shadow: 0 4px 16px var(--bg-subtle);
+  box-shadow: 1px 1px 0 var(--accent);
+  transform: translate(1px, 1px);
+  transition-duration: 0.06s;
 }
 
 
@@ -171,26 +189,49 @@
   letter-spacing: 0.1em;
   text-transform: uppercase;
   cursor: pointer;
-  border: none;
-  transition: background 0.18s, color 0.18s, opacity 0.18s;
+  border: 1px solid var(--border);
+  box-shadow: 2px 2px 0 var(--border);
+  transition: box-shadow 0.12s, transform 0.1s, background 0.15s, border-color 0.15s;
   white-space: nowrap;
   flex-shrink: 0;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .typeBtnActive {
   background: var(--accent);
   color: var(--bg);
+  border-color: var(--accent);
+  box-shadow: 2px 2px 0 var(--accent);
+}
+
+.typeBtnActive:hover {
+  box-shadow: 3px 3px 0 var(--accent);
+  transform: translate(-1px, -1px);
+}
+
+.typeBtnActive:active {
+  box-shadow: 1px 1px 0 var(--accent);
+  transform: translate(1px, 1px);
+  transition-duration: 0.06s;
 }
 
 .typeBtnInactive {
   background: transparent;
   color: var(--text);
-  border: 1px solid var(--border);
   opacity: 0.6;
 }
 
 .typeBtnInactive:hover {
   opacity: 0.9;
+  border-color: var(--accent);
+  box-shadow: 3px 3px 0 var(--accent);
+  transform: translate(-1px, -1px);
+}
+
+.typeBtnInactive:active {
+  box-shadow: 1px 1px 0 var(--accent);
+  transform: translate(1px, 1px);
+  transition-duration: 0.06s;
 }
 
 .typeBtnSoon {
