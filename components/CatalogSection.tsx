@@ -35,12 +35,13 @@ export default function CatalogSection({ products, categories, categoryData = {}
     return () => obs.disconnect()
   }, [])
 
+  const rawCategory = searchParams.get('category') ?? 'all'
+  const rawType = searchParams.get('type') ?? 'all'
+
   useEffect(() => {
-    const cat = searchParams.get('category')
-    const type = searchParams.get('type')
-    setActiveCategory(cat ?? 'all')
-    setActiveType(type ?? 'all')
-  }, [searchParams])
+    setActiveCategory(rawCategory)
+    setActiveType(rawType)
+  }, [rawCategory, rawType])
 
 
   const categoryFiltered = activeCategory === 'all'

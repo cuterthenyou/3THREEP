@@ -236,18 +236,19 @@
 
 .subLinkType {
   font-family: var(--font-deutsch);
-  font-size: clamp(0.55rem, 2vw, 0.7rem);
+  font-size: clamp(0.65rem, 2.2vw, 0.85rem);
   color: var(--accent);
-  opacity: 0.38;
+  opacity: 0.55;
   text-decoration: none;
-  padding: 0.1rem 3rem;
+  padding: 0.15rem 2rem;
   display: block;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.07em;
   transition: opacity 0.15s;
+  animation: fadeInUp 0.3s ease both;
 }
 
-.subLinkType:hover { opacity: 0.65; }
+.subLinkType:hover { opacity: 1; }
 
 
 /* ── Footer ── */

@@ -1,0 +1,41 @@
+/* Neo-brutal sidebar footer buttons */
+
+.sidebarBtnAccent {
+  background: var(--bg-subtle);
+  border: 1px solid var(--accent);
+  box-shadow: 2px 2px 0 var(--accent);
+  transition: box-shadow 0.12s, transform 0.1s, background 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.sidebarBtnAccent:hover {
+  background: var(--accent-2);
+  box-shadow: 3px 3px 0 var(--accent);
+  transform: translate(-1px, -1px);
+}
+
+.sidebarBtnAccent:active {
+  box-shadow: 1px 1px 0 var(--accent);
+  transform: translate(1px, 1px);
+  transition-duration: 0.06s;
+}
+
+.sidebarBtnMuted {
+  background: transparent;
+  border: 1px solid var(--border);
+  box-shadow: 2px 2px 0 var(--border);
+  transition: box-shadow 0.12s, transform 0.1s, border-color 0.12s;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.sidebarBtnMuted:hover {
+  border-color: var(--accent);
+  box-shadow: 3px 3px 0 var(--accent);
+  transform: translate(-1px, -1px);
+}
+
+.sidebarBtnMuted:active {
+  box-shadow: 1px 1px 0 var(--accent);
+  transform: translate(1px, 1px);
+  transition-duration: 0.06s;
+}

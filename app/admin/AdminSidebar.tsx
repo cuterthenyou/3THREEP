@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { toggleTheme } from '@/lib/theme'
+import s from './AdminSidebar.module.css'
 
 function IcoDash() {
   return <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" style={{ flexShrink: 0 }}>
@@ -207,14 +208,16 @@ export default function AdminSidebar() {
           <button
             onClick={() => { toggleTheme(); setIsDark(d => !d) }}
             title={isDark ? 'Светлая тема' : 'Тёмная тема'}
-            style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: collapsed ? '0.6rem' : '0.55rem 0.75rem', justifyContent: collapsed ? 'center' : 'flex-start', borderRadius: '3px', background: 'var(--bg-subtle)', border: '1px solid var(--accent)', boxShadow: '2px 2px 0 var(--accent)', cursor: 'pointer', color: 'var(--accent)', width: '100%', whiteSpace: 'nowrap', transition: 'box-shadow 0.12s, transform 0.1s' }}>
+            className={s.sidebarBtnAccent}
+            style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: collapsed ? '0.6rem' : '0.55rem 0.75rem', justifyContent: collapsed ? 'center' : 'flex-start', borderRadius: '3px', cursor: 'pointer', color: 'var(--accent)', width: '100%', whiteSpace: 'nowrap' }}>
             {isDark ? <IcoSun /> : <IcoMoon />}
             {!collapsed && <span style={{ fontFamily: "var(--font-involve)", fontSize: '0.75rem' }}>{isDark ? 'Светлая' : 'Тёмная'}</span>}
           </button>
           <button
             onClick={() => setCollapsed(v => !v)}
             aria-label={collapsed ? 'Развернуть' : 'Свернуть'}
-            style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: collapsed ? '0.6rem' : '0.55rem 0.75rem', justifyContent: collapsed ? 'center' : 'flex-start', borderRadius: '3px', background: 'none', border: '1px solid var(--border)', boxShadow: '2px 2px 0 var(--border)', cursor: 'pointer', color: 'var(--text-muted)', width: '100%', whiteSpace: 'nowrap', transition: 'box-shadow 0.12s, transform 0.1s' }}>
+            className={s.sidebarBtnMuted}
+            style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: collapsed ? '0.6rem' : '0.55rem 0.75rem', justifyContent: collapsed ? 'center' : 'flex-start', borderRadius: '3px', cursor: 'pointer', color: 'var(--text-muted)', width: '100%', whiteSpace: 'nowrap' }}>
             {collapsed ? <IcoChevR /> : <IcoChevL />}
             {!collapsed && <span style={{ fontFamily: "var(--font-involve)", fontSize: '0.7rem' }}>Свернуть</span>}
           </button>
