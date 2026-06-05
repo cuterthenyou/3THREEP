@@ -14,6 +14,18 @@ function BrutalSun() {
 function BrutalMoon() {
   return <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor"><path d="M8,1 L12,3 L14,7 L12,11 L8,13 L10,10.5 L11,7 L10,3.5 Z"/></svg>
 }
+function LvlFire() {
+  return <svg width="40" height="40" viewBox="0 0 20 24" fill="currentColor"><path d="M10,0 L14,6 L16,4 L15,10 L18,8 L16,14 L18,13 L14,20 L10,24 L6,20 L2,13 L4,14 L2,8 L5,10 L4,4 L6,6 Z"/></svg>
+}
+function LvlBolt() {
+  return <svg width="36" height="40" viewBox="0 0 14 24" fill="currentColor"><path d="M9,0 L2,13 L7,13 L5,24 L12,11 L7,11 Z"/></svg>
+}
+function LvlStar() {
+  return <svg width="36" height="36" viewBox="0 0 14 14" fill="currentColor"><path d="M7 0L9 5.5L14 7L9 8.5L7 14L5 8.5L0 7L5 5.5Z"/></svg>
+}
+function LvlCircle() {
+  return <svg width="32" height="32" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5"><polygon points="7,0.5 13.5,4 13.5,10 7,13.5 0.5,10 0.5,4"/></svg>
+}
 import s from './account.module.css';
 
 interface Props {
@@ -168,10 +180,7 @@ export default function AccountClient({ user, profile, orders, profileBg }: Prop
           {/* Profile card */}
           <div className={s.profileCard}>
             <div className={s.profileInfo}>
-              <div className={s.profileMeta}>
-                <span className={s.profileLabel}>✦ Мой аккаунт</span>
-              </div>
-
+              <span className={s.levelBadge}>LVL {level}</span>
               <h2 className={s.username}>{username}</h2>
 
               <div className="flex gap-2">
@@ -215,7 +224,6 @@ export default function AccountClient({ user, profile, orders, profileBg }: Prop
 
             {/* Avatar + actions */}
             <div className={s.avatarCol}>
-              <span className={s.levelBadge}>Уровень {level}</span>
               <input
                 ref={avatarRef}
                 type="file"
@@ -232,8 +240,8 @@ export default function AccountClient({ user, profile, orders, profileBg }: Prop
                 {avatarUrl ? (
                   <Image src={avatarUrl} alt="avatar" fill className="object-cover" sizes="80px" />
                 ) : (
-                  <span style={{ fontSize: '2.5rem', lineHeight: 1 }}>
-                    {level >= 4 ? '🔥' : level >= 3 ? '⚡' : level >= 2 ? '✦' : '○'}
+                  <span style={{ color: 'var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    {level >= 4 ? <LvlFire /> : level >= 3 ? <LvlBolt /> : level >= 2 ? <LvlStar /> : <LvlCircle />}
                   </span>
                 )}
                 <div className={s.avatarOverlay}>
@@ -253,8 +261,7 @@ export default function AccountClient({ user, profile, orders, profileBg }: Prop
                   alt="AQUA+"
                   width={32}
                   height={32}
-                  className="rounded-lg"
-                  style={{ border: '2px solid var(--accent-2)' }}
+                  style={{ border: '2px solid var(--accent-2)', borderRadius: '2px' }}
                 />
               )}
               {[...Array(7)].map((_, i) => (
@@ -341,8 +348,9 @@ export default function AccountClient({ user, profile, orders, profileBg }: Prop
                     <div className={s.orderMeta}>
                       <span className={s.orderId}>#{order.id.slice(0, 8)}</span>
                       <span
-                        className="text-xs px-2 py-0.5 rounded-full uppercase tracking-widest"
+                        className="text-xs px-2 py-0.5 uppercase tracking-widest"
                         style={{
+                          borderRadius: '2px',
                           background: STATUS_COLORS[order.status] + '22',
                           color: STATUS_COLORS[order.status],
                           fontFamily: "var(--font-onder)",

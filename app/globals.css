@@ -66,14 +66,14 @@
   --overlay-heavy:  rgba(0, 0, 0, 0.75);
   --overlay-medium: rgba(0, 0, 0, 0.55);
 
-  /* ── Status colors (semantic, same across themes) ── */
-  --status-new:         #F29774;
-  --status-paid:        #7EC8A4;
-  --status-in-progress: #F2C46D;
-  --status-shipped:     #74B3F2;
-  --status-delivered:   #A8E6A3;
-  --status-cancelled:   #E08080;
-  --status-error:       #E08080;
+  /* ── Status colors (light/terracotta theme — darker tones readable on red bg) ── */
+  --status-new:         #c4501a;
+  --status-paid:        #2e6b46;
+  --status-in-progress: #8a6200;
+  --status-shipped:     #1a4a8a;
+  --status-delivered:   #2a6e28;
+  --status-cancelled:   #8a2020;
+  --status-error:       #8a2020;
 }
 
 [data-theme="dark"] {
@@ -102,7 +102,7 @@
   /* ── Card theming — dark bg contrasts on pink card ── */
   --text-on-card: var(--bg);
 
-  /* ── Status colors (same as light — semantic meaning unchanged) ── */
+  /* ── Status colors (dark theme — vibrant, pop on dark background) ── */
   --status-new:         #F29774;
   --status-paid:        #7EC8A4;
   --status-in-progress: #F2C46D;

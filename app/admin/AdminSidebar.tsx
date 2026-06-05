@@ -125,7 +125,7 @@ function NavItems({ pathname, collapsed, onNavigate }: { pathname: string; colla
               display: 'flex', alignItems: 'center', gap: '0.75rem',
               padding: collapsed ? '0.6rem' : '0.55rem 0.75rem',
               justifyContent: collapsed ? 'center' : 'flex-start',
-              borderRadius: '0.5rem',
+              borderRadius: '3px',
               background: active ? 'var(--accent-2)' : 'transparent',
               color: active ? 'var(--accent)' : 'var(--text-muted)',
               textDecoration: 'none',
@@ -190,21 +190,21 @@ export default function AdminSidebar() {
         <div className="px-2 py-3 flex flex-col gap-1" style={{ borderTop: '1px solid var(--border-soft)' }}>
           <Link href="/"
             title={collapsed ? 'На сайт' : undefined}
-            style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: collapsed ? '0.6rem' : '0.55rem 0.75rem', justifyContent: collapsed ? 'center' : 'flex-start', borderRadius: '0.5rem', color: 'var(--text-muted)', textDecoration: 'none', whiteSpace: 'nowrap' }}>
+            style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: collapsed ? '0.6rem' : '0.55rem 0.75rem', justifyContent: collapsed ? 'center' : 'flex-start', borderRadius: '3px', color: 'var(--text-muted)', textDecoration: 'none', whiteSpace: 'nowrap' }}>
             <IcoExit />
             {!collapsed && <span style={{ fontFamily: "var(--font-involve)", fontSize: '0.75rem' }}>На сайт</span>}
           </Link>
           <button
             onClick={() => { toggleTheme(); setIsDark(d => !d) }}
             title={isDark ? 'Светлая тема' : 'Тёмная тема'}
-            style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: collapsed ? '0.6rem' : '0.55rem 0.75rem', justifyContent: collapsed ? 'center' : 'flex-start', borderRadius: '0.5rem', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--accent)', width: '100%', whiteSpace: 'nowrap', opacity: 0.75 }}>
+            style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: collapsed ? '0.6rem' : '0.55rem 0.75rem', justifyContent: collapsed ? 'center' : 'flex-start', borderRadius: '3px', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--accent)', width: '100%', whiteSpace: 'nowrap', opacity: 0.75 }}>
             {isDark ? <IcoSun /> : <IcoMoon />}
             {!collapsed && <span style={{ fontFamily: "var(--font-involve)", fontSize: '0.75rem' }}>{isDark ? 'Светлая' : 'Тёмная'}</span>}
           </button>
           <button
             onClick={() => setCollapsed(v => !v)}
             aria-label={collapsed ? 'Развернуть' : 'Свернуть'}
-            style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: collapsed ? '0.6rem' : '0.55rem 0.75rem', justifyContent: collapsed ? 'center' : 'flex-start', borderRadius: '0.5rem', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', width: '100%', whiteSpace: 'nowrap', opacity: 0.6 }}>
+            style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: collapsed ? '0.6rem' : '0.55rem 0.75rem', justifyContent: collapsed ? 'center' : 'flex-start', borderRadius: '3px', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', width: '100%', whiteSpace: 'nowrap', opacity: 0.6 }}>
             {collapsed ? <IcoChevR /> : <IcoChevL />}
             {!collapsed && <span style={{ fontFamily: "var(--font-involve)", fontSize: '0.7rem' }}>Свернуть</span>}
           </button>
@@ -213,7 +213,8 @@ export default function AdminSidebar() {
 
       {/* ── Mobile toggle button ── */}
       <button
-        className="md:hidden fixed top-3 left-3 z-50 flex items-center justify-center p-1.5 rounded-lg"
+        className="md:hidden fixed top-3 left-3 z-50 flex items-center justify-center p-1.5"
+        style={{ borderRadius: '2px' }}
         style={{ background: 'var(--bg-2)', border: '1px solid var(--border-soft)', cursor: 'pointer' }}
         onClick={() => setMobileOpen(v => !v)}
         aria-label="Открыть меню"
@@ -251,13 +252,13 @@ export default function AdminSidebar() {
         {/* Footer */}
         <div className="px-2 py-3 flex flex-col gap-1" style={{ borderTop: '1px solid var(--border-soft)' }}>
           <Link href="/" onClick={() => setMobileOpen(false)}
-            style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.55rem 0.75rem', borderRadius: '0.5rem', color: 'var(--text-muted)', textDecoration: 'none', whiteSpace: 'nowrap' }}>
+            style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.55rem 0.75rem', borderRadius: '3px', color: 'var(--text-muted)', textDecoration: 'none', whiteSpace: 'nowrap' }}>
             <IcoExit />
             <span style={{ fontFamily: "var(--font-involve)", fontSize: '0.75rem' }}>На сайт</span>
           </Link>
           <button
             onClick={() => { toggleTheme(); setIsDark(d => !d) }}
-            style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.55rem 0.75rem', borderRadius: '0.5rem', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--accent)', width: '100%', whiteSpace: 'nowrap', opacity: 0.75 }}>
+            style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.55rem 0.75rem', borderRadius: '3px', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--accent)', width: '100%', whiteSpace: 'nowrap', opacity: 0.75 }}>
             {isDark ? <IcoSun /> : <IcoMoon />}
             <span style={{ fontFamily: "var(--font-involve)", fontSize: '0.75rem' }}>{isDark ? 'Светлая' : 'Тёмная'}</span>
           </button>

@@ -134,7 +134,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 0.5rem;
+  border-radius: 2px;
   background: var(--bg-subtle);
   color: var(--accent);
   border: none;
@@ -271,7 +271,7 @@
   min-width: 11rem;
   background: var(--bg-2);
   border: 1px solid var(--border);
-  border-radius: 0.6rem;
+  border-radius: 3px;
   overflow: hidden;
   z-index: 100;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);

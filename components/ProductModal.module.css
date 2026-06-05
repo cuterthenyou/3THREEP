@@ -11,7 +11,7 @@
 .closeBtn {
   background: var(--accent);
   color: var(--bg);
-  border-radius: 5px;
+  border-radius: 2px;
   cursor: pointer;
   transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s, box-shadow 0.2s;
 }
@@ -29,7 +29,7 @@
 /* Thumbnails */
 .thumbBtn {
   aspect-ratio: 1 / 1;
-  border-radius: 4px;
+  border-radius: 2px;
   overflow: hidden;
   position: relative;
   cursor: pointer;
@@ -89,7 +89,7 @@
   height: 44px;
   padding: 0 8px;
   border: 2px solid var(--accent);
-  border-radius: 4px;
+  border-radius: 2px;
   font-family: var(--font-involve);
   font-size: 0.65rem;
   color: var(--accent);
@@ -126,7 +126,7 @@
   font-family: var(--font-onder);
   font-size: 0.8rem;
   color: var(--bg);
-  border-radius: 5px;
+  border-radius: 3px;
   cursor: pointer;
   transition: background 0.2s, transform 0.15s, filter 0.2s, box-shadow 0.2s;
   border: none;

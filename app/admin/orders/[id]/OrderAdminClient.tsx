@@ -162,8 +162,9 @@ export default function OrderAdminClient({ order, messages: init, adminId }: Pro
               <button
                 key={st}
                 onClick={() => setStatus(st)}
-                className="text-xs px-3 py-1.5 rounded-full uppercase tracking-widest transition-all"
+                className="text-xs px-3 py-1.5 uppercase tracking-widest transition-all"
                 style={{
+                  borderRadius: '2px',
                   background: status === st ? STATUS_COLORS[st] + '33' : 'transparent',
                   color: STATUS_COLORS[st],
                   border: `1px solid ${STATUS_COLORS[st]}${status === st ? 'ff' : '55'}`,

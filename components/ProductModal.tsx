@@ -203,7 +203,7 @@ export default function ProductModal({ product, visible, onClose, modalBg }: Pro
               </p>
 
               <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-2">
-                <h2 className={`text-xl sm:text-2xl lg:text-3xl ${s.name}`}>{product.name}</h2>
+                <h2 className={`text-lg sm:text-xl ${s.name}`}>{product.name}</h2>
                 <p className={`text-lg sm:text-xl ${s.price}`}>{product.price.toLocaleString('ru-RU')} RUB</p>
               </div>
 

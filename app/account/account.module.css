@@ -32,7 +32,7 @@
 
 /* Profile card */
 .profileCard {
-  border-radius: 1rem;
+  border-radius: 3px;
   padding: 1.25rem;
   display: flex;
   gap: 1rem;
@@ -68,7 +68,7 @@
 .levelBadge {
   font-size: 0.6rem;
   padding: 0.125rem 0.5rem;
-  border-radius: 9999px;
+  border-radius: 2px;
   text-transform: uppercase;
   letter-spacing: 0.1em;
   background: var(--bg-subtle);
@@ -88,7 +88,7 @@
 .avatarThumb {
   width: 2rem;
   height: 2rem;
-  border-radius: 0.5rem;
+  border-radius: 2px;
   overflow: hidden;
   border: 2px solid var(--accent-2);
 }
@@ -96,7 +96,7 @@
 .avatarThumbEmpty {
   width: 2rem;
   height: 2rem;
-  border-radius: 0.5rem;
+  border-radius: 2px;
   overflow: hidden;
   border: 2px solid var(--border);
   background: var(--bg-subtle);
@@ -117,16 +117,20 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
+  align-self: stretch;
   gap: 0.75rem;
   flex-shrink: 0;
+  width: 6.5rem;
 }
 
 .avatarBtn {
   position: relative;
-  width: 6.5rem;
-  height: 6.5rem;
-  border-radius: 0.5rem;
+  width: 100%;
+  flex: 1;
+  min-height: 7rem;
+  height: auto;
+  border-radius: 2px;
   overflow: hidden;
   display: flex;
   align-items: center;
@@ -176,7 +180,7 @@
   background: var(--bg-subtle);
   border: 1px solid var(--border);
   color: var(--color-accent);
-  border-radius: 6px;
+  border-radius: 2px;
   font-family: var(--font-onder);
   cursor: pointer;
   transition: opacity 0.15s;
@@ -188,7 +192,7 @@
 
 /* Collections */
 .collectionsCard {
-  border-radius: 1rem;
+  border-radius: 3px;
   padding: 1rem;
   display: flex;
   flex-direction: column;
@@ -209,7 +213,7 @@
 .collectionSlot {
   width: 2rem;
   height: 2rem;
-  border-radius: 0.5rem;
+  border-radius: 2px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -231,7 +235,7 @@
   font-size: 0.75rem;
   text-transform: uppercase;
   letter-spacing: 0.1em;
-  border-radius: 8px;
+  border-radius: 2px;
   font-family: var(--font-onder);
   cursor: pointer;
   transition: background 0.15s, color 0.15s;
@@ -251,7 +255,7 @@
 
 /* Inventory */
 .inventoryCard {
-  border-radius: 1rem;
+  border-radius: 3px;
   padding: 1.25rem;
   display: flex;
   flex-direction: column;
@@ -298,7 +302,7 @@
   position: relative;
   display: block;
   aspect-ratio: 1 / 1;
-  border-radius: 0.75rem;
+  border-radius: 3px;
   overflow: hidden;
   transition: transform 0.15s;
   border: 2px solid var(--accent-2);
@@ -310,7 +314,7 @@
 
 .inventorySlotEmpty {
   aspect-ratio: 1 / 1;
-  border-radius: 0.75rem;
+  border-radius: 3px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -329,7 +333,7 @@
   letter-spacing: 0.1em;
   background: var(--color-accent);
   color: var(--color-primary);
-  border-radius: 10px;
+  border-radius: 3px;
   font-family: var(--font-onder);
   font-size: 0.8rem;
   text-decoration: none;
@@ -351,7 +355,7 @@
 
 /* Orders list */
 .orderCard {
-  border-radius: 1rem;
+  border-radius: 3px;
   padding: 1rem;
   display: flex;
   flex-direction: column;
@@ -404,7 +408,7 @@
 }
 
 .emptyOrders {
-  border-radius: 1rem;
+  border-radius: 3px;
   padding: 2rem;
   text-align: center;
   background: var(--bg-subtle);
@@ -443,7 +447,7 @@
 .modalCard {
   width: 100%;
   max-width: 24rem;
-  border-radius: 1rem;
+  border-radius: 3px;
   padding: 1.5rem;
   display: flex;
   flex-direction: column;
@@ -470,7 +474,7 @@
 .modalInput {
   width: 100%;
   padding: 0.75rem 1rem;
-  border-radius: 0.75rem;
+  border-radius: 2px;
   outline: none;
   font-size: 1rem;
   background: var(--bg-subtle);
@@ -499,7 +503,7 @@
   letter-spacing: 0.1em;
   background: var(--color-accent);
   color: var(--color-primary);
-  border-radius: 10px;
+  border-radius: 3px;
   font-family: var(--font-onder);
   font-size: 0.8rem;
   border: none;
@@ -555,7 +559,7 @@
   background: var(--bg-subtle);
   border: 1px solid var(--border);
   color: var(--color-accent);
-  border-radius: 6px;
+  border-radius: 2px;
   font-family: var(--font-onder);
   cursor: pointer;
   transition: opacity 0.15s;
@@ -594,6 +598,8 @@
   .avatarBtn {
     width: 5rem;
     height: 5rem;
+    flex: unset;
+    min-height: unset;
   }
 
   .username {

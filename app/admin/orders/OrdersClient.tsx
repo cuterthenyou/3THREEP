@@ -143,8 +143,8 @@ export default function OrdersClient({ orders }: { orders: Order[] }) {
                   <span className="text-xs uppercase tracking-widest" style={{ color: 'var(--accent)', opacity: 0.5, fontFamily: "var(--font-involve)" }}>
                     #{order.id.slice(0, 8)}
                   </span>
-                  <span className="text-xs px-2 py-0.5 rounded-full uppercase tracking-widest"
-                    style={{ background: 'var(--bg-subtle)', color: STATUS_COLORS[order.status as OrderStatus], fontFamily: "var(--font-onder)", fontSize: '0.6rem', border: '1px solid var(--border)' }}>
+                  <span className="text-xs px-2 py-0.5 uppercase tracking-widest"
+                    style={{ borderRadius: '2px', background: 'var(--bg-subtle)', color: STATUS_COLORS[order.status as OrderStatus], fontFamily: "var(--font-onder)", fontSize: '0.6rem', border: '1px solid var(--border)' }}>
                     {ORDER_STATUS_LABELS[order.status as OrderStatus]}
                   </span>
                   <span className="text-xs" style={{ color: 'var(--accent)', opacity: 0.4, fontFamily: "var(--font-involve)" }}>
