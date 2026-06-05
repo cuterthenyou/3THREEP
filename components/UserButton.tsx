@@ -50,7 +50,7 @@ export default function UserButton() {
     router.refresh()
   }
 
-  if (user === undefined) return null
+  if (user === undefined) return <div className="w-9 h-9 flex-shrink-0" />
 
   if (!user) {
     return (

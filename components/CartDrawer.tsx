@@ -157,7 +157,7 @@ export default function CartDrawer() {
               <span className={s.totalLabel}>Итого</span>
               <span className={s.totalValue}>{formatPrice(total)}</span>
             </div>
-            <Link href="/checkout" onClick={closeCart} className={`w-full py-3 transition-opacity hover:opacity-90 ${s.checkoutLink}`}>
+            <Link href="/checkout" onClick={() => { historyPushed.current = false; setOpen(false) }} className={`w-full py-3 transition-opacity hover:opacity-90 ${s.checkoutLink}`}>
               Оформить заказ
             </Link>
           </div>

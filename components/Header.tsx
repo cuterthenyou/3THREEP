@@ -146,7 +146,7 @@ export default function Header({ isAdminUser = false }: Props) {
           <img src="/images/logo-text-63.svg" alt="THREEP" className="theme-img hidden xl:block h-8 w-auto absolute left-1/2 -translate-x-1/2" />
 
           {/* Icons — on mobile spread evenly across a fixed width, on desktop tight gap */}
-          <div className="flex items-center justify-between gap-2 sm:gap-3">
+          <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
             {/* Theme toggle — pill badge */}
             <button
               onClick={toggleTheme}
