@@ -181,34 +181,6 @@ export default function AccountClient({ user, profile, orders, profileBg, profil
           {/* Profile card */}
           <div className={s.profileCard}>
             <div className={s.profileInfo}>
-              {/* Avatar */}
-              <div className={s.avatarCol}>
-                <input
-                  ref={avatarRef}
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={handleAvatarChange}
-                />
-                <button
-                  onClick={() => avatarRef.current?.click()}
-                  disabled={uploadingAvatar}
-                  className={s.avatarBtn}
-                  title="Сменить аватарку"
-                >
-                  {avatarUrl ? (
-                    <Image src={avatarUrl} alt="avatar" fill className="object-cover" sizes="120px" />
-                  ) : (
-                    <span style={{ color: 'var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      {level >= 4 ? <LvlFire /> : level >= 3 ? <LvlBolt /> : level >= 2 ? <LvlStar /> : <LvlCircle />}
-                    </span>
-                  )}
-                  <div className={s.avatarOverlay}>
-                    {uploadingAvatar ? '...' : 'Сменить'}
-                  </div>
-                </button>
-              </div>
-
               <span className={s.levelBadge}>LVL {level}</span>
               <h2 className={s.username}>{username}</h2>
 
@@ -249,6 +221,34 @@ export default function AccountClient({ user, profile, orders, profileBg, profil
                   </p>
                 ))}
               </div>
+            </div>
+
+            {/* Avatar — right column, full card height */}
+            <div className={s.avatarCol}>
+              <input
+                ref={avatarRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleAvatarChange}
+              />
+              <button
+                onClick={() => avatarRef.current?.click()}
+                disabled={uploadingAvatar}
+                className={s.avatarBtn}
+                title="Сменить аватарку"
+              >
+                {avatarUrl ? (
+                  <Image src={avatarUrl} alt="avatar" fill className="object-cover" sizes="160px" />
+                ) : (
+                  <span style={{ color: 'var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    {level >= 4 ? <LvlFire /> : level >= 3 ? <LvlBolt /> : level >= 2 ? <LvlStar /> : <LvlCircle />}
+                  </span>
+                )}
+                <div className={s.avatarOverlay}>
+                  {uploadingAvatar ? '...' : 'Сменить'}
+                </div>
+              </button>
             </div>
           </div>
 

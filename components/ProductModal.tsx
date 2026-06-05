@@ -169,13 +169,13 @@ export default function ProductModal({ product, visible, onClose, modalBg }: Pro
             transition: (isTouch && slideOut) ? 'transform 0.28s ease-in' : 'transform 0.3s ease, opacity 0.3s ease',
           }}
         >
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-start">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 lg:items-stretch">
 
             {/* Gallery */}
             <div className="flex flex-col gap-4">
               <div
                 className="w-full rounded-lg overflow-hidden"
-                style={{ aspectRatio: '3/4', position: 'relative', background: '#000' }}
+                style={{ aspectRatio: '3/4', position: 'relative', background: '#000', maxHeight: '70vh' }}
                 {...touchHandlers}
               >
                 <Image src={product.images[activeImg] || product.images[0]} alt={product.name} fill className="object-cover select-none" draggable={false} sizes="(max-width: 768px) 100vw, 50vw" />
@@ -193,53 +193,64 @@ export default function ProductModal({ product, visible, onClose, modalBg }: Pro
             </div>
 
             {/* Product info */}
-            <div className="flex flex-col gap-5 pt-2 pb-24 lg:pt-0 lg:pb-0">
-              <div className="flex justify-center lg:justify-start">
-                <Image src="/images/aqua+.png" alt="AQUA+" width={0} height={0} sizes="15vw" className="theme-img h-10 w-auto" />
-              </div>
+            <div className="flex flex-col pt-2 pb-24 lg:pt-0 lg:pb-0" style={{ height: '100%' }}>
 
-              <p className={`uppercase tracking-widest text-xs ${s.category}`}>
-                {product.category?.toUpperCase() || 'T-SHIRT'}
-              </p>
-
-              <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-2">
-                <h2 className={`text-lg sm:text-xl ${s.name}`}>{product.name}</h2>
-                <p className={`text-lg sm:text-xl ${s.price}`}>{product.price.toLocaleString('ru-RU')} RUB</p>
-              </div>
-
-              <p className={`text-sm ${s.description}`}>{product.description}</p>
-
-              <div className="flex items-center justify-between gap-4">
-                <div className="flex flex-col gap-1">
-                  {product.material && (
-                    <p className={`text-sm ${s.detail}`}><span style={{ opacity: 0.7 }}>Состав:</span> {product.material}</p>
-                  )}
-                  {product.cut && (
-                    <p className={`text-sm ${s.detail}`}><span style={{ opacity: 0.7 }}>Крой:</span> {product.cut}</p>
-                  )}
+              {/* Top section */}
+              <div className="flex flex-col gap-5">
+                <div className="flex justify-center lg:justify-start">
+                  <Image src="/images/aqua+.png" alt="AQUA+" width={0} height={0} sizes="15vw" className="theme-img h-10 w-auto" />
                 </div>
-                <div className="flex gap-2 flex-wrap justify-end">
+
+                <p className={`uppercase tracking-widest text-xs ${s.category}`}>
+                  {product.category?.toUpperCase() || 'T-SHIRT'}
+                </p>
+
+                <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-2">
+                  <h2 className={`text-lg sm:text-xl ${s.name}`}>{product.name}</h2>
+                  <p className={`text-lg sm:text-xl ${s.price}`}>{product.price.toLocaleString('ru-RU')} RUB</p>
+                </div>
+
+                <p className={`text-sm ${s.description}`}>{product.description}</p>
+              </div>
+
+              {/* Spacer */}
+              <div style={{ flex: 1, minHeight: '2rem' }} />
+
+              {/* Bottom section — details, sizes, button */}
+              <div className="flex flex-col gap-5">
+                {(product.material || product.cut) && (
+                  <div className="flex flex-col gap-1">
+                    {product.material && (
+                      <p className={`text-sm ${s.detail}`}><span style={{ opacity: 0.7 }}>Состав:</span> {product.material}</p>
+                    )}
+                    {product.cut && (
+                      <p className={`text-sm ${s.detail}`}><span style={{ opacity: 0.7 }}>Крой:</span> {product.cut}</p>
+                    )}
+                  </div>
+                )}
+
+                <div className="flex gap-2 flex-wrap">
                   {sizes.map((size) => (
                     <button key={size} className={`${s.sizeBtn} ${selectedSize === size ? s.sizeBtnActive : ''}`} onClick={() => setSelectedSize(size)}>
                       {size}
                     </button>
                   ))}
                 </div>
+
+                <AddToCartButton product={product} size={selectedSize} onClose={onClose} />
+
+                {(product.grade || product.series || product.article) && (
+                  <div style={{
+                    display: 'flex', flexWrap: 'wrap', gap: '1rem',
+                    fontFamily: 'var(--font-involve)', fontSize: '0.68rem',
+                    opacity: 0.45,
+                  }}>
+                    {product.grade && <span>Grade {product.grade}</span>}
+                    {product.series && <span>Серия: {product.series}</span>}
+                    {product.article && <span>Арт.: {product.article}</span>}
+                  </div>
+                )}
               </div>
-
-              <AddToCartButton product={product} size={selectedSize} onClose={onClose} />
-
-              {(product.grade || product.series || product.article) && (
-                <div style={{
-                  display: 'flex', flexWrap: 'wrap', gap: '1rem',
-                  fontFamily: 'var(--font-involve)', fontSize: '0.68rem',
-                  opacity: 0.45, marginTop: '-0.5rem',
-                }}>
-                  {product.grade && <span>Grade {product.grade}</span>}
-                  {product.series && <span>Серия: {product.series}</span>}
-                  {product.article && <span>Арт.: {product.article}</span>}
-                </div>
-              )}
             </div>
           </div>
         </div>
