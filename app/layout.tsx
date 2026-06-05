@@ -3,6 +3,7 @@ import type { ReactNode } from 'react';
 import { Unbounded } from 'next/font/google';
 import { CartProvider } from '@/lib/cart';
 import CartDrawer from '@/components/CartDrawer';
+import Providers from './providers';
 import CookieBanner from '@/components/CookieBanner';
 import GlitterCanvas from '@/components/GlitterCanvas';
 import ScrollToTop from '@/components/ScrollToTop';
@@ -59,10 +60,12 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           </defs>
         </svg>
 
-        <CartProvider>
-          {children}
-          <CartDrawer />
-        </CartProvider>
+        <Providers>
+          <CartProvider>
+            {children}
+            <CartDrawer />
+          </CartProvider>
+        </Providers>
         <ScrollToTop />
         <CookieBanner />
       </body>
