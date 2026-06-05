@@ -220,6 +220,8 @@
 .chatInputRow {
   display: flex;
   gap: 0.5rem;
+  position: relative;
+  align-items: center;
 }
 
 .chatInput {

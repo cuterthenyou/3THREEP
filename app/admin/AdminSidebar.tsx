@@ -11,6 +11,7 @@ import {
   IconPhoto,
   IconSettings,
   IconPencil,
+  IconMoodSmile,
   IconChevronLeft,
   IconChevronRight,
   IconLogout,
@@ -27,6 +28,7 @@ const NAV = [
   { href: '/admin/media',       label: 'Медиа',     Icon: IconPhoto },
   { href: '/admin/site',        label: 'Сайт',      Icon: IconSettings },
   { href: '/admin/texts',       label: 'Тексты',    Icon: IconPencil },
+  { href: '/admin/emojis',      label: 'Emoji',     Icon: IconMoodSmile },
 ]
 
 function NavItems({ pathname, collapsed, onNavigate }: { pathname: string; collapsed: boolean; onNavigate?: () => void }) {

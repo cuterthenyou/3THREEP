@@ -19,7 +19,7 @@ export default async function AdminOrdersPage() {
         ) FILTER (WHERE oi.id IS NOT NULL),
         '[]'
       ) AS order_items,
-      json_build_object('email', p.email, 'name', p.name) AS profiles
+      CASE WHEN o.user_id IS NOT NULL THEN json_build_object('email', p.email, 'name', p.name) END AS profiles
      FROM orders o
      LEFT JOIN order_items oi ON oi.order_id = o.id
      LEFT JOIN profiles p ON p.id = o.user_id

@@ -114,12 +114,18 @@ export default function OrderAdminClient({ order, messages: init, adminId }: Pro
 
       {/* Customer + items */}
       <div className={s.card}>
-        {profile && (
+        {profile ? (
           <p className={s.clientName}>
             <span className={s.clientLabel}>Клиент: </span>
             {String(profile.name || profile.email || '')}
           </p>
-        )}
+        ) : (order.guest_name || order.guest_email) ? (
+          <p className={s.clientName}>
+            <span className={s.clientLabel}>Гость: </span>
+            {[String(order.guest_name || ''), String(order.guest_email || '')].filter(Boolean).join(' · ')}
+            {order.guest_phone ? ` · ${order.guest_phone}` : ''}
+          </p>
+        ) : null}
         {items.map((item) => (
           <div key={String(item.id)} className={s.itemRow}>
             <span>

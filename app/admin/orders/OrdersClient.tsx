@@ -27,6 +27,8 @@ interface Order {
   created_at: string
   order_items: Record<string, unknown>[]
   profiles: Record<string, unknown> | null
+  guest_name: string | null
+  guest_email: string | null
 }
 
 export default function OrdersClient({ orders }: { orders: Order[] }) {
@@ -62,8 +64,8 @@ export default function OrdersClient({ orders }: { orders: Order[] }) {
     if (search) {
       const q = search.toLowerCase()
       list = list.filter(o => {
-        const email = String((o.profiles as Record<string, unknown>)?.email ?? '').toLowerCase()
-        const name = String((o.profiles as Record<string, unknown>)?.name ?? '').toLowerCase()
+        const email = String((o.profiles as Record<string, unknown>)?.email ?? o.guest_email ?? '').toLowerCase()
+        const name = String((o.profiles as Record<string, unknown>)?.name ?? o.guest_name ?? '').toLowerCase()
         return o.id.toLowerCase().includes(q) || email.includes(q) || name.includes(q)
       })
     }
@@ -156,11 +158,15 @@ export default function OrdersClient({ orders }: { orders: Order[] }) {
                     </span>
                   ))}
                 </div>
-                {profile && (
+                {profile ? (
                   <p className="text-xs mt-1" style={{ color: 'var(--accent)', opacity: 0.4, fontFamily: "var(--font-involve)" }}>
                     {String(profile.name || profile.email || '')}
                   </p>
-                )}
+                ) : (order.guest_name || order.guest_email) ? (
+                  <p className="text-xs mt-1" style={{ color: 'var(--accent)', opacity: 0.4, fontFamily: "var(--font-involve)" }}>
+                    Гость: {[order.guest_name, order.guest_email].filter(Boolean).join(' · ')}
+                  </p>
+                ) : null}
               </div>
               <p className="text-lg flex-shrink-0" style={{ color: 'var(--accent)', fontFamily: "var(--font-onder)" }}>
                 {formatPrice(order.total)}

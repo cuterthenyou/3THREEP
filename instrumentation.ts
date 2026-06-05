@@ -107,6 +107,26 @@ export async function register() {
       },
     ])
 
+    // Guest checkout + newsletter + custom emojis migrations
+    await pool.query(`
+      ALTER TABLE orders ALTER COLUMN user_id DROP NOT NULL;
+      ALTER TABLE orders ADD COLUMN IF NOT EXISTS guest_email TEXT;
+      ALTER TABLE orders ADD COLUMN IF NOT EXISTS guest_name  TEXT;
+      ALTER TABLE orders ADD COLUMN IF NOT EXISTS guest_phone TEXT;
+      ALTER TABLE users ADD COLUMN IF NOT EXISTS newsletter_subscription BOOLEAN DEFAULT false;
+      CREATE TABLE IF NOT EXISTS newsletter_subscribers (
+        email TEXT PRIMARY KEY,
+        user_id UUID REFERENCES users(id) ON DELETE SET NULL,
+        subscribed_at TIMESTAMPTZ DEFAULT NOW()
+      );
+      CREATE TABLE IF NOT EXISTS custom_emojis (
+        id SERIAL PRIMARY KEY,
+        name TEXT UNIQUE NOT NULL,
+        url TEXT NOT NULL,
+        created_at TIMESTAMPTZ DEFAULT NOW()
+      );
+    `).catch((e: Error) => console.error('[migration] guest/newsletter/emoji failed:', e.message))
+
     for (const [key, value] of [
       ['footer_content', footerDefault],
       ['info_content', infoDefault],

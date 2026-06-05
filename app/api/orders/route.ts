@@ -5,20 +5,36 @@ import { NextResponse, type NextRequest } from 'next/server'
 
 export async function POST(req: NextRequest) {
   const session = await auth()
-  if (!session?.user?.id) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const body = await req.json()
-  const { items, total, delivery_address, comment } = body
+  const { items, total, delivery_address, comment, guest_name, guest_email, guest_phone } = body
 
   if (!items?.length || !total || !delivery_address) {
     return NextResponse.json({ error: 'Invalid data' }, { status: 400 })
   }
 
-  const { rows: [order] } = await query(
-    `INSERT INTO orders (user_id, total, delivery_address, comment, status)
-     VALUES ($1, $2, $3, $4, 'new') RETURNING *`,
-    [session.user.id, total, delivery_address, comment ?? null]
-  )
+  const isGuest = !session?.user?.id
+  if (isGuest && !guest_email?.trim()) {
+    return NextResponse.json({ error: 'Email обязателен для гостевого заказа' }, { status: 400 })
+  }
+
+  let order: Record<string, unknown>
+
+  if (isGuest) {
+    const { rows: [newOrder] } = await query(
+      `INSERT INTO orders (user_id, total, delivery_address, comment, status, guest_name, guest_email, guest_phone)
+       VALUES (NULL, $1, $2, $3, 'new', $4, $5, $6) RETURNING *`,
+      [total, delivery_address, comment ?? null, guest_name?.trim() ?? null, guest_email.trim(), guest_phone?.trim() ?? null]
+    )
+    order = newOrder
+  } else {
+    const { rows: [newOrder] } = await query(
+      `INSERT INTO orders (user_id, total, delivery_address, comment, status)
+       VALUES ($1, $2, $3, $4, 'new') RETURNING *`,
+      [session.user.id, total, delivery_address, comment ?? null]
+    )
+    order = newOrder
+  }
 
   if (!order) return NextResponse.json({ error: 'Failed to create order' }, { status: 500 })
 
@@ -45,13 +61,15 @@ export async function POST(req: NextRequest) {
   )
 
   const totalFormatted = Number(order.total).toLocaleString('ru-RU')
+  const whoLabel = isGuest ? `Гость: ${guest_email}` : `Пользователь`
   sendTelegram(
     `🛒 <b>Новый заказ!</b>\n\n` +
     `Заказ: <code>#${String(order.id).slice(0, 8)}</code>\n` +
+    `${whoLabel}\n` +
     `Сумма: ${totalFormatted} ₽\n` +
     `Адрес: ${order.delivery_address || '—'}\n\n` +
     `👉 https://3threep.ru/admin/orders/${order.id}`
   ).catch(() => {})
 
-  return NextResponse.json({ id: order.id })
+  return NextResponse.json({ id: order.id, isGuest })
 }

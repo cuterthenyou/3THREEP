@@ -1,6 +1,7 @@
 import { auth } from '@/lib/auth'
 import { query, queryMany, queryOne } from '@/lib/db'
 import { sendTelegram } from '@/lib/telegram'
+import { filterProfanity } from '@/lib/profanity'
 import { NextResponse, type NextRequest } from 'next/server'
 
 export async function GET(
@@ -41,9 +42,11 @@ export async function POST(
   const { text } = await req.json()
   if (!text?.trim()) return NextResponse.json({ error: 'Empty message' }, { status: 400 })
 
+  const filtered = filterProfanity(text.trim())
+
   const { rows } = await query(
     'INSERT INTO messages (order_id, sender_id, is_admin, text) VALUES ($1, $2, false, $3) RETURNING *',
-    [id, session.user.id, text.trim()]
+    [id, session.user.id, filtered]
   )
 
   sendTelegram(

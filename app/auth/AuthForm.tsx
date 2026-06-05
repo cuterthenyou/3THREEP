@@ -13,6 +13,7 @@ export default function AuthForm() {
   const [error, setError] = useState('');
   const [step, setStep] = useState<'email' | 'code'>('email');
   const [consent, setConsent] = useState(false);
+  const [newsletter, setNewsletter] = useState(false);
   const [emailTouched, setEmailTouched] = useState(false);
 
   const searchParams = useSearchParams();
@@ -48,6 +49,9 @@ export default function AuthForm() {
         setError('Неверный код. Попробуй ещё раз.');
         setLoading(false);
         return;
+      }
+      if (newsletter) {
+        await fetch('/api/newsletter/subscribe', { method: 'POST' }).catch(() => {})
       }
       window.location.href = callbackUrl;
     } catch {
@@ -93,6 +97,15 @@ export default function AuthForm() {
                 </Link>{' '}
                 и обработкой персональных данных
               </span>
+            </label>
+            <label className={s.consent}>
+              <input
+                type="checkbox"
+                checked={newsletter}
+                onChange={(e) => setNewsletter(e.target.checked)}
+                className={s.consentCheck}
+              />
+              <span>Я хочу получать новости и акции от 3THREEP</span>
             </label>
             <button onClick={requestCode} disabled={loading || !isEmailValid || !consent} className={s.btn}>
               {loading ? 'Отправляем...' : 'Получить код'}
