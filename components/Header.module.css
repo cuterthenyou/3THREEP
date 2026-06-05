@@ -105,23 +105,23 @@
 }
 
 .navLink {
-  font-family: var(--font-involve);
-  font-weight: 800;
-  font-size: clamp(1.3rem, 5vw, 1.8rem);
+  font-family: var(--font-deutsch);
+  font-size: clamp(1.8rem, 7vw, 2.6rem);
   text-transform: uppercase;
-  letter-spacing: 0.03em;
+  letter-spacing: 0.05em;
   white-space: nowrap;
   color: var(--accent);
   text-decoration: none;
-  padding: 0.25rem 1rem;
+  padding: 0.15rem 1rem;
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.6rem;
   background: none;
   border: none;
   cursor: pointer;
   transition: opacity 0.18s;
   animation: fadeInUp 0.4s ease both;
+  line-height: 1.15;
 }
 
 /* ── Overlay close button ── */
@@ -148,11 +148,9 @@
 
 .navLink:hover { opacity: 0.65; }
 
-.navLinkSmall {
-  font-family: var(--font-involve);
-  font-weight: 800;
-  font-size: clamp(1.3rem, 5vw, 1.8rem);
-  opacity: 0.8;
+.navLinkAdmin {
+  font-size: clamp(1.4rem, 5vw, 1.9rem);
+  opacity: 0.65;
 }
 
 /* ── Accordion ── */
@@ -189,49 +187,62 @@
 
 /* ── Burger menu user info ── */
 .menuUserInfo {
-  font-family: var(--font-involve);
-  font-size: 0.62rem;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--accent);
-  opacity: 0.28;
-  margin-bottom: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+  margin-bottom: 2rem;
   text-align: center;
 }
 
-.menuUserInfo span {
-  opacity: 0.75;
+.menuUserName {
+  font-family: var(--font-deutsch);
+  font-size: clamp(1.2rem, 5vw, 1.6rem);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--accent);
+  opacity: 0.85;
+  line-height: 1;
+}
+
+.menuUserLevel {
+  font-family: var(--font-onder);
+  font-size: 0.62rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--accent);
+  opacity: 0.4;
 }
 
 .subLink {
-  font-family: var(--font-involve);
-  font-weight: 400;
-  font-size: clamp(0.9rem, 3.5vw, 1.15rem);
+  font-family: var(--font-onder);
+  font-size: clamp(1rem, 4vw, 1.3rem);
   color: var(--accent);
-  opacity: 0.65;
+  opacity: 0.7;
   text-decoration: none;
   padding: 0.2rem 1.5rem;
   transition: opacity 0.15s;
   animation: fadeInUp 0.3s ease both;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
 }
 
 .subLink:hover { opacity: 1; }
 
 .subLinkType {
-  font-family: var(--font-involve);
-  font-weight: 400;
-  font-size: clamp(0.72rem, 2.5vw, 0.88rem);
+  font-family: var(--font-onder);
+  font-size: clamp(0.75rem, 3vw, 0.95rem);
   color: var(--accent);
   opacity: 0.38;
   text-decoration: none;
   padding: 0.1rem 3rem;
   display: block;
   text-transform: uppercase;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.12em;
   transition: opacity 0.15s;
 }
 
-.subLinkType:hover { opacity: 0.7; }
+.subLinkType:hover { opacity: 0.65; }
 
 .adminDivider {
   font-family: var(--font-involve);

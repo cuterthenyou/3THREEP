@@ -23,6 +23,42 @@ function BrutalMoon() {
   )
 }
 
+function IconGrid() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor" style={{ opacity: 0.55, flexShrink: 0 }}>
+      <rect x="0" y="0" width="6" height="6"/>
+      <rect x="8" y="0" width="6" height="6"/>
+      <rect x="0" y="8" width="6" height="6"/>
+      <rect x="8" y="8" width="6" height="6"/>
+    </svg>
+  )
+}
+
+function IconDiamond() {
+  return (
+    <svg width="13" height="14" viewBox="0 0 13 14" fill="currentColor" style={{ opacity: 0.55, flexShrink: 0 }}>
+      <polygon points="6.5,0 13,7 6.5,14 0,7"/>
+    </svg>
+  )
+}
+
+function IconUser() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor" style={{ opacity: 0.55, flexShrink: 0 }}>
+      <polygon points="7,0.5 9.5,3 9.5,6 7,8.5 4.5,6 4.5,3"/>
+      <path d="M1,14 L3.5,8.5 H10.5 L13,14 Z"/>
+    </svg>
+  )
+}
+
+function IconHex() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ opacity: 0.55, flexShrink: 0 }}>
+      <polygon points="7,0.5 13,3.5 13,10.5 7,13.5 1,10.5 1,3.5"/>
+    </svg>
+  )
+}
+
 interface Props {
   isAdminUser?: boolean;
 }
@@ -31,7 +67,11 @@ const ADMIN_LINKS = [
   { href: '/admin', label: 'Дашборд' },
   { href: '/admin/orders', label: 'Заказы' },
   { href: '/admin/products', label: 'Товары' },
+  { href: '/admin/collections', label: 'Коллекции' },
   { href: '/admin/media', label: 'Медиа' },
+  { href: '/admin/texts', label: 'Тексты' },
+  { href: '/admin/site', label: 'Настройки сайта' },
+  { href: '/admin/emojis', label: 'Эмодзи' },
 ];
 
 interface Collection { slug: string; name: string; types?: string[] }
@@ -220,24 +260,25 @@ export default function Header({ isAdminUser = false }: Props) {
           {/* Burger user info */}
           {menuUser && (
             <div className={s.menuUserInfo}>
-              {menuUser.name}<span> · LVL {menuUser.level}</span>
+              <span className={s.menuUserName}>{menuUser.name}</span>
+              <span className={s.menuUserLevel}>LVL {menuUser.level}</span>
             </div>
           )}
 
           {/* Коллекции — accordion */}
           <div className={s.accordion}>
             <button className={s.navLink} onClick={() => toggle('collections')}>
-              Коллекции <span className={`${s.arrow} ${expanded === 'collections' ? s.arrowOpen : ''}`}>▸</span>
+              <IconGrid /> Коллекции <span className={`${s.arrow} ${expanded === 'collections' ? s.arrowOpen : ''}`}>▸</span>
             </button>
             <div className={`${s.sub} ${expanded === 'collections' ? s.subOpen : ''}`}>
-              <Link href="/#catalog" onClick={() => setMenuOpen(false)} className={s.subLink}>Все коллекции</Link>
+              <Link href="/#catalog" onClick={() => setMenuOpen(false)} className={s.subLink}>— Все</Link>
               {collectionsLoading
                 ? <span className={s.subLink} style={{ opacity: 0.3, cursor: 'default' }}>...</span>
                 : collections.map(c => (
                   <div key={c.slug}>
-                    <Link href={`/?collection=${c.slug}`} onClick={() => setMenuOpen(false)} className={s.subLink}>{c.name}</Link>
+                    <Link href={`/#catalog`} onClick={() => setMenuOpen(false)} className={s.subLink}>— {c.name}</Link>
                     {c.types?.map(type => (
-                      <Link key={type} href={`/?collection=${c.slug}`} onClick={() => setMenuOpen(false)} className={s.subLinkType}>{type}</Link>
+                      <Link key={type} href={`/#catalog`} onClick={() => setMenuOpen(false)} className={s.subLinkType}>{type}</Link>
                     ))}
                   </div>
                 ))
@@ -246,17 +287,21 @@ export default function Header({ isAdminUser = false }: Props) {
           </div>
 
           {/* Инфа */}
-          <Link href="/info" onClick={() => setMenuOpen(false)} className={s.navLink}>Инфа</Link>
+          <Link href="/info" onClick={() => setMenuOpen(false)} className={s.navLink}>
+            <IconDiamond /> Инфа
+          </Link>
 
           {/* Личный кабинет */}
-          <Link href="/account" onClick={() => setMenuOpen(false)} className={s.navLink}>Личный кабинет</Link>
+          <Link href="/account" onClick={() => setMenuOpen(false)} className={s.navLink}>
+            <IconUser /> Кабинет
+          </Link>
 
           {/* Admin accordion */}
           {isAdminUser && (
             <div className={s.accordion}>
               <div className={s.adminDivider}>Admin</div>
-              <button className={`${s.navLink} ${s.navLinkSmall}`} onClick={() => toggle('admin')}>
-                Панель управления <span className={`${s.arrow} ${expanded === 'admin' ? s.arrowOpen : ''}`}>▸</span>
+              <button className={`${s.navLink} ${s.navLinkAdmin}`} onClick={() => toggle('admin')}>
+                <IconHex /> Панель <span className={`${s.arrow} ${expanded === 'admin' ? s.arrowOpen : ''}`}>▸</span>
               </button>
               <div className={`${s.sub} ${expanded === 'admin' ? s.subOpen : ''}`}>
                 {ADMIN_LINKS.map(({ href, label }) => (
