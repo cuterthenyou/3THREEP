@@ -10,6 +10,7 @@ import {
   IconStack2,
   IconPhoto,
   IconSettings,
+  IconPencil,
   IconChevronLeft,
   IconChevronRight,
   IconLogout,
@@ -25,6 +26,7 @@ const NAV = [
   { href: '/admin/collections', label: 'Коллекции', Icon: IconStack2 },
   { href: '/admin/media',       label: 'Медиа',     Icon: IconPhoto },
   { href: '/admin/site',        label: 'Сайт',      Icon: IconSettings },
+  { href: '/admin/texts',       label: 'Тексты',    Icon: IconPencil },
 ]
 
 function NavItems({ pathname, collapsed, onNavigate }: { pathname: string; collapsed: boolean; onNavigate?: () => void }) {

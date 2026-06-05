@@ -1,5 +1,34 @@
 import Link from 'next/link';
+import { queryOne } from '@/lib/db'
 import s from './Footer.module.css'
+
+export type FooterContent = {
+  contact_heading: string
+  contact_subtext: string
+  vk_direct_url: string
+  tg_url: string
+  follow_heading: string
+  follow_subtext: string
+  vk_community_url: string
+  tiktok_url: string
+  instagram_url: string
+  meta_disclaimer: string
+  copyright: string
+}
+
+export const FOOTER_DEFAULTS: FooterContent = {
+  contact_heading: 'Пиши ёпта',
+  contact_subtext: 'Хочешь заказать, есть вопрос или просто хочешь поговорить — пиши напрямую',
+  vk_direct_url: 'https://vk.me/3threep_shop',
+  tg_url: 'http://t.me/arasuka333',
+  follow_heading: 'Смотри чё творим',
+  follow_subtext: 'Следи за нами — там самое свежее',
+  vk_community_url: 'https://vk.com/3threep_shop',
+  tiktok_url: 'https://www.tiktok.com/@3threep.shop',
+  instagram_url: 'https://www.instagram.com/3threep.shop/',
+  meta_disclaimer: '*Meta Platforms признана экстремистской организацией в РФ',
+  copyright: '© 2024 THREEP. All rights reserved. Custom streetwear for the bold.',
+}
 
 const VKIcon = () => (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
@@ -34,7 +63,13 @@ function SocialBtn({ href, label, children }: { href: string; label: string; chi
   )
 }
 
-export default function Footer() {
+export default async function Footer() {
+  let content = FOOTER_DEFAULTS
+  try {
+    const row = await queryOne<{ value: string }>(`SELECT value FROM site_settings WHERE key = 'footer_content'`)
+    if (row?.value) content = { ...FOOTER_DEFAULTS, ...JSON.parse(row.value) }
+  } catch { /* table may not exist yet */ }
+
   return (
     <footer className="py-10 sm:py-14 px-6 sm:px-8" id="footer">
       <div className="max-w-6xl mx-auto">
@@ -43,29 +78,29 @@ export default function Footer() {
 
           {/* Card 1 — contact us */}
           <div className={`flex-1 flex flex-col items-center justify-center gap-5 px-8 py-10 rounded-[10px] ${s.card}`}>
-            <h2 className={s.heading}>Пиши ёпта</h2>
+            <h2 className={s.heading}>{content.contact_heading}</h2>
             <p className={`text-xs text-center ${s.subtitle}`}>
-              Хочешь заказать, есть вопрос или просто хочешь поговорить — пиши напрямую
+              {content.contact_subtext}
             </p>
             <div className="flex items-center gap-3">
-              <SocialBtn href="https://vk.me/3threep_shop" label="VK"><VKIcon /></SocialBtn>
-              <SocialBtn href="http://t.me/arasuka333" label="Telegram"><TGIcon /></SocialBtn>
+              <SocialBtn href={content.vk_direct_url} label="VK"><VKIcon /></SocialBtn>
+              <SocialBtn href={content.tg_url} label="Telegram"><TGIcon /></SocialBtn>
             </div>
           </div>
 
           {/* Card 2 — follow us */}
           <div className={`flex-1 flex flex-col items-center justify-center gap-5 px-8 py-10 rounded-[10px] ${s.card}`}>
-            <h2 className={s.heading}>Смотри чё творим</h2>
+            <h2 className={s.heading}>{content.follow_heading}</h2>
             <p className={`text-xs text-center ${s.subtitle}`}>
-              Следи за нами — там самое свежее
+              {content.follow_subtext}
             </p>
             <div className="flex items-center gap-3">
-              <SocialBtn href="https://vk.com/3threep_shop" label="VK сообщество"><VKIcon /></SocialBtn>
-              <SocialBtn href="https://www.tiktok.com/@3threep.shop" label="TikTok"><TikTokIcon /></SocialBtn>
-              <SocialBtn href="https://www.instagram.com/3threep.shop/" label="Instagram*"><IGIcon /></SocialBtn>
+              <SocialBtn href={content.vk_community_url} label="VK сообщество"><VKIcon /></SocialBtn>
+              <SocialBtn href={content.tiktok_url} label="TikTok"><TikTokIcon /></SocialBtn>
+              <SocialBtn href={content.instagram_url} label="Instagram*"><IGIcon /></SocialBtn>
             </div>
             <p className={`text-xs text-center ${s.disclaimer}`}>
-              *Meta Platforms признана экстремистской организацией в РФ
+              {content.meta_disclaimer}
             </p>
           </div>
 
@@ -74,7 +109,7 @@ export default function Footer() {
         {/* Copyright + legal */}
         <div className="mt-8 flex flex-col items-center gap-2">
           <p className={`text-sm text-center ${s.copyright}`}>
-            © 2024 THREEP. All rights reserved. Custom streetwear for the bold.
+            {content.copyright}
           </p>
           <Link href="/privacy" className={s.privacyLink}>
             Политика конфиденциальности

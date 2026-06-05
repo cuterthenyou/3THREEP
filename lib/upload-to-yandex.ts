@@ -4,17 +4,24 @@ import sharp from 'sharp'
 
 const IMAGE_MIME_TYPES = new Set(['image/jpeg', 'image/jpg', 'image/png', 'image/webp'])
 
-async function optimizeBuffer(buf: Buffer, mimeType: string): Promise<Buffer> {
+const FOLDER_MAX_WIDTHS: Record<string, number> = {
+  avatars: 256,
+  assets: 1920,
+  products: 1920,
+}
+
+async function optimizeBuffer(buf: Buffer, mimeType: string, folder: string): Promise<Buffer> {
   if (!IMAGE_MIME_TYPES.has(mimeType)) return buf;
+  const width = FOLDER_MAX_WIDTHS[folder] ?? 1920;
   if (mimeType === 'image/png') {
     return sharp(buf)
-      .resize({ width: 2000, withoutEnlargement: true })
+      .resize({ width, withoutEnlargement: true })
       .png({ compressionLevel: 8 })
       .toBuffer();
   }
   return sharp(buf)
-    .resize({ width: 2000, withoutEnlargement: true })
-    .jpeg({ quality: 85, progressive: true })
+    .resize({ width, withoutEnlargement: true })
+    .webp({ quality: 85 })
     .toBuffer();
 }
 
@@ -25,7 +32,7 @@ export async function uploadToYandex(
 ) {
   const bytes = await file.arrayBuffer()
   const raw = Buffer.from(bytes)
-  const buffer = await optimizeBuffer(raw, file.type)
+  const buffer = await optimizeBuffer(raw, file.type, folder)
 
   let contentType: string
   let ext: string
@@ -36,8 +43,8 @@ export async function uploadToYandex(
     contentType = 'image/png'
     ext = 'png'
   } else {
-    contentType = 'image/jpeg'
-    ext = 'jpg'
+    contentType = 'image/webp'
+    ext = 'webp'
   }
   const fileName = customFileName || `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
   const key = `${folder}/${fileName}`
@@ -52,7 +59,7 @@ export async function uploadToYandex(
   )
 
   const baseUrl = process.env.NEXT_PUBLIC_STORAGE_BASE_URL || 'https://storage.yandexcloud.net/threep-media'
-  
+
   return {
     fileName,
     key,

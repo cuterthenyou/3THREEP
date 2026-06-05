@@ -11,6 +11,14 @@ export async function POST(req: NextRequest) {
 
   if (!file) return NextResponse.json({ error: 'No file' }, { status: 400 })
 
+  const MAX_VIDEO_SIZE = 200 * 1024 * 1024
+  if (file.type.startsWith('video/') && file.size > MAX_VIDEO_SIZE) {
+    return NextResponse.json(
+      { error: 'Видео слишком большое. Максимум 200MB. Сожми видео перед загрузкой.' },
+      { status: 413 }
+    )
+  }
+
   try {
     const folderParam = formData.get('folder') as string | null
     const validFolders = ['products', 'assets', 'avatars']

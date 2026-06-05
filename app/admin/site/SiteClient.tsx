@@ -38,7 +38,7 @@ export default function SiteClient({ initialSettings }: Props) {
     const res = await fetch('/api/admin/upload', { method: 'POST', body: fd })
     const data = await res.json()
     setUploadingHero(false)
-    if (!data.url) { setHeroMsg('Ошибка загрузки'); return }
+    if (!data.url) { setHeroMsg(data.error ?? 'Ошибка загрузки'); return }
     setHeroUrl(data.url)
     setSavingHero(true)
     await saveSetting('hero_video_url', data.url)

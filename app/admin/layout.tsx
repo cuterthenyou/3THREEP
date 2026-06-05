@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react'
+ import type { ReactNode } from 'react'
 import Link from 'next/link'
 import { auth } from '@/lib/auth'
 import { isAdmin } from '@/lib/isAdmin'
