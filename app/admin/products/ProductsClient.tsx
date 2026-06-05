@@ -10,7 +10,7 @@ const PRODUCT_TYPES = ['T-Shirt', 'Hoodie', 'Sweatshirt', 'Pants', 'Accessory', 
 const EMPTY: Omit<Product, 'id' | 'created_at'> = {
   name: '', description: '', price: 0,
   images: [], sizes: ['S', 'M', 'L', 'XL', '2XL'],
-  colors: [], stock: 10, active: true, category: '', product_type: 'T-Shirt', bg_url: null,
+  colors: [], stock: 10, active: true, category: '', product_type: 'T-Shirt', bg_url: null, bg_url_dark: null,
   grade: null, series: null, article: null, material: null, cut: null,
 }
 
@@ -50,11 +50,14 @@ export default function ProductsClient({ products }: { products: Product[] }) {
   const [saving, setSaving] = useState(false)
   const [uploading, setUploading] = useState(false)
   const [uploadingBg, setUploadingBg] = useState(false)
+  const [uploadingBgDark, setUploadingBgDark] = useState(false)
   const [bgUrl, setBgUrl] = useState<string | null>(null)
+  const [bgUrlDark, setBgUrlDark] = useState<string | null>(null)
   const [error, setError] = useState('')
   const [dragOver, setDragOver] = useState(false)
   const fileRef = useRef<HTMLInputElement>(null)
   const bgRef = useRef<HTMLInputElement>(null)
+  const bgDarkRef = useRef<HTMLInputElement>(null)
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
@@ -113,6 +116,7 @@ export default function ProductsClient({ products }: { products: Product[] }) {
     setSizesInput('S,M,L,XL,2XL')
     setColorsInput('')
     setBgUrl(null)
+    setBgUrlDark(null)
     setError('')
   }
 
@@ -122,6 +126,7 @@ export default function ProductsClient({ products }: { products: Product[] }) {
     setSizesInput(p.sizes.join(','))
     setColorsInput((p.colors ?? []).join(','))
     setBgUrl(p.bg_url ?? null)
+    setBgUrlDark(p.bg_url_dark ?? null)
     setError('')
   }
 
@@ -133,6 +138,17 @@ export default function ProductsClient({ products }: { products: Product[] }) {
     const data = await res.json()
     setUploadingBg(false)
     if (data.url) setBgUrl(data.url)
+    else setError(`Ошибка загрузки фона: ${data.error}`)
+  }
+
+  async function uploadBgDark(file: File) {
+    setUploadingBgDark(true)
+    const fd = new FormData()
+    fd.append('file', file)
+    const res = await fetch('/api/admin/upload', { method: 'POST', body: fd })
+    const data = await res.json()
+    setUploadingBgDark(false)
+    if (data.url) setBgUrlDark(data.url)
     else setError(`Ошибка загрузки фона: ${data.error}`)
   }
 
@@ -173,6 +189,7 @@ export default function ProductsClient({ products }: { products: Product[] }) {
       ...editing,
       images,
       bg_url: bgUrl,
+      bg_url_dark: bgUrlDark,
       sizes: sizesInput.split(',').map(s => s.trim()).filter(Boolean),
       colors: colorsInput.split(',').map(s => s.trim()).filter(Boolean),
     }
@@ -413,35 +430,46 @@ export default function ProductsClient({ products }: { products: Product[] }) {
               <Inp label="Крой" value={editing.cut ?? ''} onChange={v => setEditing(e => ({ ...e, cut: v || null }))} />
             </div>
 
-            {/* Card background PNG */}
-            <div className="flex flex-col gap-1">
-              <label className="text-xs uppercase tracking-widest" style={LABEL_STYLE}>Фон карточки (PNG прозрачный)</label>
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => bgRef.current?.click()}
-                  className="px-3 py-2 text-xs rounded-lg uppercase tracking-widest"
-                  style={{ background: 'var(--bg-subtle)', color: 'var(--accent)', fontFamily: "var(--font-onder)", fontSize: '0.65rem' }}
-                >
-                  {uploadingBg ? 'Загружаем...' : 'Загрузить PNG'}
-                </button>
-                <input ref={bgRef} type="file" accept="image/png" className="hidden"
-                  onChange={e => e.target.files?.[0] && uploadBg(e.target.files[0])} />
+            {/* Card background PNG — light + dark variants */}
+            <div className="grid grid-cols-2 gap-3">
+              <div className="flex flex-col gap-1">
+                <label className="text-xs uppercase tracking-widest" style={LABEL_STYLE}>Фон карточки (свет)</label>
+                <div className="flex items-center gap-2">
+                  <button type="button" onClick={() => bgRef.current?.click()}
+                    className="px-3 py-2 text-xs rounded-lg uppercase tracking-widest"
+                    style={{ background: 'var(--bg-subtle)', color: 'var(--accent)', fontFamily: "var(--font-onder)", fontSize: '0.65rem' }}>
+                    {uploadingBg ? '...' : 'Загрузить'}
+                  </button>
+                  <input ref={bgRef} type="file" accept="image/*" className="hidden"
+                    onChange={e => e.target.files?.[0] && uploadBg(e.target.files[0])} />
+                  {bgUrl && <button type="button" onClick={() => setBgUrl(null)} style={{ color: 'var(--accent)', opacity: 0.4, fontSize: '0.8rem' }}>✕</button>}
+                </div>
                 {bgUrl && (
-                  <span className="text-xs truncate max-w-[180px]" style={{ color: 'var(--accent)', opacity: 0.6, fontFamily: "var(--font-involve)" }}>
-                    {bgUrl.split('/').pop()}
-                  </span>
-                )}
-                {bgUrl && (
-                  <button type="button" onClick={() => setBgUrl(null)} style={{ color: 'var(--accent)', opacity: 0.4, fontSize: '0.8rem' }}>✕</button>
+                  <div className="w-16 h-10 rounded overflow-hidden mt-1" style={{ background: 'repeating-conic-gradient(#808080 0% 25%, #fff 0% 50%) 0 0 / 8px 8px' }}>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={bgUrl} alt="" className="w-full h-full object-cover" />
+                  </div>
                 )}
               </div>
-              {bgUrl && (
-                <div className="w-16 h-10 rounded overflow-hidden mt-1" style={{ background: 'repeating-conic-gradient(#808080 0% 25%, #fff 0% 50%) 0 0 / 8px 8px' }}>
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={bgUrl} alt="" className="w-full h-full object-cover" />
+              <div className="flex flex-col gap-1">
+                <label className="text-xs uppercase tracking-widest" style={LABEL_STYLE}>Фон карточки (темно)</label>
+                <div className="flex items-center gap-2">
+                  <button type="button" onClick={() => bgDarkRef.current?.click()}
+                    className="px-3 py-2 text-xs rounded-lg uppercase tracking-widest"
+                    style={{ background: 'var(--bg-subtle)', color: 'var(--accent)', fontFamily: "var(--font-onder)", fontSize: '0.65rem' }}>
+                    {uploadingBgDark ? '...' : 'Загрузить'}
+                  </button>
+                  <input ref={bgDarkRef} type="file" accept="image/*" className="hidden"
+                    onChange={e => e.target.files?.[0] && uploadBgDark(e.target.files[0])} />
+                  {bgUrlDark && <button type="button" onClick={() => setBgUrlDark(null)} style={{ color: 'var(--accent)', opacity: 0.4, fontSize: '0.8rem' }}>✕</button>}
                 </div>
-              )}
+                {bgUrlDark && (
+                  <div className="w-16 h-10 rounded overflow-hidden mt-1" style={{ background: 'repeating-conic-gradient(#404040 0% 25%, #111 0% 50%) 0 0 / 8px 8px' }}>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={bgUrlDark} alt="" className="w-full h-full object-cover" />
+                  </div>
+                )}
+              </div>
             </div>
 
             <div className="flex items-center gap-3">
@@ -458,9 +486,9 @@ export default function ProductsClient({ products }: { products: Product[] }) {
             )}
 
             <div className="flex gap-3">
-              <button onClick={save} disabled={saving || uploading || uploadingBg}
+              <button onClick={save} disabled={saving || uploading || uploadingBg || uploadingBgDark}
                 className="flex-1 py-3 uppercase tracking-widest transition-opacity"
-                style={{ background: 'var(--accent)', color: 'var(--bg)', borderRadius: '8px', fontFamily: "var(--font-onder)", fontSize: '0.75rem', opacity: saving || uploading || uploadingBg ? 0.5 : 1 }}>
+                style={{ background: 'var(--accent)', color: 'var(--bg)', borderRadius: '8px', fontFamily: "var(--font-onder)", fontSize: '0.75rem', opacity: saving || uploading || uploadingBg || uploadingBgDark ? 0.5 : 1 }}>
                 {saving ? 'Сохраняем...' : 'Сохранить'}
               </button>
               <button onClick={() => setEditing(null)}

@@ -26,6 +26,14 @@ export default function CatalogSection({ products, categories, categoryData = {}
   const [openProduct, setOpenProduct] = useState<Product | null>(null)
   const [modalVisible, setModalVisible] = useState(false)
   const [modalBg, setModalBg] = useState<string | null>(null)
+  const [isDark, setIsDark] = useState(false)
+
+  useEffect(() => {
+    setIsDark(document.documentElement.dataset.theme === 'dark')
+    const obs = new MutationObserver(() => setIsDark(document.documentElement.dataset.theme === 'dark'))
+    obs.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] })
+    return () => obs.disconnect()
+  }, [])
 
   useEffect(() => {
     const cat = searchParams.get('category')
@@ -47,13 +55,17 @@ export default function CatalogSection({ products, categories, categoryData = {}
 
   const openModal = useCallback((product: Product) => {
     setOpenProduct(product)
-    setModalBg(categoryData[product.category]?.modal_bg_url ?? null)
+    const cat = categoryData[product.category]
+    setModalBg(isDark
+      ? (cat?.modal_bg_url_dark ?? cat?.modal_bg_url ?? null)
+      : (cat?.modal_bg_url ?? cat?.modal_bg_url_dark ?? null)
+    )
     requestAnimationFrame(() => setModalVisible(true))
     const y = window.scrollY
     document.body.style.top = `-${y}px`
     document.body.style.position = 'fixed'
     document.body.style.width = '100%'
-  }, [categoryData])
+  }, [categoryData, isDark])
 
   const closeModal = useCallback(() => {
     setModalVisible(false)
@@ -114,7 +126,7 @@ export default function CatalogSection({ products, categories, categoryData = {}
       <section className="w-full px-6 sm:px-8 py-10">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-y-8 gap-x-6 max-w-6xl mx-auto">
           {filtered.map((product, idx) => (
-            <ProductCard key={product.id} product={product} index={idx} onOpen={openModal} categoryData={categoryData} />
+            <ProductCard key={product.id} product={product} index={idx} onOpen={openModal} categoryData={categoryData} isDark={isDark} />
           ))}
         </div>
       </section>
@@ -161,11 +173,13 @@ const ProductCard = React.memo(function ProductCard({
   index,
   onOpen,
   categoryData,
+  isDark,
 }: {
   product: Product
   index: number
   onOpen: (p: Product) => void
   categoryData: Record<string, Category>
+  isDark: boolean
 }) {
   const [currentImg, setCurrentImg] = useState(0)
   const [btnText, setBtnText] = useState('Посмотреть')
@@ -244,10 +258,17 @@ const ProductCard = React.memo(function ProductCard({
     setTimeout(() => setGlitching(false), 420)
   }
 
+  const bgUrl = isDark
+    ? (product.bg_url_dark ?? product.bg_url ?? null)
+    : (product.bg_url ?? product.bg_url_dark ?? null)
+
   return (
     <div
       className={`flex flex-col w-full ${s.productCard}`}
-      style={{ background: 'var(--bg-card)' }}
+      style={bgUrl
+        ? { backgroundImage: `url(${bgUrl})`, backgroundSize: 'cover', backgroundPosition: 'center' }
+        : { background: 'var(--bg-card)' }
+      }
       onClick={() => onOpen(product)}
       onMouseEnter={triggerGlitch}
     >
@@ -257,7 +278,6 @@ const ProductCard = React.memo(function ProductCard({
       {/* Image carousel */}
       <div
         className={`w-full relative overflow-hidden ${s.productImgWrap}`}
-        style={product.bg_url ? { backgroundImage: `url(${product.bg_url})`, backgroundSize: 'cover', backgroundPosition: 'center' } : undefined}
         onMouseMove={e => {
           if (product.images.length <= 1) return
           const rect = e.currentTarget.getBoundingClientRect()

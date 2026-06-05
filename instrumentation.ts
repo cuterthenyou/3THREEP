@@ -117,6 +117,12 @@ export async function register() {
       ALTER TABLE categories ADD COLUMN IF NOT EXISTS description TEXT;
     `).catch((e: Error) => console.error('[migration] product fields failed:', e.message))
 
+    // Light/dark card bg + modal bg variants
+    await pool.query(`
+      ALTER TABLE products ADD COLUMN IF NOT EXISTS bg_url_dark TEXT;
+      ALTER TABLE categories ADD COLUMN IF NOT EXISTS modal_bg_url_dark TEXT;
+    `).catch((e: Error) => console.error('[migration] bg dark variants failed:', e.message))
+
     // Guest checkout + newsletter + custom emojis migrations
     await pool.query(`
       ALTER TABLE orders ALTER COLUMN user_id DROP NOT NULL;

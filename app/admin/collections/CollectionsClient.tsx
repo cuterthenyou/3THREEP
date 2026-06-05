@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import type { Category } from '@/lib/types'
 
 const EMPTY: Omit<Category, never> = {
-  slug: '', name: '', active: true, description: null, texture_url: null, texture_url_2: null, texture_url_3: null, logo_top_url: null, logo_bottom_url: null, modal_bg_url: null,
+  slug: '', name: '', active: true, description: null, logo_top_url: null, logo_bottom_url: null, modal_bg_url: null, modal_bg_url_dark: null,
 }
 
 const INPUT_STYLE = {
@@ -16,7 +16,7 @@ const INPUT_STYLE = {
 }
 const LABEL_STYLE = { color: 'var(--accent)', opacity: 0.5, fontFamily: "var(--font-onder)" }
 
-type UploadField = 'texture_url' | 'texture_url_2' | 'texture_url_3' | 'logo_top_url' | 'logo_bottom_url' | 'modal_bg_url'
+type UploadField = 'logo_top_url' | 'logo_bottom_url' | 'modal_bg_url' | 'modal_bg_url_dark'
 
 export default function CollectionsClient({ collections }: { collections: Category[] }) {
   const [editing, setEditing] = useState<Category | null>(null)
@@ -26,12 +26,10 @@ export default function CollectionsClient({ collections }: { collections: Catego
   const [error, setError] = useState('')
   const router = useRouter()
 
-  const textureRef = useRef<HTMLInputElement>(null) as React.RefObject<HTMLInputElement>
-  const texture2Ref = useRef<HTMLInputElement>(null) as React.RefObject<HTMLInputElement>
-  const texture3Ref = useRef<HTMLInputElement>(null) as React.RefObject<HTMLInputElement>
   const logoTopRef = useRef<HTMLInputElement>(null) as React.RefObject<HTMLInputElement>
   const logoBottomRef = useRef<HTMLInputElement>(null) as React.RefObject<HTMLInputElement>
   const modalBgRef = useRef<HTMLInputElement>(null) as React.RefObject<HTMLInputElement>
+  const modalBgDarkRef = useRef<HTMLInputElement>(null) as React.RefObject<HTMLInputElement>
 
   function openNew() { setEditing({ ...EMPTY }); setOriginalSlug(''); setError('') }
   function openEdit(c: Category) { setEditing({ ...c }); setOriginalSlug(c.slug); setError('') }
@@ -154,9 +152,9 @@ export default function CollectionsClient({ collections }: { collections: Catego
           <div key={c.slug} className="rounded-xl p-3"
             style={{ display: 'grid', gridTemplateColumns: '3.5rem 1fr', gap: '0.75rem', alignItems: 'start', background: 'var(--bg-subtle)', border: '1px solid var(--border-soft)' }}>
             <div className="w-14 h-14 rounded-lg overflow-hidden" style={{ background: 'var(--accent-2)' }}>
-              {c.texture_url && (
+              {c.logo_top_url && (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img src={c.texture_url} alt="" className="w-full h-full object-cover" />
+                <img src={c.logo_top_url} alt="" className="w-full h-full object-cover" />
               )}
             </div>
             <div className="min-w-0">
@@ -166,7 +164,7 @@ export default function CollectionsClient({ collections }: { collections: Catego
                 slug: {c.slug}
                 {c.logo_top_url ? ' · лого-топ ✓' : ''}
                 {c.logo_bottom_url ? ' · лого-боттом ✓' : ''}
-                {c.texture_url ? ' · текстура ✓' : ''}
+                {c.modal_bg_url ? ' · фон-модалки ✓' : ''}
               </p>
               <div className="flex gap-2 flex-wrap mt-2">
                 <button onClick={() => toggleActive(c)}
@@ -228,12 +226,10 @@ export default function CollectionsClient({ collections }: { collections: Catego
               />
             </div>
 
-            <UploadBtn field="texture_url" label="Текстура карточек #1" refEl={textureRef} />
-            <UploadBtn field="texture_url_2" label="Текстура карточек #2" refEl={texture2Ref} />
-            <UploadBtn field="texture_url_3" label="Текстура карточек #3" refEl={texture3Ref} />
             <UploadBtn field="logo_top_url" label="Лого TOP (над каталогом)" refEl={logoTopRef} />
             <UploadBtn field="logo_bottom_url" label="Лого BOTTOM (под каталогом)" refEl={logoBottomRef} />
-            <UploadBtn field="modal_bg_url" label="Фон модалки товара (PNG прозрачный)" refEl={modalBgRef} accept="image/png" />
+            <UploadBtn field="modal_bg_url" label="Фон модалки (свет)" refEl={modalBgRef} accept="image/*" />
+            <UploadBtn field="modal_bg_url_dark" label="Фон модалки (темно)" refEl={modalBgDarkRef} accept="image/*" />
 
             {error && <p className="text-sm" style={{ color: 'var(--status-error)', fontFamily: "var(--font-involve)" }}>{error}</p>}
 

@@ -12,6 +12,7 @@ export interface Product {
   category: string
   product_type: string | null
   bg_url: string | null
+  bg_url_dark: string | null
   grade: string | null
   series: string | null
   article: string | null
@@ -25,12 +26,10 @@ export interface Category {
   name: string
   active: boolean
   description: string | null
-  texture_url: string | null
-  texture_url_2: string | null
-  texture_url_3: string | null
   logo_top_url: string | null
   logo_bottom_url: string | null
   modal_bg_url: string | null
+  modal_bg_url_dark: string | null
 }
 
 export type OrderStatus = 'new' | 'paid' | 'in_progress' | 'shipped' | 'delivered' | 'cancelled'
