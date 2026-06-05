@@ -23,6 +23,7 @@ export default function CatalogSection({ products, categories, categoryData = {}
   const [activeType, setActiveType] = useState<string>('all')
   const [openProduct, setOpenProduct] = useState<Product | null>(null)
   const [modalVisible, setModalVisible] = useState(false)
+  const [modalBg, setModalBg] = useState<string | null>(null)
 
   useEffect(() => { setActiveType('all') }, [activeCategory])
 
@@ -38,12 +39,13 @@ export default function CatalogSection({ products, categories, categoryData = {}
 
   const openModal = useCallback((product: Product) => {
     setOpenProduct(product)
+    setModalBg(categoryData[product.category]?.modal_bg_url ?? null)
     requestAnimationFrame(() => setModalVisible(true))
     const y = window.scrollY
     document.body.style.top = `-${y}px`
     document.body.style.position = 'fixed'
     document.body.style.width = '100%'
-  }, [])
+  }, [categoryData])
 
   const closeModal = useCallback(() => {
     setModalVisible(false)
@@ -121,7 +123,7 @@ export default function CatalogSection({ products, categories, categoryData = {}
         ) : null
       })()}
 
-      <ProductModal product={openProduct} visible={modalVisible} onClose={closeModal} />
+      <ProductModal product={openProduct} visible={modalVisible} onClose={closeModal} modalBg={modalBg} />
     </>
   )
 }
@@ -224,6 +226,7 @@ const ProductCard = React.memo(function ProductCard({
       {/* Image carousel */}
       <div
         className={`w-full relative overflow-hidden ${s.productImgWrap}`}
+        style={product.bg_url ? { backgroundImage: `url(${product.bg_url})`, backgroundSize: 'cover', backgroundPosition: 'center' } : undefined}
         onMouseMove={e => {
           if (product.images.length <= 1) return
           const rect = e.currentTarget.getBoundingClientRect()

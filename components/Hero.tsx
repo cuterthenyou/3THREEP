@@ -3,7 +3,10 @@
 import { useEffect, useRef, useCallback } from 'react';
 import s from './Hero.module.css';
 
-export default function Hero() {
+const FALLBACK_VIDEO = 'https://storage.yandexcloud.net/threep-media/assets/hero.webm'
+
+export default function Hero({ videoUrl }: { videoUrl?: string | null }) {
+  const src = videoUrl || FALLBACK_VIDEO
   const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
@@ -40,14 +43,8 @@ export default function Hero() {
         onTouchEnd={handleResume}
         style={{ cursor: 'pointer', userSelect: 'none' }}
       >
-        <source
-          src="https://storage.yandexcloud.net/threep-media/assets/hero.av1.webm"
-          type='video/webm; codecs="av01"'
-        />
-        <source
-          src="https://storage.yandexcloud.net/threep-media/assets/hero.webm"
-          type="video/webm"
-        />
+        <source src={src} type="video/webm" />
+        <source src={src} type="video/mp4" />
       </video>
     </section>
   );

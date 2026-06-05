@@ -11,6 +11,7 @@ export interface Product {
   active: boolean
   category: string
   product_type: string | null
+  bg_url: string | null
   created_at: string
 }
 
@@ -23,6 +24,7 @@ export interface Category {
   texture_url_3: string | null
   logo_top_url: string | null
   logo_bottom_url: string | null
+  modal_bg_url: string | null
 }
 
 export type OrderStatus = 'new' | 'paid' | 'in_progress' | 'shipped' | 'delivered' | 'cancelled'

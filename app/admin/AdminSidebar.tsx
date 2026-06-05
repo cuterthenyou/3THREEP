@@ -9,6 +9,7 @@ import {
   IconShirt,
   IconStack2,
   IconPhoto,
+  IconSettings,
   IconChevronLeft,
   IconChevronRight,
   IconLogout,
@@ -23,6 +24,7 @@ const NAV = [
   { href: '/admin/products',    label: 'Товары',    Icon: IconShirt },
   { href: '/admin/collections', label: 'Коллекции', Icon: IconStack2 },
   { href: '/admin/media',       label: 'Медиа',     Icon: IconPhoto },
+  { href: '/admin/site',        label: 'Сайт',      Icon: IconSettings },
 ]
 
 function NavItems({ pathname, collapsed, onNavigate }: { pathname: string; collapsed: boolean; onNavigate?: () => void }) {

@@ -17,7 +17,7 @@ export default async function AccountPage() {
     email: session.user.email ?? '',
   }
 
-  const [profile, orders] = await Promise.all([
+  const [profile, orders, settingsRows] = await Promise.all([
     queryOne(`SELECT * FROM profiles WHERE id = $1`, [user.id]),
     queryMany(
       `SELECT o.*,
@@ -32,13 +32,17 @@ export default async function AccountPage() {
        ORDER BY o.created_at DESC`,
       [user.id]
     ),
+    queryMany(`SELECT key, value FROM site_settings`).catch(() => [] as Array<{key: string; value: string | null}>),
   ])
+
+  const profileBg = settingsRows.find((r: {key: string; value: string | null}) => r.key === 'profile_bg_url')?.value ?? null
 
   return (
     <AccountClient
       user={{ id: user.id, email: user.email }}
       profile={profile}
       orders={orders}
+      profileBg={profileBg}
     />
   )
 }

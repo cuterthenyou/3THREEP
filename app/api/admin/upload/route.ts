@@ -12,7 +12,10 @@ export async function POST(req: NextRequest) {
   if (!file) return NextResponse.json({ error: 'No file' }, { status: 400 })
 
   try {
-    const result = await uploadToYandex('products', file)
+    const folderParam = formData.get('folder') as string | null
+    const validFolders = ['products', 'assets', 'avatars']
+    const folder = (folderParam && validFolders.includes(folderParam) ? folderParam : 'products') as 'products' | 'assets' | 'avatars'
+    const result = await uploadToYandex(folder, file)
     return NextResponse.json({ url: result.url })
   } catch (error) {
     console.error('Upload error:', error)

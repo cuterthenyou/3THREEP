@@ -6,6 +6,12 @@ const IMAGE_MIME_TYPES = new Set(['image/jpeg', 'image/jpg', 'image/png', 'image
 
 async function optimizeBuffer(buf: Buffer, mimeType: string): Promise<Buffer> {
   if (!IMAGE_MIME_TYPES.has(mimeType)) return buf;
+  if (mimeType === 'image/png') {
+    return sharp(buf)
+      .resize({ width: 2000, withoutEnlargement: true })
+      .png({ compressionLevel: 8 })
+      .toBuffer();
+  }
   return sharp(buf)
     .resize({ width: 2000, withoutEnlargement: true })
     .jpeg({ quality: 85, progressive: true })
@@ -20,9 +26,19 @@ export async function uploadToYandex(
   const bytes = await file.arrayBuffer()
   const raw = Buffer.from(bytes)
   const buffer = await optimizeBuffer(raw, file.type)
-  const contentType = IMAGE_MIME_TYPES.has(file.type) ? 'image/jpeg' : file.type
 
-  const ext = IMAGE_MIME_TYPES.has(file.type) ? 'jpg' : (file.name.split('.').pop() ?? 'bin')
+  let contentType: string
+  let ext: string
+  if (!IMAGE_MIME_TYPES.has(file.type)) {
+    contentType = file.type
+    ext = file.name.split('.').pop() ?? 'bin'
+  } else if (file.type === 'image/png') {
+    contentType = 'image/png'
+    ext = 'png'
+  } else {
+    contentType = 'image/jpeg'
+    ext = 'jpg'
+  }
   const fileName = customFileName || `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
   const key = `${folder}/${fileName}`
 

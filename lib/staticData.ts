@@ -26,6 +26,7 @@ export const staticProducts: Product[] = [
     active: true,
     category: 'aqua',
     product_type: 'T-Shirt',
+    bg_url: null,
     created_at: '',
   },
   {
@@ -48,6 +49,7 @@ export const staticProducts: Product[] = [
     active: true,
     category: 'aqua',
     product_type: 'T-Shirt',
+    bg_url: null,
     created_at: '',
   },
   {
@@ -67,6 +69,7 @@ export const staticProducts: Product[] = [
     active: true,
     category: 'aqua',
     product_type: 'T-Shirt',
+    bg_url: null,
     created_at: '',
   },
 ]

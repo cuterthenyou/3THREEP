@@ -15,12 +15,12 @@ export async function POST(req: NextRequest) {
   const body = await req.json()
   const {
     slug, name, texture_url = null, logo_top_url = null, logo_bottom_url = null,
-    texture_url_2 = null, texture_url_3 = null, active = true,
+    texture_url_2 = null, texture_url_3 = null, active = true, modal_bg_url = null,
   } = body
 
   const { rows: [category] } = await query(
-    `INSERT INTO categories (slug, name, texture_url, logo_top_url, logo_bottom_url, texture_url_2, texture_url_3, active)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+    `INSERT INTO categories (slug, name, texture_url, logo_top_url, logo_bottom_url, texture_url_2, texture_url_3, active, modal_bg_url)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
      ON CONFLICT (slug) DO UPDATE SET
        name = EXCLUDED.name,
        texture_url = EXCLUDED.texture_url,
@@ -28,9 +28,10 @@ export async function POST(req: NextRequest) {
        logo_bottom_url = EXCLUDED.logo_bottom_url,
        texture_url_2 = EXCLUDED.texture_url_2,
        texture_url_3 = EXCLUDED.texture_url_3,
-       active = EXCLUDED.active
+       active = EXCLUDED.active,
+       modal_bg_url = EXCLUDED.modal_bg_url
      RETURNING *`,
-    [slug, name, texture_url, logo_top_url, logo_bottom_url, texture_url_2, texture_url_3, active]
+    [slug, name, texture_url, logo_top_url, logo_bottom_url, texture_url_2, texture_url_3, active, modal_bg_url]
   )
 
   revalidatePath('/')

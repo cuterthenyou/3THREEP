@@ -10,6 +10,7 @@ interface Props {
   product: Product | null
   visible: boolean
   onClose: () => void
+  modalBg?: string | null
 }
 
 function AddToCartButton({ product, size, onClose }: { product: Product; size: string; onClose: () => void }) {
@@ -29,7 +30,7 @@ function AddToCartButton({ product, size, onClose }: { product: Product; size: s
   )
 }
 
-export default function ProductModal({ product, visible, onClose }: Props) {
+export default function ProductModal({ product, visible, onClose, modalBg }: Props) {
   const [activeImg, setActiveImg] = useState(0)
   const [selectedSize, setSelectedSize] = useState('S')
   const [touchStart, setTouchStart] = useState<{ x: number; y: number } | null>(null)
@@ -149,7 +150,7 @@ export default function ProductModal({ product, visible, onClose }: Props) {
       onClick={(e) => e.target === e.currentTarget && closeWithAnimation()}
       {...modalTouchHandlers}
     >
-      <div className={`absolute inset-0 overflow-y-auto ${s.inner}`}>
+      <div className={`absolute inset-0 overflow-y-auto ${s.inner}`} style={modalBg ? { backgroundImage: `url(${modalBg})`, backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' } : undefined}>
         <button
           onClick={closeWithAnimation}
           className={`fixed top-5 right-5 z-50 flex items-center justify-center w-9 h-9 ${s.closeBtn}`}

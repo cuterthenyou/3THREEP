@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import type { Category } from '@/lib/types'
 
 const EMPTY: Omit<Category, never> = {
-  slug: '', name: '', active: true, texture_url: null, texture_url_2: null, texture_url_3: null, logo_top_url: null, logo_bottom_url: null,
+  slug: '', name: '', active: true, texture_url: null, texture_url_2: null, texture_url_3: null, logo_top_url: null, logo_bottom_url: null, modal_bg_url: null,
 }
 
 const INPUT_STYLE = {
@@ -16,7 +16,7 @@ const INPUT_STYLE = {
 }
 const LABEL_STYLE = { color: 'var(--accent)', opacity: 0.5, fontFamily: "var(--font-onder)" }
 
-type UploadField = 'texture_url' | 'texture_url_2' | 'texture_url_3' | 'logo_top_url' | 'logo_bottom_url'
+type UploadField = 'texture_url' | 'texture_url_2' | 'texture_url_3' | 'logo_top_url' | 'logo_bottom_url' | 'modal_bg_url'
 
 export default function CollectionsClient({ collections }: { collections: Category[] }) {
   const [editing, setEditing] = useState<Category | null>(null)
@@ -31,6 +31,7 @@ export default function CollectionsClient({ collections }: { collections: Catego
   const texture3Ref = useRef<HTMLInputElement>(null) as React.RefObject<HTMLInputElement>
   const logoTopRef = useRef<HTMLInputElement>(null) as React.RefObject<HTMLInputElement>
   const logoBottomRef = useRef<HTMLInputElement>(null) as React.RefObject<HTMLInputElement>
+  const modalBgRef = useRef<HTMLInputElement>(null) as React.RefObject<HTMLInputElement>
 
   function openNew() { setEditing({ ...EMPTY }); setOriginalSlug(''); setError('') }
   function openEdit(c: Category) { setEditing({ ...c }); setOriginalSlug(c.slug); setError('') }
@@ -89,7 +90,7 @@ export default function CollectionsClient({ collections }: { collections: Catego
     router.refresh()
   }
 
-  function UploadBtn({ field, label, refEl }: { field: UploadField; label: string; refEl: React.RefObject<HTMLInputElement> }) {
+  function UploadBtn({ field, label, refEl, accept = 'image/*,.svg' }: { field: UploadField; label: string; refEl: React.RefObject<HTMLInputElement>; accept?: string }) {
     const val = editing?.[field]
     return (
       <div className="flex flex-col gap-1">
@@ -106,7 +107,7 @@ export default function CollectionsClient({ collections }: { collections: Catego
           <input
             ref={refEl}
             type="file"
-            accept="image/*,.svg"
+            accept={accept}
             className="hidden"
             onChange={e => e.target.files?.[0] && uploadFile(e.target.files[0], field)}
           />
@@ -220,6 +221,7 @@ export default function CollectionsClient({ collections }: { collections: Catego
             <UploadBtn field="texture_url_3" label="Текстура карточек #3" refEl={texture3Ref} />
             <UploadBtn field="logo_top_url" label="Лого TOP (над каталогом)" refEl={logoTopRef} />
             <UploadBtn field="logo_bottom_url" label="Лого BOTTOM (под каталогом)" refEl={logoBottomRef} />
+            <UploadBtn field="modal_bg_url" label="Фон модалки товара (PNG прозрачный)" refEl={modalBgRef} accept="image/png" />
 
             {error && <p className="text-sm" style={{ color: 'var(--status-error)', fontFamily: "var(--font-involve)" }}>{error}</p>}
 

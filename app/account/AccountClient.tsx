@@ -14,6 +14,7 @@ interface Props {
   user: { id: string; email: string };
   profile: Profile | null;
   orders: Order[];
+  profileBg?: string | null;
 }
 
 const STATUS_COLORS: Record<OrderStatus, string> = {
@@ -42,7 +43,7 @@ function getUsername(email: string, name: string | null) {
   return email.split('@')[0].toUpperCase();
 }
 
-export default function AccountClient({ user, profile, orders }: Props) {
+export default function AccountClient({ user, profile, orders, profileBg }: Props) {
   const [loggingOut, setLoggingOut] = useState(false);
   const [activeTab, setActiveTab] = useState<'inventory' | 'orders'>('inventory');
   const [showNicknameModal, setShowNicknameModal] = useState(!profile?.name);
@@ -110,7 +111,7 @@ export default function AccountClient({ user, profile, orders }: Props) {
   }
 
   return (
-    <div className={s.page}>
+    <div className={s.page} style={profileBg ? { backgroundImage: `url(${profileBg})`, backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' } : undefined}>
       <button
         onClick={() => { toggleTheme(); setIsDark(d => !d); }}
         title={isDark ? 'Светлая тема' : 'Тёмная тема'}

@@ -19,12 +19,17 @@ export default async function HomePage() {
   let products = staticProducts;
   let categories = staticCategories;
   let categoryData: Record<string, Category> = {};
+  let heroVideoUrl: string | null = null;
 
   try {
-    const [productsData, categoriesData] = await Promise.all([
+    const [productsData, categoriesData, settingsData] = await Promise.all([
       queryMany(`SELECT * FROM products WHERE active = true ORDER BY created_at DESC`),
       queryMany(`SELECT * FROM categories`),
+      queryMany(`SELECT key, value FROM site_settings`).catch(() => [] as Array<{key: string; value: string | null}>),
     ])
+    for (const row of settingsData) {
+      if (row.key === 'hero_video_url') heroVideoUrl = row.value
+    }
 
     const inactiveCatSlugs = new Set(
       categoriesData
@@ -62,7 +67,7 @@ export default async function HomePage() {
   return (
     <main className="min-h-screen">
       <Header isAdminUser={isAdminUser} />
-      <Hero />
+      <Hero videoUrl={heroVideoUrl} />
       {/* <HeroTransition /> */}
       <CatalogSection products={products} categories={categories} categoryData={categoryData} />
       <Footer />
