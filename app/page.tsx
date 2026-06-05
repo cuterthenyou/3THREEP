@@ -82,7 +82,7 @@ export default async function HomePage() {
       <div style={{ position: 'relative', marginTop: '-100px', zIndex: 2, lineHeight: 0 }}>
         <svg viewBox="0 0 1440 100" preserveAspectRatio="none" style={{ display: 'block', width: '100%', height: 100 }}>
           <path
-            d="M0,100 L0,58 L38,28 L72,52 L100,12 L138,44 L168,8 L200,38 L230,16 L265,50 L295,14 L325,42 L355,6 L388,40 L418,18 L450,52 L480,10 L512,44 L542,20 L572,56 L604,8 L638,42 L668,16 L700,50 L730,12 L762,46 L792,22 L822,58 L854,10 L888,44 L918,20 L950,52 L980,14 L1012,48 L1042,8 L1075,42 L1105,18 L1138,54 L1168,12 L1200,46 L1232,20 L1262,50 L1295,8 L1325,40 L1358,18 L1390,48 L1440,22 L1440,100 Z"
+            d="M0,100 L0,62 L120,22 L240,68 L360,16 L480,66 L600,22 L720,72 L840,18 L960,66 L1080,24 L1200,70 L1320,20 L1440,58 L1440,100 Z"
             fill="var(--bg)"
           />
         </svg>

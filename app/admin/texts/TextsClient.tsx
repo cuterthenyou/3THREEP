@@ -4,6 +4,7 @@ import { useState } from 'react'
 import type { FooterContent } from '@/components/Footer'
 import type { InfoContent } from '@/app/info/InfoClient'
 import type { PrivacySection } from './page'
+import a from '../admin.module.css'
 
 interface Props {
   initialFooter: FooterContent
@@ -107,19 +108,7 @@ function SaveBtn({ onClick, saving, msg }: { onClick: () => void; saving: boolea
       <button
         onClick={onClick}
         disabled={saving}
-        style={{
-          padding: '0.6rem 1.5rem',
-          background: 'var(--accent)',
-          color: 'var(--bg)',
-          fontFamily: 'var(--font-onder)',
-          fontSize: '0.65rem',
-          letterSpacing: '0.1em',
-          textTransform: 'uppercase',
-          border: 'none',
-          borderRadius: '0.5rem',
-          cursor: saving ? 'not-allowed' : 'pointer',
-          opacity: saving ? 0.5 : 1,
-        }}
+        className={a.btn}
       >
         {saving ? 'Сохраняем...' : 'Сохранить'}
       </button>
@@ -349,20 +338,8 @@ export default function TextsClient({ initialFooter, initialInfo, initialPrivacy
 
           <button
             onClick={addSection}
-            style={{
-              padding: '0.5rem 1.25rem',
-              background: 'none',
-              border: '1px dashed var(--border-soft)',
-              borderRadius: '0.5rem',
-              cursor: 'pointer',
-              color: 'var(--accent)',
-              fontFamily: 'var(--font-onder)',
-              fontSize: '0.6rem',
-              letterSpacing: '0.1em',
-              textTransform: 'uppercase',
-              opacity: 0.6,
-              marginBottom: '0.5rem',
-            }}
+            className={a.btn}
+            style={{ marginBottom: '0.5rem' }}
           >
             + Добавить раздел
           </button>

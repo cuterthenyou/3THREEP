@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import a from '../admin.module.css'
 
 interface NavConfig {
   hiddenCollections: string[]
@@ -16,8 +17,6 @@ interface Props {
 const LABEL_STYLE = { color: 'var(--text-muted)', fontFamily: "'Involve', sans-serif", fontSize: '0.7rem', textTransform: 'uppercase' as const, letterSpacing: '0.1em' }
 const INPUT_STYLE = { background: 'var(--bg-2)', border: '1px solid var(--border)', color: 'var(--accent)', fontFamily: "'Involve', sans-serif", fontSize: '0.85rem' }
 const CARD_STYLE = { background: 'var(--bg-subtle)', border: '1px solid var(--border-soft)', borderRadius: '3px', padding: '1.25rem', display: 'flex', flexDirection: 'column' as const, gap: '1rem' }
-const BTN = { background: 'var(--accent)', color: 'var(--bg)', border: 'none', borderRadius: '2px', fontFamily: "'ONDER', sans-serif", fontSize: '0.7rem', letterSpacing: '0.1em', textTransform: 'uppercase' as const, cursor: 'pointer', padding: '0.5rem 1rem', boxShadow: '2px 2px 0 var(--border)', transition: 'box-shadow 0.12s, transform 0.1s' }
-const BTN_GHOST = { background: 'transparent', color: 'var(--accent)', border: '1px solid var(--border)', borderRadius: '2px', fontFamily: "'Involve', sans-serif", fontSize: '0.7rem', cursor: 'pointer', padding: '0.35rem 0.6rem' }
 
 export default function MenuClient({ allCollections, initialConfig }: Props) {
   const [config, setConfig] = useState<NavConfig>(initialConfig)
@@ -97,7 +96,7 @@ export default function MenuClient({ allCollections, initialConfig }: Props) {
     <div className="admin-content" style={{ padding: '2rem', maxWidth: '720px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <h1 style={{ fontFamily: "'ONDER', sans-serif", fontSize: '1.4rem', color: 'var(--accent)', letterSpacing: '0.08em' }}>МЕНЮ</h1>
-        <button onClick={save} disabled={saving} style={BTN}>
+        <button onClick={save} disabled={saving} className={a.btn}>
           {saving ? 'Сохранение...' : saved ? '✓ Сохранено' : 'Сохранить'}
         </button>
       </div>
@@ -117,14 +116,14 @@ export default function MenuClient({ allCollections, initialConfig }: Props) {
           const hidden = config.hiddenCollections.includes(col.slug)
           return (
             <div key={col.slug} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.5rem 0.75rem', background: 'var(--bg-2)', borderRadius: '2px', border: `1px solid ${hidden ? 'var(--border)' : 'var(--accent)'}`, opacity: hidden ? 0.45 : 1 }}>
-              <button onClick={() => toggleHidden(col.slug)} style={{ ...BTN_GHOST, fontSize: '0.6rem', padding: '0.2rem 0.5rem', color: hidden ? 'var(--text-muted)' : 'var(--accent)' }}>
+              <button onClick={() => toggleHidden(col.slug)} className={a.btnSecondary}>
                 {hidden ? 'Скрыт' : 'Виден'}
               </button>
               <span style={{ flex: 1, fontFamily: "'ONDER', sans-serif", fontSize: '0.85rem', color: 'var(--accent)', letterSpacing: '0.05em' }}>{col.name}</span>
               <span style={{ fontFamily: "'Involve', sans-serif", fontSize: '0.6rem', color: 'var(--text-muted)', opacity: 0.5 }}>{col.slug}</span>
               <div style={{ display: 'flex', gap: '0.25rem' }}>
-                <button onClick={() => moveUp(col.slug)} disabled={i === 0} style={{ ...BTN_GHOST, padding: '0.2rem 0.4rem', opacity: i === 0 ? 0.3 : 1 }}>↑</button>
-                <button onClick={() => moveDown(col.slug)} disabled={i === orderedCollections.length - 1} style={{ ...BTN_GHOST, padding: '0.2rem 0.4rem', opacity: i === orderedCollections.length - 1 ? 0.3 : 1 }}>↓</button>
+                <button onClick={() => moveUp(col.slug)} disabled={i === 0} className={a.btnSecondary}>↑</button>
+                <button onClick={() => moveDown(col.slug)} disabled={i === orderedCollections.length - 1} className={a.btnSecondary}>↓</button>
               </div>
             </div>
           )
@@ -138,7 +137,7 @@ export default function MenuClient({ allCollections, initialConfig }: Props) {
           <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.5rem 0.75rem', background: 'var(--bg-2)', borderRadius: '2px', border: '1px solid var(--border)' }}>
             <span style={{ flex: 1, fontFamily: "'ONDER', sans-serif", fontSize: '0.85rem', color: 'var(--accent)' }}>{item.label}</span>
             <span style={{ fontFamily: "'Involve', sans-serif", fontSize: '0.7rem', color: 'var(--text-muted)', opacity: 0.6 }}>{item.href}</span>
-            <button onClick={() => removeCustomItem(i)} style={{ ...BTN_GHOST, color: 'var(--status-error)', borderColor: 'var(--status-error)', padding: '0.2rem 0.5rem', fontSize: '0.6rem' }}>Удалить</button>
+            <button onClick={() => removeCustomItem(i)} className={a.btnDanger}>Удалить</button>
           </div>
         ))}
         <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
@@ -154,7 +153,7 @@ export default function MenuClient({ allCollections, initialConfig }: Props) {
             placeholder="/url или https://..."
             style={{ ...INPUT_STYLE, borderRadius: '2px', padding: '0.4rem 0.75rem', flex: 1, minWidth: '160px', outline: 'none' }}
           />
-          <button onClick={addCustomItem} style={BTN}>Добавить</button>
+          <button onClick={addCustomItem} className={a.btn}>Добавить</button>
         </div>
       </div>
 

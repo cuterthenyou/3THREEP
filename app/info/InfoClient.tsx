@@ -87,7 +87,6 @@ type TabId = 'delivery' | 'contacts' | 'about'
 function SocialRow({
   href,
   icon,
-  label,
   handle,
   last = false,
 }: {
@@ -109,14 +108,13 @@ function SocialRow({
         padding: '0.7rem 0',
         borderBottom: last ? 'none' : '1px solid var(--border)',
         textDecoration: 'none',
-        color: 'var(--text)',
+        color: 'var(--accent)',
         transition: 'opacity 0.15s',
       }}
       onMouseEnter={e => (e.currentTarget.style.opacity = '0.7')}
       onMouseLeave={e => (e.currentTarget.style.opacity = '1')}
     >
-      <span style={{ color: 'var(--accent)', opacity: 0.8, flexShrink: 0, display: 'flex' }}>{icon}</span>
-      <span style={{ fontFamily: "var(--font-onder)", fontSize: '0.58rem', letterSpacing: '0.16em', opacity: 0.4, minWidth: '2.2rem', textTransform: 'uppercase' }}>{label}</span>
+      <span style={{ color: 'var(--accent)', opacity: 0.75, flexShrink: 0, display: 'flex' }}>{icon}</span>
       <span style={{ fontFamily: "var(--font-involve)", fontSize: '0.88rem' }}>{handle}</span>
     </a>
   )
@@ -125,7 +123,7 @@ function SocialRow({
 function InfoSection({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div>
-      <p style={{ fontFamily: "var(--font-onder)", fontSize: '0.6rem', letterSpacing: '0.16em', opacity: 0.4, marginBottom: '0.6rem', textTransform: 'uppercase' }}>{label}</p>
+      <p style={{ fontFamily: "var(--font-onder)", fontSize: '0.7rem', letterSpacing: '0.16em', opacity: 0.65, marginBottom: '0.6rem', textTransform: 'uppercase', color: 'var(--accent)' }}>{label}</p>
       {children}
     </div>
   )
@@ -148,33 +146,33 @@ export default function InfoClient({ content }: { content: InfoContent }) {
           ← Главная
         </Link>
 
-        <h1 style={{ color: 'var(--text)', fontFamily: "var(--font-onder)", fontSize: 'clamp(2rem, 8vw, 3.2rem)', marginBottom: '0.5rem', letterSpacing: '0.05em', lineHeight: 1 }}>
+        <h1 style={{ color: 'var(--accent)', fontFamily: "var(--font-onder)", fontSize: 'clamp(2rem, 8vw, 3.2rem)', marginBottom: '0.5rem', letterSpacing: '0.05em', lineHeight: 1 }}>
           ИНФА
         </h1>
-        <div style={{ height: '2px', background: 'var(--accent)', opacity: 0.25, marginBottom: '2rem', width: '3rem' }} />
+        <div style={{ height: '2px', background: 'var(--accent)', opacity: 0.4, marginBottom: '2rem', width: '3rem' }} />
 
         {/* Tabs */}
-        <div style={{ display: 'flex', marginBottom: '2.5rem', borderBottom: '1px solid var(--border)', overflowX: 'auto' }}>
+        <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '2.5rem', overflowX: 'auto' }}>
           {tabs.map(t => (
             <button
               key={t.id}
               onClick={() => setTab(t.id)}
               style={{
-                padding: '0.55rem 1.1rem',
+                padding: '0.4rem 1rem',
                 fontFamily: "var(--font-onder)",
                 fontSize: '0.62rem',
                 letterSpacing: '0.1em',
                 textTransform: 'uppercase',
-                color: 'var(--text)',
-                background: 'none',
-                border: 'none',
-                borderBottom: tab === t.id ? '2px solid var(--accent)' : '2px solid transparent',
                 cursor: 'pointer',
-                opacity: tab === t.id ? 1 : 0.42,
-                transition: 'opacity 0.15s, border-color 0.15s',
-                marginBottom: '-1px',
+                borderRadius: '3px',
                 whiteSpace: 'nowrap',
                 flexShrink: 0,
+                transition: 'box-shadow 0.12s, transform 0.1s, opacity 0.15s',
+                WebkitTapHighlightColor: 'transparent',
+                ...(tab === t.id
+                  ? { background: 'var(--accent)', color: 'var(--bg)', border: '1px solid var(--accent)', boxShadow: '2px 2px 0 var(--accent)' }
+                  : { background: 'transparent', color: 'var(--accent)', border: '1px solid var(--border)', boxShadow: '2px 2px 0 var(--border)', opacity: 0.55 }
+                ),
               }}
             >
               {t.label}
@@ -183,16 +181,16 @@ export default function InfoClient({ content }: { content: InfoContent }) {
         </div>
 
         {/* Content */}
-        <div style={{ color: 'var(--text)', fontFamily: "var(--font-involve)", fontSize: '0.9rem', lineHeight: 1.8 }}>
+        <div style={{ color: 'var(--accent)', fontFamily: "var(--font-involve)", fontSize: '0.9rem', lineHeight: 1.8 }}>
 
           {tab === 'delivery' && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1.75rem' }}>
-              <p style={{ opacity: 0.75 }}>{c.delivery_intro}</p>
+              <p style={{ opacity: 0.88 }}>{c.delivery_intro}</p>
               <InfoSection label={c.payment_heading}>
-                <p style={{ opacity: 0.75 }}>{c.payment_text}</p>
+                <p style={{ opacity: 0.88 }}>{c.payment_text}</p>
               </InfoSection>
               <InfoSection label={c.delivery_heading}>
-                <p style={{ opacity: 0.75 }}>{c.delivery_text}</p>
+                <p style={{ opacity: 0.88 }}>{c.delivery_text}</p>
                 <p style={{ opacity: 0.5, fontSize: '0.82rem', marginTop: '0.4rem' }}>{c.delivery_note}</p>
               </InfoSection>
             </div>
@@ -223,14 +221,14 @@ export default function InfoClient({ content }: { content: InfoContent }) {
           {tab === 'about' && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1.75rem' }}>
               <InfoSection label={c.location_heading}>
-                <p style={{ opacity: 0.75 }}>{c.location_text}</p>
+                <p style={{ opacity: 0.88 }}>{c.location_text}</p>
               </InfoSection>
               <InfoSection label={c.what_heading}>
-                <p style={{ opacity: 0.75 }}>{c.what_text}</p>
+                <p style={{ opacity: 0.88 }}>{c.what_text}</p>
                 <p style={{ opacity: 0.45, fontSize: '0.82rem', marginTop: '0.5rem', fontStyle: 'italic' }}>{c.what_subtext}</p>
               </InfoSection>
               <InfoSection label={c.how_heading}>
-                <p style={{ opacity: 0.75 }}>{c.how_text}</p>
+                <p style={{ opacity: 0.88 }}>{c.how_text}</p>
               </InfoSection>
             </div>
           )}

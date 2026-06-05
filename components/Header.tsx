@@ -278,9 +278,9 @@ export default function Header({ isAdminUser = false, initialCollections }: Prop
                 ? <span className={s.subLink} style={{ opacity: 0.3, cursor: 'default' }}>...</span>
                 : collections.map(c => (
                   <div key={c.slug}>
-                    <Link href={c.href ?? `/?category=${c.slug}#catalog`} onClick={() => setMenuOpen(false)} className={s.subLink}>— {c.name}</Link>
+                    <Link href={c.href ?? `/?category=${c.slug}`} onClick={() => setMenuOpen(false)} className={s.subLink}>— {c.name}</Link>
                     {!c.href && c.types?.map(type => (
-                      <Link key={type} href={`/?category=${c.slug}&type=${encodeURIComponent(type)}#catalog`} onClick={() => setMenuOpen(false)} className={s.subLinkType}>{type}</Link>
+                      <Link key={type} href={`/?category=${c.slug}&type=${encodeURIComponent(type)}`} onClick={() => setMenuOpen(false)} className={s.subLinkType}>{type}</Link>
                     ))}
                   </div>
                 ))

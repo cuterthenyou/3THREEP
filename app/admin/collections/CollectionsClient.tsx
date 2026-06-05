@@ -3,6 +3,7 @@
 import React, { useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import type { Category } from '@/lib/types'
+import a from '../admin.module.css'
 
 const EMPTY: Omit<Category, never> = {
   slug: '', name: '', active: true, description: null, logo_top_url: null, logo_bottom_url: null, modal_bg_url: null, modal_bg_url_dark: null,
@@ -97,8 +98,7 @@ export default function CollectionsClient({ collections }: { collections: Catego
           <button
             type="button"
             onClick={() => refEl.current?.click()}
-            className="px-3 py-2 text-xs rounded-lg uppercase tracking-widest"
-            style={{ background: 'var(--bg-subtle)', color: 'var(--accent)', fontFamily: "var(--font-onder)", fontSize: '0.65rem' }}
+            className={a.btnSecondary}
           >
             {uploading === field ? 'Загружаем...' : 'Загрузить'}
           </button>
@@ -135,9 +135,7 @@ export default function CollectionsClient({ collections }: { collections: Catego
         <h1 className="uppercase tracking-widest" style={{ color: 'var(--accent)', fontFamily: "var(--font-onder)", fontSize: 'clamp(0.9rem, 3vw, 1.1rem)' }}>
           Коллекции ({collections.length})
         </h1>
-        <button onClick={openNew}
-          className="uppercase tracking-widest transition-opacity hover:opacity-80"
-          style={{ background: 'var(--accent)', color: 'var(--bg)', borderRadius: '8px', fontFamily: "var(--font-onder)", fontSize: '0.68rem', padding: '0.4rem 0.8rem' }}>
+        <button onClick={openNew} className={a.btn}>
           + Добавить
         </button>
       </div>
@@ -167,19 +165,13 @@ export default function CollectionsClient({ collections }: { collections: Catego
                 {c.modal_bg_url ? ' · фон-модалки ✓' : ''}
               </p>
               <div className="flex gap-2 flex-wrap mt-2">
-                <button onClick={() => toggleActive(c)}
-                  className="px-2.5 py-1 text-xs uppercase tracking-widest rounded-lg"
-                  style={{ background: c.active ? 'var(--bg-subtle)' : 'var(--accent-2)', color: 'var(--accent)', fontFamily: "var(--font-involve)", fontWeight: 700, fontSize: '0.62rem', border: '1px solid var(--border-soft)' }}>
+                <button onClick={() => toggleActive(c)} className={a.btnSecondary}>
                   {c.active ? 'Скрыть' : 'Показать'}
                 </button>
-                <button onClick={() => openEdit(c)}
-                  className="px-2.5 py-1 text-xs uppercase tracking-widest rounded-lg"
-                  style={{ background: 'var(--accent-2)', color: 'var(--accent)', fontFamily: "var(--font-involve)", fontWeight: 700, fontSize: '0.62rem' }}>
+                <button onClick={() => openEdit(c)} className={a.btnSecondary}>
                   Ред.
                 </button>
-                <button onClick={() => remove(c.slug)}
-                  className="px-2.5 py-1 text-xs uppercase tracking-widest rounded-lg"
-                  style={{ background: 'var(--bg-subtle)', color: 'var(--accent)', opacity: 0.5, fontFamily: "var(--font-involve)", fontWeight: 700, fontSize: '0.62rem', border: '1px solid var(--border-soft)' }}>
+                <button onClick={() => remove(c.slug)} className={a.btnDanger}>
                   Удалить
                 </button>
               </div>
@@ -235,13 +227,10 @@ export default function CollectionsClient({ collections }: { collections: Catego
 
             <div className="flex gap-3">
               <button onClick={save} disabled={saving || !!uploading}
-                className="flex-1 py-3 uppercase tracking-widest transition-opacity"
-                style={{ background: 'var(--accent)', color: 'var(--bg)', borderRadius: '8px', fontFamily: "var(--font-onder)", fontSize: '0.75rem', opacity: saving ? 0.5 : 1 }}>
+                className={a.btn} style={{ flex: 1 }}>
                 {saving ? 'Сохраняем...' : 'Сохранить'}
               </button>
-              <button onClick={() => setEditing(null)}
-                className="px-4 py-3 uppercase tracking-widest"
-                style={{ background: 'var(--bg-subtle)', color: 'var(--accent)', borderRadius: '8px', fontFamily: "var(--font-onder)", fontSize: '0.75rem' }}>
+              <button onClick={() => setEditing(null)} className={a.btnSecondary}>
                 Отмена
               </button>
             </div>

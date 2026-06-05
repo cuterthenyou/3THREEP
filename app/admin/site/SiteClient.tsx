@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useRef } from 'react'
+import a from '../admin.module.css'
 
 const LABEL_STYLE = { color: 'var(--accent)', opacity: 0.5, fontFamily: "var(--font-onder)" }
 const SECTION_TITLE = { color: 'var(--accent)', fontFamily: "var(--font-involve)", fontWeight: 800, fontSize: '1rem' }
@@ -12,14 +13,19 @@ interface Props {
 export default function SiteClient({ initialSettings }: Props) {
   const [heroUrl, setHeroUrl] = useState<string | null>(initialSettings['hero_video_url'] ?? null)
   const [profileBg, setProfileBg] = useState<string | null>(initialSettings['profile_bg_url'] ?? null)
+  const [profileBgDark, setProfileBgDark] = useState<string | null>(initialSettings['profile_bg_url_dark'] ?? null)
   const [uploadingHero, setUploadingHero] = useState(false)
   const [uploadingProfile, setUploadingProfile] = useState(false)
+  const [uploadingProfileDark, setUploadingProfileDark] = useState(false)
   const [savingHero, setSavingHero] = useState(false)
   const [savingProfile, setSavingProfile] = useState(false)
+  const [savingProfileDark, setSavingProfileDark] = useState(false)
   const [heroMsg, setHeroMsg] = useState('')
   const [profileMsg, setProfileMsg] = useState('')
+  const [profileDarkMsg, setProfileDarkMsg] = useState('')
   const heroRef = useRef<HTMLInputElement>(null)
   const profileRef = useRef<HTMLInputElement>(null)
+  const profileDarkRef = useRef<HTMLInputElement>(null)
 
   async function saveSetting(key: string, value: string | null) {
     await fetch('/api/admin/site-settings', {
@@ -71,6 +77,31 @@ export default function SiteClient({ initialSettings }: Props) {
     setProfileMsg('✓ Фон профиля удалён')
   }
 
+  async function uploadProfileBgDark(file: File) {
+    setUploadingProfileDark(true)
+    setProfileDarkMsg('')
+    const fd = new FormData()
+    fd.append('file', file)
+    fd.append('folder', 'assets')
+    const res = await fetch('/api/admin/upload', { method: 'POST', body: fd })
+    const data = await res.json()
+    setUploadingProfileDark(false)
+    if (!data.url) { setProfileDarkMsg('Ошибка загрузки'); return }
+    setProfileBgDark(data.url)
+    setSavingProfileDark(true)
+    await saveSetting('profile_bg_url_dark', data.url)
+    setSavingProfileDark(false)
+    setProfileDarkMsg('✓ Фон обновлён')
+  }
+
+  async function removeProfileBgDark() {
+    setProfileBgDark(null)
+    setSavingProfileDark(true)
+    await saveSetting('profile_bg_url_dark', null)
+    setSavingProfileDark(false)
+    setProfileDarkMsg('✓ Фон удалён')
+  }
+
   return (
     <div className="px-6 py-6 max-w-2xl mx-auto flex flex-col gap-8">
       <h1 className="uppercase tracking-widest" style={{ color: 'var(--accent)', fontFamily: "var(--font-onder)", fontSize: 'clamp(0.9rem, 3vw, 1.1rem)' }}>
@@ -108,8 +139,7 @@ export default function SiteClient({ initialSettings }: Props) {
           <button
             onClick={() => heroRef.current?.click()}
             disabled={uploadingHero || savingHero}
-            className="px-4 py-2 uppercase tracking-widest rounded-lg"
-            style={{ background: 'var(--accent)', color: 'var(--bg)', fontFamily: "var(--font-onder)", fontSize: '0.72rem', opacity: uploadingHero || savingHero ? 0.5 : 1 }}
+            className={a.btn}
           >
             {uploadingHero ? 'Загружаем...' : savingHero ? 'Сохраняем...' : 'Загрузить видео'}
           </button>
@@ -142,8 +172,7 @@ export default function SiteClient({ initialSettings }: Props) {
           <button
             onClick={() => profileRef.current?.click()}
             disabled={uploadingProfile || savingProfile}
-            className="px-4 py-2 uppercase tracking-widest rounded-lg"
-            style={{ background: 'var(--accent)', color: 'var(--bg)', fontFamily: "var(--font-onder)", fontSize: '0.72rem', opacity: uploadingProfile || savingProfile ? 0.5 : 1 }}
+            className={a.btn}
           >
             {uploadingProfile ? 'Загружаем...' : savingProfile ? 'Сохраняем...' : 'Загрузить PNG'}
           </button>
@@ -153,13 +182,54 @@ export default function SiteClient({ initialSettings }: Props) {
             <button
               onClick={removeProfileBg}
               disabled={savingProfile}
-              className="px-3 py-2 uppercase tracking-widest rounded-lg"
-              style={{ background: 'var(--bg-2)', color: 'var(--accent)', fontFamily: "var(--font-onder)", fontSize: '0.65rem', border: '1px solid var(--border-soft)', opacity: savingProfile ? 0.4 : 0.7 }}
+              className={a.btnDanger}
             >
               Удалить фон
             </button>
           )}
           {profileMsg && <span className="text-xs" style={{ color: profileMsg.startsWith('✓') ? 'var(--status-delivered)' : 'var(--status-error)', fontFamily: "var(--font-involve)" }}>{profileMsg}</span>}
+        </div>
+      </div>
+
+      {/* ── Profile background dark ── */}
+      <div className="rounded-2xl p-5 flex flex-col gap-4" style={{ background: 'var(--bg-subtle)', border: '1px solid var(--border-soft)' }}>
+        <p style={SECTION_TITLE}>Фон профиля (тёмная тема)</p>
+        <p className="text-xs" style={{ color: 'var(--accent)', opacity: 0.5, fontFamily: "var(--font-involve)" }}>
+          PNG-фон для тёмной темы. Если не задан — используется светлый фон.
+        </p>
+
+        {profileBgDark && (
+          <div className="rounded-xl overflow-hidden" style={{ maxHeight: 200, background: 'repeating-conic-gradient(#333 0% 25%, #555 0% 50%) 0 0 / 8px 8px' }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={profileBgDark} alt="" className="w-full object-contain" style={{ maxHeight: 200 }} />
+          </div>
+        )}
+        {!profileBgDark && (
+          <div className="rounded-xl flex items-center justify-center h-24" style={{ background: 'var(--bg-2)', border: '1px dashed var(--border-soft)' }}>
+            <span className="text-xs" style={{ color: 'var(--accent)', opacity: 0.3, fontFamily: "var(--font-involve)" }}>Фон не задан</span>
+          </div>
+        )}
+
+        <div className="flex items-center gap-3 flex-wrap">
+          <button
+            onClick={() => profileDarkRef.current?.click()}
+            disabled={uploadingProfileDark || savingProfileDark}
+            className={a.btn}
+          >
+            {uploadingProfileDark ? 'Загружаем...' : savingProfileDark ? 'Сохраняем...' : 'Загрузить PNG'}
+          </button>
+          <input ref={profileDarkRef} type="file" accept="image/png" className="hidden"
+            onChange={e => e.target.files?.[0] && uploadProfileBgDark(e.target.files[0])} />
+          {profileBgDark && (
+            <button
+              onClick={removeProfileBgDark}
+              disabled={savingProfileDark}
+              className={a.btnDanger}
+            >
+              Удалить фон
+            </button>
+          )}
+          {profileDarkMsg && <span className="text-xs" style={{ color: profileDarkMsg.startsWith('✓') ? 'var(--status-delivered)' : 'var(--status-error)', fontFamily: "var(--font-involve)" }}>{profileDarkMsg}</span>}
         </div>
       </div>
     </div>

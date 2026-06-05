@@ -33,6 +33,7 @@ interface Props {
   profile: Profile | null;
   orders: Order[];
   profileBg?: string | null;
+  profileBgDark?: string | null;
 }
 
 const STATUS_COLORS: Record<OrderStatus, string> = {
@@ -61,7 +62,7 @@ function getUsername(email: string, name: string | null) {
   return email.split('@')[0].toUpperCase();
 }
 
-export default function AccountClient({ user, profile, orders, profileBg }: Props) {
+export default function AccountClient({ user, profile, orders, profileBg, profileBgDark }: Props) {
   const [loggingOut, setLoggingOut] = useState(false);
   const [activeTab, setActiveTab] = useState<'inventory' | 'orders'>('inventory');
   const [showNicknameModal, setShowNicknameModal] = useState(!profile?.name);
@@ -129,7 +130,7 @@ export default function AccountClient({ user, profile, orders, profileBg }: Prop
   }
 
   return (
-    <div className={s.page} style={profileBg ? { backgroundImage: `url(${profileBg})`, backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' } : undefined}>
+    <div className={s.page} style={(() => { const bg = isDark ? (profileBgDark ?? profileBg) : (profileBg ?? profileBgDark); return bg ? { backgroundImage: `url(${bg})`, backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' } : undefined })()} >
       {/* Nickname modal */}
       {showNicknameModal && (
         <div className={s.modalOverlay}>
@@ -180,6 +181,34 @@ export default function AccountClient({ user, profile, orders, profileBg }: Prop
           {/* Profile card */}
           <div className={s.profileCard}>
             <div className={s.profileInfo}>
+              {/* Avatar */}
+              <div className={s.avatarCol}>
+                <input
+                  ref={avatarRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleAvatarChange}
+                />
+                <button
+                  onClick={() => avatarRef.current?.click()}
+                  disabled={uploadingAvatar}
+                  className={s.avatarBtn}
+                  title="Сменить аватарку"
+                >
+                  {avatarUrl ? (
+                    <Image src={avatarUrl} alt="avatar" fill className="object-cover" sizes="120px" />
+                  ) : (
+                    <span style={{ color: 'var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      {level >= 4 ? <LvlFire /> : level >= 3 ? <LvlBolt /> : level >= 2 ? <LvlStar /> : <LvlCircle />}
+                    </span>
+                  )}
+                  <div className={s.avatarOverlay}>
+                    {uploadingAvatar ? '...' : 'Сменить'}
+                  </div>
+                </button>
+              </div>
+
               <span className={s.levelBadge}>LVL {level}</span>
               <h2 className={s.username}>{username}</h2>
 
@@ -220,34 +249,6 @@ export default function AccountClient({ user, profile, orders, profileBg }: Prop
                   </p>
                 ))}
               </div>
-            </div>
-
-            {/* Avatar + actions */}
-            <div className={s.avatarCol}>
-              <input
-                ref={avatarRef}
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={handleAvatarChange}
-              />
-              <button
-                onClick={() => avatarRef.current?.click()}
-                disabled={uploadingAvatar}
-                className={s.avatarBtn}
-                title="Сменить аватарку"
-              >
-                {avatarUrl ? (
-                  <Image src={avatarUrl} alt="avatar" fill className="object-cover" sizes="80px" />
-                ) : (
-                  <span style={{ color: 'var(--accent)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    {level >= 4 ? <LvlFire /> : level >= 3 ? <LvlBolt /> : level >= 2 ? <LvlStar /> : <LvlCircle />}
-                  </span>
-                )}
-                <div className={s.avatarOverlay}>
-                  {uploadingAvatar ? '...' : 'Сменить'}
-                </div>
-              </button>
             </div>
           </div>
 

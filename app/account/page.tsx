@@ -36,6 +36,7 @@ export default async function AccountPage() {
   ])
 
   const profileBg = settingsRows.find((r: {key: string; value: string | null}) => r.key === 'profile_bg_url')?.value ?? null
+  const profileBgDark = settingsRows.find((r: {key: string; value: string | null}) => r.key === 'profile_bg_url_dark')?.value ?? null
 
   return (
     <AccountClient
@@ -43,6 +44,7 @@ export default async function AccountPage() {
       profile={profile}
       orders={orders}
       profileBg={profileBg}
+      profileBgDark={profileBgDark}
     />
   )
 }

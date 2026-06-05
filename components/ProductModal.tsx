@@ -175,7 +175,7 @@ export default function ProductModal({ product, visible, onClose, modalBg }: Pro
             <div className="flex flex-col gap-4">
               <div
                 className="w-full rounded-lg overflow-hidden"
-                style={{ aspectRatio: '1/1', position: 'relative', background: '#000' }}
+                style={{ aspectRatio: '3/4', position: 'relative', background: '#000' }}
                 {...touchHandlers}
               >
                 <Image src={product.images[activeImg] || product.images[0]} alt={product.name} fill className="object-cover select-none" draggable={false} sizes="(max-width: 768px) 100vw, 50vw" />

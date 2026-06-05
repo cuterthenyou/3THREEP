@@ -1,0 +1,56 @@
+.btn {
+  padding: 0.45rem 1.1rem;
+  font-family: var(--font-onder);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  background: var(--accent);
+  color: var(--bg);
+  border: 1px solid var(--accent);
+  box-shadow: 2px 2px 0 var(--accent);
+  border-radius: 3px;
+  cursor: pointer;
+  transition: box-shadow 0.12s, transform 0.1s;
+  -webkit-tap-highlight-color: transparent;
+}
+.btn:hover:not(:disabled) { box-shadow: 3px 3px 0 var(--accent); transform: translate(-1px, -1px); }
+.btn:active:not(:disabled) { box-shadow: 1px 1px 0 var(--accent); transform: translate(1px, 1px); transition-duration: 0.06s; }
+.btn:disabled { opacity: 0.5; cursor: default; }
+
+.btnSecondary {
+  padding: 0.45rem 1.1rem;
+  font-family: var(--font-onder);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  background: transparent;
+  color: var(--accent);
+  border: 1px solid var(--border);
+  box-shadow: 2px 2px 0 var(--border);
+  border-radius: 3px;
+  cursor: pointer;
+  transition: box-shadow 0.12s, transform 0.1s, border-color 0.12s;
+  -webkit-tap-highlight-color: transparent;
+}
+.btnSecondary:hover:not(:disabled) { border-color: var(--accent); box-shadow: 3px 3px 0 var(--accent); transform: translate(-1px, -1px); }
+.btnSecondary:active:not(:disabled) { box-shadow: 1px 1px 0 var(--accent); transform: translate(1px, 1px); transition-duration: 0.06s; }
+.btnSecondary:disabled { opacity: 0.5; cursor: default; }
+
+.btnDanger {
+  padding: 0.45rem 1.1rem;
+  font-family: var(--font-onder);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  background: transparent;
+  color: var(--status-error);
+  border: 1px solid var(--status-error);
+  box-shadow: 2px 2px 0 var(--status-error);
+  border-radius: 3px;
+  cursor: pointer;
+  transition: box-shadow 0.12s, transform 0.1s;
+  -webkit-tap-highlight-color: transparent;
+}
+.btnDanger:hover:not(:disabled) { box-shadow: 3px 3px 0 var(--status-error); transform: translate(-1px, -1px); }
+.btnDanger:active:not(:disabled) { box-shadow: 1px 1px 0 var(--status-error); transform: translate(1px, 1px); transition-duration: 0.06s; }
+.btnDanger:disabled { opacity: 0.5; cursor: default; }

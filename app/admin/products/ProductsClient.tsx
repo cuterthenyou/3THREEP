@@ -4,6 +4,7 @@ import { useState, useRef, useEffect, useMemo } from 'react'
 import { useRouter, useSearchParams, usePathname } from 'next/navigation'
 import Image from 'next/image'
 import type { Product } from '@/lib/types'
+import a from '../admin.module.css'
 
 const PRODUCT_TYPES = ['T-Shirt', 'Hoodie', 'Sweatshirt', 'Pants', 'Accessory', 'Other']
 
@@ -231,9 +232,7 @@ export default function ProductsClient({ products }: { products: Product[] }) {
           style={{ color: 'var(--accent)', fontFamily: "var(--font-onder)", fontSize: 'clamp(0.9rem, 3vw, 1.1rem)' }}>
           Товары ({filtered.length}/{products.length})
         </h1>
-        <button onClick={openNew}
-          className="uppercase tracking-widest transition-opacity hover:opacity-80"
-          style={{ background: 'var(--accent)', color: 'var(--bg)', borderRadius: '8px', fontFamily: "var(--font-onder)", fontSize: '0.68rem', padding: '0.4rem 0.8rem' }}>
+        <button onClick={openNew} className={a.btn}>
           + Добавить товар
         </button>
       </div>
@@ -298,14 +297,10 @@ export default function ProductsClient({ products }: { products: Product[] }) {
                 {' · '}Остаток: {p.stock}
               </p>
               <div className="flex gap-2 flex-wrap mt-2">
-                <button onClick={() => openEdit(p)}
-                  className="px-2.5 py-1 text-xs uppercase tracking-widest rounded-lg"
-                  style={{ background: 'var(--accent-2)', color: 'var(--accent)', fontFamily: "var(--font-involve)", fontWeight: 700, fontSize: '0.62rem' }}>
+                <button onClick={() => openEdit(p)} className={a.btnSecondary}>
                   Ред.
                 </button>
-                <button onClick={() => toggleActive(p.id, p.active)}
-                  className="px-2.5 py-1 text-xs uppercase tracking-widest rounded-lg"
-                  style={{ background: 'var(--bg-subtle)', color: 'var(--accent)', opacity: 0.7, fontFamily: "var(--font-involve)", fontWeight: 700, fontSize: '0.62rem', border: '1px solid var(--border-soft)' }}>
+                <button onClick={() => toggleActive(p.id, p.active)} className={a.btnSecondary}>
                   {p.active ? 'Скрыть' : 'Показать'}
                 </button>
               </div>
@@ -435,9 +430,7 @@ export default function ProductsClient({ products }: { products: Product[] }) {
               <div className="flex flex-col gap-1">
                 <label className="text-xs uppercase tracking-widest" style={LABEL_STYLE}>Фон карточки (свет)</label>
                 <div className="flex items-center gap-2">
-                  <button type="button" onClick={() => bgRef.current?.click()}
-                    className="px-3 py-2 text-xs rounded-lg uppercase tracking-widest"
-                    style={{ background: 'var(--bg-subtle)', color: 'var(--accent)', fontFamily: "var(--font-onder)", fontSize: '0.65rem' }}>
+                  <button type="button" onClick={() => bgRef.current?.click()} className={a.btnSecondary}>
                     {uploadingBg ? '...' : 'Загрузить'}
                   </button>
                   <input ref={bgRef} type="file" accept="image/*" className="hidden"
@@ -454,9 +447,7 @@ export default function ProductsClient({ products }: { products: Product[] }) {
               <div className="flex flex-col gap-1">
                 <label className="text-xs uppercase tracking-widest" style={LABEL_STYLE}>Фон карточки (темно)</label>
                 <div className="flex items-center gap-2">
-                  <button type="button" onClick={() => bgDarkRef.current?.click()}
-                    className="px-3 py-2 text-xs rounded-lg uppercase tracking-widest"
-                    style={{ background: 'var(--bg-subtle)', color: 'var(--accent)', fontFamily: "var(--font-onder)", fontSize: '0.65rem' }}>
+                  <button type="button" onClick={() => bgDarkRef.current?.click()} className={a.btnSecondary}>
                     {uploadingBgDark ? '...' : 'Загрузить'}
                   </button>
                   <input ref={bgDarkRef} type="file" accept="image/*" className="hidden"
@@ -487,13 +478,10 @@ export default function ProductsClient({ products }: { products: Product[] }) {
 
             <div className="flex gap-3">
               <button onClick={save} disabled={saving || uploading || uploadingBg || uploadingBgDark}
-                className="flex-1 py-3 uppercase tracking-widest transition-opacity"
-                style={{ background: 'var(--accent)', color: 'var(--bg)', borderRadius: '8px', fontFamily: "var(--font-onder)", fontSize: '0.75rem', opacity: saving || uploading || uploadingBg || uploadingBgDark ? 0.5 : 1 }}>
+                className={a.btn} style={{ flex: 1 }}>
                 {saving ? 'Сохраняем...' : 'Сохранить'}
               </button>
-              <button onClick={() => setEditing(null)}
-                className="px-4 py-3 uppercase tracking-widest"
-                style={{ background: 'rgba(242,151,116,0.1)', color: 'var(--accent)', borderRadius: '8px', fontFamily: "var(--font-onder)", fontSize: '0.75rem' }}>
+              <button onClick={() => setEditing(null)} className={a.btnSecondary}>
                 Отмена
               </button>
             </div>

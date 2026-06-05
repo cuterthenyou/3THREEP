@@ -2,6 +2,7 @@
 
 import { useState, useRef } from 'react'
 import Image from 'next/image'
+import a from '../admin.module.css'
 
 interface Emoji {
   id: number
@@ -78,13 +79,6 @@ export default function EmojisClient({ initialEmojis }: { initialEmojis: Emoji[]
     fontSize: '0.9rem', borderRadius: '0.75rem', outline: 'none',
     padding: '0.65rem 0.9rem', width: '100%',
   }
-  const btnStyle = {
-    background: 'var(--accent)', color: 'var(--bg)',
-    fontFamily: 'var(--font-onder)', fontSize: '0.78rem',
-    textTransform: 'uppercase' as const, letterSpacing: '0.1em',
-    padding: '0.65rem 1.25rem', borderRadius: '8px',
-    border: 'none', cursor: 'pointer',
-  }
 
   return (
     <div className="px-6 py-6 max-w-2xl mx-auto">
@@ -130,7 +124,7 @@ export default function EmojisClient({ initialEmojis }: { initialEmojis: Emoji[]
 
         {error && <p style={{ color: 'var(--status-error)', fontFamily: 'var(--font-involve)', fontSize: '0.82rem' }}>{error}</p>}
 
-        <button onClick={handleAdd} disabled={adding || uploading || !imageUrl || !name.trim()} style={{ ...btnStyle, opacity: (adding || uploading || !imageUrl || !name.trim()) ? 0.5 : 1 }}>
+        <button onClick={handleAdd} disabled={adding || uploading || !imageUrl || !name.trim()} className={a.btn}>
           {adding ? 'Добавляем...' : '+ Добавить'}
         </button>
       </div>
@@ -154,7 +148,7 @@ export default function EmojisClient({ initialEmojis }: { initialEmojis: Emoji[]
             </div>
             <button
               onClick={() => handleDelete(emoji.id)}
-              style={{ background: 'none', border: '1px solid var(--border)', color: 'var(--status-error)', borderRadius: '6px', padding: '0.3rem 0.65rem', cursor: 'pointer', fontFamily: 'var(--font-involve)', fontSize: '0.78rem', opacity: 0.7 }}
+              className={a.btnDanger}
             >
               Удалить
             </button>

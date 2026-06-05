@@ -36,7 +36,7 @@
   padding: 1.25rem;
   display: flex;
   gap: 1rem;
-  background: var(--bg-subtle);
+  background: var(--bg-2);
   border: 1px solid var(--border-soft);
 }
 
@@ -75,6 +75,7 @@
   border: 1px solid var(--border);
   color: var(--color-accent);
   font-family: var(--font-onder);
+  align-self: flex-start;
 }
 
 .username {
@@ -116,20 +117,17 @@
 .avatarCol {
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: flex-start;
   justify-content: flex-start;
-  align-self: stretch;
   gap: 0.75rem;
   flex-shrink: 0;
-  width: auto;
-  min-width: 7rem;
+  align-self: flex-start;
 }
 
 .avatarBtn {
   position: relative;
-  height: 100%;
-  width: auto;
-  aspect-ratio: 1 / 1;
+  width: 7.5rem;
+  height: 7.5rem;
   flex: none;
   border-radius: 2px;
   overflow: hidden;
@@ -198,7 +196,7 @@
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
-  background: var(--bg-subtle);
+  background: var(--bg-2);
   border: 1px solid var(--border-soft);
 }
 
@@ -291,7 +289,7 @@
   display: flex;
   flex-direction: column;
   gap: 1rem;
-  background: var(--bg-subtle);
+  background: var(--bg-2);
   border: 1px solid var(--border-soft);
 }
 
@@ -393,7 +391,7 @@
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-  background: var(--bg-subtle);
+  background: var(--bg-2);
   border: 1px solid var(--border);
   box-shadow: 2px 2px 0 var(--border);
   text-decoration: none;
@@ -634,20 +632,13 @@
   }
 
   .avatarCol {
-    width: 100%;
-    align-self: auto;
-    min-width: unset;
-    flex-direction: row;
-    justify-content: center;
+    align-self: center;
     align-items: center;
-    flex-shrink: unset;
-    padding-top: 0.5rem;
   }
 
   .avatarBtn {
-    height: 8rem;
     width: 8rem;
-    flex: unset;
+    height: 8rem;
   }
 
   .username {

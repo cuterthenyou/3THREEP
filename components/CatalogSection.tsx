@@ -37,10 +37,18 @@ export default function CatalogSection({ products, categories, categoryData = {}
 
   const rawCategory = searchParams.get('category') ?? 'all'
   const rawType = searchParams.get('type') ?? 'all'
+  const hasMountedRef = React.useRef(false)
 
   useEffect(() => {
     setActiveCategory(rawCategory)
     setActiveType(rawType)
+    if (!hasMountedRef.current) { hasMountedRef.current = true; return }
+    if (rawCategory !== 'all' || rawType !== 'all') {
+      const id = setTimeout(() =>
+        document.getElementById('catalog')?.scrollIntoView({ behavior: 'smooth' })
+      , 350)
+      return () => clearTimeout(id)
+    }
   }, [rawCategory, rawType])
 
 

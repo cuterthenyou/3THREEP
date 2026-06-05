@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import Image from 'next/image'
+import a from '../admin.module.css'
 
 interface MediaFile {
   bucket: string
@@ -163,8 +164,7 @@ export default function MediaClient() {
         <h1 className="text-lg uppercase tracking-widest" style={{ color: accent, fontFamily: "var(--font-onder)" }}>
           Медиабиблиотека
         </h1>
-        <button onClick={load} className="text-xs uppercase tracking-widest px-4 py-2 rounded"
-          style={{ background: accentDim, color: accent, border: '1px solid var(--border)', fontFamily: "var(--font-onder)" }}>
+        <button onClick={load} className={a.btnSecondary}>
           Обновить
         </button>
       </div>
@@ -196,14 +196,10 @@ export default function MediaClient() {
           <span style={{ color: accent, fontFamily: "var(--font-involve)", fontSize: '0.8rem' }}>
             Выбрано: {selected.size}
           </span>
-          <button onClick={downloadSelected}
-            className="px-3 py-1.5 rounded text-xs uppercase tracking-widest"
-            style={{ background: 'rgba(116,179,242,0.18)', color: 'var(--status-shipped)', border: '1px solid rgba(116,179,242,0.3)', fontFamily: "var(--font-onder)", fontSize: '0.65rem' }}>
+          <button onClick={downloadSelected} className={a.btnSecondary}>
             Скачать
           </button>
-          <button onClick={deleteSelected} disabled={massDeleting}
-            className="px-3 py-1.5 rounded text-xs uppercase tracking-widest"
-            style={{ background: 'rgba(224,128,128,0.18)', color: 'var(--status-error)', border: '1px solid rgba(224,128,128,0.3)', fontFamily: "var(--font-onder)", fontSize: '0.65rem', opacity: massDeleting ? 0.5 : 1 }}>
+          <button onClick={deleteSelected} disabled={massDeleting} className={a.btnDanger}>
             {massDeleting ? 'Удаляем...' : 'Удалить'}
           </button>
           <button onClick={() => setSelected(new Set())}
@@ -278,16 +274,13 @@ export default function MediaClient() {
                     {formatBytes(file.size)} · {new Date(file.created_at).toLocaleDateString('ru-RU')}
                   </p>
                   <div className="flex gap-1 mt-auto pt-1">
-                    <button onClick={() => copyUrl(file.url)} className="flex-1 py-1 rounded text-center"
-                      style={{ background: copied === file.url ? 'rgba(126,200,164,0.2)' : 'rgba(242,151,116,0.1)', color: copied === file.url ? 'var(--status-paid)' : accent, border: '1px solid rgba(242,151,116,0.2)', fontFamily: "var(--font-onder)", fontSize: '0.55rem' }}
-                      title="Копировать URL">
+                    <button onClick={() => copyUrl(file.url)} className={a.btnSecondary}
+                      style={{ flex: 1 }} title="Копировать URL">
                       {copied === file.url ? '✓' : 'URL'}
                     </button>
-                    <button onClick={() => window.open(file.url, '_blank')} className="px-2 py-1 rounded"
-                      style={{ background: 'rgba(242,151,116,0.1)', color: accent, border: '1px solid rgba(242,151,116,0.2)', fontFamily: "var(--font-onder)", fontSize: '0.55rem' }}
+                    <button onClick={() => window.open(file.url, '_blank')} className={a.btnSecondary}
                       title="Открыть">↗</button>
-                    <button onClick={() => deleteFile(file)} disabled={deleting.has(file.url)} className="px-2 py-1 rounded"
-                      style={{ background: 'rgba(224,128,128,0.1)', color: 'var(--status-error)', border: '1px solid rgba(224,128,128,0.2)', fontFamily: "var(--font-onder)", fontSize: '0.55rem', opacity: deleting.has(file.url) ? 0.5 : 1 }}
+                    <button onClick={() => deleteFile(file)} disabled={deleting.has(file.url)} className={a.btnDanger}
                       title="Удалить">✕</button>
                   </div>
                 </div>
