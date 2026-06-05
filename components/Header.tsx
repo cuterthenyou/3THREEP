@@ -257,15 +257,15 @@ export default function Header({ isAdminUser = false, initialCollections }: Prop
             <path d="M1 1L13 13M13 1L1 13" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"/>
           </svg>
         </button>
-        <nav className={s.nav}>
+        {/* Burger user info — top of overlay, outside nav */}
+        {menuUser && (
+          <div className={s.menuUserInfo}>
+            <span className={s.menuUserName}>{menuUser.name}</span>
+            <span className={s.menuUserLevel}>LVL {menuUser.level}</span>
+          </div>
+        )}
 
-          {/* Burger user info */}
-          {menuUser && (
-            <div className={s.menuUserInfo}>
-              <span className={s.menuUserName}>{menuUser.name}</span>
-              <span className={s.menuUserLevel}>LVL {menuUser.level}</span>
-            </div>
-          )}
+        <nav className={s.nav}>
 
           {/* Коллекции — accordion */}
           <div className={s.accordion}>
@@ -325,7 +325,7 @@ export default function Header({ isAdminUser = false, initialCollections }: Prop
           )}
           {isAdminUser && (
             <div className={s.accordion}>
-              <button className={`${s.navLink} ${s.navLinkAdmin}`} onClick={() => toggle('admin')}>
+              <button className={s.navLink} onClick={() => toggle('admin')}>
                 <IconHex /> Панель <span className={`${s.arrow} ${expanded === 'admin' ? s.arrowOpen : ''}`}>▸</span>
               </button>
               <div className={`${s.sub} ${expanded === 'admin' ? s.subOpen : ''}`}>

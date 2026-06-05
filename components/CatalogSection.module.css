@@ -53,8 +53,8 @@
   cursor: pointer;
   position: relative;
   background: var(--bg-card);
-  border: 1px solid var(--border);
-  box-shadow: 2px 2px 0 var(--border);
+  border: 1px solid var(--accent);
+  box-shadow: 2px 2px 0 var(--accent);
   transition: box-shadow 0.15s, transform 0.15s, border-color 0.15s;
   -webkit-tap-highlight-color: transparent;
 }

@@ -14,8 +14,9 @@
   margin-bottom: 0.75rem;
   padding: 0.3rem 0.65rem;
   border: 1px solid var(--border-mid);
-  border-radius: 6px;
+  border-radius: 3px;
   background: var(--bg-subtle);
+  box-shadow: 2px 2px 0 var(--border-mid);
 }
 
 @media (min-width: 640px) {
@@ -41,7 +42,7 @@
 
 .summaryCard {
   background: var(--color-primary);
-  border-radius: 1rem;
+  border-radius: 3px;
 }
 
 .itemName {
@@ -84,7 +85,7 @@
 .notice {
   background: var(--bg-subtle);
   border: 1px solid var(--border);
-  border-radius: 0.75rem;
+  border-radius: 3px;
   padding: 1rem;
 }
 
@@ -116,7 +117,7 @@
   border: 1px solid var(--border-mid);
   font-family: var(--font-involve);
   font-size: 0.9rem;
-  border-radius: 0.75rem;
+  border-radius: 3px;
   outline: none;
   width: 100%;
   transition: border-color 0.2s, box-shadow 0.2s;
@@ -160,23 +161,25 @@
   letter-spacing: 0.1em;
   background: var(--color-accent);
   color: var(--color-primary);
-  border-radius: 12px;
+  border-radius: 3px;
   font-family: var(--font-onder);
   font-size: 0.82rem;
   cursor: pointer;
-  transition: filter 0.2s, transform 0.15s, box-shadow 0.2s;
+  border: 1px solid var(--color-accent);
+  box-shadow: 2px 2px 0 var(--color-accent);
+  transition: box-shadow 0.12s, transform 0.1s;
   -webkit-tap-highlight-color: transparent;
 }
 
 .submitBtn:hover:not(:disabled) {
-  filter: brightness(1.08);
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(242, 151, 116, 0.35);
+  box-shadow: 3px 3px 0 var(--color-accent);
+  transform: translate(-1px, -1px);
 }
 
 .submitBtn:active:not(:disabled) {
-  transform: translateY(0) scale(0.98);
-  transition-duration: 0.08s;
+  box-shadow: 1px 1px 0 var(--color-accent);
+  transform: translate(1px, 1px);
+  transition-duration: 0.06s;
 }
 
 .submitBtn:disabled {
@@ -185,12 +188,20 @@
 }
 
 .backLink {
-  transition: opacity 0.2s, transform 0.15s;
+  transition: box-shadow 0.12s, transform 0.1s, border-color 0.15s;
 }
 
 .backLink:hover {
   opacity: 1;
-  transform: translateX(-3px);
+  border-color: var(--color-accent);
+  box-shadow: 3px 3px 0 var(--color-accent);
+  transform: translate(-1px, -1px);
+}
+
+.backLink:active {
+  box-shadow: 1px 1px 0 var(--color-accent);
+  transform: translate(1px, 1px);
+  transition-duration: 0.06s;
 }
 
 .guestBtn {
@@ -200,17 +211,26 @@
   background: transparent;
   color: var(--color-accent);
   border: 1px solid var(--border-mid);
-  border-radius: 12px;
+  border-radius: 3px;
   font-family: var(--font-onder);
   font-size: 0.82rem;
   cursor: pointer;
   padding: 1rem;
-  transition: border-color 0.2s, background 0.2s;
+  box-shadow: 2px 2px 0 var(--border-mid);
+  transition: box-shadow 0.12s, transform 0.1s, border-color 0.15s, background 0.15s;
 }
 
 .guestBtn:hover {
   border-color: var(--color-accent);
   background: var(--bg-subtle);
+  box-shadow: 3px 3px 0 var(--color-accent);
+  transform: translate(-1px, -1px);
+}
+
+.guestBtn:active {
+  box-shadow: 1px 1px 0 var(--color-accent);
+  transform: translate(1px, 1px);
+  transition-duration: 0.06s;
 }
 
 .switchModeBtn {

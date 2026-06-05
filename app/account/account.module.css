@@ -127,9 +127,8 @@
 .avatarBtn {
   position: relative;
   width: 100%;
-  flex: 1;
-  min-height: 7rem;
-  height: auto;
+  aspect-ratio: 1 / 1;
+  flex: none;
   border-radius: 2px;
   overflow: hidden;
   display: flex;
@@ -642,9 +641,7 @@
 
   .avatarBtn {
     width: 5rem;
-    height: 5rem;
     flex: unset;
-    min-height: unset;
   }
 
   .username {

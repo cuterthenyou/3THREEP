@@ -20,18 +20,22 @@
   color: var(--accent);
   cursor: pointer;
   border-radius: 2px;
-  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), background 0.2s, opacity 0.2s;
+  border: 1px solid var(--accent);
+  box-shadow: 2px 2px 0 var(--accent);
+  transition: box-shadow 0.12s, transform 0.1s, background 0.15s;
   -webkit-tap-highlight-color: transparent;
 }
 
 .closeBtn:hover {
   background: var(--accent-2);
-  transform: rotate(90deg);
+  box-shadow: 3px 3px 0 var(--accent);
+  transform: translate(-1px, -1px);
 }
 
 .closeBtn:active {
-  transform: rotate(90deg) scale(0.9);
-  transition-duration: 0.08s;
+  box-shadow: 1px 1px 0 var(--accent);
+  transform: translate(1px, 1px);
+  transition-duration: 0.06s;
 }
 
 .emptyText {
@@ -49,18 +53,21 @@
   text-transform: uppercase;
   letter-spacing: 0.1em;
   cursor: pointer;
-  transition: opacity 0.2s, transform 0.15s;
+  border: 1px solid var(--accent);
+  box-shadow: 2px 2px 0 var(--accent);
+  transition: box-shadow 0.12s, transform 0.1s;
   -webkit-tap-highlight-color: transparent;
 }
 
 .backToShopBtn:hover {
-  opacity: 0.85;
-  transform: translateX(-3px);
+  box-shadow: 3px 3px 0 var(--accent);
+  transform: translate(-1px, -1px);
 }
 
 .backToShopBtn:active {
-  transform: translateX(0) scale(0.97);
-  transition-duration: 0.08s;
+  box-shadow: 1px 1px 0 var(--accent);
+  transform: translate(1px, 1px);
+  transition-duration: 0.06s;
 }
 
 .item {
@@ -99,17 +106,22 @@
   color: var(--accent);
   cursor: pointer;
   border-radius: 2px;
-  transition: background 0.15s, transform 0.1s;
+  border: 1px solid var(--border);
+  box-shadow: 2px 2px 0 var(--border);
+  transition: box-shadow 0.12s, transform 0.1s, background 0.15s, border-color 0.15s;
   -webkit-tap-highlight-color: transparent;
 }
 
 .qtyBtn:hover {
   background: var(--accent-2);
+  border-color: var(--accent);
+  box-shadow: 3px 3px 0 var(--accent);
+  transform: translate(-1px, -1px);
 }
 
 .qtyBtn:active {
-  transform: scale(0.88);
-  background: var(--border);
+  box-shadow: 1px 1px 0 var(--accent);
+  transform: translate(1px, 1px);
   transition-duration: 0.06s;
 }
 
@@ -160,20 +172,21 @@
   text-align: center;
   text-decoration: none;
   cursor: pointer;
-  transition: filter 0.2s, transform 0.15s, box-shadow 0.2s;
+  border: 1px solid var(--accent);
+  box-shadow: 2px 2px 0 var(--accent);
+  transition: box-shadow 0.12s, transform 0.1s;
   -webkit-tap-highlight-color: transparent;
 }
 
 .checkoutLink:hover {
-  filter: brightness(1.08);
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px var(--accent-2);
+  box-shadow: 3px 3px 0 var(--accent);
+  transform: translate(-1px, -1px);
 }
 
 .checkoutLink:active {
-  transform: translateY(0) scale(0.98);
-  filter: brightness(1);
-  transition-duration: 0.08s;
+  box-shadow: 1px 1px 0 var(--accent);
+  transform: translate(1px, 1px);
+  transition-duration: 0.06s;
 }
 
 @media (max-width: 639px) {

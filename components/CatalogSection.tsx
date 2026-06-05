@@ -125,13 +125,12 @@ export default function CatalogSection({ products, categories, categoryData = {}
         return desc ? (
           <div style={{ textAlign: 'center', padding: '0 2rem 1.5rem', maxWidth: '560px', margin: '0 auto' }}>
             <p style={{
-              fontFamily: 'var(--font-onder)',
-              fontSize: 'clamp(0.65rem, 1.8vw, 0.8rem)',
+              fontFamily: 'var(--font-involve)',
+              fontSize: '0.72rem',
               color: 'var(--accent)',
-              opacity: 0.42,
-              letterSpacing: '0.1em',
-              lineHeight: 1.9,
-              textTransform: 'uppercase',
+              opacity: 0.5,
+              letterSpacing: '0.03em',
+              lineHeight: 1.8,
             }}>
               {desc}
             </p>

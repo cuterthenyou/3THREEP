@@ -24,19 +24,22 @@
   background: rgba(0, 0, 0, 0.12);
   color: var(--bg);
   cursor: pointer;
-  border-radius: 8px;
-  transition: transform 0.2s, background 0.2s, box-shadow 0.2s;
+  border-radius: 2px;
+  border: 1px solid rgba(0, 0, 0, 0.18);
+  box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.18);
+  transition: box-shadow 0.12s, transform 0.1s, background 0.15s;
   -webkit-tap-highlight-color: transparent;
 }
 
 .socialBtn:hover {
   background: rgba(0, 0, 0, 0.22);
-  transform: translateY(-3px);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.28);
+  transform: translate(-1px, -1px);
 }
 
 .socialBtn:active {
-  transform: translateY(0) scale(0.95);
+  box-shadow: 1px 1px 0 rgba(0, 0, 0, 0.18);
+  transform: translate(1px, 1px);
   transition-duration: 0.08s;
 }
 
