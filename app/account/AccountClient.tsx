@@ -6,8 +6,14 @@ import type { Order, Profile, OrderStatus } from '@/lib/types';
 import { ORDER_STATUS_LABELS } from '@/lib/types';
 import Link from 'next/link';
 import Image from 'next/image';
-import { IconSun, IconMoon2 } from '@tabler/icons-react';
 import { toggleTheme } from '@/lib/theme';
+
+function BrutalSun() {
+  return <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor"><path d="M7 0L9 5.5L14 7L9 8.5L7 14L5 8.5L0 7L5 5.5Z"/></svg>
+}
+function BrutalMoon() {
+  return <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor"><path d="M8,1 L12,3 L14,7 L12,11 L8,13 L10,10.5 L11,7 L10,3.5 Z"/></svg>
+}
 import s from './account.module.css';
 
 interface Props {
@@ -154,7 +160,7 @@ export default function AccountClient({ user, profile, orders, profileBg }: Prop
                 {loggingOut ? '...' : 'Выйти'}
               </button>
               <button onClick={() => { toggleTheme(); setIsDark(d => !d); }} className={s.topNavBtn} title={isDark ? 'Светлая тема' : 'Тёмная тема'}>
-                {isDark ? <IconSun size={14} /> : <IconMoon2 size={14} />}
+                {isDark ? <BrutalSun /> : <BrutalMoon />}
               </button>
             </div>
           </div>

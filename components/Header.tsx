@@ -276,9 +276,9 @@ export default function Header({ isAdminUser = false }: Props) {
                 ? <span className={s.subLink} style={{ opacity: 0.3, cursor: 'default' }}>...</span>
                 : collections.map(c => (
                   <div key={c.slug}>
-                    <Link href={`/#catalog`} onClick={() => setMenuOpen(false)} className={s.subLink}>— {c.name}</Link>
+                    <Link href={`/?category=${c.slug}#catalog`} onClick={() => setMenuOpen(false)} className={s.subLink}>— {c.name}</Link>
                     {c.types?.map(type => (
-                      <Link key={type} href={`/#catalog`} onClick={() => setMenuOpen(false)} className={s.subLinkType}>{type}</Link>
+                      <Link key={type} href={`/?category=${c.slug}&type=${encodeURIComponent(type)}#catalog`} onClick={() => setMenuOpen(false)} className={s.subLinkType}>{type}</Link>
                     ))}
                   </div>
                 ))
@@ -298,8 +298,7 @@ export default function Header({ isAdminUser = false }: Props) {
 
           {/* Admin accordion */}
           {isAdminUser && (
-            <div className={s.accordion}>
-              <div className={s.adminDivider}>Admin</div>
+            <div className={s.accordion} style={{ marginTop: '2rem' }}>
               <button className={`${s.navLink} ${s.navLinkAdmin}`} onClick={() => toggle('admin')}>
                 <IconHex /> Панель <span className={`${s.arrow} ${expanded === 'admin' ? s.arrowOpen : ''}`}>▸</span>
               </button>

@@ -3,32 +3,111 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import {
-  IconLayoutDashboard,
-  IconPackage,
-  IconShirt,
-  IconStack2,
-  IconPhoto,
-  IconSettings,
-  IconPencil,
-  IconMoodSmile,
-  IconChevronLeft,
-  IconChevronRight,
-  IconLogout,
-  IconSun,
-  IconMoon2,
-} from '@tabler/icons-react'
 import { toggleTheme } from '@/lib/theme'
 
+function IcoDash() {
+  return <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" style={{ flexShrink: 0 }}>
+    <rect x="0" y="0" width="6.5" height="6.5"/>
+    <rect x="9.5" y="0" width="6.5" height="6.5"/>
+    <rect x="0" y="9.5" width="6.5" height="6.5"/>
+    <rect x="9.5" y="9.5" width="6.5" height="6.5"/>
+  </svg>
+}
+
+function IcoOrders() {
+  return <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="miter" style={{ flexShrink: 0 }}>
+    <path d="M1,5 L8,1 L15,5 L15,14 L1,14 Z"/>
+    <path d="M1,5 L8,9 L15,5"/>
+    <line x1="8" y1="9" x2="8" y2="14"/>
+  </svg>
+}
+
+function IcoProducts() {
+  return <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" style={{ flexShrink: 0 }}>
+    <path d="M8,0 L11,3 L13,3 L13,6 L11,6 L11,4 L9,4 L9,14 L11,14 L11,16 L5,16 L5,14 L7,14 L7,4 L5,4 L5,6 L3,6 L3,3 L5,3 Z"/>
+  </svg>
+}
+
+function IcoCols() {
+  return <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" style={{ flexShrink: 0 }}>
+    <rect x="0" y="0" width="16" height="4"/>
+    <rect x="0" y="6" width="16" height="4"/>
+    <rect x="0" y="12" width="16" height="4"/>
+  </svg>
+}
+
+function IcoMedia() {
+  return <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="miter" style={{ flexShrink: 0 }}>
+    <rect x="1" y="3" width="14" height="11"/>
+    <path d="M1,3 L4,0 L12,0 L15,3"/>
+    <circle cx="8" cy="8.5" r="2.5" fill="currentColor" stroke="none"/>
+  </svg>
+}
+
+function IcoSite() {
+  return <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ flexShrink: 0 }}>
+    <polygon points="8,0.5 14.5,4 14.5,12 8,15.5 1.5,12 1.5,4"/>
+    <polygon points="8,4 11,6 11,10 8,12 5,10 5,6" fill="currentColor" stroke="none"/>
+  </svg>
+}
+
+function IcoTexts() {
+  return <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" style={{ flexShrink: 0 }}>
+    <rect x="0" y="1" width="16" height="2.5"/>
+    <rect x="0" y="6.5" width="12" height="2.5"/>
+    <rect x="0" y="12" width="8" height="2.5"/>
+  </svg>
+}
+
+function IcoEmoji() {
+  return <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" style={{ flexShrink: 0 }}>
+    <polygon points="8,0.5 15.5,8 8,15.5 0.5,8"/>
+    <circle cx="5.5" cy="7" r="1" fill="currentColor" stroke="none"/>
+    <circle cx="10.5" cy="7" r="1" fill="currentColor" stroke="none"/>
+    <path d="M5.5,10 Q8,12.5 10.5,10" strokeLinecap="round"/>
+  </svg>
+}
+
+function IcoExit() {
+  return <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" style={{ flexShrink: 0 }}>
+    <path d="M0,1 L9,1 L9,3 L2,3 L2,13 L9,13 L9,15 L0,15 Z"/>
+    <path d="M7,8 L16,8 M11,4 L16,8 L11,12" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="square"/>
+  </svg>
+}
+
+function IcoSun() {
+  return <svg width="16" height="16" viewBox="0 0 14 14" fill="currentColor" style={{ flexShrink: 0 }}>
+    <path d="M7 0L9 5.5L14 7L9 8.5L7 14L5 8.5L0 7L5 5.5Z"/>
+  </svg>
+}
+
+function IcoMoon() {
+  return <svg width="16" height="16" viewBox="0 0 14 14" fill="currentColor" style={{ flexShrink: 0 }}>
+    <path d="M8,1 L12,3 L14,7 L12,11 L8,13 L10,10.5 L11,7 L10,3.5 Z"/>
+  </svg>
+}
+
+function IcoChevL() {
+  return <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="square" style={{ flexShrink: 0 }}>
+    <path d="M11,2 L5,8 L11,14"/>
+  </svg>
+}
+
+function IcoChevR() {
+  return <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="square" style={{ flexShrink: 0 }}>
+    <path d="M5,2 L11,8 L5,14"/>
+  </svg>
+}
+
 const NAV = [
-  { href: '/admin',             label: 'Дашборд',   Icon: IconLayoutDashboard, exact: true },
-  { href: '/admin/orders',      label: 'Заказы',    Icon: IconPackage },
-  { href: '/admin/products',    label: 'Товары',    Icon: IconShirt },
-  { href: '/admin/collections', label: 'Коллекции', Icon: IconStack2 },
-  { href: '/admin/media',       label: 'Медиа',     Icon: IconPhoto },
-  { href: '/admin/site',        label: 'Сайт',      Icon: IconSettings },
-  { href: '/admin/texts',       label: 'Тексты',    Icon: IconPencil },
-  { href: '/admin/emojis',      label: 'Emoji',     Icon: IconMoodSmile },
+  { href: '/admin',             label: 'Дашборд',   Icon: IcoDash,     exact: true },
+  { href: '/admin/orders',      label: 'Заказы',    Icon: IcoOrders },
+  { href: '/admin/products',    label: 'Товары',    Icon: IcoProducts },
+  { href: '/admin/collections', label: 'Коллекции', Icon: IcoCols },
+  { href: '/admin/media',       label: 'Медиа',     Icon: IcoMedia },
+  { href: '/admin/site',        label: 'Сайт',      Icon: IcoSite },
+  { href: '/admin/texts',       label: 'Тексты',    Icon: IcoTexts },
+  { href: '/admin/emojis',      label: 'Emoji',     Icon: IcoEmoji },
 ]
 
 function NavItems({ pathname, collapsed, onNavigate }: { pathname: string; collapsed: boolean; onNavigate?: () => void }) {
@@ -54,7 +133,7 @@ function NavItems({ pathname, collapsed, onNavigate }: { pathname: string; colla
               transition: 'background 0.15s, color 0.15s',
             }}
           >
-            <Icon size={18} style={{ flexShrink: 0 }} />
+            <Icon />
             {!collapsed && (
               <span style={{ fontFamily: "var(--font-involve)", fontSize: '0.82rem', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                 {label}
@@ -112,21 +191,21 @@ export default function AdminSidebar() {
           <Link href="/"
             title={collapsed ? 'На сайт' : undefined}
             style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: collapsed ? '0.6rem' : '0.55rem 0.75rem', justifyContent: collapsed ? 'center' : 'flex-start', borderRadius: '0.5rem', color: 'var(--text-muted)', textDecoration: 'none', whiteSpace: 'nowrap' }}>
-            <IconLogout size={16} style={{ flexShrink: 0 }} />
+            <IcoExit />
             {!collapsed && <span style={{ fontFamily: "var(--font-involve)", fontSize: '0.75rem' }}>На сайт</span>}
           </Link>
           <button
             onClick={() => { toggleTheme(); setIsDark(d => !d) }}
             title={isDark ? 'Светлая тема' : 'Тёмная тема'}
             style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: collapsed ? '0.6rem' : '0.55rem 0.75rem', justifyContent: collapsed ? 'center' : 'flex-start', borderRadius: '0.5rem', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--accent)', width: '100%', whiteSpace: 'nowrap', opacity: 0.75 }}>
-            {isDark ? <IconSun size={16} style={{ flexShrink: 0 }} /> : <IconMoon2 size={16} style={{ flexShrink: 0 }} />}
+            {isDark ? <IcoSun /> : <IcoMoon />}
             {!collapsed && <span style={{ fontFamily: "var(--font-involve)", fontSize: '0.75rem' }}>{isDark ? 'Светлая' : 'Тёмная'}</span>}
           </button>
           <button
             onClick={() => setCollapsed(v => !v)}
             aria-label={collapsed ? 'Развернуть' : 'Свернуть'}
             style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: collapsed ? '0.6rem' : '0.55rem 0.75rem', justifyContent: collapsed ? 'center' : 'flex-start', borderRadius: '0.5rem', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', width: '100%', whiteSpace: 'nowrap', opacity: 0.6 }}>
-            {collapsed ? <IconChevronRight size={16} /> : <IconChevronLeft size={16} />}
+            {collapsed ? <IcoChevR /> : <IcoChevL />}
             {!collapsed && <span style={{ fontFamily: "var(--font-involve)", fontSize: '0.7rem' }}>Свернуть</span>}
           </button>
         </div>
@@ -173,13 +252,13 @@ export default function AdminSidebar() {
         <div className="px-2 py-3 flex flex-col gap-1" style={{ borderTop: '1px solid var(--border-soft)' }}>
           <Link href="/" onClick={() => setMobileOpen(false)}
             style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.55rem 0.75rem', borderRadius: '0.5rem', color: 'var(--text-muted)', textDecoration: 'none', whiteSpace: 'nowrap' }}>
-            <IconLogout size={16} style={{ flexShrink: 0 }} />
+            <IcoExit />
             <span style={{ fontFamily: "var(--font-involve)", fontSize: '0.75rem' }}>На сайт</span>
           </Link>
           <button
             onClick={() => { toggleTheme(); setIsDark(d => !d) }}
             style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.55rem 0.75rem', borderRadius: '0.5rem', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--accent)', width: '100%', whiteSpace: 'nowrap', opacity: 0.75 }}>
-            {isDark ? <IconSun size={16} style={{ flexShrink: 0 }} /> : <IconMoon2 size={16} style={{ flexShrink: 0 }} />}
+            {isDark ? <IcoSun /> : <IcoMoon />}
             <span style={{ fontFamily: "var(--font-involve)", fontSize: '0.75rem' }}>{isDark ? 'Светлая' : 'Тёмная'}</span>
           </button>
         </div>

@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react'
 import Image from 'next/image'
+import { useSearchParams } from 'next/navigation'
 import type { Product, ProductCategory, Category } from '@/lib/types'
 import ProductModal from './ProductModal'
 import s from './CatalogSection.module.css'
@@ -19,13 +20,20 @@ function formatPrice(price: number) {
 }
 
 export default function CatalogSection({ products, categories, categoryData = {} }: Props) {
+  const searchParams = useSearchParams()
   const [activeCategory, setActiveCategory] = useState<string>('all')
   const [activeType, setActiveType] = useState<string>('all')
   const [openProduct, setOpenProduct] = useState<Product | null>(null)
   const [modalVisible, setModalVisible] = useState(false)
   const [modalBg, setModalBg] = useState<string | null>(null)
 
-  useEffect(() => { setActiveType('all') }, [activeCategory])
+  useEffect(() => {
+    const cat = searchParams.get('category')
+    const type = searchParams.get('type')
+    setActiveCategory(cat ?? 'all')
+    setActiveType(type ?? 'all')
+  }, [searchParams])
+
 
   const categoryFiltered = activeCategory === 'all'
     ? products
@@ -65,7 +73,7 @@ export default function CatalogSection({ products, categories, categoryData = {}
           {[{ name: 'Все', slug: 'all' }, ...categories.filter(c => c.slug !== 'all')].map((cat) => (
             <button
               key={cat.slug}
-              onClick={() => setActiveCategory(cat.slug)}
+              onClick={() => { setActiveCategory(cat.slug); setActiveType('all') }}
               className={`px-5 py-2 uppercase tracking-widest transition-all duration-200 ${s.filterBtn} ${activeCategory === cat.slug ? s.filterBtnActive : s.filterBtnInactive}`}
             >
               {cat.name}
@@ -111,6 +119,26 @@ export default function CatalogSection({ products, categories, categoryData = {}
         </div>
       </section>
 
+      {/* Collection description — between cards and bottom logo */}
+      {activeCategory !== 'all' && (() => {
+        const desc = categoryData[activeCategory]?.description
+        return desc ? (
+          <div style={{ textAlign: 'center', padding: '0 2rem 1.5rem', maxWidth: '560px', margin: '0 auto' }}>
+            <p style={{
+              fontFamily: 'var(--font-onder)',
+              fontSize: 'clamp(0.65rem, 1.8vw, 0.8rem)',
+              color: 'var(--accent)',
+              opacity: 0.42,
+              letterSpacing: '0.1em',
+              lineHeight: 1.9,
+              textTransform: 'uppercase',
+            }}>
+              {desc}
+            </p>
+          </div>
+        ) : null
+      })()}
+
       {/* Collection logo BOTTOM — only when a collection is selected */}
       {activeCategory !== 'all' && (() => {
         const activeCat = categoryData[activeCategory]
@@ -147,6 +175,7 @@ const ProductCard = React.memo(function ProductCard({
   const [showHint, setShowHint] = useState(false)
   const touchStartX = React.useRef<number | null>(null)
   const lastInteractionRef = React.useRef<number>(0)
+  const isManualRef = React.useRef(false)
 
   const TEXTS = ['Посмотреть', 'чекнуть', 'чё, по чём?', 'скок стоит?', 'сколько денег?', 'чё по цене?']
 
@@ -189,6 +218,7 @@ const ProductCard = React.memo(function ProductCard({
     const startId = setTimeout(() => {
       id = setInterval(() => {
         if (Date.now() - lastInteractionRef.current < 5000) return
+        isManualRef.current = false
         setCurrentImg((i) => (i + 1) % product.images.length)
       }, 3000)
     }, Math.random() * 4000)
@@ -198,12 +228,14 @@ const ProductCard = React.memo(function ProductCard({
   function prevImg(e: React.MouseEvent | React.TouchEvent) {
     e.stopPropagation()
     lastInteractionRef.current = Date.now()
+    isManualRef.current = true
     setCurrentImg(i => (i - 1 + product.images.length) % product.images.length)
   }
 
   function nextImg(e: React.MouseEvent | React.TouchEvent) {
     e.stopPropagation()
     lastInteractionRef.current = Date.now()
+    isManualRef.current = true
     setCurrentImg(i => (i + 1) % product.images.length)
   }
 
@@ -234,6 +266,7 @@ const ProductCard = React.memo(function ProductCard({
             Math.floor((e.clientX - rect.left) / rect.width * product.images.length),
             product.images.length - 1
           ))
+          isManualRef.current = true
           setCurrentImg(idx)
           lastInteractionRef.current = Date.now()
         }}
@@ -258,7 +291,7 @@ const ProductCard = React.memo(function ProductCard({
             className="object-cover select-none"
             draggable={false}
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-            style={{ opacity: i === currentImg ? 1 : 0, transition: 'opacity 0.6s cubic-bezier(0.4,0,0.2,1)', position: 'absolute', top: 0, left: 0 }}
+            style={{ opacity: i === currentImg ? 1 : 0, transition: isManualRef.current ? 'none' : 'opacity 0.6s cubic-bezier(0.4,0,0.2,1)', position: 'absolute', top: 0, left: 0 }}
           />
         ))}
 

@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import type { Category } from '@/lib/types'
 
 const EMPTY: Omit<Category, never> = {
-  slug: '', name: '', active: true, texture_url: null, texture_url_2: null, texture_url_3: null, logo_top_url: null, logo_bottom_url: null, modal_bg_url: null,
+  slug: '', name: '', active: true, description: null, texture_url: null, texture_url_2: null, texture_url_3: null, logo_top_url: null, logo_bottom_url: null, modal_bg_url: null,
 }
 
 const INPUT_STYLE = {
@@ -214,6 +214,18 @@ export default function CollectionsClient({ collections }: { collections: Catego
               <input value={editing.name} onChange={e => setEditing(ed => ed ? { ...ed, name: e.target.value } : ed)}
                 className="w-full px-3 py-2 rounded-lg outline-none text-sm" style={INPUT_STYLE}
                 placeholder="AQUA+" />
+            </div>
+
+            <div className="flex flex-col gap-1">
+              <label className="text-xs uppercase tracking-widest" style={LABEL_STYLE}>Описание коллекции (2-3 строки)</label>
+              <textarea
+                value={editing.description ?? ''}
+                onChange={e => setEditing(ed => ed ? { ...ed, description: e.target.value || null } : ed)}
+                rows={3}
+                className="w-full px-3 py-2 rounded-lg outline-none text-sm resize-none"
+                style={INPUT_STYLE}
+                placeholder="Атмосфера коллекции..."
+              />
             </div>
 
             <UploadBtn field="texture_url" label="Текстура карточек #1" refEl={textureRef} />

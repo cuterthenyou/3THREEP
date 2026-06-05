@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import Header from '@/components/Header';
 import Hero from '@/components/Hero';
 // import HeroTransition from '@/components/HeroTransition'; // disabled — needs redesign
@@ -76,7 +77,9 @@ export default async function HomePage() {
           />
         </svg>
       </div>
-      <CatalogSection products={products} categories={categories} categoryData={categoryData} />
+      <Suspense fallback={<div id="catalog" />}>
+        <CatalogSection products={products} categories={categories} categoryData={categoryData} />
+      </Suspense>
       <Footer />
     </main>
   )

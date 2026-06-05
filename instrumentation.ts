@@ -114,6 +114,7 @@ export async function register() {
       ALTER TABLE products ADD COLUMN IF NOT EXISTS article TEXT;
       ALTER TABLE products ADD COLUMN IF NOT EXISTS material TEXT;
       ALTER TABLE products ADD COLUMN IF NOT EXISTS cut TEXT;
+      ALTER TABLE categories ADD COLUMN IF NOT EXISTS description TEXT;
     `).catch((e: Error) => console.error('[migration] product fields failed:', e.message))
 
     // Guest checkout + newsletter + custom emojis migrations

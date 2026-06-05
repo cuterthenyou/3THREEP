@@ -24,6 +24,7 @@ export interface Category {
   slug: string
   name: string
   active: boolean
+  description: string | null
   texture_url: string | null
   texture_url_2: string | null
   texture_url_3: string | null

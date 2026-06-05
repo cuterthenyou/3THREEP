@@ -12,7 +12,7 @@ export async function GET() {
         `SELECT p.category AS slug, COALESCE(cat.name, p.category) AS name
          FROM (SELECT DISTINCT category FROM products WHERE active = true AND category IS NOT NULL) p
          LEFT JOIN categories cat ON cat.slug = p.category
-         ORDER BY cat.created_at ASC NULLS LAST, p.category ASC`
+         ORDER BY p.category ASC`
       ),
       queryMany<{ category: string; types: string[] }>(
         `SELECT category, array_agg(DISTINCT product_type ORDER BY product_type) as types
