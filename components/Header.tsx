@@ -4,9 +4,24 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 import Link from 'next/link';
 import { useCart } from '@/lib/cart';
 import { toggleTheme } from '@/lib/theme';
-import { IconSun, IconMoon2 } from '@tabler/icons-react';
 import UserButton from './UserButton';
 import s from './Header.module.css';
+
+function BrutalSun() {
+  return (
+    <svg width="12" height="12" viewBox="0 0 14 14" fill="currentColor">
+      <path d="M7 0L9 5.5L14 7L9 8.5L7 14L5 8.5L0 7L5 5.5Z"/>
+    </svg>
+  )
+}
+
+function BrutalMoon() {
+  return (
+    <svg width="12" height="12" viewBox="0 0 14 14" fill="currentColor">
+      <path d="M8,1 L12,3 L14,7 L12,11 L8,13 L10,10.5 L11,7 L10,3.5 Z"/>
+    </svg>
+  )
+}
 
 interface Props {
   isAdminUser?: boolean;
@@ -139,33 +154,32 @@ export default function Header({ isAdminUser = false }: Props) {
         <div className="flex items-center justify-between px-5 sm:px-8 py-4 sm:py-5">
           <Link href="/" aria-label="На главную">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/images/logo-61.svg" alt="THREEP Logo" className="theme-img h-8 sm:h-12 w-auto flex-shrink-0" />
+            <img src="/images/logo-61.svg" alt="THREEP Logo" className="theme-img h-7 sm:h-9 w-auto flex-shrink-0" />
           </Link>
           {/* Center logo text — hidden on mobile */}
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/images/logo-text-63.svg" alt="THREEP" className="theme-img hidden xl:block h-8 w-auto absolute left-1/2 -translate-x-1/2" />
+          <img src="/images/logo-text-63.svg" alt="THREEP" className="theme-img hidden xl:block h-5 sm:h-6 w-auto absolute left-1/2 -translate-x-1/2" />
 
           {/* Icons — on mobile spread evenly across a fixed width, on desktop tight gap */}
           <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
-            {/* Theme toggle — pill badge */}
+            {/* Theme toggle */}
             <button
               onClick={toggleTheme}
               className={s.themeBadge}
               aria-label={isDark ? 'Включить светлую тему' : 'Включить тёмную тему'}
             >
-              {isDark ? <IconSun size={12} /> : <IconMoon2 size={12} />}
-              <span>{isDark ? 'Light' : 'Dark'}</span>
+              {isDark ? <BrutalSun /> : <BrutalMoon />}
+              <span>{isDark ? 'LIGHT' : 'DARK'}</span>
             </button>
 
             {/* User button */}
             <UserButton />
 
             {/* Cart icon — always visible */}
-            <button onClick={() => setOpen(true)} className={`relative flex items-center justify-center w-9 h-9 rounded-lg transition-opacity hover:opacity-80 ${s.navBtn}`} aria-label="Корзина">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
-                <line x1="3" y1="6" x2="21" y2="6" />
-                <path d="M16 10a4 4 0 0 1-8 0" />
+            <button onClick={() => setOpen(true)} className={`relative flex items-center justify-center w-9 h-9 rounded-lg ${s.navBtn}`} aria-label="Корзина">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="square" strokeLinejoin="miter">
+                <path d="M2,5 L14,5 L12.5,14 L3.5,14 Z"/>
+                <path d="M5,5 L5,3 L11,3 L11,5"/>
               </svg>
               {count > 0 && (
                 <span className={`absolute -top-1 -right-1 w-4 h-4 flex items-center justify-center rounded-full ${s.cartBadge}`}>{count}</span>
