@@ -71,27 +71,6 @@
   box-shadow: 0 4px 16px var(--bg-subtle);
 }
 
-/* VHS scanline overlay on hover */
-.productCard::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: repeating-linear-gradient(
-    0deg,
-    transparent,
-    transparent 2px,
-    rgba(242, 151, 116, 0.03) 2px,
-    rgba(242, 151, 116, 0.03) 4px
-  );
-  opacity: 0;
-  transition: opacity 0.3s ease;
-  pointer-events: none;
-  z-index: 1;
-}
-
-.productCard:hover::after {
-  opacity: 1;
-}
 
 /* Product image wrapper */
 .productImgWrap {
