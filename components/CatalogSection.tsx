@@ -300,7 +300,7 @@ const ProductCard = React.memo(function ProductCard({
         <p className={s.productType}>{product.product_type || 'T-SHIRT'}</p>
         <div className="flex items-end justify-between gap-2">
           <h3 className={s.productName}>{product.name}</h3>
-          <span className={s.productPrice}>{Number(product.price).toLocaleString('ru-RU')}</span>
+          <span className={s.productPrice}>{formatPrice(product.price)}</span>
         </div>
       </div>
     </div>

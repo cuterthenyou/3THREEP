@@ -523,6 +523,56 @@
   cursor: default;
 }
 
+/* Top nav */
+.topNav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.25rem 0;
+  margin-bottom: 0.25rem;
+}
+
+.topNavLink {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--color-accent);
+  opacity: 0.5;
+  font-family: var(--font-onder);
+  text-decoration: none;
+  transition: opacity 0.15s;
+}
+
+.topNavLink:hover {
+  opacity: 0.9;
+}
+
+.topNavBtn {
+  font-size: 0.7rem;
+  padding: 0.3rem 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  background: var(--bg-subtle);
+  border: 1px solid var(--border);
+  color: var(--color-accent);
+  border-radius: 6px;
+  font-family: var(--font-onder);
+  cursor: pointer;
+  transition: opacity 0.15s;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.topNavBtn:hover:not(:disabled) {
+  opacity: 0.8;
+}
+
+.topNavBtn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
 /* ── Mobile responsive ── */
 @media (max-width: 639px) {
   .profileCard {

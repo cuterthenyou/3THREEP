@@ -112,13 +112,6 @@ export default function AccountClient({ user, profile, orders, profileBg }: Prop
 
   return (
     <div className={s.page} style={profileBg ? { backgroundImage: `url(${profileBg})`, backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' } : undefined}>
-      <button
-        onClick={() => { toggleTheme(); setIsDark(d => !d); }}
-        title={isDark ? 'Светлая тема' : 'Тёмная тема'}
-        style={{ position: 'fixed', top: '1rem', right: '1rem', zIndex: 100, background: 'none', border: 'none', cursor: 'pointer', color: 'var(--accent)', padding: '0.5rem', opacity: 0.75 }}
-      >
-        {isDark ? <IconSun size={20} /> : <IconMoon2 size={20} />}
-      </button>
       {/* Nickname modal */}
       {showNicknameModal && (
         <div className={s.modalOverlay}>
@@ -153,12 +146,24 @@ export default function AccountClient({ user, profile, orders, profileBg }: Prop
 
       <div className={s.content}>
         <div className={s.inner}>
+          {/* Top nav */}
+          <div className={s.topNav}>
+            <Link href="/" className={s.topNavLink}>← На главную</Link>
+            <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+              <button onClick={handleLogout} disabled={loggingOut} className={s.topNavBtn}>
+                {loggingOut ? '...' : 'Выйти'}
+              </button>
+              <button onClick={() => { toggleTheme(); setIsDark(d => !d); }} className={s.topNavBtn} title={isDark ? 'Светлая тема' : 'Тёмная тема'}>
+                {isDark ? <IconSun size={14} /> : <IconMoon2 size={14} />}
+              </button>
+            </div>
+          </div>
+
           {/* Profile card */}
           <div className={s.profileCard}>
             <div className={s.profileInfo}>
               <div className={s.profileMeta}>
                 <span className={s.profileLabel}>✦ Мой аккаунт</span>
-                <span className={s.levelBadge}>Уровень {level}</span>
               </div>
 
               <h2 className={s.username}>{username}</h2>
@@ -204,6 +209,7 @@ export default function AccountClient({ user, profile, orders, profileBg }: Prop
 
             {/* Avatar + actions */}
             <div className={s.avatarCol}>
+              <span className={s.levelBadge}>Уровень {level}</span>
               <input
                 ref={avatarRef}
                 type="file"
@@ -227,13 +233,6 @@ export default function AccountClient({ user, profile, orders, profileBg }: Prop
                 <div className={s.avatarOverlay}>
                   {uploadingAvatar ? '...' : 'Сменить'}
                 </div>
-              </button>
-              <button
-                onClick={handleLogout}
-                disabled={loggingOut}
-                className={s.logoutBtn}
-              >
-                Выйти
               </button>
             </div>
           </div>
