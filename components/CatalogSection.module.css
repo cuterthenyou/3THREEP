@@ -37,6 +37,7 @@
   overflow: hidden;
   cursor: pointer;
   position: relative;
+  background: var(--bg-card);
   transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease;
   -webkit-tap-highlight-color: transparent;
 }
@@ -72,12 +73,14 @@
 }
 
 
-/* Product image wrapper */
+/* Product image wrapper — polaroid inner frame */
 .productImgWrap {
   aspect-ratio: 1 / 1;
   position: relative;
   overflow: hidden;
-  width: 100%;
+  width: calc(100% - 20px);
+  margin: 10px 10px 0;
+  border-radius: 4px;
 }
 
 /* Transparent overlay — blocks right-click/drag on images */

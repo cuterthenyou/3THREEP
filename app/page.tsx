@@ -68,7 +68,14 @@ export default async function HomePage() {
     <main className="min-h-screen">
       <Header isAdminUser={isAdminUser} />
       <Hero videoUrl={heroVideoUrl} />
-      {/* <HeroTransition /> */}
+      <div style={{ position: 'relative', marginTop: '-80px', zIndex: 2, lineHeight: 0 }}>
+        <svg viewBox="0 0 1440 80" preserveAspectRatio="none" style={{ display: 'block', width: '100%', height: 80 }}>
+          <path
+            d="M0,80 L0,54 Q40,36 90,50 Q150,65 220,38 Q290,14 370,42 Q440,62 520,30 Q600,4 680,32 Q755,55 840,22 Q920,0 1000,28 Q1080,52 1160,24 Q1240,3 1310,30 Q1370,50 1440,34 L1440,80 Z"
+            fill="var(--bg)"
+          />
+        </svg>
+      </div>
       <CatalogSection products={products} categories={categories} categoryData={categoryData} />
       <Footer />
     </main>

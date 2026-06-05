@@ -107,6 +107,15 @@ export async function register() {
       },
     ])
 
+    // Product extended fields migration
+    await pool.query(`
+      ALTER TABLE products ADD COLUMN IF NOT EXISTS grade TEXT;
+      ALTER TABLE products ADD COLUMN IF NOT EXISTS series TEXT;
+      ALTER TABLE products ADD COLUMN IF NOT EXISTS article TEXT;
+      ALTER TABLE products ADD COLUMN IF NOT EXISTS material TEXT;
+      ALTER TABLE products ADD COLUMN IF NOT EXISTS cut TEXT;
+    `).catch((e: Error) => console.error('[migration] product fields failed:', e.message))
+
     // Guest checkout + newsletter + custom emojis migrations
     await pool.query(`
       ALTER TABLE orders ALTER COLUMN user_id DROP NOT NULL;

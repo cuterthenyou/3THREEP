@@ -11,6 +11,7 @@ const EMPTY: Omit<Product, 'id' | 'created_at'> = {
   name: '', description: '', price: 0,
   images: [], sizes: ['S', 'M', 'L', 'XL', '2XL'],
   colors: [], stock: 10, active: true, category: '', product_type: 'T-Shirt', bg_url: null,
+  grade: null, series: null, article: null, material: null, cut: null,
 }
 
 const INPUT_STYLE = {
@@ -399,6 +400,17 @@ export default function ProductsClient({ products }: { products: Product[] }) {
                   ))}
                 </div>
               )}
+            </div>
+
+            {/* Extended product fields */}
+            <div className="grid grid-cols-3 gap-3">
+              <Inp label="Grade" value={editing.grade ?? ''} onChange={v => setEditing(e => ({ ...e, grade: v || null }))} />
+              <Inp label="Серия" value={editing.series ?? ''} onChange={v => setEditing(e => ({ ...e, series: v || null }))} />
+              <Inp label="Артикул" value={editing.article ?? ''} onChange={v => setEditing(e => ({ ...e, article: v || null }))} />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <Inp label="Состав" value={editing.material ?? ''} onChange={v => setEditing(e => ({ ...e, material: v || null }))} />
+              <Inp label="Крой" value={editing.cut ?? ''} onChange={v => setEditing(e => ({ ...e, cut: v || null }))} />
             </div>
 
             {/* Card background PNG */}

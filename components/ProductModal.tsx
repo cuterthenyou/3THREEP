@@ -25,7 +25,7 @@ function AddToCartButton({ product, size, onClose }: { product: Product; size: s
 
   return (
     <button onClick={handleAdd} className={`${s.addBtn} ${added ? s.addBtnAdded : s.addBtnDefault}`}>
-      {added ? '✓ Добавлено' : 'В корзину'}
+      {added ? '✓ Добавлено' : 'ШВЫРНУТЬ В КОРЗИНУ'}
     </button>
   )
 }
@@ -204,15 +204,19 @@ export default function ProductModal({ product, visible, onClose, modalBg }: Pro
 
               <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-2">
                 <h2 className={`text-xl sm:text-2xl lg:text-3xl ${s.name}`}>{product.name}</h2>
-                <p className={`text-lg sm:text-xl ${s.price}`}>{product.price.toLocaleString('ru-RU')} ₽</p>
+                <p className={`text-lg sm:text-xl ${s.price}`}>{product.price.toLocaleString('ru-RU')} RUB</p>
               </div>
 
               <p className={`text-sm ${s.description}`}>{product.description}</p>
 
               <div className="flex items-center justify-between gap-4">
                 <div className="flex flex-col gap-1">
-                  <p className={`text-sm ${s.detail}`}><span style={{ opacity: 0.7 }}>Состав:</span> хлопок 100%</p>
-                  <p className={`text-sm ${s.detail}`}><span style={{ opacity: 0.7 }}>Посадка:</span> oversize</p>
+                  {product.material && (
+                    <p className={`text-sm ${s.detail}`}><span style={{ opacity: 0.7 }}>Состав:</span> {product.material}</p>
+                  )}
+                  {product.cut && (
+                    <p className={`text-sm ${s.detail}`}><span style={{ opacity: 0.7 }}>Крой:</span> {product.cut}</p>
+                  )}
                 </div>
                 <div className="flex gap-2 flex-wrap justify-end">
                   {sizes.map((size) => (
@@ -224,6 +228,18 @@ export default function ProductModal({ product, visible, onClose, modalBg }: Pro
               </div>
 
               <AddToCartButton product={product} size={selectedSize} onClose={onClose} />
+
+              {(product.grade || product.series || product.article) && (
+                <div style={{
+                  display: 'flex', flexWrap: 'wrap', gap: '1rem',
+                  fontFamily: 'var(--font-involve)', fontSize: '0.68rem',
+                  opacity: 0.45, marginTop: '-0.5rem',
+                }}>
+                  {product.grade && <span>Grade {product.grade}</span>}
+                  {product.series && <span>Серия: {product.series}</span>}
+                  {product.article && <span>Арт.: {product.article}</span>}
+                </div>
+              )}
             </div>
           </div>
         </div>

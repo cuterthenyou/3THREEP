@@ -10,12 +10,13 @@ export async function POST(req: NextRequest) {
   const {
     name, description = '', price, images = [], sizes = [],
     colors = [], stock = 0, active = true, category = 'general', product_type = null, bg_url = null,
+    grade = null, series = null, article = null, material = null, cut = null,
   } = body
 
   const { rows: [product] } = await query(
-    `INSERT INTO products (name, description, price, images, sizes, colors, stock, active, category, product_type, bg_url)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING *`,
-    [name, description, price, images, sizes, colors, stock, active, category, product_type, bg_url]
+    `INSERT INTO products (name, description, price, images, sizes, colors, stock, active, category, product_type, bg_url, grade, series, article, material, cut)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16) RETURNING *`,
+    [name, description, price, images, sizes, colors, stock, active, category, product_type, bg_url, grade, series, article, material, cut]
   )
 
   return NextResponse.json(product)

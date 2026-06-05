@@ -24,7 +24,7 @@
 
 .inner {
   width: 100%;
-  max-width: 32rem;
+  max-width: 48rem;
   display: flex;
   flex-direction: column;
   gap: 1rem;
@@ -36,8 +36,8 @@
   padding: 1.25rem;
   display: flex;
   gap: 1rem;
-  background: linear-gradient(135deg, var(--bg) 0%, var(--bg-2) 100%);
-  border: 1px solid var(--border);
+  background: var(--bg-subtle);
+  border: 1px solid var(--border-soft);
 }
 
 .profileInfo {
@@ -124,17 +124,25 @@
 
 .avatarBtn {
   position: relative;
-  width: 5rem;
-  height: 5rem;
-  border-radius: 0.75rem;
+  width: 6.5rem;
+  height: 6.5rem;
+  border-radius: 0.5rem;
   overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 2px solid var(--border);
+  border: 2px solid var(--accent);
   background: var(--bg-subtle);
   cursor: pointer;
-  transition: opacity 0.15s;
+  box-shadow: 4px 4px 0 var(--accent), -1px -1px 0 rgba(0, 0, 0, 0.15);
+  outline: 1px solid var(--border);
+  outline-offset: 3px;
+  transition: box-shadow 0.2s, transform 0.15s;
+}
+
+.avatarBtn:hover:not(:disabled) {
+  box-shadow: 5px 5px 0 var(--accent), -1px -1px 0 rgba(0, 0, 0, 0.2);
+  transform: translate(-1px, -1px);
 }
 
 .avatarBtn:disabled {
@@ -440,8 +448,8 @@
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
-  background: linear-gradient(135deg, var(--bg) 0%, var(--bg-2) 100%);
-  border: 1px solid var(--border);
+  background: var(--bg-subtle);
+  border: 1px solid var(--border-soft);
 }
 
 .modalTitle {
@@ -534,8 +542,8 @@
   }
 
   .avatarBtn {
-    width: 4rem;
-    height: 4rem;
+    width: 5rem;
+    height: 5rem;
   }
 
   .username {

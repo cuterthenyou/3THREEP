@@ -12,6 +12,11 @@ export interface Product {
   category: string
   product_type: string | null
   bg_url: string | null
+  grade: string | null
+  series: string | null
+  article: string | null
+  material: string | null
+  cut: string | null
   created_at: string
 }
 

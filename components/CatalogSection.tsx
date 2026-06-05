@@ -15,7 +15,7 @@ interface Props {
 }
 
 function formatPrice(price: number) {
-  return price.toLocaleString('ru-RU') + ' ₽'
+  return price.toLocaleString('ru-RU') + ' RUB'
 }
 
 export default function CatalogSection({ products, categories, categoryData = {} }: Props) {
@@ -74,10 +74,10 @@ export default function CatalogSection({ products, categories, categoryData = {}
         </div>
       </div>
 
-      {/* Collection logo TOP */}
-      {(() => {
+      {/* Collection logo TOP — only when a collection is selected */}
+      {activeCategory !== 'all' && (() => {
         const activeCat = categoryData[activeCategory]
-        const logoTop = activeCat?.logo_top_url ?? '/images/vector-54.svg'
+        const logoTop = activeCat?.logo_top_url
         return logoTop ? (
           <div className="flex justify-center pt-6 pb-2">
             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -111,10 +111,10 @@ export default function CatalogSection({ products, categories, categoryData = {}
         </div>
       </section>
 
-      {/* Collection logo BOTTOM */}
-      {(() => {
+      {/* Collection logo BOTTOM — only when a collection is selected */}
+      {activeCategory !== 'all' && (() => {
         const activeCat = categoryData[activeCategory]
-        const logoBottom = activeCat?.logo_bottom_url ?? '/images/vector-43.svg'
+        const logoBottom = activeCat?.logo_bottom_url
         return logoBottom ? (
           <div className="flex justify-center pb-16">
             {/* eslint-disable-next-line @next/next/no-img-element */}
