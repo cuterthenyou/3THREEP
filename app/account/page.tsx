@@ -17,7 +17,7 @@ export default async function AccountPage() {
     email: session.user.email ?? '',
   }
 
-  const [profile, orders, settingsRows] = await Promise.all([
+  const [profile, orders, settingsRows, userRow] = await Promise.all([
     queryOne(`SELECT * FROM profiles WHERE id = $1`, [user.id]),
     queryMany(
       `SELECT o.*,
@@ -33,6 +33,7 @@ export default async function AccountPage() {
       [user.id]
     ),
     queryMany(`SELECT key, value FROM site_settings`).catch(() => [] as Array<{key: string; value: string | null}>),
+    queryOne(`SELECT newsletter_subscription FROM users WHERE id = $1`, [user.id]).catch(() => null),
   ])
 
   const profileBg = settingsRows.find((r: {key: string; value: string | null}) => r.key === 'profile_bg_url')?.value ?? null
@@ -45,6 +46,7 @@ export default async function AccountPage() {
       orders={orders}
       profileBg={profileBg}
       profileBgDark={profileBgDark}
+      newsletterSubscribed={userRow?.newsletter_subscription === true}
     />
   )
 }

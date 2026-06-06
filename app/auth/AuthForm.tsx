@@ -7,7 +7,11 @@ import Link from 'next/link';
 import s from './auth.module.css';
 
 export default function AuthForm() {
-  const [email, setEmail] = useState('');
+  const searchParams = useSearchParams();
+  const callbackUrl = searchParams.get('callbackUrl') || '/account';
+  const emailFromUrl = searchParams.get('email') ?? '';
+
+  const [email, setEmail] = useState(emailFromUrl);
   const [code, setCode] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -15,9 +19,6 @@ export default function AuthForm() {
   const [consent, setConsent] = useState(false);
   const [newsletter, setNewsletter] = useState(false);
   const [emailTouched, setEmailTouched] = useState(false);
-
-  const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get('callbackUrl') || '/account';
 
   const isEmailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 

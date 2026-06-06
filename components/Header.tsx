@@ -74,6 +74,7 @@ const ADMIN_LINKS = [
   { href: '/admin/texts', label: 'Тексты' },
   { href: '/admin/site', label: 'Настройки сайта' },
   { href: '/admin/emojis', label: 'Эмодзи' },
+  { href: '/admin/newsletter', label: 'Рассылка' },
 ];
 
 interface Collection { slug: string; name: string; types?: string[]; href?: string }

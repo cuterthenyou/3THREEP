@@ -7,6 +7,7 @@ import { formatPrice } from '@/lib/utils';
 import Link from 'next/link';
 import Image from 'next/image';
 import EmojiPicker, { type CustomEmoji } from '@/components/EmojiPicker';
+import { renderMessage } from '@/components/renderEmoji';
 import s from './order-detail.module.css';
 
 interface Props {
@@ -22,28 +23,6 @@ function formatDate(iso: string) {
     year: 'numeric',
     hour: '2-digit',
     minute: '2-digit',
-  });
-}
-
-function renderMessageText(text: string, customEmojis: CustomEmoji[]) {
-  if (!text.includes(':') || customEmojis.length === 0) return text;
-  const parts = text.split(/(:[\w-]+:)/g);
-  return parts.map((part, i) => {
-    const match = part.match(/^:([\w-]+):$/);
-    if (match) {
-      const ce = customEmojis.find(e => e.name === match[1]);
-      if (ce) {
-        return (
-          <img
-            key={i}
-            src={ce.url}
-            alt={match[1]}
-            style={{ width: 20, height: 20, objectFit: 'contain', display: 'inline-block', verticalAlign: 'middle', margin: '0 1px' }}
-          />
-        );
-      }
-    }
-    return <span key={i}>{part}</span>;
   });
 }
 
@@ -207,7 +186,7 @@ export default function OrderDetailClient({ order, messages: initialMessages, us
               <div key={msg.id} className={msg.is_admin ? s.msgAdmin : s.msgUser}>
                 <div className={msg.is_admin ? s.msgBubbleAdmin : s.msgBubbleUser}>
                   {msg.is_admin && <p className={s.msgSender}>THREEP</p>}
-                  <p className={s.msgText}>{renderMessageText(msg.text, customEmojis)}</p>
+                  <p className={s.msgText}>{renderMessage(msg.text, customEmojis)}</p>
                   <p className={s.msgTime}>
                     {new Date(msg.created_at).toLocaleTimeString('ru-RU', {
                       hour: '2-digit',

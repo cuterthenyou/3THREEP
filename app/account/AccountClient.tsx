@@ -27,6 +27,7 @@ function LvlStar() {
 function LvlCircle() {
   return <svg width="32" height="32" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5"><polygon points="7,0.5 13.5,4 13.5,10 7,13.5 0.5,10 0.5,4"/></svg>
 }
+import EmojiPicker from '@/components/EmojiPicker';
 import s from './account.module.css';
 
 interface Props {
@@ -35,6 +36,7 @@ interface Props {
   orders: Order[];
   profileBg?: string | null;
   profileBgDark?: string | null;
+  newsletterSubscribed?: boolean;
 }
 
 function getLevel(sparks: number) {
@@ -50,7 +52,7 @@ function getUsername(email: string, name: string | null) {
   return email.split('@')[0].toUpperCase();
 }
 
-export default function AccountClient({ user, profile, orders, profileBg, profileBgDark }: Props) {
+export default function AccountClient({ user, profile, orders, profileBg, profileBgDark, newsletterSubscribed }: Props) {
   const [loggingOut, setLoggingOut] = useState(false);
   const [activeTab, setActiveTab] = useState<'inventory' | 'orders'>('inventory');
   const [showNicknameModal, setShowNicknameModal] = useState(!profile?.name);
@@ -60,7 +62,10 @@ export default function AccountClient({ user, profile, orders, profileBg, profil
   const [avatarUrl, setAvatarUrl] = useState<string | null>(profile?.avatar_url ?? null);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [displayName, setDisplayName] = useState(profile?.name ?? null);
+  const [subscribed, setSubscribed] = useState(newsletterSubscribed ?? false);
+  const [unsubscribing, setUnsubscribing] = useState(false);
   const avatarRef = useRef<HTMLInputElement>(null);
+  const nicknameRef = useRef<HTMLInputElement>(null);
   const [isDark, setIsDark] = useState(false);
 
   useEffect(() => {
@@ -117,6 +122,26 @@ export default function AccountClient({ user, profile, orders, profileBg, profil
     await signOut({ callbackUrl: '/' });
   }
 
+  async function handleUnsubscribe() {
+    setUnsubscribing(true);
+    await fetch('/api/newsletter/unsubscribe', { method: 'POST' }).catch(() => {});
+    setSubscribed(false);
+    setUnsubscribing(false);
+  }
+
+  function insertEmojiInNickname(emoji: string) {
+    const input = nicknameRef.current;
+    if (!input) { setNicknameInput(v => v + emoji); return; }
+    const start = input.selectionStart ?? nicknameInput.length;
+    const end = input.selectionEnd ?? nicknameInput.length;
+    const next = nicknameInput.slice(0, start) + emoji + nicknameInput.slice(end);
+    setNicknameInput(next);
+    requestAnimationFrame(() => {
+      input.focus();
+      input.setSelectionRange(start + emoji.length, start + emoji.length);
+    });
+  }
+
   return (
     <div className={s.page} style={(() => { const bg = isDark ? (profileBgDark ?? profileBg) : (profileBg ?? profileBgDark); return bg ? { backgroundImage: `url(${bg})`, backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' } : undefined })()} >
       {/* Nickname modal */}
@@ -128,16 +153,21 @@ export default function AccountClient({ user, profile, orders, profileBg, profil
               <p className={s.modalSubtitle}>Как тебя звать в THREEP?</p>
             </div>
             <div className="flex flex-col gap-2">
-              <input
-                type="text"
-                value={nicknameInput}
-                onChange={(e) => { setNicknameInput(e.target.value); setNicknameError(''); }}
-                onKeyDown={(e) => e.key === 'Enter' && handleSaveNickname()}
-                placeholder="nickname"
-                maxLength={20}
-                autoFocus
-                className={s.modalInput}
-              />
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                <input
+                  ref={nicknameRef}
+                  type="text"
+                  value={nicknameInput}
+                  onChange={(e) => { setNicknameInput(e.target.value); setNicknameError(''); }}
+                  onKeyDown={(e) => e.key === 'Enter' && handleSaveNickname()}
+                  placeholder="nickname"
+                  maxLength={20}
+                  autoFocus
+                  className={s.modalInput}
+                  style={{ flex: 1 }}
+                />
+                <EmojiPicker onSelect={insertEmojiInNickname} />
+              </div>
               {nicknameError && <p className={s.modalError}>{nicknameError}</p>}
             </div>
             <button
@@ -368,6 +398,24 @@ export default function AccountClient({ user, profile, orders, profileBg, profil
           )}
 
           <Link href="/" className={s.backLink}>← В магазин</Link>
+
+          {subscribed && (
+            <button
+              onClick={handleUnsubscribe}
+              disabled={unsubscribing}
+              style={{
+                background: 'none', border: 'none', cursor: 'pointer',
+                fontFamily: 'var(--font-involve)', fontSize: '0.7rem',
+                color: 'var(--accent)', opacity: 0.3, letterSpacing: '0.05em',
+                textDecoration: 'underline', padding: '0.25rem 0',
+                transition: 'opacity 0.15s', alignSelf: 'flex-start',
+              }}
+              onMouseEnter={e => (e.currentTarget.style.opacity = '0.6')}
+              onMouseLeave={e => (e.currentTarget.style.opacity = '0.3')}
+            >
+              {unsubscribing ? '...' : 'Отписаться от новостей'}
+            </button>
+          )}
         </div>
       </div>
     </div>

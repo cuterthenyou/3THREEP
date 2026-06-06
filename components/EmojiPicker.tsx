@@ -2,16 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import Image from 'next/image'
-
-const STANDARD_EMOJIS = [
-  '😀','😂','🥹','😍','🤩','😎','🥶','😤','😭','🤯','😴','🤔',
-  '👍','👎','👏','🤝','🙏','🫶','✌️','💪','🤞','🫵','☝️','👋',
-  '❤️','🧡','💛','💚','💙','💜','🖤','🤍','💔','❤️‍🔥','✨','🔥',
-  '💯','🎉','🎊','🥳','🏆','👑','💎','🚀','⚡','🌙','⭐','🌊',
-  '😈','👿','💀','☠️','🤡','🎭','🎨','🕶️','👁️','🤌','🫡','😤',
-  '🍕','🍔','☕','🍺','🥂','🎵','🎶','📸','💻','🔑','💸','🎯',
-  '🐈','🐕','🐺','🦊','🦁','🐉','🦋','🌹','🍀','☀️','🌈','🌙',
-]
+import { SVG_EMOJIS } from './svgEmojis'
 
 export interface CustomEmoji {
   id: number
@@ -49,12 +40,19 @@ export default function EmojiPicker({ onSelect }: Props) {
         onClick={() => setOpen(v => !v)}
         style={{
           background: 'none', border: 'none', cursor: 'pointer',
-          fontSize: '1.2rem', padding: '0 0.4rem', opacity: open ? 0.9 : 0.55,
+          padding: '0 0.4rem', opacity: open ? 0.9 : 0.55,
           transition: 'opacity 0.15s', lineHeight: 1,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          width: 28, height: 28, color: 'var(--accent)',
         }}
         title="Эмодзи"
       >
-        😊
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" width="16" height="16">
+          <circle cx="10" cy="10" r="8.5"/>
+          <circle cx="7" cy="8.5" r="1" fill="currentColor" stroke="none"/>
+          <circle cx="13" cy="8.5" r="1" fill="currentColor" stroke="none"/>
+          <path d="M7,12.5 Q10,15.5 13,12.5" strokeLinecap="round"/>
+        </svg>
       </button>
 
       {open && (
@@ -83,7 +81,7 @@ export default function EmojiPicker({ onSelect }: Props) {
                     borderBottom: tab === t ? '2px solid var(--accent)' : '2px solid transparent',
                   }}
                 >
-                  {t === 'standard' ? 'Стандартные' : 'Кастомные'}
+                  {t === 'standard' ? 'THREEP' : 'Кастомные'}
                 </button>
               ))}
             </div>
@@ -91,21 +89,27 @@ export default function EmojiPicker({ onSelect }: Props) {
 
           <div style={{ overflow: 'auto', padding: '0.5rem', maxHeight: 220 }}>
             {tab === 'standard' ? (
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(8, 1fr)', gap: '0.15rem' }}>
-                {STANDARD_EMOJIS.map(emoji => (
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '0.15rem' }}>
+                {SVG_EMOJIS.map(emoji => (
                   <button
-                    key={emoji}
+                    key={emoji.name}
                     type="button"
-                    onClick={() => { onSelect(emoji); setOpen(false) }}
+                    onClick={() => { onSelect(`:${emoji.name}:`); setOpen(false) }}
+                    title={`:${emoji.name}:`}
                     style={{
                       background: 'none', border: 'none', cursor: 'pointer',
-                      fontSize: '1.15rem', padding: '0.2rem', borderRadius: '0.3rem',
-                      transition: 'background 0.1s', lineHeight: 1,
+                      padding: '0.25rem', borderRadius: '0.3rem',
+                      transition: 'background 0.1s',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      color: 'var(--accent)',
+                      width: '100%', aspectRatio: '1',
                     }}
                     onMouseEnter={e => (e.currentTarget.style.background = 'var(--bg-subtle)')}
                     onMouseLeave={e => (e.currentTarget.style.background = 'none')}
                   >
-                    {emoji}
+                    <span style={{ width: 18, height: 18, display: 'block' }}>
+                      {emoji.svg}
+                    </span>
                   </button>
                 ))}
               </div>

@@ -8,6 +8,7 @@ function ConfirmationContent() {
   const searchParams = useSearchParams()
   const id = searchParams.get('id')
   const email = searchParams.get('email')
+  const isGuest = searchParams.get('guest') === '1'
 
   return (
     <main style={{
@@ -54,6 +55,40 @@ function ConfirmationContent() {
         }}>
           После обработки заказа тебе придёт письмо с деталями и реквизитами для оплаты.
         </p>
+
+        {isGuest && email && (
+          <div style={{
+            border: '1px solid var(--accent)',
+            boxShadow: '3px 3px 0 var(--accent)',
+            borderRadius: '4px',
+            padding: '1rem 1.25rem',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '0.75rem',
+            textAlign: 'left',
+          }}>
+            <p style={{
+              fontFamily: 'var(--font-involve)', fontSize: '0.82rem',
+              color: 'var(--accent)', lineHeight: 1.6,
+            }}>
+              Создай аккаунт — следи за заказами и получай бонусы
+            </p>
+            <Link
+              href={`/auth?email=${encodeURIComponent(email)}&callbackUrl=/account`}
+              style={{
+                display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                gap: '0.4rem', padding: '0.6rem 1.25rem',
+                background: 'var(--accent)', color: 'var(--bg)',
+                fontFamily: 'var(--font-onder)', fontSize: '0.72rem',
+                textTransform: 'uppercase', letterSpacing: '0.1em',
+                borderRadius: '3px', textDecoration: 'none',
+                alignSelf: 'flex-start',
+              }}
+            >
+              Создать аккаунт →
+            </Link>
+          </div>
+        )}
 
         <Link
           href="/"

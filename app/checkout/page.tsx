@@ -84,7 +84,7 @@ export default function CheckoutPage() {
 
       clear()
       if (data.isGuest) {
-        router.push(`/order-confirmation?id=${data.id}&email=${encodeURIComponent(guestEmail.trim())}`)
+        router.push(`/order-confirmation?id=${data.id}&email=${encodeURIComponent(guestEmail.trim())}&guest=1`)
       } else {
         router.push(`/account/orders/${data.id}`)
       }

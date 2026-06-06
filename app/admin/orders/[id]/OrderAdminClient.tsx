@@ -5,6 +5,8 @@ import type { OrderStatus, Message } from '@/lib/types';
 import { ORDER_STATUS_LABELS, STATUS_COLORS } from '@/lib/types';
 import { formatPrice } from '@/lib/utils';
 import Link from 'next/link';
+import EmojiPicker, { type CustomEmoji } from '@/components/EmojiPicker';
+import { renderMessage } from '@/components/renderEmoji';
 import s from './order-admin.module.css';
 
 const STATUSES: OrderStatus[] = [
@@ -30,7 +32,13 @@ export default function OrderAdminClient({ order, messages: init, adminId }: Pro
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [sending, setSending] = useState(false);
+  const [customEmojis, setCustomEmojis] = useState<CustomEmoji[]>([]);
   const bottomRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    fetch('/api/emojis').then(r => r.json()).then(setCustomEmojis).catch(() => {});
+  }, []);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -49,6 +57,19 @@ export default function OrderAdminClient({ order, messages: init, adminId }: Pro
     const interval = setInterval(fetchMessages, 3000);
     return () => clearInterval(interval);
   }, [fetchMessages]);
+
+  function insertEmoji(emoji: string) {
+    const input = inputRef.current;
+    if (!input) { setText(t => t + emoji); return; }
+    const start = input.selectionStart ?? text.length;
+    const end = input.selectionEnd ?? text.length;
+    const newText = text.slice(0, start) + emoji + text.slice(end);
+    setText(newText);
+    requestAnimationFrame(() => {
+      input.focus();
+      input.setSelectionRange(start + emoji.length, start + emoji.length);
+    });
+  }
 
   async function saveOrder() {
     setSaving(true);
@@ -191,14 +212,16 @@ export default function OrderAdminClient({ order, messages: init, adminId }: Pro
             <div key={msg.id} className={msg.is_admin ? s.msgAdmin : s.msgClient}>
               <div className={msg.is_admin ? s.msgBubbleAdmin : s.msgBubbleClient}>
                 {!msg.is_admin && <p className={s.msgSender}>Клиент</p>}
-                <p className={s.msgText}>{msg.text}</p>
+                <p className={s.msgText}>{renderMessage(msg.text, customEmojis)}</p>
               </div>
             </div>
           ))}
           <div ref={bottomRef} />
         </div>
         <div className={s.chatInputRow}>
+          <EmojiPicker onSelect={insertEmoji} />
           <input
+            ref={inputRef}
             type="text"
             placeholder="Ответить клиенту..."
             value={text}

@@ -78,6 +78,13 @@ function IcoEmoji() {
   </svg>
 }
 
+function IcoNewsletter() {
+  return <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" style={{ flexShrink: 0 }}>
+    <rect x="1" y="3" width="14" height="10" rx="1"/>
+    <path d="M1,4 L8,9.5 L15,4"/>
+  </svg>
+}
+
 function IcoExit() {
   return <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" style={{ flexShrink: 0 }}>
     <path d="M0,1 L9,1 L9,3 L2,3 L2,13 L9,13 L9,15 L0,15 Z"/>
@@ -119,6 +126,7 @@ const NAV = [
   { href: '/admin/site',        label: 'Сайт',      Icon: IcoSite },
   { href: '/admin/texts',       label: 'Тексты',    Icon: IcoTexts },
   { href: '/admin/emojis',      label: 'Emoji',     Icon: IcoEmoji },
+  { href: '/admin/newsletter',  label: 'Рассылка',  Icon: IcoNewsletter },
 ]
 
 function NavItems({ pathname, collapsed, onNavigate }: { pathname: string; collapsed: boolean; onNavigate?: () => void }) {
