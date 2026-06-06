@@ -22,7 +22,7 @@ export const INPUT_STYLE_BG2: React.CSSProperties = {
 export const LABEL_STYLE: React.CSSProperties = {
   color: 'var(--accent)',
   opacity: 0.5,
-  fontFamily: 'var(--font-onder)',
+  fontFamily: 'var(--font-involve)',
 }
 
 export const LABEL_STYLE_MUTED: React.CSSProperties = {

@@ -7,6 +7,7 @@ import type { OrderStatus } from '@/lib/types'
 import { ORDER_STATUS_LABELS, STATUS_COLORS } from '@/lib/types'
 import { formatPrice } from '@/lib/utils'
 import { AdminPageTitle, AdminEmptyState } from '../components'
+import a from '../admin.module.css'
 
 type SortKey = 'date' | 'total'
 type SortDir = 'asc' | 'desc'
@@ -124,8 +125,7 @@ export default function OrdersClient({ orders }: { orders: Order[] }) {
             <Link
               key={order.id}
               href={`/admin/orders/${order.id}`}
-              className="rounded-xl p-4 flex flex-col sm:flex-row sm:items-center gap-3 transition-opacity hover:opacity-90"
-              style={{ background: 'var(--bg-subtle)', border: '1px solid var(--border-soft)', textDecoration: 'none' }}
+              className={`${a.orderCard} flex flex-col sm:flex-row sm:items-center gap-3`}
             >
               <div className="flex-1">
                 <div className="flex items-center gap-3 flex-wrap">
@@ -157,7 +157,7 @@ export default function OrdersClient({ orders }: { orders: Order[] }) {
                   </p>
                 ) : null}
               </div>
-              <p className="text-lg flex-shrink-0" style={{ color: 'var(--accent)', fontFamily: "var(--font-onder)" }}>
+              <p className="text-lg flex-shrink-0" style={{ color: 'var(--accent)', fontFamily: "var(--font-deutsch)" }}>
                 {formatPrice(order.total)}
               </p>
             </Link>

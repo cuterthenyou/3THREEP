@@ -276,7 +276,7 @@ export default function TextsClient({ initialFooter, initialInfo, initialPrivacy
               }}
             >
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-                <span style={{ fontFamily: 'var(--font-onder)', fontSize: '0.58rem', letterSpacing: '0.1em', opacity: 0.4, textTransform: 'uppercase' }}>
+                <span style={{ fontFamily: 'var(--font-involve)', fontSize: '0.58rem', letterSpacing: '0.1em', opacity: 0.4, textTransform: 'uppercase' }}>
                   Раздел {i + 1}
                 </span>
                 <button

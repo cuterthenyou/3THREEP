@@ -125,7 +125,7 @@ export default function CollectionsClient({ collections }: { collections: Catego
 
   return (
     <div className="px-6 py-6 max-w-3xl mx-auto">
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between mb-6">
         <AdminPageTitle>Коллекции ({collections.length})</AdminPageTitle>
         <button onClick={openNew} className={a.btn}>
           + Добавить

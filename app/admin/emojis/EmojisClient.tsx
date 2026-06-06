@@ -75,7 +75,7 @@ export default function EmojisClient({ initialEmojis }: { initialEmojis: Emoji[]
       <AdminPageTitle>Кастомные Emoji</AdminPageTitle>
 
       <div style={{ background: 'var(--bg-subtle)', border: '1px solid var(--border-soft)', borderRadius: '1rem', padding: '1.25rem', marginBottom: '2rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-        <h2 style={{ color: 'var(--accent)', fontFamily: 'var(--font-onder)', fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.1em', opacity: 0.7 }}>
+        <h2 style={{ color: 'var(--accent)', fontFamily: 'var(--font-involve)', fontSize: '0.85rem', textTransform: 'uppercase', letterSpacing: '0.1em', opacity: 0.7 }}>
           Добавить emoji
         </h2>
 
@@ -129,7 +129,7 @@ export default function EmojisClient({ initialEmojis }: { initialEmojis: Emoji[]
           }}>
             <Image src={emoji.url} alt={emoji.name} width={40} height={40} style={{ objectFit: 'contain', borderRadius: 6, background: 'var(--bg-2)', padding: 3, flexShrink: 0 }} unoptimized />
             <div style={{ flex: 1 }}>
-              <p style={{ color: 'var(--accent)', fontFamily: 'var(--font-onder)', fontSize: '0.9rem' }}>:{emoji.name}:</p>
+              <p style={{ color: 'var(--accent)', fontFamily: 'var(--font-involve)', fontSize: '0.9rem' }}>:{emoji.name}:</p>
               <p style={{ color: 'var(--accent)', opacity: 0.35, fontFamily: 'var(--font-involve)', fontSize: '0.72rem' }}>
                 {new Date(emoji.created_at).toLocaleDateString('ru-RU')}
               </p>

@@ -215,7 +215,7 @@ export default function ProductsClient({ products }: { products: Product[] }) {
 
   return (
     <div className="px-6 py-6 max-w-4xl mx-auto">
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between mb-4">
         <AdminPageTitle>Товары ({filtered.length}/{products.length})</AdminPageTitle>
         <button onClick={openNew} className={a.btn}>
           + Добавить товар

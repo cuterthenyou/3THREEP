@@ -55,6 +55,32 @@
 .btnDanger:active:not(:disabled) { box-shadow: 1px 1px 0 var(--status-error); transform: translate(1px, 1px); transition-duration: 0.06s; }
 .btnDanger:disabled { opacity: 0.5; cursor: default; }
 
+.orderCard {
+  border-radius: 3px;
+  padding: 1rem;
+  background: var(--bg-subtle);
+  border: 1px solid var(--border);
+  box-shadow: 2px 2px 0 var(--border);
+  text-decoration: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  transition: box-shadow 0.15s, transform 0.15s, border-color 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.orderCard:hover {
+  border-color: var(--accent);
+  box-shadow: 3px 3px 0 var(--accent);
+  transform: translate(-1px, -1px);
+}
+
+.orderCard:active {
+  box-shadow: 1px 1px 0 var(--accent);
+  transform: translate(1px, 1px);
+  transition-duration: 0.06s;
+}
+
 .periodBtn {
   font-family: var(--font-involve);
   font-size: 0.72rem;
