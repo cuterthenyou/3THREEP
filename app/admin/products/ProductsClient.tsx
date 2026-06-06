@@ -213,6 +213,12 @@ export default function ProductsClient({ products }: { products: Product[] }) {
     router.refresh()
   }
 
+  async function remove(id: string) {
+    if (!confirm('Удалить товар? Это действие нельзя отменить.')) return
+    await fetch(`/api/admin/products/${id}`, { method: 'DELETE' })
+    router.refresh()
+  }
+
   return (
     <div className="px-6 py-6 max-w-4xl mx-auto">
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between mb-4">
@@ -285,6 +291,9 @@ export default function ProductsClient({ products }: { products: Product[] }) {
                 </button>
                 <button onClick={() => toggleActive(p.id, p.active)} className={a.btnSecondary}>
                   {p.active ? 'Скрыть' : 'Показать'}
+                </button>
+                <button onClick={() => remove(p.id)} className={a.btnDanger}>
+                  Удалить
                 </button>
               </div>
             </div>

@@ -125,13 +125,14 @@ export default function OrdersClient({ orders }: { orders: Order[] }) {
             <Link
               key={order.id}
               href={`/admin/orders/${order.id}`}
-              className={`${a.orderCard} flex flex-col sm:flex-row sm:items-center gap-3`}
+              className={a.orderCard}
             >
-              <div className="flex-1">
-                <div className="flex items-center gap-3 flex-wrap">
-                  <span className="text-xs uppercase tracking-widest" style={{ color: 'var(--accent)', opacity: 0.5, fontFamily: "var(--font-involve)" }}>
-                    #{order.id.slice(0, 8)}
-                  </span>
+              {/* Zone 1: ID left, status + date right */}
+              <div className="flex items-center justify-between gap-2 flex-wrap">
+                <span className="text-xs uppercase tracking-widest" style={{ color: 'var(--accent)', opacity: 0.5, fontFamily: "var(--font-involve)" }}>
+                  #{order.id.slice(0, 8)}
+                </span>
+                <div className="flex items-center gap-2">
                   <span className="text-xs px-2 py-0.5 uppercase tracking-widest"
                     style={{ borderRadius: '2px', background: 'var(--bg-subtle)', color: STATUS_COLORS[order.status as OrderStatus], fontFamily: "var(--font-onder)", fontSize: '0.6rem', border: '1px solid var(--border)' }}>
                     {ORDER_STATUS_LABELS[order.status as OrderStatus]}
@@ -140,26 +141,30 @@ export default function OrdersClient({ orders }: { orders: Order[] }) {
                     {new Date(order.created_at).toLocaleDateString('ru-RU')}
                   </span>
                 </div>
-                <div className="mt-1 flex flex-col gap-0.5">
-                  {items.map((item) => (
-                    <span key={String(item.id)} className="text-sm" style={{ color: 'var(--accent)', fontFamily: "var(--font-involve)" }}>
-                      {String(item.product_name)}{item.size ? ` / ${item.size}` : ''} × {Number(item.quantity)}
-                    </span>
-                  ))}
-                </div>
+              </div>
+              {/* Zone 2: items + user */}
+              <div className="flex flex-col gap-0.5">
+                {items.map((item) => (
+                  <span key={String(item.id)} className="text-sm" style={{ color: 'var(--accent)', fontFamily: "var(--font-involve)" }}>
+                    {String(item.product_name)}{item.size ? ` / ${item.size}` : ''} × {Number(item.quantity)}
+                  </span>
+                ))}
                 {profile ? (
-                  <p className="text-xs mt-1" style={{ color: 'var(--accent)', opacity: 0.4, fontFamily: "var(--font-involve)" }}>
+                  <p className="text-xs" style={{ color: 'var(--accent)', opacity: 0.4, fontFamily: "var(--font-involve)" }}>
                     {String(profile.name || profile.email || '')}
                   </p>
                 ) : (order.guest_name || order.guest_email) ? (
-                  <p className="text-xs mt-1" style={{ color: 'var(--accent)', opacity: 0.4, fontFamily: "var(--font-involve)" }}>
+                  <p className="text-xs" style={{ color: 'var(--accent)', opacity: 0.4, fontFamily: "var(--font-involve)" }}>
                     Гость: {[order.guest_name, order.guest_email].filter(Boolean).join(' · ')}
                   </p>
                 ) : null}
               </div>
-              <p className="text-lg flex-shrink-0" style={{ color: 'var(--accent)', fontFamily: "var(--font-deutsch)" }}>
-                {formatPrice(order.total)}
-              </p>
+              {/* Zone 3: price right-aligned */}
+              <div className="flex justify-end">
+                <p className="text-lg" style={{ color: 'var(--accent)', fontFamily: "var(--font-deutsch)" }}>
+                  {formatPrice(order.total)}
+                </p>
+              </div>
             </Link>
           )
         })}

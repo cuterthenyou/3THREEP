@@ -34,7 +34,19 @@ function isSvg(mime: string, name: string) {
   return mime === 'image/svg+xml' || /\.svg$/i.test(name)
 }
 
-const KNOWN_BUCKETS = ['products', 'avatars', 'static']
+const FOLDER_LABELS: Record<string, string> = {
+  products: 'Товары',
+  avatars: 'Аватары',
+  assets: 'Ассеты',
+  static: 'Статика',
+}
+const KNOWN_FOLDERS = Object.keys(FOLDER_LABELS)
+
+function getFolder(file: MediaFile): string {
+  if (file.bucket === 'static') return 'static'
+  const slash = file.name.indexOf('/')
+  return slash > 0 ? file.name.slice(0, slash) : '_root'
+}
 
 function VideoCard({ file }: { file: MediaFile }) {
   const [duration, setDuration] = useState<number | null>(null)
@@ -61,7 +73,6 @@ function VideoCard({ file }: { file: MediaFile }) {
 
 export default function MediaClient() {
   const [files, setFiles] = useState<MediaFile[]>([])
-  const [allBuckets, setAllBuckets] = useState<string[]>(KNOWN_BUCKETS)
   const [loading, setLoading] = useState(true)
   const [bucket, setBucket] = useState<string>('all')
   const [search, setSearch] = useState('')
@@ -75,21 +86,21 @@ export default function MediaClient() {
     const res = await fetch('/api/admin/media')
     const data = await res.json()
     setFiles(data.files ?? [])
-    if (data.buckets) setAllBuckets(data.buckets)
     setLoading(false)
     setSelected(new Set())
   }, [])
 
   useEffect(() => { load() }, [load])
 
-  const otherBuckets = allBuckets.filter(b => !KNOWN_BUCKETS.includes(b))
+  const presentFolders = useMemo(() =>
+    [...new Set(files.map(getFolder))], [files])
 
   const filtered = useMemo(() => {
     let list = bucket === 'all'
       ? files
       : bucket === 'other'
-      ? files.filter(f => !KNOWN_BUCKETS.includes(f.bucket))
-      : files.filter(f => f.bucket === bucket)
+      ? files.filter(f => !KNOWN_FOLDERS.includes(getFolder(f)) && getFolder(f) !== '_root')
+      : files.filter(f => getFolder(f) === bucket)
     if (search) {
       const q = search.toLowerCase()
       list = list.filter(f => f.name.toLowerCase().includes(q))
@@ -177,10 +188,13 @@ export default function MediaClient() {
 
       {/* Bucket tabs */}
       <div className="flex flex-wrap gap-2 mb-4">
-        {(['all', ...KNOWN_BUCKETS] as string[]).concat(otherBuckets.length ? ['other'] : []).map((b) => (
+        {(['all',
+          ...KNOWN_FOLDERS.filter(f => presentFolders.includes(f)),
+          ...(presentFolders.some(f => !KNOWN_FOLDERS.includes(f) && f !== '_root') ? ['other'] : []),
+        ]).map((b) => (
           <button key={b} onClick={() => setBucket(b)} className="px-3 py-1.5 rounded uppercase tracking-widest"
             style={{ fontFamily: "var(--font-involve)", fontWeight: 700, fontSize: '0.7rem', letterSpacing: '0.06em', background: bucket === b ? accent : accentDim, color: bucket === b ? 'var(--bg)' : accent, border: '1px solid var(--border)' }}>
-            {b === 'all' ? 'Все' : b === 'other' ? 'Другое' : b}
+            {b === 'all' ? 'Все' : FOLDER_LABELS[b] ?? 'Другое'}
           </button>
         ))}
         <span className="ml-auto text-xs self-center" style={{ color: accent, opacity: 0.5, fontFamily: "var(--font-involve)" }}>

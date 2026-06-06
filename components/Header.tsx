@@ -280,9 +280,6 @@ export default function Header({ isAdminUser = false, initialCollections }: Prop
                 : collections.map(c => (
                   <div key={c.slug}>
                     <Link href={c.href ?? `/?category=${encodeURIComponent(c.slug)}`} onClick={() => setMenuOpen(false)} className={s.subLink}>— {c.name}</Link>
-                    {!c.href && c.types?.map(type => (
-                      <Link key={type} href={`/?category=${encodeURIComponent(c.slug)}&type=${encodeURIComponent(type)}`} onClick={() => setMenuOpen(false)} className={s.subLinkType}>{type}</Link>
-                    ))}
                   </div>
                 ))
               }

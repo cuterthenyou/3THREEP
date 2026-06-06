@@ -164,7 +164,7 @@ export default function MenuClient({ allCollections, initialConfig }: Props) {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', padding: '0.75rem', background: 'var(--bg-2)', borderRadius: '2px' }}>
           <span style={{ fontFamily: 'var(--font-onder)', fontSize: '0.85rem', color: 'var(--accent)', opacity: 0.5 }}>▸ Коллекции</span>
           {orderedCollections.filter(c => !config.hiddenCollections.includes(c.slug)).map(c => (
-            <span key={c.slug} style={{ fontFamily: 'var(--font-deutsch)', fontSize: '0.75rem', color: 'var(--accent)', paddingLeft: '1.5rem', opacity: 0.7 }}>— {c.name}</span>
+            <span key={c.slug} style={{ fontFamily: 'var(--font-involve)', fontSize: '0.75rem', color: 'var(--accent)', paddingLeft: '1.5rem', opacity: 0.7 }}>— {c.name}</span>
           ))}
           {config.customItems.map((item, i) => (
             <span key={i} style={{ fontFamily: 'var(--font-onder)', fontSize: '0.85rem', color: 'var(--accent)', opacity: 0.8 }}>◆ {item.label}</span>
