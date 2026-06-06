@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import s from './admin.module.css'
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -74,18 +75,8 @@ export default function DashboardClient() {
             <button
               key={p.value}
               onClick={() => setPeriod(p.value)}
-              style={{
-                fontFamily: "var(--font-involve)",
-                fontSize: '0.72rem',
-                padding: '0.3rem 0.75rem',
-                borderRadius: '6px',
-                border: `1px solid ${period === p.value ? accent : 'var(--border)'}`,
-                background: period === p.value ? 'var(--accent-2)' : 'transparent',
-                color: accent,
-                cursor: 'pointer',
-                transition: 'all 0.18s',
-                opacity: loading ? 0.5 : 1,
-              }}
+              className={`${s.periodBtn} ${period === p.value ? s.periodBtnActive : ''}`}
+              style={{ opacity: loading ? 0.5 : 1 }}
             >
               {p.label}
             </button>
@@ -110,7 +101,7 @@ export default function DashboardClient() {
       {/* Revenue chart */}
       {!loading && chartData.length > 0 && (
         <div style={{ background: accentDim, border: `1px solid var(--border-soft)`, borderRadius: '12px', padding: '1.25rem' }}>
-          <p style={{ fontFamily: "var(--font-onder)", fontSize: '0.68rem', color: accent, opacity: 0.5, textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: '1rem' }}>
+          <p style={{ fontFamily: "var(--font-involve)", fontSize: '0.68rem', color: accent, opacity: 0.5, textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: '1rem' }}>
             График выручки
           </p>
           <Line
@@ -142,23 +133,23 @@ export default function DashboardClient() {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
         {/* Top products */}
         <div style={{ background: accentDim, border: `1px solid var(--border-soft)`, borderRadius: '12px', padding: '1.25rem' }}>
-          <p style={{ fontFamily: "var(--font-onder)", fontSize: '0.68rem', color: accent, opacity: 0.5, textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: '0.75rem' }}>Топ позиций</p>
+          <p style={{ fontFamily: "var(--font-involve)", fontSize: '0.68rem', color: accent, opacity: 0.5, textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: '0.75rem' }}>Топ позиций</p>
           {!loading && data?.topProducts.length === 0 && (
             <p style={{ color: accent, opacity: 0.3, fontFamily: "var(--font-involve)", fontSize: '0.8rem' }}>Нет данных</p>
           )}
           {!loading && data?.topProducts.map((p, i) => (
             <div key={p.product_name} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.45rem 0', borderBottom: i < (data.topProducts.length - 1) ? '1px solid var(--bg-subtle)' : 'none' }}>
-              <span style={{ fontFamily: "var(--font-onder)", fontSize: '0.65rem', color: accent, opacity: 0.3, minWidth: '1.2rem' }}>{i + 1}</span>
+              <span style={{ fontFamily: "var(--font-involve)", fontSize: '0.65rem', color: accent, opacity: 0.3, minWidth: '1.2rem' }}>{i + 1}</span>
               <span style={{ fontFamily: "var(--font-involve)", fontSize: '0.78rem', color: accent, flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.product_name}</span>
-              <span style={{ fontFamily: "var(--font-onder)", fontSize: '0.72rem', color: accent, opacity: 0.6 }}>{p.units_sold} шт</span>
-              <span style={{ fontFamily: "var(--font-onder)", fontSize: '0.72rem', color: accent, minWidth: '5rem', textAlign: 'right' }}>{fmt(Number(p.revenue))}</span>
+              <span style={{ fontFamily: "var(--font-involve)", fontSize: '0.72rem', color: accent, opacity: 0.6 }}>{p.units_sold} шт</span>
+              <span style={{ fontFamily: "var(--font-deutsch)", fontSize: '0.72rem', color: accent, minWidth: '5rem', textAlign: 'right' }}>{fmt(Number(p.revenue))}</span>
             </div>
           ))}
         </div>
 
         {/* Size breakdown */}
         <div style={{ background: accentDim, border: `1px solid var(--border-soft)`, borderRadius: '12px', padding: '1.25rem' }}>
-          <p style={{ fontFamily: "var(--font-onder)", fontSize: '0.68rem', color: accent, opacity: 0.5, textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: '0.75rem' }}>Разбивка по размерам</p>
+          <p style={{ fontFamily: "var(--font-involve)", fontSize: '0.68rem', color: accent, opacity: 0.5, textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: '0.75rem' }}>Разбивка по размерам</p>
           {!loading && data?.sizeBreakdown.length === 0 && (
             <p style={{ color: accent, opacity: 0.3, fontFamily: "var(--font-involve)", fontSize: '0.8rem' }}>Нет данных</p>
           )}
@@ -167,7 +158,7 @@ export default function DashboardClient() {
             const pct = max > 0 ? (Number(s.total_sold) / max) * 100 : 0
             return (
               <div key={s.size} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.4rem 0' }}>
-                <span style={{ fontFamily: "var(--font-onder)", fontSize: '0.7rem', color: accent, minWidth: '2rem' }}>{s.size}</span>
+                <span style={{ fontFamily: "var(--font-involve)", fontSize: '0.7rem', color: accent, minWidth: '2rem' }}>{s.size}</span>
                 <div style={{ flex: 1, height: '6px', background: 'var(--bg-subtle)', borderRadius: '3px', overflow: 'hidden' }}>
                   <div style={{ width: `${pct}%`, height: '100%', background: accent, borderRadius: '3px', transition: 'width 0.5s ease' }} />
                 </div>

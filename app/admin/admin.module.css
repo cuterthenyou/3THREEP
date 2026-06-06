@@ -54,3 +54,26 @@
 .btnDanger:hover:not(:disabled) { box-shadow: 3px 3px 0 var(--status-error); transform: translate(-1px, -1px); }
 .btnDanger:active:not(:disabled) { box-shadow: 1px 1px 0 var(--status-error); transform: translate(1px, 1px); transition-duration: 0.06s; }
 .btnDanger:disabled { opacity: 0.5; cursor: default; }
+
+.periodBtn {
+  font-family: var(--font-involve);
+  font-size: 0.72rem;
+  padding: 0.3rem 0.75rem;
+  border-radius: 3px;
+  border: 1px solid var(--border);
+  box-shadow: 2px 2px 0 var(--border);
+  background: transparent;
+  color: var(--accent);
+  cursor: pointer;
+  transition: box-shadow 0.12s, transform 0.1s, border-color 0.12s, background 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+.periodBtn:hover { border-color: var(--accent); box-shadow: 3px 3px 0 var(--accent); transform: translate(-1px, -1px); background: var(--accent-2); }
+.periodBtn:active { box-shadow: 1px 1px 0 var(--accent); transform: translate(1px, 1px); transition-duration: 0.06s; }
+
+.periodBtnActive {
+  border-color: var(--accent);
+  box-shadow: 2px 2px 0 var(--accent);
+  background: var(--accent-2);
+}
+.periodBtnActive:hover { box-shadow: 3px 3px 0 var(--accent); transform: translate(-1px, -1px); }
