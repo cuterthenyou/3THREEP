@@ -107,13 +107,14 @@ export default function Header({ isAdminUser = false, initialCollections }: Prop
       .catch(() => {});
   }, []);
 
-  // Eager-load collections on mount so they're ready when menu opens
+  // Load collections — skip fetch if SSR already provided them
   useEffect(() => {
+    if (initialCollections && initialCollections.length > 0) return;
     fetch('/api/collections')
       .then(r => r.ok ? r.json() : { collections: [] })
       .then(d => { setCollections(d.collections ?? []); setCollectionsLoading(false); })
       .catch(() => setCollectionsLoading(false));
-  }, []);
+  }, [initialCollections]);
 
   // Sync theme icon with current theme
   useEffect(() => {
