@@ -15,8 +15,11 @@ interface Props {
 
 export default function CatalogSection({ products, categories, categoryData = {} }: Props) {
   const searchParams = useSearchParams()
-  const [activeCategory, setActiveCategory] = useState<string>('all')
-  const [activeType, setActiveType] = useState<string>('all')
+  const rawCategory = searchParams.get('category') ?? 'all'
+  const rawType = searchParams.get('type') ?? 'all'
+
+  const [activeCategory, setActiveCategory] = useState<string>(rawCategory)
+  const [activeType, setActiveType] = useState<string>(rawType)
   const [openProduct, setOpenProduct] = useState<Product | null>(null)
   const [modalVisible, setModalVisible] = useState(false)
   const [modalBg, setModalBg] = useState<string | null>(null)
@@ -29,14 +32,9 @@ export default function CatalogSection({ products, categories, categoryData = {}
     return () => obs.disconnect()
   }, [])
 
-  const rawCategory = searchParams.get('category') ?? 'all'
-  const rawType = searchParams.get('type') ?? 'all'
-  const hasMountedRef = React.useRef(false)
-
   useEffect(() => {
     setActiveCategory(rawCategory)
     setActiveType(rawType)
-    if (!hasMountedRef.current) { hasMountedRef.current = true; return }
     if (rawCategory !== 'all' || rawType !== 'all') {
       const id = setTimeout(() =>
         document.getElementById('catalog')?.scrollIntoView({ behavior: 'smooth' })

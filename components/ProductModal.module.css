@@ -34,9 +34,7 @@
   width: 56px;
   flex-shrink: 0;
   max-height: 72vh;
-  overflow-y: auto;
-  scrollbar-width: thin;
-  scrollbar-color: var(--border-soft) transparent;
+  overflow: hidden;
 }
 
 /* Mobile thumbnail row — below main image, constrained to photo width */
@@ -70,6 +68,12 @@
 .thumbBtn:hover {
   transform: scale(1.06);
   box-shadow: 0 2px 8px var(--accent-glow);
+}
+
+.thumbsCol .thumbBtn:hover {
+  transform: none;
+  filter: brightness(1.15);
+  box-shadow: none;
 }
 
 .thumbBtn:active {

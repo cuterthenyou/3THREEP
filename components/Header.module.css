@@ -167,7 +167,7 @@
 
 .arrow {
   display: inline-block;
-  font-size: 0.7em;
+  font-size: 1em;
   transition: transform 0.25s ease;
 }
 
@@ -226,7 +226,7 @@
 }
 
 .subLink {
-  font-family: var(--font-deutsch);
+  font-family: var(--font-involve);
   font-size: clamp(0.7rem, 2.5vw, 1rem);
   color: var(--accent);
   opacity: 0.72;
@@ -241,7 +241,7 @@
 .subLink:hover { opacity: 1; }
 
 .subLinkType {
-  font-family: var(--font-deutsch);
+  font-family: var(--font-involve);
   font-size: clamp(0.65rem, 2.2vw, 0.85rem);
   color: var(--accent);
   opacity: 0.55;
