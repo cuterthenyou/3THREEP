@@ -26,6 +26,37 @@
   transition-duration: 0.08s;
 }
 
+/* Desktop thumbnail column — left of main image */
+.thumbsCol {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 56px;
+  flex-shrink: 0;
+  max-height: 72vh;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-soft) transparent;
+}
+
+/* Mobile thumbnail row — below main image, constrained to photo width */
+.thumbsRow {
+  display: flex;
+  gap: 6px;
+  margin-top: 8px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.thumbsRow::-webkit-scrollbar {
+  display: none;
+}
+
+.thumbsRow .thumbBtn {
+  width: 52px;
+  flex-shrink: 0;
+}
+
 /* Thumbnails */
 .thumbBtn {
   aspect-ratio: 1 / 1;

@@ -169,16 +169,52 @@ export default function ProductModal({ product, visible, onClose, modalBg }: Pro
             transition: (isTouch && slideOut) ? 'transform 0.28s ease-in' : 'transform 0.3s ease, opacity 0.3s ease',
           }}
         >
-          {/* Main grid: image height drives row, text matches it */}
+          {/* Main grid: image col + text col */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 lg:items-stretch">
 
-            {/* Main image only — thumbnails are outside the grid row */}
-            <div
-              className="w-full rounded-lg overflow-hidden"
-              style={{ aspectRatio: '3/4', position: 'relative', background: 'var(--bg-2)', maxHeight: '72vh' }}
-              {...touchHandlers}
-            >
-              <Image src={product.images[activeImg] || product.images[0]} alt={product.name} fill className="object-cover select-none" draggable={false} sizes="(max-width: 768px) 100vw, 50vw" />
+            {/* Image column */}
+            <div>
+              {/* Desktop: thumbs LEFT of main image */}
+              <div className="hidden lg:flex gap-2 items-start">
+                {product.images.length > 1 && (
+                  <div className={s.thumbsCol}>
+                    {product.images.map((img, i) => (
+                      <button key={i} onClick={() => setActiveImg(i)} className={s.thumbBtn}
+                        style={{ outline: i === activeImg ? '2px solid var(--accent)' : '2px solid transparent', outlineOffset: '-2px' }}>
+                        <Image src={img} alt={product.name} fill className="object-cover" sizes="64px" />
+                      </button>
+                    ))}
+                  </div>
+                )}
+                <div
+                  className="flex-1 rounded-lg overflow-hidden"
+                  style={{ aspectRatio: '3/4', position: 'relative', background: 'var(--bg-2)', maxHeight: '72vh' }}
+                  {...touchHandlers}
+                >
+                  <Image src={product.images[activeImg] || product.images[0]} alt={product.name} fill className="object-cover select-none" draggable={false} sizes="40vw" />
+                </div>
+              </div>
+
+              {/* Mobile: image then thumbs below */}
+              <div className="lg:hidden">
+                <div
+                  className="w-full rounded-lg overflow-hidden"
+                  style={{ aspectRatio: '3/4', position: 'relative', background: 'var(--bg-2)' }}
+                  {...touchHandlers}
+                >
+                  <Image src={product.images[activeImg] || product.images[0]} alt={product.name} fill className="object-cover select-none" draggable={false} sizes="100vw" />
+                </div>
+                {product.images.length > 1 && (
+                  <div className={s.thumbsRow}>
+                    {product.images.map((img, i) => (
+                      <button key={i} onClick={() => setActiveImg(i)} className={s.thumbBtn}
+                        style={{ outline: i === activeImg ? '2px solid var(--accent)' : '2px solid transparent', outlineOffset: '-2px' }}>
+                        <Image src={img} alt={product.name} fill className="object-cover" sizes="52px" />
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* Product info — same height as main image */}
@@ -239,30 +275,6 @@ export default function ProductModal({ product, visible, onClose, modalBg }: Pro
               </div>
             </div>
           </div>
-
-          {/* Thumbnails — below the grid, aligned to left column */}
-          {product.images.length > 1 && (
-            <div className="hidden lg:grid mt-4" style={{ gridTemplateColumns: '1fr 1fr', gap: '0 2rem' }}>
-              <div className="grid grid-cols-5 gap-2">
-                {product.images.map((img, i) => (
-                  <button key={i} onClick={() => setActiveImg(i)} className={s.thumbBtn} style={{ outline: i === activeImg ? '2px solid var(--accent)' : '2px solid transparent', outlineOffset: '-2px' }}>
-                    <Image src={img} alt={product.name} fill className="object-cover" sizes="80px" />
-                  </button>
-                ))}
-              </div>
-              <div />
-            </div>
-          )}
-          {/* Thumbnails on mobile — simple row */}
-          {product.images.length > 1 && (
-            <div className="lg:hidden grid grid-cols-5 gap-2 mt-4">
-              {product.images.map((img, i) => (
-                <button key={i} onClick={() => setActiveImg(i)} className={s.thumbBtn} style={{ outline: i === activeImg ? '2px solid var(--accent)' : '2px solid transparent', outlineOffset: '-2px' }}>
-                  <Image src={img} alt={product.name} fill className="object-cover" sizes="80px" />
-                </button>
-              ))}
-            </div>
-          )}
         </div>
       </div>
     </div>
