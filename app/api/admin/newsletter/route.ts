@@ -1,6 +1,7 @@
 import { auth } from '@/lib/auth'
 import { isAdmin } from '@/lib/isAdmin'
 import { queryMany } from '@/lib/db'
+import { ensureNewsletterTables } from '@/lib/newsletter'
 import { NextResponse } from 'next/server'
 
 export async function GET() {
@@ -9,6 +10,7 @@ export async function GET() {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
 
+  await ensureNewsletterTables()
   const rows = await queryMany(
     `SELECT ns.email, ns.subscribed_at, u.name
      FROM newsletter_subscribers ns

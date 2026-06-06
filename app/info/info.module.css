@@ -1,0 +1,203 @@
+.page {
+  background: var(--bg);
+  min-height: 100vh;
+}
+
+.hero {
+  width: 100%;
+  padding: 7rem 1.5rem 3rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.heroInner {
+  max-width: 560px;
+  margin: 0 auto;
+}
+
+.backLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--accent);
+  font-family: var(--font-onder);
+  font-size: 0.6rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  text-decoration: none;
+  opacity: 0.35;
+  margin-bottom: 3rem;
+  transition: opacity 0.15s;
+}
+
+.backLink:hover {
+  opacity: 0.7;
+}
+
+.heading {
+  color: var(--accent);
+  font-family: var(--font-onder);
+  font-size: clamp(4rem, 16vw, 8rem);
+  letter-spacing: 0.04em;
+  line-height: 0.88;
+  margin-bottom: 1.25rem;
+  display: block;
+}
+
+.divider {
+  height: 2px;
+  background: var(--accent);
+  opacity: 0.2;
+  width: 3.5rem;
+  margin-bottom: 0.9rem;
+}
+
+.subhead {
+  font-family: var(--font-involve);
+  font-size: 0.72rem;
+  color: var(--accent);
+  opacity: 0.3;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* Body */
+
+.body {
+  padding: 0 1.5rem 6rem;
+  max-width: 560px;
+  margin: 0 auto;
+}
+
+.tabs {
+  display: flex;
+  gap: 0.5rem;
+  padding: 2.5rem 0 0.25rem;
+  margin-bottom: 2.5rem;
+  overflow-x: auto;
+}
+
+.tabBtn {
+  padding: 0.45rem 1.1rem;
+  font-family: var(--font-onder);
+  font-size: 0.6rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  cursor: pointer;
+  border-radius: 2px;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: box-shadow 0.12s, background 0.12s, color 0.12s, opacity 0.12s;
+  -webkit-tap-highlight-color: transparent;
+  background: transparent;
+  color: var(--accent);
+  border: 1px solid var(--border);
+  box-shadow: 2px 2px 0 var(--border);
+  opacity: 0.5;
+}
+
+.tabBtnActive {
+  background: var(--accent);
+  color: var(--bg);
+  border: 1px solid var(--accent);
+  box-shadow: 2px 2px 0 var(--accent);
+  opacity: 1;
+}
+
+.content {
+  color: var(--accent);
+  font-family: var(--font-involve);
+  font-size: 0.9rem;
+  line-height: 1.85;
+}
+
+.sectionBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.sectionLabel {
+  font-family: var(--font-onder);
+  font-size: 0.6rem;
+  letter-spacing: 0.2em;
+  opacity: 0.4;
+  margin-bottom: 0.5rem;
+  text-transform: uppercase;
+  color: var(--accent);
+  display: block;
+}
+
+.text {
+  opacity: 0.88;
+}
+
+.textNote {
+  opacity: 0.45;
+  font-size: 0.8rem;
+  margin-top: 0.4rem;
+}
+
+.textSub {
+  opacity: 0.45;
+  font-size: 0.8rem;
+  margin-top: 0.4rem;
+  font-style: italic;
+}
+
+/* Contacts */
+
+.socialGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 2.25rem;
+}
+
+.socialGroupLabel {
+  font-family: var(--font-onder);
+  font-size: 0.58rem;
+  letter-spacing: 0.2em;
+  opacity: 0.35;
+  margin-bottom: 0.1rem;
+  text-transform: uppercase;
+  color: var(--accent);
+  display: block;
+}
+
+.socialList {
+  border-top: 1px solid var(--border);
+}
+
+.socialRow {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.85rem 0;
+  border-bottom: 1px solid var(--border);
+  text-decoration: none;
+  color: var(--accent);
+  transition: opacity 0.15s, transform 0.15s;
+}
+
+.socialRow:hover {
+  opacity: 0.65;
+  transform: translateX(4px);
+}
+
+.socialIcon {
+  color: var(--accent);
+  opacity: 0.55;
+  flex-shrink: 0;
+  display: flex;
+}
+
+.socialHandle {
+  font-family: var(--font-involve);
+  font-size: 0.9rem;
+}
+
+.disclaimer {
+  font-size: 0.68rem;
+  opacity: 0.22;
+  margin-top: 0.75rem;
+  font-family: var(--font-involve);
+}

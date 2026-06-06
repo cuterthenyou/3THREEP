@@ -9,6 +9,8 @@ import {
   IconBrandTiktok,
   IconBrandInstagram,
 } from '@tabler/icons-react'
+import BatAnimation from '@/components/BatAnimation'
+import s from './info.module.css'
 
 export type InfoContent = {
   tab1_label: string
@@ -84,51 +86,6 @@ export const INFO_DEFAULTS: InfoContent = {
 
 type TabId = 'delivery' | 'contacts' | 'about'
 
-function SocialRow({
-  href,
-  icon,
-  handle,
-  last = false,
-}: {
-  href: string
-  icon: React.ReactNode
-  label: string
-  handle: string
-  last?: boolean
-}) {
-  return (
-    <a
-      href={href}
-      target="_blank"
-      rel="noopener noreferrer"
-      style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: '0.85rem',
-        padding: '0.7rem 0',
-        borderBottom: last ? 'none' : '1px solid var(--border)',
-        textDecoration: 'none',
-        color: 'var(--accent)',
-        transition: 'opacity 0.15s',
-      }}
-      onMouseEnter={e => (e.currentTarget.style.opacity = '0.7')}
-      onMouseLeave={e => (e.currentTarget.style.opacity = '1')}
-    >
-      <span style={{ color: 'var(--accent)', opacity: 0.75, flexShrink: 0, display: 'flex' }}>{icon}</span>
-      <span style={{ fontFamily: "var(--font-involve)", fontSize: '0.88rem' }}>{handle}</span>
-    </a>
-  )
-}
-
-function InfoSection({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <div>
-      <p style={{ fontFamily: "var(--font-onder)", fontSize: '0.7rem', letterSpacing: '0.16em', opacity: 0.65, marginBottom: '0.6rem', textTransform: 'uppercase', color: 'var(--accent)' }}>{label}</p>
-      {children}
-    </div>
-  )
-}
-
 export default function InfoClient({ content }: { content: InfoContent }) {
   const c = content
   const tabs: { id: TabId; label: string }[] = [
@@ -139,41 +96,28 @@ export default function InfoClient({ content }: { content: InfoContent }) {
   const [tab, setTab] = useState<TabId>('delivery')
 
   return (
-    <main style={{ background: 'var(--bg)', minHeight: '100vh', padding: '2rem 1rem 4rem' }}>
-      <div style={{ maxWidth: '560px', margin: '0 auto' }}>
+    <main className={s.page}>
 
-        <Link href="/" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', color: 'var(--text)', fontFamily: "var(--font-onder)", fontSize: '0.62rem', letterSpacing: '0.14em', textTransform: 'uppercase', textDecoration: 'none', opacity: 0.4, marginBottom: '2.5rem' }}>
-          ← Главная
-        </Link>
+      {/* Cinematic hero header */}
+      <div className={s.hero}>
+        <div className={s.heroInner}>
+          <Link href="/" className={s.backLink}>← Главная</Link>
+          <span className={s.heading}>ИНФА</span>
+          <div className={s.divider} />
+          <p className={s.subhead}>О бренде · Доставка · Контакты</p>
+        </div>
+      </div>
 
-        <h1 style={{ color: 'var(--accent)', fontFamily: "var(--font-onder)", fontSize: 'clamp(2rem, 8vw, 3.2rem)', marginBottom: '0.5rem', letterSpacing: '0.05em', lineHeight: 1 }}>
-          ИНФА
-        </h1>
-        <div style={{ height: '2px', background: 'var(--accent)', opacity: 0.4, marginBottom: '2rem', width: '3rem' }} />
+      {/* Body */}
+      <div className={s.body}>
 
         {/* Tabs */}
-        <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '2.5rem', overflowX: 'auto' }}>
+        <div className={s.tabs}>
           {tabs.map(t => (
             <button
               key={t.id}
               onClick={() => setTab(t.id)}
-              style={{
-                padding: '0.4rem 1rem',
-                fontFamily: "var(--font-onder)",
-                fontSize: '0.62rem',
-                letterSpacing: '0.1em',
-                textTransform: 'uppercase',
-                cursor: 'pointer',
-                borderRadius: '3px',
-                whiteSpace: 'nowrap',
-                flexShrink: 0,
-                transition: 'box-shadow 0.12s, transform 0.1s, opacity 0.15s',
-                WebkitTapHighlightColor: 'transparent',
-                ...(tab === t.id
-                  ? { background: 'var(--accent)', color: 'var(--bg)', border: '1px solid var(--accent)', boxShadow: '2px 2px 0 var(--accent)' }
-                  : { background: 'transparent', color: 'var(--accent)', border: '1px solid var(--border)', boxShadow: '2px 2px 0 var(--border)', opacity: 0.55 }
-                ),
-              }}
+              className={`${s.tabBtn} ${tab === t.id ? s.tabBtnActive : ''}`}
             >
               {t.label}
             </button>
@@ -181,60 +125,85 @@ export default function InfoClient({ content }: { content: InfoContent }) {
         </div>
 
         {/* Content */}
-        <div style={{ color: 'var(--accent)', fontFamily: "var(--font-involve)", fontSize: '0.9rem', lineHeight: 1.8 }}>
+        <div className={s.content}>
 
           {tab === 'delivery' && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.75rem' }}>
-              <p style={{ opacity: 0.88 }}>{c.delivery_intro}</p>
-              <InfoSection label={c.payment_heading}>
-                <p style={{ opacity: 0.88 }}>{c.payment_text}</p>
-              </InfoSection>
-              <InfoSection label={c.delivery_heading}>
-                <p style={{ opacity: 0.88 }}>{c.delivery_text}</p>
-                <p style={{ opacity: 0.5, fontSize: '0.82rem', marginTop: '0.4rem' }}>{c.delivery_note}</p>
-              </InfoSection>
+            <div className={s.sectionBlock}>
+              <p className={s.text}>{c.delivery_intro}</p>
+              <div>
+                <span className={s.sectionLabel}>{c.payment_heading}</span>
+                <p className={s.text}>{c.payment_text}</p>
+              </div>
+              <div>
+                <span className={s.sectionLabel}>{c.delivery_heading}</span>
+                <p className={s.text}>{c.delivery_text}</p>
+                <p className={s.textNote}>{c.delivery_note}</p>
+              </div>
             </div>
           )}
 
           {tab === 'contacts' && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+            <div className={s.socialGroup}>
               <div>
-                <p style={{ fontFamily: "var(--font-onder)", fontSize: '0.6rem', letterSpacing: '0.16em', opacity: 0.4, marginBottom: '0.25rem', textTransform: 'uppercase' }}>{c.write_heading}</p>
-                <div style={{ borderTop: '1px solid var(--border)' }}>
-                  <SocialRow href={c.vk_url} icon={<IconBrandVk size={18} />} label={c.vk_label} handle={c.vk_handle} />
-                  <SocialRow href={c.tg_url} icon={<IconBrandTelegram size={18} />} label={c.tg_label} handle={c.tg_handle} />
-                  <SocialRow href={`mailto:${c.mail_email}`} icon={<IconMail size={18} />} label={c.mail_label} handle={c.mail_email} last />
+                <span className={s.socialGroupLabel}>{c.write_heading}</span>
+                <div className={s.socialList}>
+                  <a href={c.vk_url} target="_blank" rel="noopener noreferrer" className={s.socialRow}>
+                    <span className={s.socialIcon}><IconBrandVk size={18}/></span>
+                    <span className={s.socialHandle}>{c.vk_handle}</span>
+                  </a>
+                  <a href={c.tg_url} target="_blank" rel="noopener noreferrer" className={s.socialRow}>
+                    <span className={s.socialIcon}><IconBrandTelegram size={18}/></span>
+                    <span className={s.socialHandle}>{c.tg_handle}</span>
+                  </a>
+                  <a href={`mailto:${c.mail_email}`} className={s.socialRow}>
+                    <span className={s.socialIcon}><IconMail size={18}/></span>
+                    <span className={s.socialHandle}>{c.mail_email}</span>
+                  </a>
                 </div>
               </div>
               <div>
-                <p style={{ fontFamily: "var(--font-onder)", fontSize: '0.6rem', letterSpacing: '0.16em', opacity: 0.4, marginBottom: '0.25rem', textTransform: 'uppercase' }}>{c.follow_heading}</p>
-                <div style={{ borderTop: '1px solid var(--border)' }}>
-                  <SocialRow href={c.vk_community_url} icon={<IconBrandVk size={18} />} label="VK" handle={c.vk_community_handle} />
-                  <SocialRow href={c.tiktok_url} icon={<IconBrandTiktok size={18} />} label="TT" handle={c.tiktok_handle} />
-                  <SocialRow href={c.instagram_url} icon={<IconBrandInstagram size={18} />} label="IG*" handle={c.instagram_handle} last />
+                <span className={s.socialGroupLabel}>{c.follow_heading}</span>
+                <div className={s.socialList}>
+                  <a href={c.vk_community_url} target="_blank" rel="noopener noreferrer" className={s.socialRow}>
+                    <span className={s.socialIcon}><IconBrandVk size={18}/></span>
+                    <span className={s.socialHandle}>{c.vk_community_handle}</span>
+                  </a>
+                  <a href={c.tiktok_url} target="_blank" rel="noopener noreferrer" className={s.socialRow}>
+                    <span className={s.socialIcon}><IconBrandTiktok size={18}/></span>
+                    <span className={s.socialHandle}>{c.tiktok_handle}</span>
+                  </a>
+                  <a href={c.instagram_url} target="_blank" rel="noopener noreferrer" className={s.socialRow}>
+                    <span className={s.socialIcon}><IconBrandInstagram size={18}/></span>
+                    <span className={s.socialHandle}>{c.instagram_handle}</span>
+                  </a>
                 </div>
-                <p style={{ fontSize: '0.7rem', opacity: 0.3, marginTop: '0.75rem', fontFamily: "var(--font-involve)" }}>{c.contacts_meta_disclaimer}</p>
+                <p className={s.disclaimer}>{c.contacts_meta_disclaimer}</p>
               </div>
             </div>
           )}
 
           {tab === 'about' && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.75rem' }}>
-              <InfoSection label={c.location_heading}>
-                <p style={{ opacity: 0.88 }}>{c.location_text}</p>
-              </InfoSection>
-              <InfoSection label={c.what_heading}>
-                <p style={{ opacity: 0.88 }}>{c.what_text}</p>
-                <p style={{ opacity: 0.45, fontSize: '0.82rem', marginTop: '0.5rem', fontStyle: 'italic' }}>{c.what_subtext}</p>
-              </InfoSection>
-              <InfoSection label={c.how_heading}>
-                <p style={{ opacity: 0.88 }}>{c.how_text}</p>
-              </InfoSection>
+            <div className={s.sectionBlock}>
+              <div>
+                <span className={s.sectionLabel}>{c.location_heading}</span>
+                <p className={s.text}>{c.location_text}</p>
+              </div>
+              <div>
+                <span className={s.sectionLabel}>{c.what_heading}</span>
+                <p className={s.text}>{c.what_text}</p>
+                <p className={s.textSub}>{c.what_subtext}</p>
+              </div>
+              <div>
+                <span className={s.sectionLabel}>{c.how_heading}</span>
+                <p className={s.text}>{c.how_text}</p>
+              </div>
             </div>
           )}
 
         </div>
       </div>
+
+      <BatAnimation />
     </main>
   )
 }

@@ -1,5 +1,6 @@
 import { auth } from '@/lib/auth'
 import { query } from '@/lib/db'
+import { ensureNewsletterTables } from '@/lib/newsletter'
 import { NextResponse } from 'next/server'
 
 export async function POST() {
@@ -8,6 +9,7 @@ export async function POST() {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
+  await ensureNewsletterTables()
   await query(
     `UPDATE users SET newsletter_subscription = true WHERE id = $1`,
     [session.user.id]

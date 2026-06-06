@@ -1,21 +1,16 @@
 'use client'
 
-import React, { useState, useEffect, useCallback } from 'react'
+import React, { useState, useEffect, useCallback, useRef } from 'react'
 import { useSearchParams } from 'next/navigation'
 import type { Product, ProductCategory, Category } from '@/lib/types'
 import ProductModal from './ProductModal'
 import ProductCard from './ProductCard'
 import s from './CatalogSection.module.css'
 
-type Cols = 1 | 2 | 3
+type Cols = 2 | 3
 
-function GridIcon({ cols, active }: { cols: Cols; active: boolean }) {
+function GridIcon({ cols, active }: { cols: 2 | 3; active: boolean }) {
   const c = active ? 'var(--bg)' : 'var(--accent)'
-  if (cols === 1) return (
-    <svg width="14" height="14" viewBox="0 0 14 14" fill={c}>
-      <rect x="1" y="1" width="12" height="12" rx="1"/>
-    </svg>
-  )
   if (cols === 2) return (
     <svg width="14" height="14" viewBox="0 0 14 14" fill={c}>
       <rect x="1"   y="1" width="5.5" height="12" rx="1"/>
@@ -32,9 +27,8 @@ function GridIcon({ cols, active }: { cols: Cols; active: boolean }) {
 }
 
 const GRID_CLASS: Record<Cols, string> = {
-  1: 'grid-cols-1',
-  2: 'grid-cols-2',
-  3: 'grid-cols-2 lg:grid-cols-3',
+  2: 'grid-cols-1 sm:grid-cols-2',
+  3: 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3',
 }
 
 interface Props {
@@ -54,11 +48,14 @@ export default function CatalogSection({ products, categories, categoryData = {}
   const [modalVisible, setModalVisible] = useState(false)
   const [modalBg, setModalBg] = useState<string | null>(null)
   const [isDark, setIsDark] = useState(false)
-  const [cols, setCols] = useState<Cols>(3)
+  const [cols, setCols] = useState<Cols>(2)
+  const savedScrollRef = useRef<number>(0)
 
   useEffect(() => {
     const saved = localStorage.getItem('catalog-cols')
-    if (saved === '1' || saved === '2' || saved === '3') setCols(Number(saved) as Cols)
+    if (saved === '3') { setCols(3); return }
+    if (saved === '2') { setCols(2); return }
+    if (saved === '1') { localStorage.setItem('catalog-cols', '2') }
   }, [])
 
   function setColsAndSave(n: Cols) {
@@ -84,7 +81,6 @@ export default function CatalogSection({ products, categories, categoryData = {}
     }
   }, [rawCategory, rawType])
 
-
   const categoryFiltered = activeCategory === 'all'
     ? products
     : products.filter(p => p.category === activeCategory)
@@ -103,19 +99,18 @@ export default function CatalogSection({ products, categories, categoryData = {}
       : (cat?.modal_bg_url ?? cat?.modal_bg_url_dark ?? null)
     )
     requestAnimationFrame(() => setModalVisible(true))
-    const y = window.scrollY
-    document.body.style.top = `-${y}px`
+    savedScrollRef.current = window.scrollY
+    document.body.style.top = `-${savedScrollRef.current}px`
     document.body.style.position = 'fixed'
     document.body.style.width = '100%'
   }, [categoryData, isDark])
 
   const closeModal = useCallback(() => {
     setModalVisible(false)
-    const top = parseFloat(document.body.style.top || '0')
     document.body.style.position = ''
     document.body.style.top = ''
     document.body.style.width = ''
-    if (top) window.scrollTo(0, -top)
+    window.scrollTo(0, savedScrollRef.current)
     setTimeout(() => setOpenProduct(null), 300)
   }, [])
 
@@ -136,7 +131,7 @@ export default function CatalogSection({ products, categories, categoryData = {}
         </div>
       </div>
 
-      {/* Collection logo TOP — only when a collection is selected */}
+      {/* Collection logo TOP */}
       {activeCategory !== 'all' && (() => {
         const activeCat = categoryData[activeCategory]
         const logoTop = activeCat?.logo_top_url
@@ -166,10 +161,10 @@ export default function CatalogSection({ products, categories, categoryData = {}
 
       {/* Product grid */}
       <section className="w-full px-6 sm:px-8 py-10">
-        {/* Grid switcher */}
-        <div className="flex justify-end mb-5 max-w-6xl mx-auto">
+        {/* Grid switcher — desktop only */}
+        <div className="hidden sm:flex justify-end mb-5 max-w-6xl mx-auto">
           <div className="flex gap-1">
-            {([1, 2, 3] as const).map(n => (
+            {([2, 3] as const).map(n => (
               <button
                 key={n}
                 onClick={() => setColsAndSave(n)}
@@ -201,7 +196,7 @@ export default function CatalogSection({ products, categories, categoryData = {}
         </div>
       </section>
 
-      {/* Collection description — between cards and bottom logo */}
+      {/* Collection description */}
       {activeCategory !== 'all' && (() => {
         const desc = categoryData[activeCategory]?.description
         return desc ? (
@@ -220,7 +215,7 @@ export default function CatalogSection({ products, categories, categoryData = {}
         ) : null
       })()}
 
-      {/* Collection logo BOTTOM — only when a collection is selected */}
+      {/* Collection logo BOTTOM */}
       {activeCategory !== 'all' && (() => {
         const activeCat = categoryData[activeCategory]
         const logoBottom = activeCat?.logo_bottom_url
