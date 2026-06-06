@@ -235,7 +235,7 @@ export default function ProductModal({ product, visible, onClose, modalBg }: Pro
                   <p className={`text-lg sm:text-xl ${s.price}`}>{product.price.toLocaleString('ru-RU')} RUB</p>
                 </div>
 
-                <p className={`text-sm ${s.description}`}>{product.description}</p>
+                <p className={`text-sm ${s.description}`} style={{ whiteSpace: 'pre-wrap' }}>{product.description}</p>
               </div>
 
               {/* Bottom section — details, sizes, button */}

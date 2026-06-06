@@ -1,7 +1,7 @@
 import { Suspense } from 'react';
 import Header from '@/components/Header';
 import Hero from '@/components/Hero';
-// import HeroTransition from '@/components/HeroTransition'; // disabled — needs redesign
+import TornEdge from '@/components/TornEdge';
 import CatalogSection from '@/components/CatalogSection';
 import Footer from '@/components/Footer';
 import { queryMany } from '@/lib/db';
@@ -79,14 +79,7 @@ export default async function HomePage() {
     <main className="min-h-screen">
       <Header isAdminUser={isAdminUser} initialCollections={initialCollections} />
       <Hero videoUrl={heroVideoUrl} />
-      <div style={{ position: 'relative', marginTop: '-100px', zIndex: 2, lineHeight: 0 }}>
-        <svg viewBox="0 0 1440 100" preserveAspectRatio="none" style={{ display: 'block', width: '100%', height: 100 }}>
-          <path
-            d="M0,100 L0,62 L120,22 L240,68 L360,16 L480,66 L600,22 L720,72 L840,18 L960,66 L1080,24 L1200,70 L1320,20 L1440,58 L1440,100 Z"
-            fill="var(--bg)"
-          />
-        </svg>
-      </div>
+      <TornEdge />
       <Suspense fallback={<div id="catalog" />}>
         <CatalogSection products={products} categories={categories} categoryData={categoryData} />
       </Suspense>
