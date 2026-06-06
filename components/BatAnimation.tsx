@@ -8,12 +8,22 @@ type FlightClass = typeof FLIGHT_CLASSES[number]
 
 function BatSvg() {
   return (
-    <svg width="72" height="36" viewBox="0 0 72 36" fill="currentColor" aria-hidden="true">
-      <path d="M28,20 L0,4 L4,28 L18,24 L24,20 Z"/>
-      <path d="M44,20 L72,4 L68,28 L54,24 L48,20 Z"/>
-      <ellipse cx="36" cy="20" rx="10" ry="12"/>
-      <polygon points="30,8 27,0 34,10"/>
-      <polygon points="42,8 38,10 45,0"/>
+    <svg width="100" height="50" viewBox="0 0 100 50" fill="currentColor" aria-hidden="true">
+      {/* Left wing — scalloped 2-lobe edge */}
+      <path d="M30,24 L0,5 L7,17 L0,25 L9,34 L22,36 L28,28 Z"/>
+      {/* Right wing — mirror */}
+      <path d="M70,24 L100,5 L93,17 L100,25 L91,34 L78,36 L72,28 Z"/>
+      {/* Body */}
+      <polygon points="50,8 56,12 58,20 55,30 52,36 50,38 48,36 45,30 42,20 44,12"/>
+      {/* Left ear */}
+      <polygon points="43,10 38,1 47,14"/>
+      {/* Right ear */}
+      <polygon points="57,10 53,14 62,1"/>
+      {/* Eyes */}
+      <circle cx="46" cy="18" r="2.5" style={{fill:'var(--bg)'}}/>
+      <circle cx="54" cy="18" r="2.5" style={{fill:'var(--bg)'}}/>
+      {/* Nose */}
+      <circle cx="50" cy="24" r="1.5" style={{fill:'var(--bg)'}}/>
     </svg>
   )
 }
@@ -39,7 +49,7 @@ export default function BatAnimation() {
   }
 
   useEffect(() => {
-    scheduleNext(5000)
+    scheduleNext(3000)
     return () => { if (nextTimerRef.current) clearTimeout(nextTimerRef.current) }
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -52,8 +62,8 @@ export default function BatAnimation() {
   function handleClick() {
     setFlying(false)
     if (nextTimerRef.current) clearTimeout(nextTimerRef.current)
-    blockedUntilRef.current = Date.now() + 10000
-    scheduleNext(10500)
+    blockedUntilRef.current = Date.now() + 3000
+    scheduleNext(3100)
   }
 
   if (!flying) return null

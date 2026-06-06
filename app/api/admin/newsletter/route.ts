@@ -12,9 +12,9 @@ export async function GET() {
 
   await ensureNewsletterTables()
   const rows = await queryMany(
-    `SELECT ns.email, ns.subscribed_at, u.name
+    `SELECT ns.email, ns.subscribed_at, p.name
      FROM newsletter_subscribers ns
-     LEFT JOIN users u ON u.id = ns.user_id
+     LEFT JOIN profiles p ON p.id = ns.user_id
      ORDER BY ns.subscribed_at DESC`
   )
 

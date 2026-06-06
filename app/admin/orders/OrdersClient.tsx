@@ -23,6 +23,14 @@ interface Order {
   guest_email: string | null
 }
 
+function TrashIcon() {
+  return (
+    <svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="square">
+      <path d="M2 3h9M5 3V2h3v1M4 3l.5 8M9 3l-.5 8M6.5 3v8"/>
+    </svg>
+  )
+}
+
 export default function OrdersClient({ orders }: { orders: Order[] }) {
   const router = useRouter()
   const pathname = usePathname()
@@ -32,6 +40,8 @@ export default function OrdersClient({ orders }: { orders: Order[] }) {
   const [filterStatus, setFilterStatus] = useState(searchParams.get('status') ?? 'all')
   const [sortKey, setSortKey] = useState<SortKey>((searchParams.get('sort') as SortKey) ?? 'date')
   const [sortDir, setSortDir] = useState<SortDir>((searchParams.get('dir') as SortDir) ?? 'desc')
+  const [confirmId, setConfirmId] = useState<string | null>(null)
+  const [deleting, setDeleting] = useState(false)
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -49,6 +59,14 @@ export default function OrdersClient({ orders }: { orders: Order[] }) {
   function toggleSort(key: SortKey) {
     if (sortKey === key) setSortDir(d => d === 'asc' ? 'desc' : 'asc')
     else { setSortKey(key); setSortDir('asc') }
+  }
+
+  async function deleteOrder(id: string) {
+    setDeleting(true)
+    await fetch(`/api/admin/orders/${id}`, { method: 'DELETE' })
+    setDeleting(false)
+    setConfirmId(null)
+    router.refresh()
   }
 
   const filtered = useMemo(() => {
@@ -120,52 +138,143 @@ export default function OrdersClient({ orders }: { orders: Order[] }) {
         {filtered.map((order) => {
           const profile = order.profiles as Record<string, unknown> | null
           const items = order.order_items ?? []
+          const isConfirming = confirmId === order.id
 
           return (
-            <Link
-              key={order.id}
-              href={`/admin/orders/${order.id}`}
-              className={a.orderCard}
-            >
-              {/* Zone 1: ID left, status + date right */}
-              <div className="flex items-center justify-between gap-2 flex-wrap">
-                <span className="text-xs uppercase tracking-widest" style={{ color: 'var(--accent)', opacity: 0.5, fontFamily: "var(--font-involve)" }}>
-                  #{order.id.slice(0, 8)}
-                </span>
-                <div className="flex items-center gap-2">
-                  <span className="text-xs px-2 py-0.5 uppercase tracking-widest"
-                    style={{ borderRadius: '2px', background: 'var(--bg-subtle)', color: STATUS_COLORS[order.status as OrderStatus], fontFamily: "var(--font-onder)", fontSize: '0.6rem', border: '1px solid var(--border)' }}>
-                    {ORDER_STATUS_LABELS[order.status as OrderStatus]}
+            <div key={order.id} style={{ position: 'relative' }}>
+              <Link href={`/admin/orders/${order.id}`} className={a.orderCard} style={{ display: 'block' }}>
+                {/* Zone 1: ID left, status + date right */}
+                <div className="flex items-center justify-between gap-2 flex-wrap">
+                  <span className="text-xs uppercase tracking-widest" style={{ color: 'var(--accent)', opacity: 0.5, fontFamily: "var(--font-involve)" }}>
+                    #{order.id.slice(0, 8)}
                   </span>
-                  <span className="text-xs" style={{ color: 'var(--accent)', opacity: 0.4, fontFamily: "var(--font-involve)" }}>
-                    {new Date(order.created_at).toLocaleDateString('ru-RU')}
-                  </span>
+                  <div className="flex items-center gap-2" style={{ paddingRight: '2rem' }}>
+                    <span className="text-xs px-2 py-0.5 uppercase tracking-widest"
+                      style={{ borderRadius: '2px', background: 'var(--bg-subtle)', color: STATUS_COLORS[order.status as OrderStatus], fontFamily: "var(--font-onder)", fontSize: '0.6rem', border: '1px solid var(--border)' }}>
+                      {ORDER_STATUS_LABELS[order.status as OrderStatus]}
+                    </span>
+                    <span className="text-xs" style={{ color: 'var(--accent)', opacity: 0.4, fontFamily: "var(--font-involve)" }}>
+                      {new Date(order.created_at).toLocaleDateString('ru-RU')}
+                    </span>
+                  </div>
                 </div>
-              </div>
-              {/* Zone 2: items + user */}
-              <div className="flex flex-col gap-0.5">
-                {items.map((item) => (
-                  <span key={String(item.id)} className="text-sm" style={{ color: 'var(--accent)', fontFamily: "var(--font-involve)" }}>
-                    {String(item.product_name)}{item.size ? ` / ${item.size}` : ''} × {Number(item.quantity)}
-                  </span>
-                ))}
-                {profile ? (
-                  <p className="text-xs" style={{ color: 'var(--accent)', opacity: 0.4, fontFamily: "var(--font-involve)" }}>
-                    {String(profile.name || profile.email || '')}
+                {/* Zone 2: items + user */}
+                <div className="flex flex-col gap-0.5">
+                  {items.map((item) => (
+                    <span key={String(item.id)} className="text-sm" style={{ color: 'var(--accent)', fontFamily: "var(--font-involve)" }}>
+                      {String(item.product_name)}{item.size ? ` / ${item.size}` : ''} × {Number(item.quantity)}
+                    </span>
+                  ))}
+                  {profile ? (
+                    <p className="text-xs" style={{ color: 'var(--accent)', opacity: 0.4, fontFamily: "var(--font-involve)" }}>
+                      {String(profile.name || profile.email || '')}
+                    </p>
+                  ) : (order.guest_name || order.guest_email) ? (
+                    <p className="text-xs" style={{ color: 'var(--accent)', opacity: 0.4, fontFamily: "var(--font-involve)" }}>
+                      Гость: {[order.guest_name, order.guest_email].filter(Boolean).join(' · ')}
+                    </p>
+                  ) : null}
+                </div>
+                {/* Zone 3: price right-aligned */}
+                <div className="flex justify-end">
+                  <p className="text-lg" style={{ color: 'var(--accent)', fontFamily: "var(--font-deutsch)" }}>
+                    {formatPrice(order.total)}
                   </p>
-                ) : (order.guest_name || order.guest_email) ? (
-                  <p className="text-xs" style={{ color: 'var(--accent)', opacity: 0.4, fontFamily: "var(--font-involve)" }}>
-                    Гость: {[order.guest_name, order.guest_email].filter(Boolean).join(' · ')}
+                </div>
+              </Link>
+
+              {/* Delete button */}
+              <button
+                onClick={e => { e.stopPropagation(); setConfirmId(isConfirming ? null : order.id) }}
+                title="Удалить заказ"
+                style={{
+                  position: 'absolute',
+                  top: '0.6rem',
+                  right: '0.6rem',
+                  width: '26px',
+                  height: '26px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  background: 'transparent',
+                  border: '1px solid var(--border)',
+                  borderRadius: '2px',
+                  cursor: 'pointer',
+                  color: 'var(--accent)',
+                  opacity: isConfirming ? 1 : 0.35,
+                  transition: 'opacity 0.15s, border-color 0.15s',
+                  zIndex: 2,
+                }}
+                onMouseEnter={e => (e.currentTarget.style.opacity = '0.75')}
+                onMouseLeave={e => (e.currentTarget.style.opacity = isConfirming ? '1' : '0.35')}
+              >
+                <TrashIcon />
+              </button>
+
+              {/* Inline confirmation */}
+              {isConfirming && (
+                <div
+                  style={{
+                    position: 'absolute',
+                    inset: 0,
+                    zIndex: 10,
+                    background: 'var(--bg)',
+                    border: '1px solid var(--accent)',
+                    boxShadow: '3px 3px 0 var(--accent)',
+                    borderRadius: '4px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '1rem',
+                    padding: '0 1.5rem',
+                  }}
+                >
+                  <p style={{ fontFamily: 'var(--font-involve)', fontSize: '0.82rem', color: 'var(--accent)', flex: 1 }}>
+                    Удалить заказ <span style={{ opacity: 0.5 }}>#{order.id.slice(0, 8)}</span>?
                   </p>
-                ) : null}
-              </div>
-              {/* Zone 3: price right-aligned */}
-              <div className="flex justify-end">
-                <p className="text-lg" style={{ color: 'var(--accent)', fontFamily: "var(--font-deutsch)" }}>
-                  {formatPrice(order.total)}
-                </p>
-              </div>
-            </Link>
+                  <button
+                    onClick={() => deleteOrder(order.id)}
+                    disabled={deleting}
+                    style={{
+                      padding: '0.35rem 0.9rem',
+                      background: 'var(--accent)',
+                      color: 'var(--bg)',
+                      border: '1px solid var(--accent)',
+                      boxShadow: '2px 2px 0 var(--accent)',
+                      borderRadius: '2px',
+                      fontFamily: 'var(--font-onder)',
+                      fontSize: '0.6rem',
+                      letterSpacing: '0.1em',
+                      textTransform: 'uppercase',
+                      cursor: deleting ? 'wait' : 'pointer',
+                      opacity: deleting ? 0.6 : 1,
+                      flexShrink: 0,
+                    }}
+                  >
+                    {deleting ? '...' : 'Да, удалить'}
+                  </button>
+                  <button
+                    onClick={() => setConfirmId(null)}
+                    style={{
+                      padding: '0.35rem 0.9rem',
+                      background: 'transparent',
+                      color: 'var(--accent)',
+                      border: '1px solid var(--border)',
+                      boxShadow: '2px 2px 0 var(--border)',
+                      borderRadius: '2px',
+                      fontFamily: 'var(--font-onder)',
+                      fontSize: '0.6rem',
+                      letterSpacing: '0.1em',
+                      textTransform: 'uppercase',
+                      cursor: 'pointer',
+                      flexShrink: 0,
+                    }}
+                  >
+                    Отмена
+                  </button>
+                </div>
+              )}
+            </div>
           )
         })}
       </div>
