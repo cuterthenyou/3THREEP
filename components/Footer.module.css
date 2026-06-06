@@ -21,24 +21,24 @@
 }
 
 .socialBtn {
-  background: rgba(0, 0, 0, 0.12);
+  background: var(--shadow-on-card-xs);
   color: var(--bg);
   cursor: pointer;
   border-radius: 2px;
-  border: 1px solid rgba(0, 0, 0, 0.18);
-  box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.18);
+  border: 1px solid var(--shadow-on-card-md);
+  box-shadow: 2px 2px 0 var(--shadow-on-card-md);
   transition: box-shadow 0.12s, transform 0.1s, background 0.15s;
   -webkit-tap-highlight-color: transparent;
 }
 
 .socialBtn:hover {
-  background: rgba(0, 0, 0, 0.22);
-  box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.28);
+  background: var(--shadow-on-card-lg);
+  box-shadow: 3px 3px 0 var(--shadow-on-card-xl);
   transform: translate(-1px, -1px);
 }
 
 .socialBtn:active {
-  box-shadow: 1px 1px 0 rgba(0, 0, 0, 0.18);
+  box-shadow: 1px 1px 0 var(--shadow-on-card-md);
   transform: translate(1px, 1px);
   transition-duration: 0.08s;
 }

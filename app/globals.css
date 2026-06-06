@@ -65,6 +65,20 @@
   /* ── Overlay backdrops (theme-agnostic black tints) ── */
   --overlay-heavy:  rgba(0, 0, 0, 0.75);
   --overlay-medium: rgba(0, 0, 0, 0.55);
+  --overlay-avatar: rgba(0, 0, 0, 0.60);
+
+  /* ── Shadow on card (black tints for elements on accent-bg card, always pure black) ── */
+  --shadow-on-card-xs:  rgba(0, 0, 0, 0.12);
+  --shadow-on-card-sm:  rgba(0, 0, 0, 0.15);
+  --shadow-on-card-md:  rgba(0, 0, 0, 0.18);
+  --shadow-on-card-lg:  rgba(0, 0, 0, 0.22);
+  --shadow-on-card-xl:  rgba(0, 0, 0, 0.28);
+  --shadow-on-card-2xl: rgba(0, 0, 0, 0.35);
+
+  /* ── Theme-aware soft glows (light theme values) ── */
+  --accent-glow:       rgba(242, 151, 116, 0.35);
+  --status-paid-soft:  rgba(46, 107, 70, 0.15);
+  --status-error-soft: rgba(138, 32, 32, 0.15);
 
   /* ── Status colors (light/terracotta theme — darker tones readable on red bg) ── */
   --status-new:         #c4501a;
@@ -101,6 +115,11 @@
 
   /* ── Card theming — dark bg contrasts on pink card ── */
   --text-on-card: var(--bg);
+
+  /* ── Theme-aware soft glows (dark theme values) ── */
+  --accent-glow:       rgba(252, 176, 178, 0.35);
+  --status-paid-soft:  rgba(126, 200, 154, 0.15);
+  --status-error-soft: rgba(224, 85, 85, 0.15);
 
   /* ── Status colors (dark theme — vibrant, pop on dark background) ── */
   --status-new:         #F29774;

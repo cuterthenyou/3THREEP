@@ -5,6 +5,9 @@ import { useRouter, useSearchParams, usePathname } from 'next/navigation'
 import Image from 'next/image'
 import type { Product } from '@/lib/types'
 import a from '../admin.module.css'
+import { INPUT_STYLE, LABEL_STYLE, CHECKBOARD_LIGHT, CHECKBOARD_DARK } from '../adminStyles'
+import { AdminPageTitle, AdminEmptyState, AdminModal } from '../components'
+import { formatPrice } from '@/lib/utils'
 
 const PRODUCT_TYPES = ['T-Shirt', 'Hoodie', 'Sweatshirt', 'Pants', 'Accessory', 'Other']
 
@@ -14,21 +17,6 @@ const EMPTY: Omit<Product, 'id' | 'created_at'> = {
   colors: [], stock: 10, active: true, category: '', product_type: 'T-Shirt', bg_url: null, bg_url_dark: null,
   grade: null, series: null, article: null, material: null, cut: null,
 }
-
-const INPUT_STYLE = {
-  background: 'var(--bg-subtle)',
-  color: 'var(--accent)',
-  border: '1px solid var(--border)',
-  fontFamily: "var(--font-involve)",
-}
-
-const LABEL_STYLE = {
-  color: 'var(--accent)',
-  opacity: 0.5,
-  fontFamily: "var(--font-onder)",
-}
-
-function formatPrice(p: number) { return p.toLocaleString('ru-RU') + ' ₽' }
 
 function Inp({ label, value, onChange, type = 'text' }: { label: string; value: string | number; onChange: (v: string) => void; type?: string }) {
   return (
@@ -228,10 +216,7 @@ export default function ProductsClient({ products }: { products: Product[] }) {
   return (
     <div className="px-6 py-6 max-w-4xl mx-auto">
       <div className="flex items-center justify-between mb-4">
-        <h1 className="uppercase tracking-widest"
-          style={{ color: 'var(--accent)', fontFamily: "var(--font-onder)", fontSize: 'clamp(0.9rem, 3vw, 1.1rem)' }}>
-          Товары ({filtered.length}/{products.length})
-        </h1>
+        <AdminPageTitle>Товары ({filtered.length}/{products.length})</AdminPageTitle>
         <button onClick={openNew} className={a.btn}>
           + Добавить товар
         </button>
@@ -245,18 +230,18 @@ export default function ProductsClient({ products }: { products: Product[] }) {
           value={search}
           onChange={e => setSearch(e.target.value)}
           className="flex-1 min-w-[180px] px-3 py-2 rounded-lg text-sm outline-none"
-          style={{ background: 'rgba(242,151,116,0.08)', color: 'var(--accent)', border: '1px solid rgba(242,151,116,0.2)', fontFamily: "var(--font-involve)" }}
+          style={{ background: 'var(--bg-subtle)', color: 'var(--accent)', border: '1px solid var(--border)', fontFamily: "var(--font-involve)" }}
         />
         <select value={filterActive} onChange={e => setFilterActive(e.target.value)}
           className="px-3 py-2 rounded-lg text-xs outline-none"
-          style={{ background: 'rgba(242,151,116,0.08)', color: 'var(--accent)', border: '1px solid rgba(242,151,116,0.2)', fontFamily: "var(--font-involve)" }}>
+          style={{ background: 'var(--bg-subtle)', color: 'var(--accent)', border: '1px solid var(--border)', fontFamily: "var(--font-involve)" }}>
           <option value="all">Все статусы</option>
           <option value="active">Активные</option>
           <option value="hidden">Скрытые</option>
         </select>
         <select value={filterStock} onChange={e => setFilterStock(e.target.value)}
           className="px-3 py-2 rounded-lg text-xs outline-none"
-          style={{ background: 'rgba(242,151,116,0.08)', color: 'var(--accent)', border: '1px solid rgba(242,151,116,0.2)', fontFamily: "var(--font-involve)" }}>
+          style={{ background: 'var(--bg-subtle)', color: 'var(--accent)', border: '1px solid var(--border)', fontFamily: "var(--font-involve)" }}>
           <option value="all">Любой остаток</option>
           <option value="in">В наличии</option>
           <option value="out">Нет в наличии</option>
@@ -275,9 +260,7 @@ export default function ProductsClient({ products }: { products: Product[] }) {
 
       <div className="flex flex-col gap-3">
         {filtered.length === 0 && (
-          <p className="text-sm" style={{ color: 'var(--accent)', opacity: 0.4, fontFamily: "var(--font-involve)" }}>
-            Ничего не найдено
-          </p>
+          <AdminEmptyState>Ничего не найдено</AdminEmptyState>
         )}
         {filtered.map(p => (
           <div key={p.id} className="rounded-xl p-3"
@@ -310,18 +293,7 @@ export default function ProductsClient({ products }: { products: Product[] }) {
       </div>
 
       {editing && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4"
-          style={{ background: 'var(--overlay-heavy)' }}>
-          <div className="w-full max-w-lg rounded-2xl p-6 flex flex-col gap-4 overflow-y-auto max-h-[92vh]"
-            style={{ background: 'var(--bg-2)', border: '1px solid rgba(242,151,116,0.25)' }}>
-
-            <div className="flex items-center justify-between">
-              <h2 className="text-lg uppercase tracking-widest"
-                style={{ color: 'var(--accent)', fontFamily: "var(--font-involve)", fontWeight: 800 }}>
-                {editing.id ? 'Редактировать' : 'Новый товар'}
-              </h2>
-              <button onClick={() => setEditing(null)} style={{ color: 'var(--accent)', opacity: 0.4, fontSize: '1.2rem' }}>✕</button>
-            </div>
+        <AdminModal title={editing.id ? 'Редактировать' : 'Новый товар'} onClose={() => setEditing(null)}>
 
             <Inp label="Название *" value={editing.name ?? ''} onChange={v => setEditing(e => ({ ...e, name: v }))} />
 
@@ -377,8 +349,8 @@ export default function ProductsClient({ products }: { products: Product[] }) {
                 onDrop={handleDrop}
                 className="flex flex-col items-center justify-center gap-2 rounded-xl cursor-pointer transition-all py-5"
                 style={{
-                  border: `2px dashed ${dragOver ? 'var(--accent)' : 'rgba(242,151,116,0.25)'}`,
-                  background: dragOver ? 'rgba(242,151,116,0.08)' : 'transparent',
+                  border: `2px dashed ${dragOver ? 'var(--accent)' : 'var(--border)'}`,
+                  background: dragOver ? 'var(--bg-subtle)' : 'transparent',
                 }}
               >
                 {uploading ? (
@@ -438,7 +410,7 @@ export default function ProductsClient({ products }: { products: Product[] }) {
                   {bgUrl && <button type="button" onClick={() => setBgUrl(null)} style={{ color: 'var(--accent)', opacity: 0.4, fontSize: '0.8rem' }}>✕</button>}
                 </div>
                 {bgUrl && (
-                  <div className="w-16 h-10 rounded overflow-hidden mt-1" style={{ background: 'repeating-conic-gradient(#808080 0% 25%, #fff 0% 50%) 0 0 / 8px 8px' }}>
+                  <div className="w-16 h-10 rounded overflow-hidden mt-1" style={{ background: CHECKBOARD_LIGHT }}>
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={bgUrl} alt="" className="w-full h-full object-cover" />
                   </div>
@@ -455,7 +427,7 @@ export default function ProductsClient({ products }: { products: Product[] }) {
                   {bgUrlDark && <button type="button" onClick={() => setBgUrlDark(null)} style={{ color: 'var(--accent)', opacity: 0.4, fontSize: '0.8rem' }}>✕</button>}
                 </div>
                 {bgUrlDark && (
-                  <div className="w-16 h-10 rounded overflow-hidden mt-1" style={{ background: 'repeating-conic-gradient(#404040 0% 25%, #111 0% 50%) 0 0 / 8px 8px' }}>
+                  <div className="w-16 h-10 rounded overflow-hidden mt-1" style={{ background: CHECKBOARD_DARK }}>
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={bgUrlDark} alt="" className="w-full h-full object-cover" />
                   </div>
@@ -485,8 +457,7 @@ export default function ProductsClient({ products }: { products: Product[] }) {
                 Отмена
               </button>
             </div>
-          </div>
-        </div>
+        </AdminModal>
       )}
     </div>
   )

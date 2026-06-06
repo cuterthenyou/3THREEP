@@ -175,7 +175,7 @@ export default function ProductModal({ product, visible, onClose, modalBg }: Pro
             {/* Main image only — thumbnails are outside the grid row */}
             <div
               className="w-full rounded-lg overflow-hidden"
-              style={{ aspectRatio: '3/4', position: 'relative', background: '#000', maxHeight: '72vh' }}
+              style={{ aspectRatio: '3/4', position: 'relative', background: 'var(--bg-2)', maxHeight: '72vh' }}
               {...touchHandlers}
             >
               <Image src={product.images[activeImg] || product.images[0]} alt={product.name} fill className="object-cover select-none" draggable={false} sizes="(max-width: 768px) 100vw, 50vw" />

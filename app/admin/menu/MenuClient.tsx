@@ -2,6 +2,8 @@
 
 import { useState } from 'react'
 import a from '../admin.module.css'
+import { LABEL_STYLE_MUTED } from '../adminStyles'
+import { AdminPageTitle } from '../components'
 
 interface NavConfig {
   hiddenCollections: string[]
@@ -14,8 +16,7 @@ interface Props {
   initialConfig: NavConfig
 }
 
-const LABEL_STYLE = { color: 'var(--text-muted)', fontFamily: "'Involve', sans-serif", fontSize: '0.7rem', textTransform: 'uppercase' as const, letterSpacing: '0.1em' }
-const INPUT_STYLE = { background: 'var(--bg-2)', border: '1px solid var(--border)', color: 'var(--accent)', fontFamily: "'Involve', sans-serif", fontSize: '0.85rem' }
+const INPUT_STYLE = { background: 'var(--bg-2)', border: '1px solid var(--border)', color: 'var(--accent)', fontFamily: 'var(--font-involve)', fontSize: '0.85rem' }
 const CARD_STYLE = { background: 'var(--bg-subtle)', border: '1px solid var(--border-soft)', borderRadius: '3px', padding: '1.25rem', display: 'flex', flexDirection: 'column' as const, gap: '1rem' }
 
 export default function MenuClient({ allCollections, initialConfig }: Props) {
@@ -95,7 +96,7 @@ export default function MenuClient({ allCollections, initialConfig }: Props) {
   return (
     <div className="admin-content" style={{ padding: '2rem', maxWidth: '720px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <h1 style={{ fontFamily: "'ONDER', sans-serif", fontSize: '1.4rem', color: 'var(--accent)', letterSpacing: '0.08em' }}>МЕНЮ</h1>
+        <AdminPageTitle>МЕНЮ</AdminPageTitle>
         <button onClick={save} disabled={saving} className={a.btn}>
           {saving ? 'Сохранение...' : saved ? '✓ Сохранено' : 'Сохранить'}
         </button>
@@ -103,12 +104,12 @@ export default function MenuClient({ allCollections, initialConfig }: Props) {
 
       {/* Collections visibility & order */}
       <div style={CARD_STYLE}>
-        <p style={{ ...LABEL_STYLE, fontSize: '0.65rem' }}>Коллекции в меню</p>
-        <p style={{ color: 'var(--text-muted)', fontFamily: "'Involve', sans-serif", fontSize: '0.75rem', opacity: 0.6 }}>
+        <p style={{ ...LABEL_STYLE_MUTED, fontSize: '0.65rem' }}>Коллекции в меню</p>
+        <p style={{ color: 'var(--text-muted)', fontFamily: 'var(--font-involve)', fontSize: '0.75rem', opacity: 0.6 }}>
           Все активные коллекции подтягиваются автоматически. Скрой ненужные или измени порядок.
         </p>
         {orderedCollections.length === 0 && (
-          <p style={{ color: 'var(--text-muted)', fontFamily: "'Involve', sans-serif", fontSize: '0.8rem', opacity: 0.5 }}>
+          <p style={{ color: 'var(--text-muted)', fontFamily: 'var(--font-involve)', fontSize: '0.8rem', opacity: 0.5 }}>
             Нет активных коллекций. Добавь товары с категорией в разделе Товары.
           </p>
         )}
@@ -119,8 +120,8 @@ export default function MenuClient({ allCollections, initialConfig }: Props) {
               <button onClick={() => toggleHidden(col.slug)} className={a.btnSecondary}>
                 {hidden ? 'Скрыт' : 'Виден'}
               </button>
-              <span style={{ flex: 1, fontFamily: "'ONDER', sans-serif", fontSize: '0.85rem', color: 'var(--accent)', letterSpacing: '0.05em' }}>{col.name}</span>
-              <span style={{ fontFamily: "'Involve', sans-serif", fontSize: '0.6rem', color: 'var(--text-muted)', opacity: 0.5 }}>{col.slug}</span>
+              <span style={{ flex: 1, fontFamily: 'var(--font-onder)', fontSize: '0.85rem', color: 'var(--accent)', letterSpacing: '0.05em' }}>{col.name}</span>
+              <span style={{ fontFamily: 'var(--font-involve)', fontSize: '0.6rem', color: 'var(--text-muted)', opacity: 0.5 }}>{col.slug}</span>
               <div style={{ display: 'flex', gap: '0.25rem' }}>
                 <button onClick={() => moveUp(col.slug)} disabled={i === 0} className={a.btnSecondary}>↑</button>
                 <button onClick={() => moveDown(col.slug)} disabled={i === orderedCollections.length - 1} className={a.btnSecondary}>↓</button>
@@ -132,11 +133,11 @@ export default function MenuClient({ allCollections, initialConfig }: Props) {
 
       {/* Custom items */}
       <div style={CARD_STYLE}>
-        <p style={{ ...LABEL_STYLE, fontSize: '0.65rem' }}>Кастомные пункты меню</p>
+        <p style={{ ...LABEL_STYLE_MUTED, fontSize: '0.65rem' }}>Кастомные пункты меню</p>
         {config.customItems.map((item, i) => (
           <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.5rem 0.75rem', background: 'var(--bg-2)', borderRadius: '2px', border: '1px solid var(--border)' }}>
-            <span style={{ flex: 1, fontFamily: "'ONDER', sans-serif", fontSize: '0.85rem', color: 'var(--accent)' }}>{item.label}</span>
-            <span style={{ fontFamily: "'Involve', sans-serif", fontSize: '0.7rem', color: 'var(--text-muted)', opacity: 0.6 }}>{item.href}</span>
+            <span style={{ flex: 1, fontFamily: 'var(--font-onder)', fontSize: '0.85rem', color: 'var(--accent)' }}>{item.label}</span>
+            <span style={{ fontFamily: 'var(--font-involve)', fontSize: '0.7rem', color: 'var(--text-muted)', opacity: 0.6 }}>{item.href}</span>
             <button onClick={() => removeCustomItem(i)} className={a.btnDanger}>Удалить</button>
           </div>
         ))}
@@ -159,17 +160,17 @@ export default function MenuClient({ allCollections, initialConfig }: Props) {
 
       {/* Preview */}
       <div style={CARD_STYLE}>
-        <p style={{ ...LABEL_STYLE, fontSize: '0.65rem' }}>Превью бургер-меню</p>
+        <p style={{ ...LABEL_STYLE_MUTED, fontSize: '0.65rem' }}>Превью бургер-меню</p>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', padding: '0.75rem', background: 'var(--bg-2)', borderRadius: '2px' }}>
-          <span style={{ fontFamily: "'ONDER', sans-serif", fontSize: '0.85rem', color: 'var(--accent)', opacity: 0.5 }}>▸ Коллекции</span>
+          <span style={{ fontFamily: 'var(--font-onder)', fontSize: '0.85rem', color: 'var(--accent)', opacity: 0.5 }}>▸ Коллекции</span>
           {orderedCollections.filter(c => !config.hiddenCollections.includes(c.slug)).map(c => (
-            <span key={c.slug} style={{ fontFamily: "'DeutschGothic', sans-serif", fontSize: '0.75rem', color: 'var(--accent)', paddingLeft: '1.5rem', opacity: 0.7 }}>— {c.name}</span>
+            <span key={c.slug} style={{ fontFamily: 'var(--font-deutsch)', fontSize: '0.75rem', color: 'var(--accent)', paddingLeft: '1.5rem', opacity: 0.7 }}>— {c.name}</span>
           ))}
           {config.customItems.map((item, i) => (
-            <span key={i} style={{ fontFamily: "'ONDER', sans-serif", fontSize: '0.85rem', color: 'var(--accent)', opacity: 0.8 }}>◆ {item.label}</span>
+            <span key={i} style={{ fontFamily: 'var(--font-onder)', fontSize: '0.85rem', color: 'var(--accent)', opacity: 0.8 }}>◆ {item.label}</span>
           ))}
-          <span style={{ fontFamily: "'ONDER', sans-serif", fontSize: '0.85rem', color: 'var(--accent)', opacity: 0.5 }}>◇ Инфа</span>
-          <span style={{ fontFamily: "'ONDER', sans-serif", fontSize: '0.85rem', color: 'var(--accent)', opacity: 0.5 }}>△ Кабинет</span>
+          <span style={{ fontFamily: 'var(--font-onder)', fontSize: '0.85rem', color: 'var(--accent)', opacity: 0.5 }}>◇ Инфа</span>
+          <span style={{ fontFamily: 'var(--font-onder)', fontSize: '0.85rem', color: 'var(--accent)', opacity: 0.5 }}>△ Кабинет</span>
         </div>
       </div>
     </div>

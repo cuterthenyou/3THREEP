@@ -5,6 +5,8 @@ import type { FooterContent } from '@/components/Footer'
 import type { InfoContent } from '@/app/info/InfoClient'
 import type { PrivacySection } from './page'
 import a from '../admin.module.css'
+import { LABEL_STYLE, INPUT_STYLE_BG2, SECTION_TITLE } from '../adminStyles'
+import { AdminPageTitle } from '../components'
 
 interface Props {
   initialFooter: FooterContent
@@ -15,41 +17,6 @@ interface Props {
 type MainTab = 'footer' | 'info' | 'privacy'
 type InfoTab = 'delivery' | 'contacts' | 'about'
 
-const inputStyle: React.CSSProperties = {
-  width: '100%',
-  background: 'var(--bg-2)',
-  border: '1px solid var(--border-soft)',
-  borderRadius: '0.5rem',
-  padding: '0.5rem 0.75rem',
-  color: 'var(--text)',
-  fontFamily: 'var(--font-involve)',
-  fontSize: '0.85rem',
-  outline: 'none',
-  resize: 'vertical' as const,
-}
-
-const labelStyle: React.CSSProperties = {
-  fontFamily: 'var(--font-onder)',
-  fontSize: '0.52rem',
-  letterSpacing: '0.12em',
-  textTransform: 'uppercase',
-  opacity: 0.45,
-  color: 'var(--accent)',
-  marginBottom: '0.25rem',
-  display: 'block',
-}
-
-const sectionTitleStyle: React.CSSProperties = {
-  fontFamily: 'var(--font-onder)',
-  fontSize: '0.65rem',
-  letterSpacing: '0.1em',
-  textTransform: 'uppercase',
-  color: 'var(--accent)',
-  opacity: 0.6,
-  marginBottom: '0.75rem',
-  marginTop: '1.25rem',
-}
-
 function Field({ label, value, onChange, rows }: {
   label: string
   value: string
@@ -58,20 +25,20 @@ function Field({ label, value, onChange, rows }: {
 }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', marginBottom: '0.75rem' }}>
-      <label style={labelStyle}>{label}</label>
+      <label style={LABEL_STYLE}>{label}</label>
       {rows ? (
         <textarea
           value={value}
           onChange={e => onChange(e.target.value)}
           rows={rows}
-          style={inputStyle}
+          style={INPUT_STYLE_BG2}
         />
       ) : (
         <input
           type="text"
           value={value}
           onChange={e => onChange(e.target.value)}
-          style={inputStyle}
+          style={INPUT_STYLE_BG2}
         />
       )}
     </div>
@@ -192,9 +159,7 @@ export default function TextsClient({ initialFooter, initialInfo, initialPrivacy
 
   return (
     <div style={{ padding: '1.5rem', maxWidth: '760px' }}>
-      <h1 style={{ fontFamily: 'var(--font-onder)', fontSize: '1rem', letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--accent)', marginBottom: '1.5rem' }}>
-        Редактирование текстов
-      </h1>
+      <AdminPageTitle>Редактирование текстов</AdminPageTitle>
 
       {/* Main tabs */}
       <div style={{ display: 'flex', gap: '0.25rem', marginBottom: '1.75rem', background: 'var(--bg-subtle)', padding: '0.3rem', borderRadius: '0.6rem', width: 'fit-content' }}>
@@ -206,13 +171,13 @@ export default function TextsClient({ initialFooter, initialInfo, initialPrivacy
       {/* ── FOOTER ── */}
       {mainTab === 'footer' && (
         <div>
-          <p style={sectionTitleStyle}>Блок «Написать нам»</p>
+          <p style={SECTION_TITLE}>Блок «Написать нам»</p>
           <Field label="Заголовок" value={footer.contact_heading} onChange={v => setF('contact_heading', v)} />
           <Field label="Подзаголовок" value={footer.contact_subtext} onChange={v => setF('contact_subtext', v)} rows={2} />
           <Field label="URL ВКонтакте (прямые сообщения)" value={footer.vk_direct_url} onChange={v => setF('vk_direct_url', v)} />
           <Field label="URL Telegram" value={footer.tg_url} onChange={v => setF('tg_url', v)} />
 
-          <p style={sectionTitleStyle}>Блок «Следить за нами»</p>
+          <p style={SECTION_TITLE}>Блок «Следить за нами»</p>
           <Field label="Заголовок" value={footer.follow_heading} onChange={v => setF('follow_heading', v)} />
           <Field label="Подзаголовок" value={footer.follow_subtext} onChange={v => setF('follow_subtext', v)} rows={2} />
           <Field label="URL ВКонтакте (сообщество)" value={footer.vk_community_url} onChange={v => setF('vk_community_url', v)} />
@@ -220,7 +185,7 @@ export default function TextsClient({ initialFooter, initialInfo, initialPrivacy
           <Field label="URL Instagram" value={footer.instagram_url} onChange={v => setF('instagram_url', v)} />
           <Field label="Дисклеймер про Meta" value={footer.meta_disclaimer} onChange={v => setF('meta_disclaimer', v)} />
 
-          <p style={sectionTitleStyle}>Низ страницы</p>
+          <p style={SECTION_TITLE}>Низ страницы</p>
           <Field label="Копирайт" value={footer.copyright} onChange={v => setF('copyright', v)} />
 
           <SaveBtn onClick={handleSaveFooter} saving={savingFooter} msg={footerMsg} />
@@ -252,7 +217,7 @@ export default function TextsClient({ initialFooter, initialInfo, initialPrivacy
           {infoTab === 'contacts' && (
             <div>
               <Field label="Название вкладки" value={info.tab2_label} onChange={v => setI('tab2_label', v)} />
-              <p style={sectionTitleStyle}>Блок «Написать нам»</p>
+              <p style={SECTION_TITLE}>Блок «Написать нам»</p>
               <Field label="Заголовок" value={info.write_heading} onChange={v => setI('write_heading', v)} />
               <Field label="Лейбл ВК" value={info.vk_label} onChange={v => setI('vk_label', v)} />
               <Field label="URL ВК" value={info.vk_url} onChange={v => setI('vk_url', v)} />
@@ -262,7 +227,7 @@ export default function TextsClient({ initialFooter, initialInfo, initialPrivacy
               <Field label="Хэндл Telegram (отображается)" value={info.tg_handle} onChange={v => setI('tg_handle', v)} />
               <Field label="Лейбл Email" value={info.mail_label} onChange={v => setI('mail_label', v)} />
               <Field label="Email адрес" value={info.mail_email} onChange={v => setI('mail_email', v)} />
-              <p style={sectionTitleStyle}>Блок «Следить за нами»</p>
+              <p style={SECTION_TITLE}>Блок «Следить за нами»</p>
               <Field label="Заголовок" value={info.follow_heading} onChange={v => setI('follow_heading', v)} />
               <Field label="URL ВК (сообщество)" value={info.vk_community_url} onChange={v => setI('vk_community_url', v)} />
               <Field label="Хэндл ВК (отображается)" value={info.vk_community_handle} onChange={v => setI('vk_community_handle', v)} />
@@ -277,7 +242,7 @@ export default function TextsClient({ initialFooter, initialInfo, initialPrivacy
           {infoTab === 'about' && (
             <div>
               <Field label="Название вкладки" value={info.tab3_label} onChange={v => setI('tab3_label', v)} />
-              <p style={sectionTitleStyle}>Блоки</p>
+              <p style={SECTION_TITLE}>Блоки</p>
               <Field label="Заголовок «Где мы»" value={info.location_heading} onChange={v => setI('location_heading', v)} />
               <Field label="Текст" value={info.location_text} onChange={v => setI('location_text', v)} rows={2} />
               <Field label="Заголовок «Что мы»" value={info.what_heading} onChange={v => setI('what_heading', v)} />

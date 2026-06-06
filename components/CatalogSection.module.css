@@ -35,7 +35,7 @@
 }
 
 .filterBtnInactive:hover {
-  background: rgba(242, 151, 116, 0.12);
+  background: var(--border-soft);
   box-shadow: 3px 3px 0 var(--color-accent);
   transform: translate(-1px, -1px);
 }

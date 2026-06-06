@@ -2,7 +2,8 @@
 
 import { useState, useRef, useEffect, useCallback } from 'react';
 import type { OrderStatus, Message } from '@/lib/types';
-import { ORDER_STATUS_LABELS } from '@/lib/types';
+import { ORDER_STATUS_LABELS, STATUS_COLORS } from '@/lib/types';
+import { formatPrice } from '@/lib/utils';
 import Link from 'next/link';
 import s from './order-admin.module.css';
 
@@ -14,19 +15,6 @@ const STATUSES: OrderStatus[] = [
   'delivered',
   'cancelled',
 ];
-
-const STATUS_COLORS: Record<OrderStatus, string> = {
-  new: 'var(--status-new)',
-  paid: 'var(--status-paid)',
-  in_progress: 'var(--status-in-progress)',
-  shipped: 'var(--status-shipped)',
-  delivered: 'var(--status-delivered)',
-  cancelled: 'var(--status-cancelled)',
-};
-
-function formatPrice(p: number) {
-  return p.toLocaleString('ru-RU') + ' ₽';
-}
 
 interface Props {
   order: Record<string, unknown>;
@@ -168,7 +156,7 @@ export default function OrderAdminClient({ order, messages: init, adminId }: Pro
                   background: status === st ? STATUS_COLORS[st] + '33' : 'transparent',
                   color: STATUS_COLORS[st],
                   border: `1px solid ${STATUS_COLORS[st]}${status === st ? 'ff' : '55'}`,
-                  fontFamily: "'ONDER', sans-serif",
+                  fontFamily: 'var(--font-onder)',
                   fontSize: '0.6rem',
                 }}
               >

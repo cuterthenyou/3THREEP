@@ -22,16 +22,16 @@ export default async function AdminLayout({ children }: { children: ReactNode })
     return (
       <div className="min-h-screen flex items-center justify-center px-4" style={{ background: 'var(--bg)' }}>
         <div className="w-full max-w-sm rounded-2xl p-6 flex flex-col gap-4" style={{ background: 'var(--bg-subtle)', border: '1px solid var(--border)' }}>
-          <p className="text-lg uppercase tracking-widest" style={{ color: 'var(--accent)', fontFamily: "'ONDER', sans-serif" }}>Нет доступа</p>
+          <p className="text-lg uppercase tracking-widest" style={{ color: 'var(--accent)', fontFamily: "var(--font-onder)" }}>Нет доступа</p>
           <div className="flex flex-col gap-1">
-            <p className="text-xs uppercase tracking-widest" style={{ color: 'var(--accent)', opacity: 0.5, fontFamily: "'Involve', sans-serif" }}>Твой email:</p>
+            <p className="text-xs uppercase tracking-widest" style={{ color: 'var(--accent)', opacity: 0.5, fontFamily: "var(--font-involve)" }}>Твой email:</p>
             <p className="text-sm font-mono px-3 py-2 rounded-lg" style={{ color: 'var(--accent)', background: 'var(--bg-subtle)', wordBreak: 'break-all' }}>{email ?? '(не определён)'}</p>
           </div>
           <div className="flex flex-col gap-1">
-            <p className="text-xs uppercase tracking-widest" style={{ color: 'var(--accent)', opacity: 0.5, fontFamily: "'Involve', sans-serif" }}>ADMIN_EMAIL env var:</p>
-            <p className="text-sm px-3 py-2 rounded-lg" style={{ color: 'var(--accent)', background: 'var(--bg-subtle)', fontFamily: "'Involve', sans-serif", fontSize: '0.8rem' }}>{adminEnvHint}</p>
+            <p className="text-xs uppercase tracking-widest" style={{ color: 'var(--accent)', opacity: 0.5, fontFamily: "var(--font-involve)" }}>ADMIN_EMAIL env var:</p>
+            <p className="text-sm px-3 py-2 rounded-lg" style={{ color: 'var(--accent)', background: 'var(--bg-subtle)', fontFamily: "var(--font-involve)", fontSize: '0.8rem' }}>{adminEnvHint}</p>
           </div>
-          <Link href="/account" className="text-xs uppercase tracking-widest text-center mt-2" style={{ color: 'var(--accent)', opacity: 0.5, fontFamily: "'ONDER', sans-serif" }}>← В аккаунт</Link>
+          <Link href="/account" className="text-xs uppercase tracking-widest text-center mt-2" style={{ color: 'var(--accent)', opacity: 0.5, fontFamily: "var(--font-onder)" }}>← В аккаунт</Link>
         </div>
       </div>
     )

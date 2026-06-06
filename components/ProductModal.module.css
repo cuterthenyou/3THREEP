@@ -38,7 +38,7 @@
 
 .thumbBtn:hover {
   transform: scale(1.06);
-  box-shadow: 0 2px 8px rgba(242, 151, 116, 0.35);
+  box-shadow: 0 2px 8px var(--accent-glow);
 }
 
 .thumbBtn:active {

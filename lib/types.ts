@@ -43,6 +43,15 @@ export const ORDER_STATUS_LABELS: Record<OrderStatus, string> = {
   cancelled: 'Отменён',
 }
 
+export const STATUS_COLORS: Record<OrderStatus, string> = {
+  new: 'var(--status-new)',
+  paid: 'var(--status-paid)',
+  in_progress: 'var(--status-in-progress)',
+  shipped: 'var(--status-shipped)',
+  delivered: 'var(--status-delivered)',
+  cancelled: 'var(--status-cancelled)',
+}
+
 export interface OrderItem {
   id: string
   order_id: string

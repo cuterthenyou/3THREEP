@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import Image from 'next/image'
 import a from '../admin.module.css'
+import { AdminPageTitle, AdminEmptyState } from '../components'
 
 interface MediaFile {
   bucket: string
@@ -161,9 +162,7 @@ export default function MediaClient() {
   return (
     <div className="p-6 max-w-7xl mx-auto">
       <div className="flex items-center justify-between mb-4">
-        <h1 className="text-lg uppercase tracking-widest" style={{ color: accent, fontFamily: "var(--font-onder)" }}>
-          Медиабиблиотека
-        </h1>
+        <AdminPageTitle>Медиабиблиотека</AdminPageTitle>
         <button onClick={load} className={a.btnSecondary}>
           Обновить
         </button>
@@ -173,7 +172,7 @@ export default function MediaClient() {
       <div className="mb-3">
         <input type="search" placeholder="Поиск по имени файла..." value={search} onChange={e => setSearch(e.target.value)}
           className="w-full sm:w-72 px-3 py-2 rounded-lg text-sm outline-none"
-          style={{ background: accentDim, color: accent, border: '1px solid rgba(242,151,116,0.2)', fontFamily: "var(--font-involve)" }} />
+          style={{ background: accentDim, color: accent, border: '1px solid var(--border)', fontFamily: "var(--font-involve)" }} />
       </div>
 
       {/* Bucket tabs */}
@@ -192,7 +191,7 @@ export default function MediaClient() {
       {/* Mass action panel */}
       {selected.size > 0 && (
         <div className="flex items-center gap-3 mb-4 px-4 py-3 rounded-xl"
-          style={{ background: 'rgba(242,151,116,0.12)', border: '1px solid var(--border)' }}>
+          style={{ background: 'var(--bg-subtle)', border: '1px solid var(--border)' }}>
           <span style={{ color: accent, fontFamily: "var(--font-involve)", fontSize: '0.8rem' }}>
             Выбрано: {selected.size}
           </span>
@@ -224,16 +223,16 @@ export default function MediaClient() {
       )}
 
       {loading ? (
-        <div className="text-center py-20" style={{ color: accent, opacity: 0.5, fontFamily: "var(--font-involve)" }}>Загрузка...</div>
+        <div className="text-center py-20"><AdminEmptyState>Загрузка...</AdminEmptyState></div>
       ) : filtered.length === 0 ? (
-        <div className="text-center py-20" style={{ color: accent, opacity: 0.4, fontFamily: "var(--font-involve)" }}>Нет файлов</div>
+        <div className="text-center py-20"><AdminEmptyState>Нет файлов</AdminEmptyState></div>
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
           {filtered.map((file) => {
             const isSelected = selected.has(file.url)
             return (
               <div key={file.url} className="flex flex-col rounded-lg overflow-hidden"
-                style={{ background: accentDim, border: `1px solid ${isSelected ? accent : 'rgba(242,151,116,0.15)'}`, outline: isSelected ? `2px solid ${accent}` : 'none', outlineOffset: '-2px' }}>
+                style={{ background: accentDim, border: `1px solid ${isSelected ? accent : 'var(--border)'}`, outline: isSelected ? `2px solid ${accent}` : 'none', outlineOffset: '-2px' }}>
 
                 {/* Checkbox + Preview */}
                 <div className="relative">

@@ -4,11 +4,8 @@ import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useCart } from '@/lib/cart'
+import { formatPrice } from '@/lib/utils'
 import s from './CartDrawer.module.css'
-
-function formatPrice(p: number) {
-  return p.toLocaleString('ru-RU') + ' ₽'
-}
 
 export default function CartDrawer() {
   const { items, removeItem, updateQty, total, count, open, setOpen } = useCart()

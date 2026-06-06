@@ -4,21 +4,12 @@ import { useState, useMemo, useEffect } from 'react'
 import { useRouter, usePathname, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import type { OrderStatus } from '@/lib/types'
-import { ORDER_STATUS_LABELS } from '@/lib/types'
-
-const STATUS_COLORS: Record<OrderStatus, string> = {
-  new: 'var(--status-new)',
-  paid: 'var(--status-paid)',
-  in_progress: 'var(--status-in-progress)',
-  shipped: 'var(--status-shipped)',
-  delivered: 'var(--status-delivered)',
-  cancelled: 'var(--status-cancelled)',
-}
+import { ORDER_STATUS_LABELS, STATUS_COLORS } from '@/lib/types'
+import { formatPrice } from '@/lib/utils'
+import { AdminPageTitle, AdminEmptyState } from '../components'
 
 type SortKey = 'date' | 'total'
 type SortDir = 'asc' | 'desc'
-
-function formatPrice(p: number) { return p.toLocaleString('ru-RU') + ' ₽' }
 
 interface Order {
   id: string
@@ -91,9 +82,7 @@ export default function OrdersClient({ orders }: { orders: Order[] }) {
   return (
     <div className="px-6 py-6 max-w-4xl mx-auto">
       <div className="flex items-center justify-between mb-4">
-        <h1 className="text-xl uppercase tracking-widest" style={{ color: 'var(--accent)', fontFamily: "var(--font-onder)" }}>
-          Заказы ({filtered.length}/{orders.length})
-        </h1>
+        <AdminPageTitle>Заказы ({filtered.length}/{orders.length})</AdminPageTitle>
       </div>
 
       {/* Search + Filters */}
@@ -125,7 +114,7 @@ export default function OrdersClient({ orders }: { orders: Order[] }) {
 
       <div className="flex flex-col gap-3">
         {filtered.length === 0 && (
-          <p style={{ color: 'var(--accent)', opacity: 0.4, fontFamily: "var(--font-involve)" }}>Ничего не найдено</p>
+          <AdminEmptyState>Ничего не найдено</AdminEmptyState>
         )}
         {filtered.map((order) => {
           const profile = order.profiles as Record<string, unknown> | null

@@ -2,9 +2,8 @@
 
 import { useState, useRef } from 'react'
 import a from '../admin.module.css'
-
-const LABEL_STYLE = { color: 'var(--accent)', opacity: 0.5, fontFamily: "var(--font-onder)" }
-const SECTION_TITLE = { color: 'var(--accent)', fontFamily: "var(--font-involve)", fontWeight: 800, fontSize: '1rem' }
+import { AdminSection, AdminPageTitle } from '../components'
+import { CHECKBOARD_LIGHT, CHECKBOARD_DARK } from '../adminStyles'
 
 interface Props {
   initialSettings: Record<string, string | null>
@@ -104,19 +103,16 @@ export default function SiteClient({ initialSettings }: Props) {
 
   return (
     <div className="px-6 py-6 max-w-2xl mx-auto flex flex-col gap-8">
-      <h1 className="uppercase tracking-widest" style={{ color: 'var(--accent)', fontFamily: "var(--font-onder)", fontSize: 'clamp(0.9rem, 3vw, 1.1rem)' }}>
-        Настройки сайта
-      </h1>
+      <AdminPageTitle>Настройки сайта</AdminPageTitle>
 
       {/* ── Hero video ── */}
-      <div className="rounded-2xl p-5 flex flex-col gap-4" style={{ background: 'var(--bg-subtle)', border: '1px solid var(--border-soft)' }}>
-        <p style={SECTION_TITLE}>Видео Hero секции</p>
+      <AdminSection title="Видео Hero секции">
         <p className="text-xs" style={{ color: 'var(--accent)', opacity: 0.5, fontFamily: "var(--font-involve)" }}>
           Видео показывается на главной странице поверх всего. Рекомендуется WebM или MP4.
         </p>
 
         {heroUrl && (
-          <div className="rounded-xl overflow-hidden" style={{ maxHeight: 240, background: '#000' }}>
+          <div className="rounded-xl overflow-hidden" style={{ maxHeight: 240, background: 'var(--bg-2)' }}>
             <video
               key={heroUrl}
               src={heroUrl}
@@ -147,17 +143,16 @@ export default function SiteClient({ initialSettings }: Props) {
             onChange={e => e.target.files?.[0] && uploadHero(e.target.files[0])} />
           {heroMsg && <span className="text-xs" style={{ color: heroMsg.startsWith('✓') ? 'var(--status-delivered)' : 'var(--status-error)', fontFamily: "var(--font-involve)" }}>{heroMsg}</span>}
         </div>
-      </div>
+      </AdminSection>
 
       {/* ── Profile background ── */}
-      <div className="rounded-2xl p-5 flex flex-col gap-4" style={{ background: 'var(--bg-subtle)', border: '1px solid var(--border-soft)' }}>
-        <p style={SECTION_TITLE}>Фон страницы профиля</p>
+      <AdminSection title="Фон страницы профиля">
         <p className="text-xs" style={{ color: 'var(--accent)', opacity: 0.5, fontFamily: "var(--font-involve)" }}>
           PNG с прозрачностью — показывается как фон для всех профилей пользователей.
         </p>
 
         {profileBg && (
-          <div className="rounded-xl overflow-hidden" style={{ maxHeight: 200, background: 'repeating-conic-gradient(#808080 0% 25%, #fff 0% 50%) 0 0 / 8px 8px' }}>
+          <div className="rounded-xl overflow-hidden" style={{ maxHeight: 200, background: CHECKBOARD_LIGHT }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={profileBg} alt="" className="w-full object-contain" style={{ maxHeight: 200 }} />
           </div>
@@ -189,17 +184,16 @@ export default function SiteClient({ initialSettings }: Props) {
           )}
           {profileMsg && <span className="text-xs" style={{ color: profileMsg.startsWith('✓') ? 'var(--status-delivered)' : 'var(--status-error)', fontFamily: "var(--font-involve)" }}>{profileMsg}</span>}
         </div>
-      </div>
+      </AdminSection>
 
       {/* ── Profile background dark ── */}
-      <div className="rounded-2xl p-5 flex flex-col gap-4" style={{ background: 'var(--bg-subtle)', border: '1px solid var(--border-soft)' }}>
-        <p style={SECTION_TITLE}>Фон профиля (тёмная тема)</p>
+      <AdminSection title="Фон профиля (тёмная тема)">
         <p className="text-xs" style={{ color: 'var(--accent)', opacity: 0.5, fontFamily: "var(--font-involve)" }}>
           PNG-фон для тёмной темы. Если не задан — используется светлый фон.
         </p>
 
         {profileBgDark && (
-          <div className="rounded-xl overflow-hidden" style={{ maxHeight: 200, background: 'repeating-conic-gradient(#333 0% 25%, #555 0% 50%) 0 0 / 8px 8px' }}>
+          <div className="rounded-xl overflow-hidden" style={{ maxHeight: 200, background: CHECKBOARD_DARK }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={profileBgDark} alt="" className="w-full object-contain" style={{ maxHeight: 200 }} />
           </div>
@@ -231,7 +225,7 @@ export default function SiteClient({ initialSettings }: Props) {
           )}
           {profileDarkMsg && <span className="text-xs" style={{ color: profileDarkMsg.startsWith('✓') ? 'var(--status-delivered)' : 'var(--status-error)', fontFamily: "var(--font-involve)" }}>{profileDarkMsg}</span>}
         </div>
-      </div>
+      </AdminSection>
     </div>
   )
 }

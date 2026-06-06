@@ -8,11 +8,8 @@ import { useSession } from 'next-auth/react'
 import { useCart } from '@/lib/cart'
 import Image from 'next/image'
 import Link from 'next/link'
+import { formatPrice } from '@/lib/utils'
 import s from './page.module.css'
-
-function formatPrice(p: number) {
-  return p.toLocaleString('ru-RU') + ' ₽'
-}
 
 type Mode = 'loading' | 'user' | 'choose' | 'guest'
 

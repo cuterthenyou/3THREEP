@@ -136,7 +136,7 @@
   border: 2px solid var(--accent);
   background: var(--bg-subtle);
   cursor: pointer;
-  box-shadow: 4px 4px 0 var(--accent), -1px -1px 0 rgba(0, 0, 0, 0.15);
+  box-shadow: 4px 4px 0 var(--accent), -1px -1px 0 var(--shadow-on-card-sm);
   outline: 1px solid var(--border);
   outline-offset: 3px;
   transition: box-shadow 0.2s, transform 0.15s;
@@ -159,7 +159,7 @@
   justify-content: center;
   opacity: 0;
   transition: opacity 0.2s;
-  background: rgba(0, 0, 0, 0.6);
+  background: var(--overlay-avatar);
   font-size: 0.55rem;
   text-transform: uppercase;
   color: var(--color-accent);

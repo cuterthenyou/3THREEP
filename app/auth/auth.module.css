@@ -91,7 +91,7 @@
 .btn:hover:not(:disabled) {
   filter: brightness(1.1);
   transform: translateY(-1px);
-  box-shadow: 0 4px 16px rgba(242, 151, 116, 0.35);
+  box-shadow: 0 4px 16px var(--accent-glow);
 }
 
 .btn:active:not(:disabled) {
@@ -130,12 +130,12 @@
 
 .inputValid {
   border-color: var(--status-paid) !important;
-  box-shadow: 0 0 0 3px rgba(126, 200, 154, 0.15) !important;
+  box-shadow: 0 0 0 3px var(--status-paid-soft) !important;
 }
 
 .inputError {
   border-color: var(--status-error) !important;
-  box-shadow: 0 0 0 3px rgba(224, 85, 85, 0.15) !important;
+  box-shadow: 0 0 0 3px var(--status-error-soft) !important;
 }
 
 .fieldError {

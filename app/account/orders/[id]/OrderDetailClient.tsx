@@ -2,7 +2,8 @@
 
 import { useState, useRef, useEffect, useCallback } from 'react';
 import type { Order, Message, OrderStatus } from '@/lib/types';
-import { ORDER_STATUS_LABELS } from '@/lib/types';
+import { ORDER_STATUS_LABELS, STATUS_COLORS } from '@/lib/types';
+import { formatPrice } from '@/lib/utils';
 import Link from 'next/link';
 import Image from 'next/image';
 import EmojiPicker, { type CustomEmoji } from '@/components/EmojiPicker';
@@ -12,19 +13,6 @@ interface Props {
   order: Order;
   messages: Message[];
   userId: string;
-}
-
-const STATUS_COLORS: Record<OrderStatus, string> = {
-  new: 'var(--status-new)',
-  paid: 'var(--status-paid)',
-  in_progress: 'var(--status-in-progress)',
-  shipped: 'var(--status-shipped)',
-  delivered: 'var(--status-delivered)',
-  cancelled: 'var(--status-cancelled)',
-};
-
-function formatPrice(p: number) {
-  return p.toLocaleString('ru-RU') + ' ₽';
 }
 
 function formatDate(iso: string) {

@@ -4,18 +4,12 @@ import React, { useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import type { Category } from '@/lib/types'
 import a from '../admin.module.css'
+import { INPUT_STYLE, LABEL_STYLE } from '../adminStyles'
+import { AdminPageTitle, AdminEmptyState, AdminModal } from '../components'
 
 const EMPTY: Omit<Category, never> = {
   slug: '', name: '', active: true, description: null, logo_top_url: null, logo_bottom_url: null, modal_bg_url: null, modal_bg_url_dark: null,
 }
-
-const INPUT_STYLE = {
-  background: 'var(--bg-subtle)',
-  color: 'var(--accent)',
-  border: '1px solid var(--border)',
-  fontFamily: "var(--font-involve)",
-}
-const LABEL_STYLE = { color: 'var(--accent)', opacity: 0.5, fontFamily: "var(--font-onder)" }
 
 type UploadField = 'logo_top_url' | 'logo_bottom_url' | 'modal_bg_url' | 'modal_bg_url_dark'
 
@@ -132,9 +126,7 @@ export default function CollectionsClient({ collections }: { collections: Catego
   return (
     <div className="px-6 py-6 max-w-3xl mx-auto">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="uppercase tracking-widest" style={{ color: 'var(--accent)', fontFamily: "var(--font-onder)", fontSize: 'clamp(0.9rem, 3vw, 1.1rem)' }}>
-          Коллекции ({collections.length})
-        </h1>
+        <AdminPageTitle>Коллекции ({collections.length})</AdminPageTitle>
         <button onClick={openNew} className={a.btn}>
           + Добавить
         </button>
@@ -142,9 +134,7 @@ export default function CollectionsClient({ collections }: { collections: Catego
 
       <div className="flex flex-col gap-3">
         {collections.length === 0 && (
-          <p className="text-sm" style={{ color: 'var(--accent)', opacity: 0.4, fontFamily: "var(--font-involve)" }}>
-            Коллекций нет. Создай первую — slug должен совпадать с category у товаров.
-          </p>
+          <AdminEmptyState>Коллекций нет. Создай первую — slug должен совпадать с category у товаров.</AdminEmptyState>
         )}
         {collections.map(c => (
           <div key={c.slug} className="rounded-xl p-3"
@@ -181,16 +171,7 @@ export default function CollectionsClient({ collections }: { collections: Catego
       </div>
 
       {editing && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'var(--overlay-heavy)' }}>
-          <div className="w-full max-w-lg rounded-2xl p-6 flex flex-col gap-4 overflow-y-auto max-h-[92vh]"
-            style={{ background: 'var(--bg-2)', border: '1px solid var(--border)' }}>
-
-            <div className="flex items-center justify-between">
-              <h2 className="text-lg uppercase tracking-widest" style={{ color: 'var(--accent)', fontFamily: "var(--font-involve)", fontWeight: 800 }}>
-                {editing.slug ? 'Редактировать' : 'Новая коллекция'}
-              </h2>
-              <button onClick={() => setEditing(null)} style={{ color: 'var(--accent)', opacity: 0.4, fontSize: '1.2rem' }}>✕</button>
-            </div>
+        <AdminModal title={editing.slug ? 'Редактировать' : 'Новая коллекция'} onClose={() => setEditing(null)}>
 
             <div className="flex flex-col gap-1">
               <label className="text-xs uppercase tracking-widest" style={LABEL_STYLE}>Slug * (напр. aqua, dich)</label>
@@ -234,8 +215,7 @@ export default function CollectionsClient({ collections }: { collections: Catego
                 Отмена
               </button>
             </div>
-          </div>
-        </div>
+        </AdminModal>
       )}
     </div>
   )
