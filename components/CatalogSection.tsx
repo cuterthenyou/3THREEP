@@ -7,6 +7,36 @@ import ProductModal from './ProductModal'
 import ProductCard from './ProductCard'
 import s from './CatalogSection.module.css'
 
+type Cols = 1 | 2 | 3
+
+function GridIcon({ cols, active }: { cols: Cols; active: boolean }) {
+  const c = active ? 'var(--bg)' : 'var(--accent)'
+  if (cols === 1) return (
+    <svg width="14" height="14" viewBox="0 0 14 14" fill={c}>
+      <rect x="1" y="1" width="12" height="12" rx="1"/>
+    </svg>
+  )
+  if (cols === 2) return (
+    <svg width="14" height="14" viewBox="0 0 14 14" fill={c}>
+      <rect x="1"   y="1" width="5.5" height="12" rx="1"/>
+      <rect x="7.5" y="1" width="5.5" height="12" rx="1"/>
+    </svg>
+  )
+  return (
+    <svg width="14" height="14" viewBox="0 0 14 14" fill={c}>
+      <rect x="1"   y="1" width="3.3" height="12" rx="0.5"/>
+      <rect x="5.3" y="1" width="3.3" height="12" rx="0.5"/>
+      <rect x="9.7" y="1" width="3.3" height="12" rx="0.5"/>
+    </svg>
+  )
+}
+
+const GRID_CLASS: Record<Cols, string> = {
+  1: 'grid-cols-1',
+  2: 'grid-cols-2',
+  3: 'grid-cols-2 lg:grid-cols-3',
+}
+
 interface Props {
   products: Product[]
   categories: ProductCategory[]
@@ -24,6 +54,17 @@ export default function CatalogSection({ products, categories, categoryData = {}
   const [modalVisible, setModalVisible] = useState(false)
   const [modalBg, setModalBg] = useState<string | null>(null)
   const [isDark, setIsDark] = useState(false)
+  const [cols, setCols] = useState<Cols>(3)
+
+  useEffect(() => {
+    const saved = localStorage.getItem('catalog-cols')
+    if (saved === '1' || saved === '2' || saved === '3') setCols(Number(saved) as Cols)
+  }, [])
+
+  function setColsAndSave(n: Cols) {
+    setCols(n)
+    localStorage.setItem('catalog-cols', String(n))
+  }
 
   useEffect(() => {
     setIsDark(document.documentElement.dataset.theme === 'dark')
@@ -125,7 +166,35 @@ export default function CatalogSection({ products, categories, categoryData = {}
 
       {/* Product grid */}
       <section className="w-full px-6 sm:px-8 py-10">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-y-8 gap-x-6 max-w-6xl mx-auto">
+        {/* Grid switcher */}
+        <div className="flex justify-end mb-5 max-w-6xl mx-auto">
+          <div className="flex gap-1">
+            {([1, 2, 3] as const).map(n => (
+              <button
+                key={n}
+                onClick={() => setColsAndSave(n)}
+                aria-label={`${n} в ряд`}
+                style={{
+                  width: '30px',
+                  height: '30px',
+                  border: `1px solid ${cols === n ? 'var(--accent)' : 'var(--border)'}`,
+                  background: cols === n ? 'var(--accent)' : 'transparent',
+                  borderRadius: '2px',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  transition: 'background 0.12s, border-color 0.12s',
+                  boxShadow: cols === n ? '2px 2px 0 var(--accent)' : 'none',
+                }}
+              >
+                <GridIcon cols={n} active={cols === n} />
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className={`grid ${GRID_CLASS[cols]} gap-y-8 gap-x-6 max-w-6xl mx-auto`}>
           {filtered.map((product, idx) => (
             <ProductCard key={product.id} product={product} index={idx} onOpen={openModal} categoryData={categoryData} isDark={isDark} />
           ))}

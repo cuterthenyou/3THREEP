@@ -449,14 +449,16 @@ export default function ProductsClient({ products }: { products: Product[] }) {
             <div className="grid grid-cols-2 gap-3">
               <div className="flex flex-col gap-1">
                 <label className="text-xs uppercase tracking-widest" style={LABEL_STYLE}>Фон карточки (свет)</label>
-                <div className="flex items-center gap-2">
-                  <button type="button" onClick={() => bgRef.current?.click()} className={a.btnSecondary}>
-                    {uploadingBg ? '...' : 'Загрузить'}
-                  </button>
+                <div className="flex flex-col gap-1.5">
+                  <div className="flex items-center gap-2">
+                    <button type="button" onClick={() => bgRef.current?.click()} className={a.btnSecondary}>
+                      {uploadingBg ? '...' : 'Загрузить'}
+                    </button>
+                    {bgUrl && <button type="button" onClick={() => setBgUrl(null)} style={{ color: 'var(--accent)', opacity: 0.4, fontSize: '0.8rem' }}>✕</button>}
+                  </div>
                   <button type="button" onClick={() => openPicker('bg')} className={a.btnSecondary}>Из медиа</button>
                   <input ref={bgRef} type="file" accept="image/*" className="hidden"
                     onChange={e => e.target.files?.[0] && uploadBg(e.target.files[0])} />
-                  {bgUrl && <button type="button" onClick={() => setBgUrl(null)} style={{ color: 'var(--accent)', opacity: 0.4, fontSize: '0.8rem' }}>✕</button>}
                 </div>
                 {bgUrl && (
                   <div className="w-16 h-10 rounded overflow-hidden mt-1" style={{ background: CHECKBOARD_LIGHT }}>
@@ -467,14 +469,16 @@ export default function ProductsClient({ products }: { products: Product[] }) {
               </div>
               <div className="flex flex-col gap-1">
                 <label className="text-xs uppercase tracking-widest" style={LABEL_STYLE}>Фон карточки (темно)</label>
-                <div className="flex items-center gap-2">
-                  <button type="button" onClick={() => bgDarkRef.current?.click()} className={a.btnSecondary}>
-                    {uploadingBgDark ? '...' : 'Загрузить'}
-                  </button>
+                <div className="flex flex-col gap-1.5">
+                  <div className="flex items-center gap-2">
+                    <button type="button" onClick={() => bgDarkRef.current?.click()} className={a.btnSecondary}>
+                      {uploadingBgDark ? '...' : 'Загрузить'}
+                    </button>
+                    {bgUrlDark && <button type="button" onClick={() => setBgUrlDark(null)} style={{ color: 'var(--accent)', opacity: 0.4, fontSize: '0.8rem' }}>✕</button>}
+                  </div>
                   <button type="button" onClick={() => openPicker('bgDark')} className={a.btnSecondary}>Из медиа</button>
                   <input ref={bgDarkRef} type="file" accept="image/*" className="hidden"
                     onChange={e => e.target.files?.[0] && uploadBgDark(e.target.files[0])} />
-                  {bgUrlDark && <button type="button" onClick={() => setBgUrlDark(null)} style={{ color: 'var(--accent)', opacity: 0.4, fontSize: '0.8rem' }}>✕</button>}
                 </div>
                 {bgUrlDark && (
                   <div className="w-16 h-10 rounded overflow-hidden mt-1" style={{ background: CHECKBOARD_DARK }}>
