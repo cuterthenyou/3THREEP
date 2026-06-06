@@ -1,6 +1,8 @@
 import { requireAdmin } from '@/lib/adminAuth'
 import { NextResponse, type NextRequest } from 'next/server'
 import { uploadToYandex } from '@/lib/upload-to-yandex'
+import fs from 'fs'
+import path from 'path'
 
 export async function POST(req: NextRequest) {
   const admin = await requireAdmin()
@@ -21,6 +23,16 @@ export async function POST(req: NextRequest) {
 
   try {
     const folderParam = formData.get('folder') as string | null
+
+    if (folderParam === 'static') {
+      const safeName = path.basename(file.name)
+      const dir = path.join(process.cwd(), 'public', 'images')
+      if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true })
+      const bytes = await file.arrayBuffer()
+      fs.writeFileSync(path.join(dir, safeName), Buffer.from(bytes))
+      return NextResponse.json({ url: `/images/${encodeURIComponent(safeName)}` })
+    }
+
     const validFolders = ['products', 'assets', 'avatars']
     const folder = (folderParam && validFolders.includes(folderParam) ? folderParam : 'products') as 'products' | 'assets' | 'avatars'
     const result = await uploadToYandex(folder, file)

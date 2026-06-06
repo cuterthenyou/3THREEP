@@ -6,6 +6,7 @@ import type { Category } from '@/lib/types'
 import a from '../admin.module.css'
 import { INPUT_STYLE, LABEL_STYLE } from '../adminStyles'
 import { AdminPageTitle, AdminEmptyState, AdminModal } from '../components'
+import MediaPicker from '../components/MediaPicker'
 
 const EMPTY: Omit<Category, never> = {
   slug: '', name: '', active: true, description: null, logo_top_url: null, logo_bottom_url: null, modal_bg_url: null, modal_bg_url_dark: null,
@@ -19,6 +20,8 @@ export default function CollectionsClient({ collections }: { collections: Catego
   const [saving, setSaving] = useState(false)
   const [uploading, setUploading] = useState<UploadField | null>(null)
   const [error, setError] = useState('')
+  const [pickerOpen, setPickerOpen] = useState(false)
+  const [pickerField, setPickerField] = useState<UploadField | null>(null)
   const router = useRouter()
 
   const logoTopRef = useRef<HTMLInputElement>(null) as React.RefObject<HTMLInputElement>
@@ -28,6 +31,15 @@ export default function CollectionsClient({ collections }: { collections: Catego
 
   function openNew() { setEditing({ ...EMPTY }); setOriginalSlug(''); setError('') }
   function openEdit(c: Category) { setEditing({ ...c }); setOriginalSlug(c.slug); setError('') }
+
+  function openPicker(field: UploadField) {
+    setPickerField(field)
+    setPickerOpen(true)
+  }
+
+  function onPickerSelect(url: string) {
+    if (pickerField) setEditing(e => e ? { ...e, [pickerField]: url } : e)
+  }
 
   async function uploadFile(file: File, field: UploadField) {
     setUploading(field)
@@ -88,13 +100,16 @@ export default function CollectionsClient({ collections }: { collections: Catego
     return (
       <div className="flex flex-col gap-1">
         <label className="text-xs uppercase tracking-widest" style={LABEL_STYLE}>{label}</label>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           <button
             type="button"
             onClick={() => refEl.current?.click()}
             className={a.btnSecondary}
           >
             {uploading === field ? 'Загружаем...' : 'Загрузить'}
+          </button>
+          <button type="button" onClick={() => openPicker(field)} className={a.btnSecondary}>
+            Из медиа
           </button>
           <input
             ref={refEl}
@@ -169,6 +184,13 @@ export default function CollectionsClient({ collections }: { collections: Catego
           </div>
         ))}
       </div>
+
+      <MediaPicker
+        open={pickerOpen}
+        onClose={() => setPickerOpen(false)}
+        onSelect={onPickerSelect}
+        accept="image"
+      />
 
       {editing && (
         <AdminModal title={editing.slug ? 'Редактировать' : 'Новая коллекция'} onClose={() => setEditing(null)}>

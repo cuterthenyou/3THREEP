@@ -76,7 +76,16 @@ export async function DELETE(req: NextRequest) {
   if (!bucket || !name) return NextResponse.json({ error: 'Invalid params' }, { status: 400 })
 
   if (bucket === 'static') {
-    return NextResponse.json({ error: 'Cannot delete static files via API' }, { status: 400 })
+    const safeName = path.basename(name)
+    const filePath = path.join(process.cwd(), 'public', 'images', safeName)
+    if (!fs.existsSync(filePath)) return NextResponse.json({ error: 'File not found' }, { status: 404 })
+    try {
+      fs.unlinkSync(filePath)
+      return NextResponse.json({ ok: true })
+    } catch (err) {
+      console.error('Static delete error:', err)
+      return NextResponse.json({ error: 'Delete failed' }, { status: 500 })
+    }
   }
 
   try {

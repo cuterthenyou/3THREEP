@@ -7,6 +7,7 @@ import type { Product } from '@/lib/types'
 import a from '../admin.module.css'
 import { INPUT_STYLE, LABEL_STYLE, CHECKBOARD_LIGHT, CHECKBOARD_DARK } from '../adminStyles'
 import { AdminPageTitle, AdminEmptyState, AdminModal } from '../components'
+import MediaPicker from '../components/MediaPicker'
 import { formatPrice } from '@/lib/utils'
 
 const PRODUCT_TYPES = ['T-Shirt', 'Hoodie', 'Sweatshirt', 'Pants', 'Accessory', 'Other']
@@ -44,6 +45,8 @@ export default function ProductsClient({ products }: { products: Product[] }) {
   const [bgUrlDark, setBgUrlDark] = useState<string | null>(null)
   const [error, setError] = useState('')
   const [dragOver, setDragOver] = useState(false)
+  const [pickerOpen, setPickerOpen] = useState(false)
+  const [pickerTarget, setPickerTarget] = useState<'images' | 'bg' | 'bgDark'>('images')
   const fileRef = useRef<HTMLInputElement>(null)
   const bgRef = useRef<HTMLInputElement>(null)
   const bgDarkRef = useRef<HTMLInputElement>(null)
@@ -154,6 +157,20 @@ export default function ProductsClient({ products }: { products: Product[] }) {
     }
     setImages(prev => [...prev, ...urls])
     setUploading(false)
+  }
+
+  function openPicker(target: 'images' | 'bg' | 'bgDark') {
+    setPickerTarget(target)
+    setPickerOpen(true)
+  }
+
+  function onPickerSelect(url: string) {
+    if (pickerTarget === 'bg') setBgUrl(url)
+    else if (pickerTarget === 'bgDark') setBgUrlDark(url)
+  }
+
+  function onPickerSelectMultiple(urls: string[]) {
+    setImages(prev => [...prev, ...urls])
   }
 
   function handleDrop(e: React.DragEvent) {
@@ -301,6 +318,23 @@ export default function ProductsClient({ products }: { products: Product[] }) {
         ))}
       </div>
 
+      {pickerTarget === 'images' ? (
+        <MediaPicker
+          open={pickerOpen}
+          onClose={() => setPickerOpen(false)}
+          multiple
+          onSelectMultiple={onPickerSelectMultiple}
+          accept="image"
+        />
+      ) : (
+        <MediaPicker
+          open={pickerOpen}
+          onClose={() => setPickerOpen(false)}
+          onSelect={onPickerSelect}
+          accept="image"
+        />
+      )}
+
       {editing && (
         <AdminModal title={editing.id ? 'Редактировать' : 'Новый товар'} onClose={() => setEditing(null)}>
 
@@ -348,7 +382,12 @@ export default function ProductsClient({ products }: { products: Product[] }) {
 
             {/* Image upload */}
             <div className="flex flex-col gap-2">
-              <label className="text-xs uppercase tracking-widest" style={LABEL_STYLE}>Фото товара</label>
+              <div className="flex items-center justify-between">
+                <label className="text-xs uppercase tracking-widest" style={LABEL_STYLE}>Фото товара</label>
+                <button type="button" onClick={() => openPicker('images')} className={a.btnSecondary} style={{ fontSize: '0.7rem' }}>
+                  Из медиа
+                </button>
+              </div>
 
               {/* Drop zone */}
               <div
@@ -414,6 +453,7 @@ export default function ProductsClient({ products }: { products: Product[] }) {
                   <button type="button" onClick={() => bgRef.current?.click()} className={a.btnSecondary}>
                     {uploadingBg ? '...' : 'Загрузить'}
                   </button>
+                  <button type="button" onClick={() => openPicker('bg')} className={a.btnSecondary}>Из медиа</button>
                   <input ref={bgRef} type="file" accept="image/*" className="hidden"
                     onChange={e => e.target.files?.[0] && uploadBg(e.target.files[0])} />
                   {bgUrl && <button type="button" onClick={() => setBgUrl(null)} style={{ color: 'var(--accent)', opacity: 0.4, fontSize: '0.8rem' }}>✕</button>}
@@ -431,6 +471,7 @@ export default function ProductsClient({ products }: { products: Product[] }) {
                   <button type="button" onClick={() => bgDarkRef.current?.click()} className={a.btnSecondary}>
                     {uploadingBgDark ? '...' : 'Загрузить'}
                   </button>
+                  <button type="button" onClick={() => openPicker('bgDark')} className={a.btnSecondary}>Из медиа</button>
                   <input ref={bgDarkRef} type="file" accept="image/*" className="hidden"
                     onChange={e => e.target.files?.[0] && uploadBgDark(e.target.files[0])} />
                   {bgUrlDark && <button type="button" onClick={() => setBgUrlDark(null)} style={{ color: 'var(--accent)', opacity: 0.4, fontSize: '0.8rem' }}>✕</button>}

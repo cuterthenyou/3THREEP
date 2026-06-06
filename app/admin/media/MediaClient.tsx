@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback, useMemo } from 'react'
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import Image from 'next/image'
 import a from '../admin.module.css'
 import { AdminPageTitle, AdminEmptyState } from '../components'
@@ -80,6 +80,9 @@ export default function MediaClient() {
   const [deleting, setDeleting] = useState<Set<string>>(new Set())
   const [selected, setSelected] = useState<Set<string>>(new Set())
   const [massDeleting, setMassDeleting] = useState(false)
+  const [uploadFolder, setUploadFolder] = useState('products')
+  const [uploading, setUploading] = useState(false)
+  const uploadRef = useRef<HTMLInputElement>(null)
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -155,6 +158,19 @@ export default function MediaClient() {
     load()
   }
 
+  async function handleUpload(fileList: FileList) {
+    setUploading(true)
+    for (const file of Array.from(fileList)) {
+      const fd = new FormData()
+      fd.append('file', file)
+      fd.append('folder', uploadFolder)
+      await fetch('/api/admin/upload', { method: 'POST', body: fd })
+    }
+    setUploading(false)
+    if (uploadRef.current) uploadRef.current.value = ''
+    load()
+  }
+
   function downloadSelected() {
     filtered.filter(f => selected.has(f.url)).forEach(f => {
       const a = document.createElement('a')
@@ -177,6 +193,37 @@ export default function MediaClient() {
         <button onClick={load} className={a.btnSecondary}>
           Обновить
         </button>
+      </div>
+
+      {/* Upload */}
+      <div className="mb-4 flex flex-wrap items-center gap-2 px-3 py-2 rounded-lg" style={{ background: accentDim, border: '1px solid var(--border)' }}>
+        <span style={{ color: accent, fontFamily: 'var(--font-involve)', fontSize: '0.72rem', opacity: 0.6, textTransform: 'uppercase', letterSpacing: '0.08em' }}>Папка:</span>
+        <select
+          value={uploadFolder}
+          onChange={e => setUploadFolder(e.target.value)}
+          className="px-2 py-1 rounded text-xs outline-none"
+          style={{ background: 'var(--bg-2)', color: accent, border: '1px solid var(--border)', fontFamily: 'var(--font-involve)' }}
+        >
+          <option value="products">Товары</option>
+          <option value="avatars">Аватары</option>
+          <option value="assets">Ассеты</option>
+          <option value="static">Статика (public/images)</option>
+        </select>
+        <button
+          onClick={() => uploadRef.current?.click()}
+          disabled={uploading}
+          className={a.btn}
+          style={{ fontSize: '0.72rem' }}
+        >
+          {uploading ? 'Загружаем...' : '+ Загрузить'}
+        </button>
+        <input
+          ref={uploadRef}
+          type="file"
+          multiple
+          className="hidden"
+          onChange={e => e.target.files && handleUpload(e.target.files)}
+        />
       </div>
 
       {/* Search */}
