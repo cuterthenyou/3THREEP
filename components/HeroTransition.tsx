@@ -66,47 +66,14 @@ export default function HeroTransition() {
       ctx!.putImageData(imageData, 0, 0)
     }
 
-    function lerp(a: number, b: number, t: number) { return a + (b - a) * t }
-    function easeInOut(t: number) { return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t }
-
-    let current = hexToRgb(getBgColor())
-    drawColor(current)
-
-    let target = { ...current }
-    let animStart: number | null = null
-    let animFrame: number | null = null
-    const DURATION = 450
-
-    function animate(ts: number) {
-      if (animStart === null) animStart = ts // fallback for initial draw
-      const t = easeInOut(Math.min((ts - animStart) / DURATION, 1))
-      drawColor({
-        r: Math.round(lerp(current.r, target.r, t)),
-        g: Math.round(lerp(current.g, target.g, t)),
-        b: Math.round(lerp(current.b, target.b, t)),
-      })
-      if (t < 1) {
-        animFrame = requestAnimationFrame(animate)
-      } else {
-        current = { ...target }
-        animFrame = null
-        animStart = null
-      }
-    }
+    drawColor(hexToRgb(getBgColor()))
 
     const obs = new MutationObserver(() => {
-      target = hexToRgb(getBgColor())
-      if (animFrame !== null) cancelAnimationFrame(animFrame)
-      // Record start time synchronously so canvas matches CSS transition's start frame
-      animStart = performance.now()
-      animFrame = requestAnimationFrame(animate)
+      drawColor(hexToRgb(getBgColor()))
     })
     obs.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] })
 
-    return () => {
-      obs.disconnect()
-      if (animFrame !== null) cancelAnimationFrame(animFrame)
-    }
+    return () => obs.disconnect()
   }, [])
 
   return (

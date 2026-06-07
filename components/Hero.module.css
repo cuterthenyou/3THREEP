@@ -2,7 +2,7 @@
   background: var(--bg);
   overflow: hidden;
   aspect-ratio: 1 / 1;
-  transition: background-color 0.45s ease-in-out;
+  transition: none;
 }
 
 @media (min-width: 768px) {
@@ -29,7 +29,7 @@
   z-index: 2;
   pointer-events: none;
   background: transparent;
-  transition: background 0.45s ease-in-out;
+  transition: none;
 }
 
 :global([data-theme="dark"]) .video {
