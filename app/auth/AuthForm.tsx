@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { signIn } from 'next-auth/react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
@@ -59,8 +59,25 @@ export default function AuthForm() {
   const [consent, setConsent] = useState(false);
   const [newsletter, setNewsletter] = useState(false);
   const [emailTouched, setEmailTouched] = useState(false);
+  const [resendSeconds, setResendSeconds] = useState(0);
+  const resendIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const isEmailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
+  useEffect(() => () => {
+    if (resendIntervalRef.current) clearInterval(resendIntervalRef.current);
+  }, []);
+
+  function startResendTimer() {
+    if (resendIntervalRef.current) clearInterval(resendIntervalRef.current);
+    setResendSeconds(60);
+    resendIntervalRef.current = setInterval(() => {
+      setResendSeconds(s => {
+        if (s <= 1) { clearInterval(resendIntervalRef.current!); resendIntervalRef.current = null; return 0; }
+        return s - 1;
+      });
+    }, 1000);
+  }
 
   async function requestCode() {
     setLoading(true);
@@ -71,6 +88,7 @@ export default function AuthForm() {
         setError('Не удалось отправить код. Попробуй ещё раз.');
       } else {
         setStep('code');
+        startResendTimer();
       }
     } catch {
       setError('Произошла ошибка. Попробуй ещё раз.');
@@ -84,9 +102,11 @@ export default function AuthForm() {
     setError('');
     try {
       const response = await fetch(
-        `/api/auth/callback/email?token=${code}&email=${encodeURIComponent(email)}`
+        `/api/auth/callback/email?token=${code}&email=${encodeURIComponent(email)}`,
+        { redirect: 'manual' }
       );
-      if (!response.ok) {
+      const location = response.headers.get('Location') ?? '';
+      if (response.status !== 302 || location.toLowerCase().includes('error')) {
         setError('Неверный код. Попробуй ещё раз.');
         setLoading(false);
         return;
@@ -177,11 +197,17 @@ export default function AuthForm() {
                 setStep('email');
                 setCode('');
                 setError('');
+                if (resendIntervalRef.current) clearInterval(resendIntervalRef.current);
+                setResendSeconds(0);
               }}
               className={s.backLink}
             >
               Изменить email
             </button>
+            {resendSeconds > 0
+              ? <span className={s.resendTimer}>Запросить снова — {resendSeconds}с</span>
+              : <button onClick={() => { setCode(''); setError(''); requestCode(); }} disabled={loading} className={s.backLink}>Запросить снова</button>
+            }
           </>
         )}
 

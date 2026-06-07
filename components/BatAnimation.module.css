@@ -92,19 +92,42 @@
   opacity: 0.65;
 }
 
-/* GAME OVER label — blinking above score */
-.gameOver {
+/* GAME OVER — centered fullscreen banner */
+.gameOverCenter {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  z-index: 200;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
   font-family: var(--font-heading, 'ONDER', sans-serif);
-  font-size: 0.65rem;
-  letter-spacing: 0.22em;
+  font-size: clamp(2rem, 6vw, 3.5rem);
+  letter-spacing: 0.3em;
   color: var(--accent, #f29774);
   text-transform: uppercase;
+  text-align: center;
   animation: gameOverBlink 0.85s steps(1) infinite;
 }
 
 @keyframes gameOverBlink {
   0%, 49% { opacity: 1; }
   50%, 100% { opacity: 0.18; }
+}
+
+/* Click ripple — concentric ring from cursor */
+.ripple {
+  position: fixed;
+  z-index: 95;
+  pointer-events: none;
+  width: 0;
+  height: 0;
+  transform: translate(-50%, -50%);
+  animation: rippleOut 0.55s ease-out forwards;
+}
+
+@keyframes rippleOut {
+  0%   { box-shadow: 0 0 0 0px rgba(242, 151, 116, 0.6); }
+  100% { box-shadow: 0 0 0 60px rgba(242, 151, 116, 0); }
 }
 
 /* ── Explosion ──────────────────────────────────────────────── */

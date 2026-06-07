@@ -175,7 +175,7 @@ function BatInstance({ bat, onClick, onPositionUpdate }: BatInstanceProps) {
 }
 
 // ── Score counter ─────────────────────────────────────────────────────────────
-function ScoreCounter({ score, gameOver, waveNum }: { score: number; gameOver: boolean; waveNum: number }) {
+function ScoreCounter({ score, waveNum }: { score: number; waveNum: number }) {
   const [pulse, setPulse] = useState(false)
   const prevScore = useRef(score)
 
@@ -191,10 +191,26 @@ function ScoreCounter({ score, gameOver, waveNum }: { score: number; gameOver: b
   return (
     <div className={s.score}>
       {waveNum > 0 && <span className={s.waveLabel}>WAVE {waveNum}</span>}
-      {gameOver && <span className={s.gameOver}>GAME OVER</span>}
       <span className={s.scoreLabel}>убито</span>
       <span className={`${s.scoreNum} ${pulse ? s.pulse : ''}`}>×{score}</span>
     </div>
+  )
+}
+
+// ── GAME OVER banner — centered ───────────────────────────────────────────────
+function GameOverBanner() {
+  return <div className={s.gameOverCenter}>GAME OVER</div>
+}
+
+// ── Click ripple ──────────────────────────────────────────────────────────────
+function Ripple({ data, onDone }: { data: { id: number; x: number; y: number }; onDone: () => void }) {
+  return (
+    <div
+      className={s.ripple}
+      style={{ left: data.x, top: data.y }}
+      onAnimationEnd={onDone}
+      aria-hidden="true"
+    />
   )
 }
 
@@ -257,18 +273,22 @@ export default function BatAnimation() {
   const [score, setScore]         = useState(0)
   const [waveNum, setWaveNum]     = useState(0)
 
-  const waveTimerRef    = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const goTimerRef      = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const spawnTimersRef  = useRef<ReturnType<typeof setTimeout>[]>([])
-  const batPositions    = useRef<Map<number, { x: number; y: number }>>(new Map())
-  const nextWaveNRef    = useRef(0)
-  const scheduleWaveRef = useRef(false)
-  const gameStateRef    = useRef<GameState>('idle')
-  gameStateRef.current  = gameState
+  const [ripples, setRipples] = useState<{ id: number; x: number; y: number }[]>([])
+
+  const waveTimerRef      = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const goTimerRef        = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const spawnTimersRef    = useRef<ReturnType<typeof setTimeout>[]>([])
+  const batPositions      = useRef<Map<number, { x: number; y: number }>>(new Map())
+  const nextWaveNRef      = useRef(0)
+  const currentWaveSizeRef = useRef(0)
+  const scheduleWaveRef   = useRef(false)
+  const gameStateRef      = useRef<GameState>('idle')
+  gameStateRef.current    = gameState
 
   // spawnWave: stored in a ref so timeouts always call the latest version
   const spawnWaveRef = useRef<(n: number) => void>()
   spawnWaveRef.current = (n: number) => {
+    currentWaveSizeRef.current = n
     if (waveTimerRef.current) { clearTimeout(waveTimerRef.current); waveTimerRef.current = null }
     spawnTimersRef.current.forEach(clearTimeout); spawnTimersRef.current = []
 
@@ -283,18 +303,23 @@ export default function BatAnimation() {
       const positions = [...batPositions.current.values()]
       batPositions.current.clear()
       setBats([])
-      setGameState('game_over')
       positions.forEach((p, i) => {
         setTimeout(() => {
           setExplosions(prev => [...prev, { id: nextId(), x: p.x, y: p.y, type: 'timeout' }])
         }, i * 100)
       })
-      // After 3 s → idle with full reset
-      goTimerRef.current = setTimeout(() => {
+      if (gameStateRef.current === 'lure') {
+        // Game never started — silent reset, no GAME OVER
         setGameState('idle')
-        setScore(0)
-        setWaveNum(0)
-      }, 3000)
+      } else {
+        // Real game over
+        setGameState('game_over')
+        goTimerRef.current = setTimeout(() => {
+          setGameState('idle')
+          setScore(0)
+          setWaveNum(0)
+        }, 3000)
+      }
     }, 4000)
   }
 
@@ -350,7 +375,7 @@ export default function BatAnimation() {
       if (remaining.length === 0) {
         // All bats in wave clicked — clear timer, queue next wave
         if (waveTimerRef.current) { clearTimeout(waveTimerRef.current); waveTimerRef.current = null }
-        const nextN = prev.length + 1
+        const nextN = currentWaveSizeRef.current + 1
         nextWaveNRef.current = nextN
         scheduleWaveRef.current = true
         // Upgrade lure → playing state on first successful click
@@ -367,9 +392,23 @@ export default function BatAnimation() {
   const overlayActive = gameState === 'playing' || gameState === 'game_over'
   const showScore     = gameState === 'playing' || gameState === 'game_over'
 
+  const handleOverlayClick = useCallback((e: React.MouseEvent) => {
+    const id = nextId()
+    setRipples(prev => [...prev, { id, x: e.clientX, y: e.clientY }])
+  }, [])
+
+  const removeRipple = useCallback((id: number) => {
+    setRipples(prev => prev.filter(r => r.id !== id))
+  }, [])
+
   return (
     <>
-      {overlayActive && <div className={s.overlay} aria-hidden="true" />}
+      {overlayActive && (
+        <div className={s.overlay} aria-hidden="true" onClick={handleOverlayClick} />
+      )}
+      {ripples.map(r => (
+        <Ripple key={r.id} data={r} onDone={() => removeRipple(r.id)} />
+      ))}
       {bats.map(bat => (
         <BatInstance
           key={bat.id}
@@ -385,7 +424,8 @@ export default function BatAnimation() {
           onDone={() => removeExplosion(exp.id)}
         />
       ))}
-      {showScore && <ScoreCounter score={score} gameOver={gameState === 'game_over'} waveNum={waveNum} />}
+      {gameState === 'game_over' && <GameOverBanner />}
+      {showScore && <ScoreCounter score={score} waveNum={waveNum} />}
     </>
   )
 }

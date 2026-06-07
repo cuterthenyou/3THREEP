@@ -193,6 +193,15 @@
   opacity: 0.9;
 }
 
+.resendTimer {
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  opacity: 0.35;
+  font-family: var(--font-involve);
+  text-align: center;
+  display: block;
+}
+
 .error {
   font-size: 0.875rem;
   text-align: center;
