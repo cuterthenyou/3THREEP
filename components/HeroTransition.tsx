@@ -78,7 +78,7 @@ export default function HeroTransition() {
     const DURATION = 450
 
     function animate(ts: number) {
-      if (animStart === null) animStart = ts
+      if (animStart === null) animStart = ts // fallback for initial draw
       const t = easeInOut(Math.min((ts - animStart) / DURATION, 1))
       drawColor({
         r: Math.round(lerp(current.r, target.r, t)),
@@ -97,7 +97,8 @@ export default function HeroTransition() {
     const obs = new MutationObserver(() => {
       target = hexToRgb(getBgColor())
       if (animFrame !== null) cancelAnimationFrame(animFrame)
-      animStart = null
+      // Record start time synchronously so canvas matches CSS transition's start frame
+      animStart = performance.now()
       animFrame = requestAnimationFrame(animate)
     })
     obs.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] })

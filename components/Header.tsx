@@ -286,72 +286,56 @@ export default function Header({ isAdminUser = false, initialCollections }: Prop
         )}
 
         <nav className={s.nav}>
+          <div className={s.navInner}>
 
-          {/* Коллекции — accordion */}
-          <div className={s.accordion}>
-            <button className={s.navLink} onClick={() => toggle('collections')}>
-              <IconGrid /> Коллекции <span className={`${s.arrow} ${expanded === 'collections' ? s.arrowOpen : ''}`}>▸</span>
-            </button>
-            <div className={`${s.sub} ${expanded === 'collections' ? s.subOpen : ''}`}>
-              <Link href="/#catalog" onClick={() => setMenuOpen(false)} className={s.subLink}>— Все</Link>
-              {collectionsLoading
-                ? <span className={s.subLink} style={{ opacity: 0.3, cursor: 'default' }}>...</span>
-                : collections.map(c => (
-                  <div key={c.slug}>
-                    <Link href={c.href ?? `/?category=${encodeURIComponent(c.slug)}`} onClick={() => setMenuOpen(false)} className={s.subLink}>— {c.name}</Link>
-                  </div>
-                ))
-              }
-            </div>
-          </div>
-
-          {/* Инфа */}
-          <Link href="/info" onClick={() => setMenuOpen(false)} className={s.navLink}>
-            <IconDiamond /> Инфа
-          </Link>
-
-          {/* Личный кабинет */}
-          <Link href="/account" onClick={() => setMenuOpen(false)} className={s.navLink}>
-            <IconUser /> Кабинет
-          </Link>
-
-          {/* Admin accordion */}
-          {isAdminUser && (
-            <div style={{ width: '100%', textAlign: 'center', margin: '1.5rem 0 0.5rem', position: 'relative' }}>
-              <span style={{
-                fontFamily: 'var(--font-deutsch)',
-                fontSize: '0.55rem',
-                letterSpacing: '0.3em',
-                color: 'var(--accent)',
-                opacity: 0.35,
-                padding: '0 0.75rem',
-                background: 'var(--overlay-bg)',
-                position: 'relative',
-                zIndex: 1,
-              }}>✦ ✦ ✦</span>
-              <div style={{
-                position: 'absolute',
-                top: '50%',
-                left: 0,
-                right: 0,
-                height: '1px',
-                background: 'var(--accent)',
-                opacity: 0.15,
-              }} />
-            </div>
-          )}
-          {isAdminUser && (
+            {/* Коллекции — accordion */}
             <div className={s.accordion}>
-              <button className={s.navLink} onClick={() => toggle('admin')}>
-                <IconHex /> Панель <span className={`${s.arrow} ${expanded === 'admin' ? s.arrowOpen : ''}`}>▸</span>
+              <button className={s.navLink} onClick={() => toggle('collections')}>
+                <IconGrid /> Коллекции <span className={`${s.arrow} ${expanded === 'collections' ? s.arrowOpen : ''}`}>▸</span>
               </button>
-              <div className={`${s.sub} ${expanded === 'admin' ? s.subOpen : ''}`}>
-                {ADMIN_LINKS.map(({ href, label }) => (
-                  <Link key={href} href={href} onClick={() => setMenuOpen(false)} className={s.subLink}>{label}</Link>
-                ))}
+              <div className={`${s.sub} ${expanded === 'collections' ? s.subOpen : ''}`}>
+                <Link href="/#catalog" onClick={() => setMenuOpen(false)} className={s.subLink}>— Все</Link>
+                {collectionsLoading
+                  ? <span className={s.subLink} style={{ opacity: 0.3, cursor: 'default' }}>...</span>
+                  : collections.map(c => (
+                    <div key={c.slug}>
+                      <Link href={c.href ?? `/?category=${encodeURIComponent(c.slug)}`} onClick={() => setMenuOpen(false)} className={s.subLink}>— {c.name}</Link>
+                    </div>
+                  ))
+                }
               </div>
             </div>
-          )}
+
+            {/* Инфа */}
+            <Link href="/info" onClick={() => setMenuOpen(false)} className={s.navLink}>
+              <IconDiamond /> Инфа
+            </Link>
+
+            {/* Личный кабинет */}
+            <Link href="/account" onClick={() => setMenuOpen(false)} className={s.navLink}>
+              <IconUser /> Кабинет
+            </Link>
+
+            {/* Admin accordion */}
+            {isAdminUser && (
+              <div className={s.navDivider}>
+                <span className={s.navDividerLabel}>✦ ✦ ✦</span>
+              </div>
+            )}
+            {isAdminUser && (
+              <div className={s.accordion}>
+                <button className={s.navLink} onClick={() => toggle('admin')}>
+                  <IconHex /> Панель <span className={`${s.arrow} ${expanded === 'admin' ? s.arrowOpen : ''}`}>▸</span>
+                </button>
+                <div className={`${s.sub} ${expanded === 'admin' ? s.subOpen : ''}`}>
+                  {ADMIN_LINKS.map(({ href, label }) => (
+                    <Link key={href} href={href} onClick={() => setMenuOpen(false)} className={s.subLink}>{label}</Link>
+                  ))}
+                </div>
+              </div>
+            )}
+
+          </div>
         </nav>
 
         {/* Footer links */}
