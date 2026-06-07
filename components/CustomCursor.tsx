@@ -8,11 +8,11 @@ function CrosshairShape() {
     <div style={{ position: 'relative', width: '100%', height: '100%' }}>
       <div style={{
         position: 'absolute', top: '50%', left: 0, right: 0,
-        height: 1.5, background: 'var(--accent)', transform: 'translateY(-50%)',
+        height: 1.5, background: 'var(--cursor-color)', transform: 'translateY(-50%)',
       }} />
       <div style={{
         position: 'absolute', left: '50%', top: 0, bottom: 0,
-        width: 1.5, background: 'var(--accent)', transform: 'translateX(-50%)',
+        width: 1.5, background: 'var(--cursor-color)', transform: 'translateX(-50%)',
       }} />
     </div>
   )
@@ -23,7 +23,7 @@ function SvgMask({ url }: { url: string }) {
   return (
     <div style={{
       width: '100%', height: '100%',
-      backgroundColor: 'var(--accent)',
+      backgroundColor: 'var(--cursor-color)',
       maskImage: proxied,
       WebkitMaskImage: proxied,
       maskSize: 'contain',
@@ -138,12 +138,12 @@ export default function CustomCursor() {
             trailRef.current.style.width = '28px'
             trailRef.current.style.height = '28px'
             trailRef.current.style.background = 'transparent'
-            trailRef.current.style.border = '1.5px solid var(--accent)'
+            trailRef.current.style.border = '1.5px solid var(--cursor-color)'
             trailRef.current.style.opacity = '0.7'
           } else {
             trailRef.current.style.width = '6px'
             trailRef.current.style.height = '6px'
-            trailRef.current.style.background = 'var(--accent)'
+            trailRef.current.style.background = 'var(--cursor-color)'
             trailRef.current.style.border = 'none'
             trailRef.current.style.opacity = '0.5'
           }
@@ -191,7 +191,7 @@ export default function CustomCursor() {
           position: 'fixed', top: 0, left: 0,
           width: 6, height: 6,
           borderRadius: '50%',
-          background: 'var(--accent)',
+          background: 'var(--cursor-color)',
           opacity: 0.5,
           pointerEvents: 'none',
           zIndex: 9998,

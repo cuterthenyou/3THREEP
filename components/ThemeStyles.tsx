@@ -88,6 +88,11 @@ export default async function ThemeStyles() {
     `@font-face { font-family: '${f.name}'; src: url('${f.url}') format('${fontFormat(f.url)}'); font-display: swap; }`
   ).join('\n')
 
+  const cursorColorLightRaw = settings['custom_cursor_color_light']
+  const cursorColorDarkRaw  = settings['custom_cursor_color_dark']
+  const cursorColorLight = cursorColorLightRaw && isHex(cursorColorLightRaw) ? cursorColorLightRaw : null
+  const cursorColorDark  = cursorColorDarkRaw  && isHex(cursorColorDarkRaw)  ? cursorColorDarkRaw  : null
+
   const css = `${fontFaces ? fontFaces + '\n' : ''}
 :root {
   --bg:         ${bgLight};
@@ -113,6 +118,7 @@ export default async function ThemeStyles() {
   --grain-opacity: ${grainOpacity};
   --radius-base:   ${radiusValue};
   --animation-speed: ${speedValue};
+  --cursor-color: ${cursorColorLight ?? 'var(--accent)'};
 }
 [data-theme="dark"] {
   --bg:         ${bgDark};
@@ -129,6 +135,7 @@ export default async function ThemeStyles() {
   --accent-glow: color-mix(in srgb, ${accentDark} 35%, transparent);
   --bg-card:    ${accentDark};
   --text-on-card: ${bgDark};
+  --cursor-color: ${cursorColorDark ?? 'var(--accent)'};
 }
 `.trim()
 

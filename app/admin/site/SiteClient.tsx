@@ -202,9 +202,13 @@ export default function SiteClient({ initialSettings, initialCustomFonts = [] }:
   // ── Cursor ──────────────────────────────────────────────────────
   const [cursorEnabled, setCursorEnabled] = useState(initialSettings['custom_cursor_enabled'] === 'true')
   const [cursorSvgUrl, setCursorSvgUrl] = useState<string | null>(initialSettings['custom_cursor_svg_url'] ?? null)
+  const [cursorColorLight, setCursorColorLight] = useState(initialSettings['custom_cursor_color_light'] ?? '#f29774')
+  const [cursorColorDark, setCursorColorDark] = useState(initialSettings['custom_cursor_color_dark'] ?? '#FCB0B2')
   const [savingCursor, setSavingCursor] = useState(false)
+  const [savingCursorColors, setSavingCursorColors] = useState(false)
   const [uploadingCursor, setUploadingCursor] = useState(false)
   const [cursorMsg, setCursorMsg] = useState('')
+  const [cursorColorsMsg, setCursorColorsMsg] = useState('')
   const cursorSvgRef = useRef<HTMLInputElement>(null)
 
   // ── Effects ─────────────────────────────────────────────────────
@@ -762,7 +766,7 @@ export default function SiteClient({ initialSettings, initialCustomFonts = [] }:
               {cursorSvgUrl ? (
                 <div style={{
                   width: 28, height: 28,
-                  backgroundColor: 'var(--accent)',
+                  backgroundColor: cursorColorLight || 'var(--accent)',
                   maskImage: `url(/api/proxy?url=${encodeURIComponent(cursorSvgUrl)})`,
                   WebkitMaskImage: `url(/api/proxy?url=${encodeURIComponent(cursorSvgUrl)})`,
                   maskSize: 'contain', WebkitMaskSize: 'contain',
@@ -771,8 +775,8 @@ export default function SiteClient({ initialSettings, initialCustomFonts = [] }:
                 }} />
               ) : (
                 <div style={{ position: 'relative', width: 20, height: 20 }}>
-                  <div style={{ position: 'absolute', top: '50%', left: 0, right: 0, height: 1.5, background: 'var(--accent)', transform: 'translateY(-50%)' }} />
-                  <div style={{ position: 'absolute', left: '50%', top: 0, bottom: 0, width: 1.5, background: 'var(--accent)', transform: 'translateX(-50%)' }} />
+                  <div style={{ position: 'absolute', top: '50%', left: 0, right: 0, height: 1.5, background: cursorColorLight || 'var(--accent)', transform: 'translateY(-50%)' }} />
+                  <div style={{ position: 'absolute', left: '50%', top: 0, bottom: 0, width: 1.5, background: cursorColorLight || 'var(--accent)', transform: 'translateX(-50%)' }} />
                 </div>
               )}
             </div>
@@ -801,6 +805,49 @@ export default function SiteClient({ initialSettings, initialCustomFonts = [] }:
               )} />
           </div>
         )}
+
+        {/* Color pickers — always visible in cursor section */}
+        <div className="flex flex-col gap-3 pt-1">
+          <div className="flex items-center gap-2 pb-1" style={{ borderBottom: '1px solid var(--border-soft)' }}>
+            <span className="text-xs uppercase tracking-widest font-bold" style={{ fontFamily: 'var(--font-involve)', color: 'var(--accent)' }}>
+              Цвет курсора
+            </span>
+            <span className="text-xs" style={{ color: 'var(--accent)', opacity: 0.4, fontFamily: 'var(--font-involve)' }}>
+              — если не задан, использует акцентный цвет темы
+            </span>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+            <ColorPicker
+              label="☀ Светлая тема"
+              value={cursorColorLight}
+              cssVar="--cursor-color"
+              onChange={setCursorColorLight}
+            />
+            <ColorPicker
+              label="☾ Тёмная тема"
+              value={cursorColorDark}
+              onChange={setCursorColorDark}
+            />
+          </div>
+          <div className="flex items-center gap-3 flex-wrap">
+            <button
+              onClick={async () => {
+                setSavingCursorColors(true); setCursorColorsMsg('')
+                await Promise.all([
+                  saveSetting('custom_cursor_color_light', cursorColorLight),
+                  saveSetting('custom_cursor_color_dark',  cursorColorDark),
+                ])
+                setSavingCursorColors(false)
+                setCursorColorsMsg('✓ Сохранено — перезагрузите страницу')
+              }}
+              disabled={savingCursorColors}
+              className={a.btn}
+            >
+              {savingCursorColors ? 'Сохраняем...' : 'Сохранить цвет'}
+            </button>
+            {cursorColorsMsg && <span style={msgStyle(cursorColorsMsg)}>{cursorColorsMsg}</span>}
+          </div>
+        </div>
       </AdminSection>
 
       {/* ── Hero video ── */}
