@@ -11,6 +11,7 @@ import ScrollRestorer from '@/components/ScrollRestorer';
 import ThemeStyles from '@/components/ThemeStyles';
 import CustomCursor from '@/components/CustomCursor';
 import VisitTracker from '@/components/VisitTracker';
+import LoadingScreen from '@/components/LoadingScreen';
 import './globals.css';
 
 const unbounded = Unbounded({
@@ -46,26 +47,24 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <ThemeStyles />
       </head>
       <body className="overflow-x-hidden">
+        <LoadingScreen />
         <CustomCursor />
         <VisitTracker />
         <GlitterCanvas />
-        {/* Hidden SVG filter for grain/noise effects */}
-        <svg
+        {/* Grain/noise texture overlay — opacity controlled by --grain-opacity CSS var */}
+        <div
           aria-hidden="true"
-          style={{ position: 'absolute', width: 0, height: 0, overflow: 'hidden' }}
-        >
-          <defs>
-            <filter id="grain-filter">
-              <feTurbulence
-                type="fractalNoise"
-                baseFrequency="0.65"
-                numOctaves="3"
-                stitchTiles="stitch"
-              />
-              <feColorMatrix type="saturate" values="0" />
-            </filter>
-          </defs>
-        </svg>
+          className="grain-fixed"
+          style={{
+            position: 'fixed',
+            inset: 0,
+            pointerEvents: 'none',
+            zIndex: 2,
+            backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='256' height='256'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='256' height='256' filter='url(%23n)'/%3E%3C/svg%3E\")",
+            backgroundRepeat: 'repeat',
+            backgroundSize: '256px 256px',
+          }}
+        />
 
         <Providers>
           <CartProvider>

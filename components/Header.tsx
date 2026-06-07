@@ -63,6 +63,8 @@ function IconHex() {
 interface Props {
   isAdminUser?: boolean;
   initialCollections?: Collection[];
+  logoIconUrl?: string | null;
+  logoTextUrl?: string | null;
 }
 
 const ADMIN_LINKS = [
@@ -80,7 +82,7 @@ const ADMIN_LINKS = [
 
 interface Collection { slug: string; name: string; types?: string[]; href?: string }
 
-export default function Header({ isAdminUser = false, initialCollections }: Props) {
+export default function Header({ isAdminUser = false, initialCollections, logoIconUrl: initialLogoIconUrl, logoTextUrl: initialLogoTextUrl }: Props) {
   const headerRef = useRef<HTMLElement>(null);
   const { count, setOpen } = useCart();
   const [scrolled, setScrolled] = useState(false);
@@ -90,8 +92,8 @@ export default function Header({ isAdminUser = false, initialCollections }: Prop
   const [collectionsLoading, setCollectionsLoading] = useState(!initialCollections);
   const [isDark, setIsDark] = useState(false);
   const [menuUser, setMenuUser] = useState<{ name: string; level: number } | null>(null);
-  const [logoIconUrl, setLogoIconUrl] = useState<string | null>(null);
-  const [logoTextUrl, setLogoTextUrl] = useState<string | null>(null);
+  const [logoIconUrl, setLogoIconUrl] = useState<string | null>(initialLogoIconUrl ?? null);
+  const [logoTextUrl, setLogoTextUrl] = useState<string | null>(initialLogoTextUrl ?? null);
   const menuHistoryPushed = useRef(false);
 
   function closeMenu() {
@@ -102,17 +104,6 @@ export default function Header({ isAdminUser = false, initialCollections }: Prop
       setMenuOpen(false);
     }
   }
-
-  // Fetch site logos
-  useEffect(() => {
-    fetch('/api/site-settings')
-      .then(r => r.ok ? r.json() : {})
-      .then((d: Record<string, string | null>) => {
-        if (d.logo_icon_url) setLogoIconUrl(d.logo_icon_url);
-        if (d.logo_text_url) setLogoTextUrl(d.logo_text_url);
-      })
-      .catch(() => {});
-  }, []);
 
   // Fetch current user for burger menu display
   useEffect(() => {

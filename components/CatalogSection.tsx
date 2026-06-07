@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState, useEffect, useCallback, useRef } from 'react'
+import Image from 'next/image'
 import { useSearchParams } from 'next/navigation'
 import type { Product, ProductCategory, Category } from '@/lib/types'
 import ProductModal from './ProductModal'
@@ -139,8 +140,14 @@ export default function CatalogSection({ products, categories, categoryData = {}
         const logoTop = activeCat?.logo_top_url
         return logoTop ? (
           <div className="flex justify-center pt-6 pb-2">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={logoTop} alt="Collection" className="theme-img h-16 sm:h-20 lg:h-28 w-auto" />
+            <Image
+              src={logoTop}
+              alt="Collection"
+              width={480}
+              height={112}
+              className="theme-img h-16 sm:h-20 lg:h-28 w-auto"
+              unoptimized={logoTop.endsWith('.svg')}
+            />
           </div>
         ) : null
       })()}
@@ -223,8 +230,15 @@ export default function CatalogSection({ products, categories, categoryData = {}
         const logoBottom = activeCat?.logo_bottom_url
         return logoBottom ? (
           <div className="flex justify-center pb-16">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={logoBottom} alt="Collection" className="theme-img w-32 h-auto" />
+            <Image
+              src={logoBottom}
+              alt="Collection"
+              width={128}
+              height={64}
+              className="theme-img w-32 h-auto"
+              style={{ height: 'auto' }}
+              unoptimized={logoBottom.endsWith('.svg')}
+            />
           </div>
         ) : null
       })()}

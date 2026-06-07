@@ -156,6 +156,13 @@
   z-index: 1;
 }
 
+/* Full-screen fixed grain overlay (used in layout) */
+.grain-fixed {
+  opacity: var(--grain-opacity, 0.055);
+  mix-blend-mode: overlay;
+  transition: opacity 0.3s;
+}
+
 *[style*='ONDER'] {
   word-break: break-word;
   overflow-wrap: break-word;

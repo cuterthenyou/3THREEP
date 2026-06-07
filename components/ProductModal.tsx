@@ -225,8 +225,14 @@ export default function ProductModal({ product, visible, onClose, modalBg, colle
               <div className="flex flex-col gap-5">
                 {collectionLogo && (
                   <div className="flex justify-center lg:justify-start">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={collectionLogo} alt="Collection" className="theme-img h-10 w-auto" />
+                    <Image
+                      src={collectionLogo}
+                      alt="Collection"
+                      width={200}
+                      height={40}
+                      className="theme-img h-10 w-auto"
+                      unoptimized={collectionLogo.endsWith('.svg')}
+                    />
                   </div>
                 )}
 

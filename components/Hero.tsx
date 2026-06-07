@@ -33,6 +33,7 @@ export default function Hero({ videoUrl }: { videoUrl?: string | null }) {
         muted
         loop
         playsInline
+        preload="auto"
         controlsList="nodownload nofullscreen noremoteplayback"
         disablePictureInPicture
         onContextMenu={e => e.preventDefault()}
@@ -44,7 +45,6 @@ export default function Hero({ videoUrl }: { videoUrl?: string | null }) {
         style={{ cursor: 'pointer', userSelect: 'none' }}
       >
         <source src={src} type="video/webm" />
-        <source src={src} type="video/mp4" />
       </video>
     </section>
   );
