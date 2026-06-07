@@ -11,6 +11,7 @@ interface Props {
   visible: boolean
   onClose: () => void
   modalBg?: string | null
+  collectionLogo?: string | null
 }
 
 function AddToCartButton({ product, size, onClose }: { product: Product; size: string; onClose: () => void }) {
@@ -30,7 +31,7 @@ function AddToCartButton({ product, size, onClose }: { product: Product; size: s
   )
 }
 
-export default function ProductModal({ product, visible, onClose, modalBg }: Props) {
+export default function ProductModal({ product, visible, onClose, modalBg, collectionLogo }: Props) {
   const [activeImg, setActiveImg] = useState(0)
   const [selectedSize, setSelectedSize] = useState('S')
   const [touchStart, setTouchStart] = useState<{ x: number; y: number } | null>(null)
@@ -222,9 +223,12 @@ export default function ProductModal({ product, visible, onClose, modalBg }: Pro
 
               {/* Top section */}
               <div className="flex flex-col gap-5">
-                <div className="flex justify-center lg:justify-start">
-                  <Image src="/images/aqua+.png" alt="AQUA+" width={0} height={0} sizes="15vw" className="theme-img h-10 w-auto" />
-                </div>
+                {collectionLogo && (
+                  <div className="flex justify-center lg:justify-start">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={collectionLogo} alt="Collection" className="theme-img h-10 w-auto" />
+                  </div>
+                )}
 
                 <p className={`uppercase tracking-widest text-xs ${s.category}`}>
                   {product.category?.toUpperCase() || 'T-SHIRT'}

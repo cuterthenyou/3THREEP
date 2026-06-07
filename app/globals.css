@@ -30,11 +30,20 @@
   --color-bg:      #a9342a;
   --color-bg-dark: #8b2820;
 
-  /* ── Font families ── */
+  /* ── Font families (named aliases) ── */
   --font-onder: 'ONDER', sans-serif;
   --font-involve: 'Involve', sans-serif;
   --font-deutsch: 'DeutschGothic', sans-serif;
-  --font-heading: var(--font-heading, 'Unbounded', 'ONDER', sans-serif);
+
+  /* ── Canonical font roles (override these via ThemeStyles for site-wide effect) ── */
+  --font-heading: var(--font-onder);
+  --font-body:    var(--font-involve);
+  --font-price:   var(--font-deutsch);
+
+  /* ── Visual effects ── */
+  --grain-opacity:       0.055;
+  --radius-base:         0px;
+  --animation-speed:     1;
 
   /* ── Fluid typography ── */
   --fs-h1: clamp(1.6rem, 5vw, 3.5rem);
@@ -169,7 +178,7 @@ h3,
 h4,
 h5,
 h6 {
-  font-family: var(--font-onder);
+  font-family: var(--font-heading);
 }
 
 h1 { font-size: var(--fs-h1); }

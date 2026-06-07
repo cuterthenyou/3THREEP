@@ -89,6 +89,8 @@ export default function Header({ isAdminUser = false, initialCollections }: Prop
   const [collectionsLoading, setCollectionsLoading] = useState(!initialCollections);
   const [isDark, setIsDark] = useState(false);
   const [menuUser, setMenuUser] = useState<{ name: string; level: number } | null>(null);
+  const [logoIconUrl, setLogoIconUrl] = useState<string | null>(null);
+  const [logoTextUrl, setLogoTextUrl] = useState<string | null>(null);
   const menuHistoryPushed = useRef(false);
 
   function closeMenu() {
@@ -99,6 +101,17 @@ export default function Header({ isAdminUser = false, initialCollections }: Prop
       setMenuOpen(false);
     }
   }
+
+  // Fetch site logos
+  useEffect(() => {
+    fetch('/api/site-settings')
+      .then(r => r.ok ? r.json() : {})
+      .then(d => {
+        if (d.logo_icon_url) setLogoIconUrl(d.logo_icon_url);
+        if (d.logo_text_url) setLogoTextUrl(d.logo_text_url);
+      })
+      .catch(() => {});
+  }, []);
 
   // Fetch current user for burger menu display
   useEffect(() => {
@@ -197,12 +210,18 @@ export default function Header({ isAdminUser = false, initialCollections }: Prop
       >
         <div className="flex items-center justify-between px-5 sm:px-8 py-4 sm:py-5">
           <Link href="/" aria-label="На главную">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/images/logo-61.svg" alt="THREEP Logo" className="theme-img h-7 sm:h-9 w-auto flex-shrink-0" />
+            {logoIconUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={logoIconUrl} alt="THREEP Logo" className="theme-img h-7 sm:h-9 w-auto flex-shrink-0" />
+            ) : (
+              <span style={{ fontFamily: 'var(--font-heading)', fontSize: '1.25rem', letterSpacing: '0.1em', color: 'var(--text)' }}>3P</span>
+            )}
           </Link>
           {/* Center logo text — hidden on mobile */}
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/images/logo-text-63.svg" alt="THREEP" className="theme-img hidden xl:block h-5 sm:h-6 w-auto absolute left-1/2 -translate-x-1/2" />
+          {logoTextUrl && (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={logoTextUrl} alt="THREEP" className="theme-img hidden xl:block h-5 sm:h-6 w-auto absolute left-1/2 -translate-x-1/2" />
+          )}
 
           {/* Icons — on mobile spread evenly across a fixed width, on desktop tight gap */}
           <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">

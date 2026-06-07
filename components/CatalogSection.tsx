@@ -47,6 +47,7 @@ export default function CatalogSection({ products, categories, categoryData = {}
   const [openProduct, setOpenProduct] = useState<Product | null>(null)
   const [modalVisible, setModalVisible] = useState(false)
   const [modalBg, setModalBg] = useState<string | null>(null)
+  const [modalCollectionLogo, setModalCollectionLogo] = useState<string | null>(null)
   const [isDark, setIsDark] = useState(false)
   const [cols, setCols] = useState<Cols>(2)
   const savedScrollRef = useRef<number>(0)
@@ -98,6 +99,7 @@ export default function CatalogSection({ products, categories, categoryData = {}
       ? (cat?.modal_bg_url_dark ?? cat?.modal_bg_url ?? null)
       : (cat?.modal_bg_url ?? cat?.modal_bg_url_dark ?? null)
     )
+    setModalCollectionLogo(cat?.logo_top_url ?? null)
     requestAnimationFrame(() => setModalVisible(true))
     savedScrollRef.current = window.scrollY
     document.body.style.top = `-${savedScrollRef.current}px`
@@ -227,7 +229,7 @@ export default function CatalogSection({ products, categories, categoryData = {}
         ) : null
       })()}
 
-      <ProductModal product={openProduct} visible={modalVisible} onClose={closeModal} modalBg={modalBg} />
+      <ProductModal product={openProduct} visible={modalVisible} onClose={closeModal} modalBg={modalBg} collectionLogo={modalCollectionLogo} />
     </>
   )
 }

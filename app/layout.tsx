@@ -8,6 +8,7 @@ import CookieBanner from '@/components/CookieBanner';
 import GlitterCanvas from '@/components/GlitterCanvas';
 import ScrollToTop from '@/components/ScrollToTop';
 import ScrollRestorer from '@/components/ScrollRestorer';
+import ThemeStyles from '@/components/ThemeStyles';
 import './globals.css';
 
 const unbounded = Unbounded({
@@ -40,6 +41,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             __html: `(function(){try{var t=localStorage.getItem('threep-theme')||(matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light');document.documentElement.dataset.theme=t;}catch(e){}})();`,
           }}
         />
+        <ThemeStyles />
       </head>
       <body className="overflow-x-hidden">
         <GlitterCanvas />
