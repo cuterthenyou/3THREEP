@@ -227,31 +227,37 @@
 
 .subLink {
   font-family: var(--font-involve);
-  font-size: clamp(0.7rem, 2.5vw, 1rem);
+  font-size: clamp(0.9rem, 3.2vw, 1.05rem);
   color: var(--accent);
   opacity: 0.72;
   text-decoration: none;
-  padding: 0.2rem 1.5rem;
+  display: block;
+  width: 100%;
+  padding: 0.7rem 1.5rem;
+  min-height: 2.75rem;
   transition: opacity 0.15s;
   animation: fadeInUp 0.3s ease both;
   letter-spacing: 0.06em;
   text-transform: uppercase;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .subLink:hover { opacity: 1; }
 
 .subLinkType {
   font-family: var(--font-involve);
-  font-size: clamp(0.65rem, 2.2vw, 0.85rem);
+  font-size: clamp(0.8rem, 2.8vw, 0.95rem);
   color: var(--accent);
   opacity: 0.55;
   text-decoration: none;
-  padding: 0.15rem 2rem;
+  padding: 0.65rem 2rem;
   display: block;
+  min-height: 2.75rem;
   text-transform: uppercase;
   letter-spacing: 0.07em;
   transition: opacity 0.15s;
   animation: fadeInUp 0.3s ease both;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .subLinkType:hover { opacity: 1; }

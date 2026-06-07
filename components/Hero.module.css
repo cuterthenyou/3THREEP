@@ -2,6 +2,7 @@
   background: var(--bg);
   overflow: hidden;
   aspect-ratio: 1 / 1;
+  transition: background-color 0.45s ease;
 }
 
 @media (min-width: 768px) {
@@ -18,6 +19,7 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
+  transition: filter 0.45s ease;
 }
 
 /* Dark theme overlay — tints video with soft pink */
