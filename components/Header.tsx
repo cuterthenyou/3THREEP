@@ -185,6 +185,15 @@ export default function Header({ isAdminUser = false, initialCollections, logoIc
     setMenuOpen(true);
   }, []);
 
+  // Open menu when navigated to /#menu (e.g. from the info page "В МЕНЮ" button)
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    if (window.location.hash === '#menu') {
+      history.replaceState(null, '', window.location.pathname);
+      openMenu();
+    }
+  }, [openMenu]);
+
   function toggle(section: string) {
     setExpanded(v => v === section ? null : section);
   }

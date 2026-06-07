@@ -4,6 +4,7 @@ import { queryMany } from '@/lib/db'
 import TextsClient from './TextsClient'
 import { INFO_DEFAULTS, type InfoContent } from '@/app/info/InfoClient'
 import { FOOTER_DEFAULTS, type FooterContent } from '@/components/Footer'
+import { EMAIL_AUTH_DEFAULTS, type EmailAuthContent } from '@/lib/email'
 
 export type PrivacySection = { heading: string; body: string }
 
@@ -17,7 +18,7 @@ export default async function TextsPage() {
 
   let settings: Record<string, string | null> = {}
   try {
-    const rows = await queryMany("SELECT key, value FROM site_settings WHERE key IN ('footer_content', 'info_content', 'privacy_content')")
+    const rows = await queryMany("SELECT key, value FROM site_settings WHERE key IN ('footer_content', 'info_content', 'privacy_content', 'email_auth_content')")
     for (const row of rows) settings[row.key] = row.value
   } catch { /* table may not exist yet */ }
 
@@ -33,11 +34,16 @@ export default async function TextsPage() {
     ? JSON.parse(settings['privacy_content'])
     : PRIVACY_FALLBACK
 
+  const emailAuthContent: EmailAuthContent = settings['email_auth_content']
+    ? { ...EMAIL_AUTH_DEFAULTS, ...JSON.parse(settings['email_auth_content']) }
+    : EMAIL_AUTH_DEFAULTS
+
   return (
     <TextsClient
       initialFooter={footerContent}
       initialInfo={infoContent}
       initialPrivacy={privacySections}
+      initialEmail={emailAuthContent}
     />
   )
 }

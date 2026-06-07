@@ -1,13 +1,53 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { signIn } from 'next-auth/react';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import s from './auth.module.css';
 
+// ── 6-slot animated code input ───────────────────────────────────────────────
+function CodeInput({ value, onChange, disabled }: {
+  value: string
+  onChange: (v: string) => void
+  disabled?: boolean
+}) {
+  const inputRef = useRef<HTMLInputElement>(null)
+
+  return (
+    <div className={s.codeWrap} onClick={() => inputRef.current?.focus()}>
+      {Array.from({ length: 6 }, (_, i) => {
+        const char = value[i] ?? null
+        const isActive = i === value.length && value.length < 6
+        return (
+          <div key={i} className={`${s.slot} ${isActive ? s.slotActive : ''} ${char !== null ? s.slotFilled : ''}`}>
+            {char === null
+              ? <span className={s.slotDash}>—</span>
+              : <span className={s.slotDigit} key={i + '_' + char}>{char}</span>}
+          </div>
+        )
+      })}
+      <input
+        ref={inputRef}
+        type="text"
+        inputMode="numeric"
+        pattern="[0-9]*"
+        autoComplete="one-time-code"
+        value={value}
+        disabled={disabled}
+        autoFocus
+        maxLength={6}
+        onChange={e => onChange(e.target.value.replace(/\D/g, '').slice(0, 6))}
+        className={s.hiddenInput}
+      />
+    </div>
+  )
+}
+
+// ── Main form ────────────────────────────────────────────────────────────────
 export default function AuthForm() {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const callbackUrl = searchParams.get('callbackUrl') || '/account';
   const emailFromUrl = searchParams.get('email') ?? '';
 
@@ -63,6 +103,9 @@ export default function AuthForm() {
 
   return (
     <main className={s.page}>
+      <button onClick={() => router.back()} className={s.authBack}>
+        ← НАЗАД
+      </button>
       <div className={s.card}>
         <h1 className={s.title}>Вход</h1>
 
@@ -117,19 +160,10 @@ export default function AuthForm() {
             <p className={s.hint} style={{ opacity: 0.9 }}>
               Код отправлен на <strong>{email}</strong>
             </p>
-            <input
-              type="text"
-              inputMode="numeric"
-              pattern="[0-9]*"
-              autoComplete="one-time-code"
-              placeholder="——————"
+            <CodeInput
               value={code}
-              onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
-              onKeyDown={(e) => e.key === 'Enter' && !loading && code.length === 6 && verifyCode()}
-              className={s.inputCode}
-              autoFocus
+              onChange={setCode}
               disabled={loading}
-              maxLength={6}
             />
             <button
               onClick={verifyCode}

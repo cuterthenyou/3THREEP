@@ -101,7 +101,10 @@ export default function InfoClient({ content }: { content: InfoContent }) {
       {/* Cinematic hero header */}
       <div className={s.hero}>
         <div className={s.heroInner}>
-          <Link href="/" className={s.backLink}>← Главная</Link>
+          <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center', marginBottom: '3rem' }}>
+            <Link href="/" className={s.backLink} style={{ marginBottom: 0 }}>← Главная</Link>
+            <Link href="/#menu" className={s.backLink} style={{ marginBottom: 0, opacity: 0.5 }}>В МЕНЮ ↗</Link>
+          </div>
           <span className={s.heading}>ИНФА</span>
           <div className={s.divider} />
           <p className={s.subhead}>О бренде · Доставка · Контакты</p>

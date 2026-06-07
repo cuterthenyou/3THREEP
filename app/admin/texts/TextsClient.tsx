@@ -4,6 +4,7 @@ import { useState } from 'react'
 import type { FooterContent } from '@/components/Footer'
 import type { InfoContent } from '@/app/info/InfoClient'
 import type { PrivacySection } from './page'
+import type { EmailAuthContent } from '@/lib/email'
 import a from '../admin.module.css'
 import { LABEL_STYLE, INPUT_STYLE_BG2, SECTION_TITLE } from '../adminStyles'
 import { AdminPageTitle } from '../components'
@@ -12,9 +13,10 @@ interface Props {
   initialFooter: FooterContent
   initialInfo: InfoContent
   initialPrivacy: PrivacySection[]
+  initialEmail: EmailAuthContent
 }
 
-type MainTab = 'footer' | 'info' | 'privacy'
+type MainTab = 'footer' | 'info' | 'privacy' | 'email'
 type InfoTab = 'delivery' | 'contacts' | 'about'
 
 function Field({ label, value, onChange, rows }: {
@@ -101,20 +103,23 @@ async function saveSetting(key: string, value: object | object[]) {
   return res.ok
 }
 
-export default function TextsClient({ initialFooter, initialInfo, initialPrivacy }: Props) {
+export default function TextsClient({ initialFooter, initialInfo, initialPrivacy, initialEmail }: Props) {
   const [mainTab, setMainTab] = useState<MainTab>('footer')
   const [infoTab, setInfoTab] = useState<InfoTab>('delivery')
 
   const [footer, setFooter] = useState<FooterContent>(initialFooter)
   const [info, setInfo] = useState<InfoContent>(initialInfo)
   const [privacy, setPrivacy] = useState<PrivacySection[]>(initialPrivacy)
+  const [emailAuth, setEmailAuth] = useState<EmailAuthContent>(initialEmail)
 
   const [savingFooter, setSavingFooter] = useState(false)
   const [savingInfo, setSavingInfo] = useState(false)
   const [savingPrivacy, setSavingPrivacy] = useState(false)
+  const [savingEmail, setSavingEmail] = useState(false)
   const [footerMsg, setFooterMsg] = useState('')
   const [infoMsg, setInfoMsg] = useState('')
   const [privacyMsg, setPrivacyMsg] = useState('')
+  const [emailMsg, setEmailMsg] = useState('')
 
   function setF<K extends keyof FooterContent>(key: K, val: FooterContent[K]) {
     setFooter(prev => ({ ...prev, [key]: val }))
@@ -147,6 +152,14 @@ export default function TextsClient({ initialFooter, initialInfo, initialPrivacy
     setPrivacyMsg(ok ? '✓ Политика сохранена' : 'Ошибка сохранения')
   }
 
+  async function handleSaveEmail() {
+    setSavingEmail(true)
+    setEmailMsg('')
+    const ok = await saveSetting('email_auth_content', emailAuth)
+    setSavingEmail(false)
+    setEmailMsg(ok ? '✓ Email сохранён' : 'Ошибка сохранения')
+  }
+
   function updateSection(i: number, field: keyof PrivacySection, val: string) {
     setPrivacy(prev => prev.map((s, idx) => idx === i ? { ...s, [field]: val } : s))
   }
@@ -166,6 +179,7 @@ export default function TextsClient({ initialFooter, initialInfo, initialPrivacy
         <TabBtn active={mainTab === 'footer'} onClick={() => setMainTab('footer')}>Футер</TabBtn>
         <TabBtn active={mainTab === 'info'} onClick={() => setMainTab('info')}>ИНФА</TabBtn>
         <TabBtn active={mainTab === 'privacy'} onClick={() => setMainTab('privacy')}>Политика</TabBtn>
+        <TabBtn active={mainTab === 'email'} onClick={() => setMainTab('email')}>Email</TabBtn>
       </div>
 
       {/* ── FOOTER ── */}
@@ -254,6 +268,20 @@ export default function TextsClient({ initialFooter, initialInfo, initialPrivacy
           )}
 
           <SaveBtn onClick={handleSaveInfo} saving={savingInfo} msg={infoMsg} />
+        </div>
+      )}
+
+      {/* ── EMAIL ── */}
+      {mainTab === 'email' && (
+        <div>
+          <p style={{ fontFamily: 'var(--font-involve)', fontSize: '0.78rem', opacity: 0.5, marginBottom: '1.25rem' }}>
+            Текст письма авторизации, которое приходит на email при входе.
+          </p>
+          <Field label="Тема письма (subject)" value={emailAuth.subject} onChange={v => setEmailAuth(p => ({ ...p, subject: v }))} />
+          <Field label="Текст до кода" value={emailAuth.preCodeText} onChange={v => setEmailAuth(p => ({ ...p, preCodeText: v }))} />
+          <Field label="Текст истечения кода" value={emailAuth.expiryText} onChange={v => setEmailAuth(p => ({ ...p, expiryText: v }))} />
+          <Field label="Дисклеймер (нижний текст)" value={emailAuth.footerText} onChange={v => setEmailAuth(p => ({ ...p, footerText: v }))} />
+          <SaveBtn onClick={handleSaveEmail} saving={savingEmail} msg={emailMsg} />
         </div>
       )}
 

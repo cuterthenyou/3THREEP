@@ -1,26 +1,23 @@
 import nodemailer from 'nodemailer'
 
-// Проверяем наличие SMTP переменных
 if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
   console.error('❌ SMTP credentials not found in environment variables!')
   console.error('SMTP_USER:', process.env.SMTP_USER ? 'SET' : 'MISSING')
   console.error('SMTP_PASS:', process.env.SMTP_PASS ? 'SET' : 'MISSING')
 }
 
-// Создаём транспорт для SMTP
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST || 'smtp.yandex.ru',
   port: Number(process.env.SMTP_PORT) || 465,
-  secure: true, // SSL
+  secure: true,
   auth: {
     user: process.env.SMTP_USER!,
     pass: process.env.SMTP_PASS!,
   },
-  logger: true, // Включаем логирование
-  debug: true, // Включаем debug режим
+  logger: true,
+  debug: true,
 })
 
-// Проверка подключения к SMTP (опционально, для дебага)
 export async function verifyEmailConnection() {
   try {
     await transporter.verify()
@@ -32,91 +29,96 @@ export async function verifyEmailConnection() {
   }
 }
 
-// Отправка OTP кода (6 цифр)
+export type EmailAuthContent = {
+  subject: string
+  preCodeText: string
+  expiryText: string
+  footerText: string
+}
+
+export const EMAIL_AUTH_DEFAULTS: EmailAuthContent = {
+  subject: 'Авторизация · 3THREEP',
+  preCodeText: 'твой код для входа',
+  expiryText: 'код действителен 15 минут',
+  footerText: 'если ты не запрашивал вход — просто игнорируй это письмо',
+}
+
+async function fetchEmailContent(): Promise<EmailAuthContent> {
+  try {
+    const { queryMany } = await import('./db')
+    const rows = await queryMany("SELECT value FROM site_settings WHERE key = 'email_auth_content' LIMIT 1")
+    if (rows.length && rows[0].value) {
+      return { ...EMAIL_AUTH_DEFAULTS, ...JSON.parse(rows[0].value) }
+    }
+  } catch {
+    // DB not available — fall through to defaults
+  }
+  return EMAIL_AUTH_DEFAULTS
+}
+
 export async function sendOTP(email: string, code: string) {
-  const html = `
-    <!DOCTYPE html>
-    <html>
-      <head>
-        <meta charset="utf-8">
-        <style>
-          body {
-            font-family: 'Arial', sans-serif;
-            background: #1a1a1a;
-            color: #F29774;
-            padding: 40px 20px;
-            margin: 0;
-          }
-          .container {
-            max-width: 600px;
-            margin: 0 auto;
-            background: #A9342A;
-            border-radius: 12px;
-            padding: 40px;
-            text-align: center;
-          }
-          h1 {
-            font-size: 28px;
-            margin-bottom: 20px;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-          }
-          p {
-            font-size: 16px;
-            line-height: 1.6;
-            margin-bottom: 30px;
-            opacity: 0.9;
-          }
-          .code {
-            font-size: 48px;
-            font-weight: bold;
-            letter-spacing: 8px;
-            background: #F29774;
-            color: #A9342A;
-            padding: 20px 40px;
-            border-radius: 8px;
-            display: inline-block;
-            margin: 20px 0;
-          }
-          .footer {
-            margin-top: 30px;
-            font-size: 14px;
-            opacity: 0.7;
-          }
-        </style>
-      </head>
-      <body>
-        <div class="container">
-          <h1>Авторизация в личный кабинет</h1>
-          <p>Введи этот код на странице входа:</p>
-          
-          <div class="code">${code}</div>
-          
-          <p>Код действителен 15 минут.</p>
-          
-          <div class="footer">
-            <p>Если ты не запрашивал вход — просто проигнорируй это письмо.</p>
-          </div>
-        </div>
-      </body>
-    </html>
-   `
+  const c = await fetchEmailContent()
 
-  const text = `
-Авторизация в личный кабинет.
+  const html = `<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>${c.subject}</title>
+</head>
+<body style="margin:0;padding:0;background:#090909;font-family:monospace,Courier,Arial,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#090909;padding:48px 20px;">
+    <tr><td align="center">
+      <table width="520" cellpadding="0" cellspacing="0" style="max-width:520px;width:100%;border:1px solid #1e1e1e;">
+        <tr>
+          <td style="padding:48px 44px 0;">
+            <!-- Brand header -->
+            <div style="font-size:22px;letter-spacing:0.28em;color:#f29774;font-weight:700;text-transform:uppercase;margin-bottom:36px;font-family:monospace,Courier,Arial,sans-serif;">
+              3THREEP
+            </div>
 
-Твой кодик: ${code}
+            <!-- Pre-code label -->
+            <div style="font-size:10px;letter-spacing:0.22em;color:#f29774;opacity:0.5;text-transform:uppercase;margin-bottom:20px;font-family:monospace,Courier,Arial,sans-serif;">
+              ${c.preCodeText}
+            </div>
 
-Код действителен 15 минут,потом он самоудалится.
+            <!-- Code block -->
+            <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:28px;">
+              <tr>
+                <td style="background:#0e0e0e;border:1px solid #242424;border-left:3px solid #f29774;padding:24px 16px;text-align:center;">
+                  <span style="font-size:44px;letter-spacing:0.38em;color:#f29774;font-family:monospace,Courier,Arial,sans-serif;font-weight:700;">${code}</span>
+                </td>
+              </tr>
+            </table>
 
-Если ты не ты и запрашивал вход — просто забей. Кайфуй!
-  `
+            <!-- Expiry -->
+            <div style="font-size:10px;letter-spacing:0.16em;color:#f29774;opacity:0.3;text-transform:uppercase;font-family:monospace,Courier,Arial,sans-serif;margin-bottom:48px;">
+              ${c.expiryText}
+            </div>
+          </td>
+        </tr>
+
+        <!-- Footer -->
+        <tr>
+          <td style="padding:20px 44px;border-top:1px solid #181818;">
+            <div style="font-size:9px;letter-spacing:0.12em;color:#f29774;opacity:0.18;text-transform:uppercase;font-family:monospace,Courier,Arial,sans-serif;line-height:1.6;">
+              ${c.footerText}
+            </div>
+          </td>
+        </tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`
+
+  const text = `3THREEP\n\n${c.preCodeText.toUpperCase()}\n\n${code}\n\n${c.expiryText}\n\n${c.footerText}`
 
   try {
     await transporter.sendMail({
       from: `3THREEP <${process.env.SMTP_FROM || process.env.SMTP_USER}>`,
       to: email,
-      subject: 'Авторизация',
+      subject: c.subject,
       text,
       html,
     })
@@ -128,7 +130,6 @@ export async function sendOTP(email: string, code: string) {
   }
 }
 
-// Отправка уведомления о новом заказе (для админа)
 export async function sendOrderNotification(orderData: {
   orderId: string
   userEmail: string
