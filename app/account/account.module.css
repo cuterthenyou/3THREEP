@@ -122,15 +122,6 @@
   align-self: stretch;
 }
 
-@media (min-width: 768px) {
-  .avatarCol {
-    align-self: flex-start;
-  }
-  .avatarBtn {
-    height: 9rem;
-    flex: none;
-  }
-}
 
 .avatarBtn {
   position: relative;

@@ -402,12 +402,12 @@ export default function AccountClient({ user, profile, orders, profileBg, profil
               style={{
                 background: 'none', border: 'none', cursor: 'pointer',
                 fontFamily: 'var(--font-involve)', fontSize: '0.7rem',
-                color: 'var(--accent)', opacity: 0.3, letterSpacing: '0.05em',
+                color: 'var(--accent)', opacity: 0.55, letterSpacing: '0.05em',
                 textDecoration: 'underline', padding: '0.25rem 0',
-                transition: 'opacity 0.15s', alignSelf: 'flex-start',
+                transition: 'opacity 0.15s', width: '100%', textAlign: 'center',
               }}
-              onMouseEnter={e => (e.currentTarget.style.opacity = '0.6')}
-              onMouseLeave={e => (e.currentTarget.style.opacity = '0.3')}
+              onMouseEnter={e => (e.currentTarget.style.opacity = '0.9')}
+              onMouseLeave={e => (e.currentTarget.style.opacity = '0.55')}
             >
               {unsubscribing ? '...' : 'Отписаться от новостей'}
             </button>
