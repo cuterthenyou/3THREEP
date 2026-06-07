@@ -9,6 +9,7 @@ import GlitterCanvas from '@/components/GlitterCanvas';
 import ScrollToTop from '@/components/ScrollToTop';
 import ScrollRestorer from '@/components/ScrollRestorer';
 import ThemeStyles from '@/components/ThemeStyles';
+import CustomCursor from '@/components/CustomCursor';
 import './globals.css';
 
 const unbounded = Unbounded({
@@ -44,6 +45,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <ThemeStyles />
       </head>
       <body className="overflow-x-hidden">
+        <CustomCursor />
         <GlitterCanvas />
         {/* Hidden SVG filter for grain/noise effects */}
         <svg

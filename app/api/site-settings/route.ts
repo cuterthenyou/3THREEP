@@ -16,6 +16,8 @@ const PUBLIC_KEYS = new Set([
   'grain_opacity',
   'border_radius_scale',
   'animation_speed',
+  'custom_cursor_enabled',
+  'custom_cursor_svg_url',
 ])
 
 export async function GET() {

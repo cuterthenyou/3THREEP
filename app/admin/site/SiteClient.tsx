@@ -199,6 +199,14 @@ export default function SiteClient({ initialSettings, initialCustomFonts = [] }:
   const [fontUploadMsg, setFontUploadMsg] = useState('')
   const fontFileRef = useRef<HTMLInputElement>(null)
 
+  // ── Cursor ──────────────────────────────────────────────────────
+  const [cursorEnabled, setCursorEnabled] = useState(initialSettings['custom_cursor_enabled'] === 'true')
+  const [cursorSvgUrl, setCursorSvgUrl] = useState<string | null>(initialSettings['custom_cursor_svg_url'] ?? null)
+  const [savingCursor, setSavingCursor] = useState(false)
+  const [uploadingCursor, setUploadingCursor] = useState(false)
+  const [cursorMsg, setCursorMsg] = useState('')
+  const cursorSvgRef = useRef<HTMLInputElement>(null)
+
   // ── Effects ─────────────────────────────────────────────────────
   const grainRaw = parseFloat(initialSettings['grain_opacity'] ?? '0.055')
   const [grainOpacity, setGrainOpacity] = useState(isNaN(grainRaw) ? 5.5 : Math.round(grainRaw * 1000) / 10)
@@ -696,6 +704,103 @@ export default function SiteClient({ initialSettings, initialCustomFonts = [] }:
           </button>
           {effectsMsg && <span style={msgStyle(effectsMsg)}>{effectsMsg}</span>}
         </div>
+      </AdminSection>
+
+      {/* ── Курсор ── */}
+      <AdminSection title="Кастомный курсор">
+        <p className="text-xs" style={{ color: 'var(--accent)', opacity: 0.5, fontFamily: 'var(--font-involve)' }}>
+          Только на десктопе (pointer: fine). Работает сразу после включения (перезагрузка не нужна).
+        </p>
+
+        {/* Toggle */}
+        <div className="flex items-center gap-4">
+          <button
+            disabled={savingCursor}
+            onClick={async () => {
+              setSavingCursor(true)
+              const next = !cursorEnabled
+              setCursorEnabled(next)
+              await saveSetting('custom_cursor_enabled', String(next))
+              setSavingCursor(false)
+              setCursorMsg(next ? '✓ Включён' : '✓ Выключен')
+            }}
+            style={{
+              position: 'relative', display: 'inline-flex', alignItems: 'center',
+              width: 44, height: 24, borderRadius: 12, cursor: 'pointer', flexShrink: 0,
+              background: cursorEnabled ? 'var(--accent)' : 'var(--border)',
+              border: 'none', padding: 0,
+              transition: 'background 0.2s ease',
+              opacity: savingCursor ? 0.6 : 1,
+            }}
+            aria-label={cursorEnabled ? 'Выключить курсор' : 'Включить курсор'}
+          >
+            <span style={{
+              position: 'absolute',
+              width: 18, height: 18, borderRadius: '50%', background: '#fff',
+              top: 3, left: cursorEnabled ? 23 : 3,
+              transition: 'left 0.2s ease',
+              boxShadow: '0 1px 3px rgba(0,0,0,0.3)',
+            }} />
+          </button>
+          <span style={{ fontFamily: 'var(--font-involve)', fontSize: '0.82rem', color: 'var(--text)' }}>
+            {cursorEnabled ? 'Включён' : 'Выключен'}
+          </span>
+          {cursorMsg && <span style={msgStyle(cursorMsg)}>{cursorMsg}</span>}
+        </div>
+
+        {/* SVG upload — only when enabled */}
+        {cursorEnabled && (
+          <div className="flex items-center gap-4 flex-wrap">
+            {/* Preview */}
+            <div style={{
+              width: 52, height: 52, flexShrink: 0,
+              borderRadius: 6, border: '1px solid var(--border-soft)',
+              background: 'var(--bg-2)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              position: 'relative', overflow: 'hidden',
+            }}>
+              {cursorSvgUrl ? (
+                <div style={{
+                  width: 28, height: 28,
+                  backgroundColor: 'var(--accent)',
+                  maskImage: `url(/api/proxy?url=${encodeURIComponent(cursorSvgUrl)})`,
+                  WebkitMaskImage: `url(/api/proxy?url=${encodeURIComponent(cursorSvgUrl)})`,
+                  maskSize: 'contain', WebkitMaskSize: 'contain',
+                  maskRepeat: 'no-repeat', WebkitMaskRepeat: 'no-repeat',
+                  maskPosition: 'center', WebkitMaskPosition: 'center',
+                }} />
+              ) : (
+                <div style={{ position: 'relative', width: 20, height: 20 }}>
+                  <div style={{ position: 'absolute', top: '50%', left: 0, right: 0, height: 1.5, background: 'var(--accent)', transform: 'translateY(-50%)' }} />
+                  <div style={{ position: 'absolute', left: '50%', top: 0, bottom: 0, width: 1.5, background: 'var(--accent)', transform: 'translateX(-50%)' }} />
+                </div>
+              )}
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <span className="text-xs" style={{ color: 'var(--accent)', opacity: 0.45, fontFamily: 'var(--font-involve)' }}>
+                {cursorSvgUrl ? 'Кастомный SVG' : 'По умолчанию (прицел)'}
+              </span>
+              <div className="flex gap-2 flex-wrap">
+                <button onClick={() => cursorSvgRef.current?.click()} disabled={uploadingCursor} className={a.btn}>
+                  {uploadingCursor ? 'Загружаем...' : 'Загрузить SVG'}
+                </button>
+                {cursorSvgUrl && (
+                  <button onClick={async () => {
+                    setCursorSvgUrl(null)
+                    await saveSetting('custom_cursor_svg_url', null)
+                    setCursorMsg('✓ Удалён')
+                  }} className={a.btnDanger}>Удалить</button>
+                )}
+              </div>
+            </div>
+
+            <input ref={cursorSvgRef} type="file" accept="image/svg+xml" className="hidden"
+              onChange={e => e.target.files?.[0] && uploadFile(
+                e.target.files[0], 'assets', setUploadingCursor, setCursorSvgUrl, setCursorMsg, 'custom_cursor_svg_url'
+              )} />
+          </div>
+        )}
       </AdminSection>
 
       {/* ── Hero video ── */}
