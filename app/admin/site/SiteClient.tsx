@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import a from '../admin.module.css'
 import { AdminSection, AdminPageTitle } from '../components'
 import { CHECKBOARD_LIGHT, CHECKBOARD_DARK, INPUT_STYLE } from '../adminStyles'
@@ -144,6 +144,56 @@ function FontSelect({
   )
 }
 
+// ── Glitter preview mini-canvas ────────────────────────────────────
+function GlitterPreview({ intensity, enabled }: { intensity: number; enabled: boolean }) {
+  const ref = useRef<HTMLCanvasElement>(null)
+  useEffect(() => {
+    const canvas = ref.current
+    if (!canvas || !enabled) return
+    const ctx = canvas.getContext('2d')!
+    const W = canvas.width  = 280
+    const H = canvas.height = 88
+    const count = Math.max(2, Math.round((W * H / 2500) * (intensity / 100)))
+    const particles = Array.from({ length: count }, () => ({
+      x: Math.random() * W, y: Math.random() * H,
+      size: Math.random() < 0.25 ? 2 : 1,
+      phase: Math.random() * Math.PI * 2,
+      speed: 0.4 + Math.random() * 2.0,
+      colorShift: Math.random(),
+    }))
+    const start = performance.now()
+    let id: number
+    function draw() {
+      const t = (performance.now() - start) / 1000
+      ctx.clearRect(0, 0, W, H)
+      const sweepX = ((Math.sin(t * 0.12) + 1) / 2) * W
+      for (const p of particles) {
+        const b = Math.pow(Math.sin(t * p.speed + p.phase), 3)
+        const dist = Math.abs(p.x - sweepX) / W
+        const boost = dist < 0.18 ? 0.45 * (1 - dist / 0.18) : 0
+        const bright = Math.max(0, Math.min(1, b + boost))
+        if (bright < 0.05) continue
+        ctx.fillStyle = `rgba(255, ${Math.round(160 + p.colorShift * 50)}, ${Math.round(170 + p.colorShift * 30)}, ${bright})`
+        ctx.fillRect(p.x, p.y, p.size, p.size)
+      }
+      id = requestAnimationFrame(draw)
+    }
+    id = requestAnimationFrame(draw)
+    return () => { cancelAnimationFrame(id); ctx.clearRect(0, 0, W, H) }
+  }, [intensity, enabled])
+
+  return (
+    <div style={{ position: 'relative', height: 88, borderRadius: 6, overflow: 'hidden', background: '#1c1c1e', border: '1px solid var(--border-soft)' }}>
+      <canvas ref={ref} style={{ width: '100%', height: '100%', display: 'block', opacity: enabled ? 1 : 0.15, transition: 'opacity 0.3s' }} />
+      {!enabled && (
+        <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <span style={{ fontFamily: 'var(--font-involve)', fontSize: '0.65rem', color: 'rgba(255,255,255,0.25)', letterSpacing: '0.2em' }}>ВЫКЛЮЧЕНО</span>
+        </div>
+      )}
+    </div>
+  )
+}
+
 export default function SiteClient({ initialSettings, initialCustomFonts = [] }: Props) {
   // ── Hero video ──────────────────────────────────────────────────
   const [heroUrl, setHeroUrl] = useState<string | null>(initialSettings['hero_video_url'] ?? null)
@@ -212,12 +262,20 @@ export default function SiteClient({ initialSettings, initialCustomFonts = [] }:
   const cursorSvgRef = useRef<HTMLInputElement>(null)
 
   // ── Effects ─────────────────────────────────────────────────────
-  const grainRaw = parseFloat(initialSettings['grain_opacity'] ?? '0.055')
-  const [grainOpacity, setGrainOpacity] = useState(isNaN(grainRaw) ? 5.5 : Math.round(grainRaw * 1000) / 10)
+  const grainLightRaw = parseFloat(initialSettings['grain_opacity_light'] ?? initialSettings['grain_opacity'] ?? '0.08')
+  const grainDarkRaw  = parseFloat(initialSettings['grain_opacity_dark']  ?? initialSettings['grain_opacity'] ?? '0.055')
+  const [grainLight, setGrainLight] = useState(isNaN(grainLightRaw) ? 8   : Math.round(grainLightRaw * 1000) / 10)
+  const [grainDark,  setGrainDark]  = useState(isNaN(grainDarkRaw)  ? 5.5 : Math.round(grainDarkRaw  * 1000) / 10)
   const [borderRadiusScale, setBorderRadiusScale] = useState(initialSettings['border_radius_scale'] ?? 'sharp')
   const [animationSpeed, setAnimationSpeed] = useState(initialSettings['animation_speed'] ?? 'normal')
   const [savingEffects, setSavingEffects] = useState(false)
   const [effectsMsg, setEffectsMsg] = useState('')
+
+  // ── Glitter ──────────────────────────────────────────────────────
+  const [glitterEnabled,  setGlitterEnabled]  = useState(initialSettings['glitter_enabled']  !== 'false')
+  const [glitterIntensity, setGlitterIntensity] = useState(parseInt(initialSettings['glitter_intensity'] ?? '50', 10))
+  const [savingGlitter, setSavingGlitter] = useState(false)
+  const [glitterMsg, setGlitterMsg] = useState('')
 
   // computed: built-in + custom font names for selectors
   const allFontNames = [...BUILTIN_FONTS, ...customFonts.map(f => f.name)]
@@ -379,7 +437,8 @@ export default function SiteClient({ initialSettings, initialCustomFonts = [] }:
   async function saveEffects() {
     setSavingEffects(true); setEffectsMsg('')
     await Promise.all([
-      saveSetting('grain_opacity',       String(grainOpacity / 100)),
+      saveSetting('grain_opacity_light', String(grainLight / 100)),
+      saveSetting('grain_opacity_dark',  String(grainDark  / 100)),
       saveSetting('border_radius_scale', borderRadiusScale),
       saveSetting('animation_speed',     animationSpeed),
     ])
@@ -592,40 +651,61 @@ export default function SiteClient({ initialSettings, initialCustomFonts = [] }:
         <div className="flex flex-col gap-8">
 
           {/* ── Grain opacity ── */}
-          <div className="flex flex-col gap-3">
-            <div className="flex items-center justify-between">
-              <span className="text-xs uppercase tracking-widest" style={{ color: 'var(--accent)', opacity: 0.5, fontFamily: 'var(--font-involve)' }}>Зернистость (grain)</span>
-              <span className="text-xs" style={{ color: 'var(--accent)', fontFamily: 'monospace' }}>{grainOpacity.toFixed(1)}%</span>
-            </div>
+          <div className="flex flex-col gap-4">
+            <span className="text-xs uppercase tracking-widest" style={{ color: 'var(--accent)', opacity: 0.5, fontFamily: 'var(--font-involve)' }}>Зернистость (шум на фоне)</span>
 
-            {/* Live grain preview */}
-            <div style={{ position: 'relative', height: 88, borderRadius: 6, overflow: 'hidden', background: 'linear-gradient(135deg, #141414 0%, #2a1a14 60%, #1a1a2a 100%)', border: '1px solid var(--border-soft)' }}>
-              {/* Grain overlay */}
-              <div style={{
-                position: 'absolute', inset: 0, opacity: grainOpacity / 100,
-                backgroundImage: `url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='200' height='200' filter='url(%23n)'/></svg>")`,
-                backgroundRepeat: 'repeat', backgroundSize: '200px 200px',
-                mixBlendMode: 'overlay', pointerEvents: 'none',
-              }} />
-              {/* Sample content */}
-              <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: 4 }}>
-                <span style={{ fontFamily: 'var(--font-heading)', fontSize: '1.3rem', color: 'rgba(255,255,255,0.55)', letterSpacing: '0.12em' }}>THREEP</span>
-                <span style={{ fontFamily: 'var(--font-involve)', fontSize: '0.6rem', color: 'rgba(255,255,255,0.25)', letterSpacing: '0.25em' }}>PREVIEW</span>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {/* Light theme grain */}
+              <div className="flex flex-col gap-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs" style={{ color: 'var(--accent)', fontFamily: 'var(--font-involve)' }}>☀ Светлая тема</span>
+                  <span className="text-xs" style={{ color: 'var(--accent)', fontFamily: 'monospace' }}>{grainLight.toFixed(1)}%</span>
+                </div>
+                <div style={{ position: 'relative', height: 72, borderRadius: 6, overflow: 'hidden', background: 'var(--bg)', border: '1px solid var(--border-soft)' }}>
+                  <div style={{
+                    position: 'absolute', inset: 0, opacity: grainLight / 100,
+                    backgroundImage: `url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='200' height='200' filter='url(%23n)'/></svg>")`,
+                    backgroundRepeat: 'repeat', backgroundSize: '200px 200px',
+                    mixBlendMode: 'overlay', pointerEvents: 'none',
+                  }} />
+                  <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: 3 }}>
+                    <span style={{ fontFamily: 'var(--font-heading)', fontSize: '1.1rem', color: 'var(--text)', opacity: 0.6, letterSpacing: '0.12em' }}>THREEP</span>
+                    <span style={{ fontFamily: 'var(--font-involve)', fontSize: '0.55rem', color: 'var(--text)', opacity: 0.3, letterSpacing: '0.2em' }}>PREVIEW</span>
+                  </div>
+                </div>
+                <input type="range" min={0} max={20} step={0.5} value={grainLight}
+                  onChange={e => { const v = parseFloat(e.target.value); setGrainLight(v); document.documentElement.style.setProperty('--grain-opacity', String(v / 100)) }}
+                  style={{ accentColor: 'var(--accent)', width: '100%' }}
+                />
+              </div>
+
+              {/* Dark theme grain */}
+              <div className="flex flex-col gap-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs" style={{ color: 'var(--accent)', fontFamily: 'var(--font-involve)' }}>☾ Тёмная тема</span>
+                  <span className="text-xs" style={{ color: 'var(--accent)', fontFamily: 'monospace' }}>{grainDark.toFixed(1)}%</span>
+                </div>
+                <div style={{ position: 'relative', height: 72, borderRadius: 6, overflow: 'hidden', background: '#1c1c1e', border: '1px solid var(--border-soft)' }}>
+                  <div style={{
+                    position: 'absolute', inset: 0, opacity: grainDark / 100,
+                    backgroundImage: `url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='200' height='200' filter='url(%23n)'/></svg>")`,
+                    backgroundRepeat: 'repeat', backgroundSize: '200px 200px',
+                    mixBlendMode: 'overlay', pointerEvents: 'none',
+                  }} />
+                  <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: 3 }}>
+                    <span style={{ fontFamily: 'var(--font-heading)', fontSize: '1.1rem', color: 'rgba(252,176,178,0.55)', letterSpacing: '0.12em' }}>THREEP</span>
+                    <span style={{ fontFamily: 'var(--font-involve)', fontSize: '0.55rem', color: 'rgba(252,176,178,0.25)', letterSpacing: '0.2em' }}>PREVIEW</span>
+                  </div>
+                </div>
+                <input type="range" min={0} max={20} step={0.5} value={grainDark}
+                  onChange={e => setGrainDark(parseFloat(e.target.value))}
+                  style={{ accentColor: 'var(--accent)', width: '100%' }}
+                />
               </div>
             </div>
 
-            <input
-              type="range" min={0} max={20} step={0.5}
-              value={grainOpacity}
-              onChange={e => {
-                const v = parseFloat(e.target.value)
-                setGrainOpacity(v)
-                document.documentElement.style.setProperty('--grain-opacity', String(v / 100))
-              }}
-              style={{ accentColor: 'var(--accent)', width: '100%' }}
-            />
             <div className="flex justify-between text-xs" style={{ color: 'var(--accent)', opacity: 0.3, fontFamily: 'var(--font-involve)' }}>
-              <span>Нет</span><span>Слабо</span><span>Сильно</span>
+              <span>0 — нет</span><span>10 — умеренно</span><span>20 — сильно</span>
             </div>
           </div>
 
@@ -707,6 +787,74 @@ export default function SiteClient({ initialSettings, initialCustomFonts = [] }:
             {savingEffects ? 'Сохраняем...' : 'Сохранить эффекты'}
           </button>
           {effectsMsg && <span style={msgStyle(effectsMsg)}>{effectsMsg}</span>}
+        </div>
+      </AdminSection>
+
+      {/* ── Блёстки ── */}
+      <AdminSection title="Блёстки (тёмная тема)">
+        <p className="text-xs" style={{ color: 'var(--accent)', opacity: 0.5, fontFamily: 'var(--font-involve)' }}>
+          Анимированные частицы на фоне в тёмной теме.
+        </p>
+
+        {/* Toggle */}
+        <div className="flex items-center gap-4">
+          <button
+            onClick={async () => {
+              const next = !glitterEnabled
+              setGlitterEnabled(next)
+              await saveSetting('glitter_enabled', String(next))
+            }}
+            style={{
+              display: 'flex', alignItems: 'center', gap: 8,
+              padding: '0.35rem 0.9rem', borderRadius: 20,
+              border: `1.5px solid ${glitterEnabled ? 'var(--accent)' : 'var(--border-soft)'}`,
+              background: glitterEnabled ? 'var(--accent-2)' : 'var(--bg-2)',
+              cursor: 'pointer', transition: 'all 0.2s',
+            }}
+          >
+            <span style={{ width: 8, height: 8, borderRadius: '50%', background: glitterEnabled ? 'var(--accent)' : 'var(--text-muted)', display: 'inline-block', transition: 'background 0.2s' }} />
+            <span style={{ fontFamily: 'var(--font-involve)', fontSize: '0.72rem', color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+              {glitterEnabled ? 'Включены' : 'Выключены'}
+            </span>
+          </button>
+        </div>
+
+        {/* Intensity + preview */}
+        <div className="flex flex-col gap-3">
+          <div className="flex items-center justify-between">
+            <span className="text-xs uppercase tracking-widest" style={{ color: 'var(--accent)', opacity: 0.5, fontFamily: 'var(--font-involve)' }}>Интенсивность</span>
+            <span className="text-xs" style={{ color: 'var(--accent)', fontFamily: 'monospace' }}>{glitterIntensity}%</span>
+          </div>
+
+          {/* Animated glitter preview */}
+          <GlitterPreview intensity={glitterIntensity} enabled={glitterEnabled} />
+
+          <input type="range" min={5} max={100} step={5}
+            value={glitterIntensity}
+            onChange={e => setGlitterIntensity(parseInt(e.target.value, 10))}
+            style={{ accentColor: 'var(--accent)', width: '100%' }}
+          />
+          <div className="flex justify-between text-xs" style={{ color: 'var(--accent)', opacity: 0.3, fontFamily: 'var(--font-involve)' }}>
+            <span>Редко</span><span>Умеренно</span><span>Много</span>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-3 flex-wrap">
+          <button
+            onClick={async () => {
+              setSavingGlitter(true); setGlitterMsg('')
+              await Promise.all([
+                saveSetting('glitter_enabled',   String(glitterEnabled)),
+                saveSetting('glitter_intensity', String(glitterIntensity)),
+              ])
+              setSavingGlitter(false); setGlitterMsg('✓ Сохранено')
+            }}
+            disabled={savingGlitter}
+            className={a.btn}
+          >
+            {savingGlitter ? 'Сохраняем...' : 'Сохранить'}
+          </button>
+          {glitterMsg && <span style={msgStyle(glitterMsg)}>{glitterMsg}</span>}
         </div>
       </AdminSection>
 

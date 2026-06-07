@@ -22,6 +22,7 @@ interface DashboardData {
   topProducts: { product_name: string; units_sold: string; revenue: string }[]
   sizeBreakdown: { size: string; total_sold: string }[]
   dailyRevenue: { day: string; revenue: string }[]
+  analytics: { views: string; unique_visits: string; new_users: string; newsletter: string } | null
 }
 
 function fmt(n: number) {
@@ -93,6 +94,27 @@ export default function DashboardClient() {
           : kpiCards.map((card) => (
               <div key={card.label} style={{ background: accentDim, border: `1px solid var(--accent-2)`, borderRadius: '12px', padding: '1.1rem', display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
                 <span style={{ fontFamily: "var(--font-involve)", fontSize: '0.65rem', color: accent, opacity: 0.5, textTransform: 'uppercase', letterSpacing: '0.1em' }}>{card.label}</span>
+                <span style={{ fontFamily: "var(--font-deutsch)", fontSize: '1.15rem', color: accent }}>{card.value}</span>
+              </div>
+            ))}
+      </div>
+
+      {/* Analytics tiles */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        {loading
+          ? Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} style={{ background: accentDim, border: `1px solid var(--border-soft)`, borderRadius: '12px', padding: '1.1rem', opacity: 0.25, height: '80px' }} />
+            ))
+          : [
+              { label: 'Просмотры',         value: Number(data?.analytics?.views        ?? 0), icon: '👁' },
+              { label: 'Уник. сессии',       value: Number(data?.analytics?.unique_visits ?? 0), icon: '🎯' },
+              { label: 'Новые польз.',       value: Number(data?.analytics?.new_users     ?? 0), icon: '👤' },
+              { label: 'Подписчики',         value: Number(data?.analytics?.newsletter    ?? 0), icon: '📧' },
+            ].map((card) => (
+              <div key={card.label} style={{ background: 'var(--bg-subtle)', border: `1px solid var(--border-soft)`, borderRadius: '12px', padding: '1.1rem', display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+                <span style={{ fontFamily: "var(--font-involve)", fontSize: '0.65rem', color: accent, opacity: 0.5, textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+                  {card.icon} {card.label}
+                </span>
                 <span style={{ fontFamily: "var(--font-deutsch)", fontSize: '1.15rem', color: accent }}>{card.value}</span>
               </div>
             ))}

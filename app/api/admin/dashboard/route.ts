@@ -3,11 +3,11 @@ import { auth } from '@/lib/auth'
 import { isAdmin } from '@/lib/isAdmin'
 import { queryMany, queryOne } from '@/lib/db'
 
-function periodFilter(period: string) {
+function periodFilter(period: string, col = 'created_at') {
   switch (period) {
-    case 'today': return `AND created_at >= CURRENT_DATE`
-    case '7d':    return `AND created_at >= NOW() - INTERVAL '7 days'`
-    case '30d':   return `AND created_at >= NOW() - INTERVAL '30 days'`
+    case 'today': return `AND ${col} >= CURRENT_DATE`
+    case '7d':    return `AND ${col} >= NOW() - INTERVAL '7 days'`
+    case '30d':   return `AND ${col} >= NOW() - INTERVAL '30 days'`
     default:      return ''
   }
 }
@@ -21,7 +21,7 @@ export async function GET(req: NextRequest) {
   const period = req.nextUrl.searchParams.get('period') ?? 'all'
   const pf = periodFilter(period)
 
-  const [kpi, topProducts, sizeBreakdown, dailyRevenue] = await Promise.all([
+  const [kpi, topProducts, sizeBreakdown, dailyRevenue, analytics] = await Promise.all([
     queryOne(`
       SELECT
         COUNT(*) FILTER (WHERE status <> 'cancelled') AS orders,
@@ -63,7 +63,16 @@ export async function GET(req: NextRequest) {
       ORDER BY day ASC
       LIMIT 60
     `),
+
+    // Analytics: views, unique sessions, new users, total newsletter subscribers
+    queryOne(`
+      SELECT
+        (SELECT COUNT(*) FROM page_views WHERE 1=1 ${periodFilter(period)}) AS views,
+        (SELECT COUNT(DISTINCT session_id) FROM page_views WHERE 1=1 ${periodFilter(period)}) AS unique_visits,
+        (SELECT COUNT(*) FROM users WHERE 1=1 ${periodFilter(period)}) AS new_users,
+        (SELECT COUNT(*) FROM newsletter_subscribers) AS newsletter
+    `).catch(() => ({ views: '0', unique_visits: '0', new_users: '0', newsletter: '0' })),
   ])
 
-  return NextResponse.json({ kpi, topProducts, sizeBreakdown, dailyRevenue })
+  return NextResponse.json({ kpi, topProducts, sizeBreakdown, dailyRevenue, analytics })
 }

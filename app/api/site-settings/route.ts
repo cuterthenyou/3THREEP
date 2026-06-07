@@ -20,6 +20,10 @@ const PUBLIC_KEYS = new Set([
   'custom_cursor_svg_url',
   'custom_cursor_color_light',
   'custom_cursor_color_dark',
+  'grain_opacity_light',
+  'grain_opacity_dark',
+  'glitter_enabled',
+  'glitter_intensity',
 ])
 
 export async function GET() {

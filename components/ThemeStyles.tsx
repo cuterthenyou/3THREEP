@@ -69,8 +69,10 @@ export default async function ThemeStyles() {
   const fontBody     = get('font_body')
   const fontPrice    = get('font_price')
 
-  const grainRaw     = parseFloat(get('grain_opacity'))
-  const grainOpacity = isNaN(grainRaw) ? '0.055' : String(Math.min(1, Math.max(0, grainRaw)))
+  const grainLightRaw = parseFloat(settings['grain_opacity_light'] ?? settings['grain_opacity'] ?? '0.08')
+  const grainDarkRaw  = parseFloat(settings['grain_opacity_dark']  ?? settings['grain_opacity'] ?? '0.055')
+  const grainLight = isNaN(grainLightRaw) ? '0.08'  : String(Math.min(1, Math.max(0, grainLightRaw)))
+  const grainDark  = isNaN(grainDarkRaw)  ? '0.055' : String(Math.min(1, Math.max(0, grainDarkRaw)))
 
   const radiusScale  = get('border_radius_scale')
   const radiusValue  = RADIUS_MAP[radiusScale] ?? '0px'
@@ -115,7 +117,7 @@ export default async function ThemeStyles() {
   --font-onder:    '${fontOnder}', sans-serif;
   --font-involve:  '${fontInvolve}', sans-serif;
   --font-deutsch:  '${fontDeutsch}', sans-serif;
-  --grain-opacity: ${grainOpacity};
+  --grain-opacity: ${grainLight};
   --radius-base:   ${radiusValue};
   --animation-speed: ${speedValue};
   --cursor-color: ${cursorColorLight ?? 'var(--accent)'};
@@ -135,6 +137,7 @@ export default async function ThemeStyles() {
   --accent-glow: color-mix(in srgb, ${accentDark} 35%, transparent);
   --bg-card:    ${accentDark};
   --text-on-card: ${bgDark};
+  --grain-opacity: ${grainDark};
   --cursor-color: ${cursorColorDark ?? 'var(--accent)'};
 }
 `.trim()
