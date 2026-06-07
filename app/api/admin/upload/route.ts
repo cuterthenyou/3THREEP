@@ -33,6 +33,15 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ url: `/images/${encodeURIComponent(safeName)}` })
     }
 
+    if (folderParam === 'fonts') {
+      const safeName = path.basename(file.name).replace(/[^a-zA-Z0-9._-]/g, '_')
+      const dir = path.join(process.cwd(), 'public', 'fonts')
+      if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true })
+      const bytes = await file.arrayBuffer()
+      fs.writeFileSync(path.join(dir, safeName), Buffer.from(bytes))
+      return NextResponse.json({ url: `/fonts/${safeName}` })
+    }
+
     const validFolders = ['products', 'assets', 'avatars']
     const folder = (folderParam && validFolders.includes(folderParam) ? folderParam : 'products') as 'products' | 'assets' | 'avatars'
     const result = await uploadToYandex(folder, file)

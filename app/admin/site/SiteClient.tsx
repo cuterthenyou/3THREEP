@@ -4,13 +4,15 @@ import { useState, useRef } from 'react'
 import a from '../admin.module.css'
 import { AdminSection, AdminPageTitle } from '../components'
 import { CHECKBOARD_LIGHT, CHECKBOARD_DARK, INPUT_STYLE } from '../adminStyles'
+import type { CustomFont } from '@/components/ThemeStyles'
 
 interface Props {
   initialSettings: Record<string, string | null>
+  initialCustomFonts?: CustomFont[]
 }
 
-const FONT_OPTIONS = ['ONDER', 'Involve', 'DeutschGothic'] as const
-type FontName = typeof FONT_OPTIONS[number]
+const BUILTIN_FONTS = ['ONDER', 'Involve', 'DeutschGothic'] as const
+type FontName = string
 
 const RADIUS_OPTIONS = [
   { value: 'sharp',   label: 'Острые' },
@@ -106,11 +108,13 @@ function FontSelect({
   value,
   onChange,
   previewText,
+  allFonts,
 }: {
   label: string
   value: FontName
   onChange: (v: FontName) => void
   previewText: string
+  allFonts: string[]
 }) {
   return (
     <div className="flex flex-col gap-2">
@@ -119,7 +123,7 @@ function FontSelect({
       </span>
       <select
         value={value}
-        onChange={e => onChange(e.target.value as FontName)}
+        onChange={e => onChange(e.target.value)}
         style={{
           ...INPUT_STYLE,
           padding: '0.4rem 0.6rem',
@@ -129,7 +133,7 @@ function FontSelect({
           width: '100%',
         }}
       >
-        {FONT_OPTIONS.map(f => (
+        {allFonts.map(f => (
           <option key={f} value={f}>{f}</option>
         ))}
       </select>
@@ -140,7 +144,7 @@ function FontSelect({
   )
 }
 
-export default function SiteClient({ initialSettings }: Props) {
+export default function SiteClient({ initialSettings, initialCustomFonts = [] }: Props) {
   // ── Hero video ──────────────────────────────────────────────────
   const [heroUrl, setHeroUrl] = useState<string | null>(initialSettings['hero_video_url'] ?? null)
   const [uploadingHero, setUploadingHero] = useState(false)
@@ -181,11 +185,19 @@ export default function SiteClient({ initialSettings }: Props) {
   const [colorsMsg, setColorsMsg] = useState('')
 
   // ── Fonts ───────────────────────────────────────────────────────
-  const [fontHeading, setFontHeading] = useState<FontName>((initialSettings['font_heading'] as FontName) ?? 'ONDER')
-  const [fontBody, setFontBody] = useState<FontName>((initialSettings['font_body'] as FontName) ?? 'Involve')
-  const [fontPrice, setFontPrice] = useState<FontName>((initialSettings['font_price'] as FontName) ?? 'DeutschGothic')
+  const [fontHeading, setFontHeading] = useState<FontName>(initialSettings['font_heading'] ?? 'ONDER')
+  const [fontBody, setFontBody] = useState<FontName>(initialSettings['font_body'] ?? 'Involve')
+  const [fontPrice, setFontPrice] = useState<FontName>(initialSettings['font_price'] ?? 'DeutschGothic')
   const [savingFonts, setSavingFonts] = useState(false)
   const [fontsMsg, setFontsMsg] = useState('')
+
+  // ── Custom fonts ─────────────────────────────────────────────────
+  const [customFonts, setCustomFonts] = useState<CustomFont[]>(initialCustomFonts)
+  const [pendingFontFile, setPendingFontFile] = useState<File | null>(null)
+  const [pendingFontName, setPendingFontName] = useState('')
+  const [uploadingFont, setUploadingFont] = useState(false)
+  const [fontUploadMsg, setFontUploadMsg] = useState('')
+  const fontFileRef = useRef<HTMLInputElement>(null)
 
   // ── Effects ─────────────────────────────────────────────────────
   const grainRaw = parseFloat(initialSettings['grain_opacity'] ?? '0.055')
@@ -194,6 +206,54 @@ export default function SiteClient({ initialSettings }: Props) {
   const [animationSpeed, setAnimationSpeed] = useState(initialSettings['animation_speed'] ?? 'normal')
   const [savingEffects, setSavingEffects] = useState(false)
   const [effectsMsg, setEffectsMsg] = useState('')
+
+  // computed: built-in + custom font names for selectors
+  const allFontNames = [...BUILTIN_FONTS, ...customFonts.map(f => f.name)]
+
+  // ── Custom font upload ──────────────────────────────────────────
+  function onFontFileSelected(file: File) {
+    setPendingFontFile(file)
+    const suggested = file.name.replace(/\.[^.]+$/, '').replace(/[-_]/g, ' ')
+    setPendingFontName(suggested)
+    setFontUploadMsg('')
+  }
+
+  async function saveCustomFont() {
+    if (!pendingFontFile || !pendingFontName.trim()) return
+    setUploadingFont(true); setFontUploadMsg('')
+    const fd = new FormData()
+    fd.append('file', pendingFontFile)
+    fd.append('folder', 'fonts')
+    const upRes = await fetch('/api/admin/upload', { method: 'POST', body: fd })
+    const upData = await upRes.json()
+    if (!upData.url) { setFontUploadMsg(upData.error ?? 'Ошибка загрузки'); setUploadingFont(false); return }
+
+    const saveRes = await fetch('/api/admin/fonts', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: pendingFontName.trim(), url: upData.url }),
+    })
+    setUploadingFont(false)
+    if (!saveRes.ok) { setFontUploadMsg('Ошибка сохранения'); return }
+
+    const newFont: CustomFont = { id: Date.now(), name: pendingFontName.trim(), url: upData.url }
+    setCustomFonts(prev => [...prev.filter(f => f.name !== newFont.name), newFont])
+    setPendingFontFile(null); setPendingFontName('')
+    setFontUploadMsg('✓ Шрифт добавлен')
+    if (fontFileRef.current) fontFileRef.current.value = ''
+  }
+
+  async function deleteCustomFont(font: CustomFont) {
+    await fetch('/api/admin/fonts', {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: font.id, url: font.url }),
+    })
+    setCustomFonts(prev => prev.filter(f => f.id !== font.id))
+    if (fontHeading === font.name) setFontHeading('ONDER')
+    if (fontBody === font.name) setFontBody('Involve')
+    if (fontPrice === font.name) setFontPrice('DeutschGothic')
+  }
 
   // ── Shared helpers ──────────────────────────────────────────────
   async function saveSetting(key: string, value: string | null) {
@@ -416,27 +476,82 @@ export default function SiteClient({ initialSettings }: Props) {
       {/* ── Шрифты ── */}
       <AdminSection title="Шрифты">
         <p className="text-xs" style={{ color: 'var(--accent)', opacity: 0.5, fontFamily: 'var(--font-involve)' }}>
-          Выбранный шрифт применяется ко всем соответствующим элементам сайта. Шрифты загружены локально.
+          Выбранный шрифт применяется ко всем элементам сайта. Загрузи свой шрифт ниже — он сразу появится в списке.
         </p>
 
+        {/* ── Загрузка своего шрифта ── */}
+        <div className="flex flex-col gap-3 p-4 rounded-xl" style={{ background: 'var(--bg-2)', border: '1px solid var(--border-soft)' }}>
+          <span className="text-xs uppercase tracking-widest font-bold" style={{ color: 'var(--accent)', fontFamily: 'var(--font-involve)' }}>Загрузить шрифт</span>
+
+          {/* Uploaded fonts list */}
+          {customFonts.length > 0 && (
+            <div className="flex flex-col gap-2">
+              {customFonts.map(f => (
+                <div key={f.id} className="flex items-center justify-between gap-3 py-1.5 px-3 rounded-lg" style={{ background: 'var(--bg-subtle)', border: '1px solid var(--border-soft)' }}>
+                  <div className="flex items-center gap-3 min-w-0">
+                    <span className="text-xs" style={{ fontFamily: 'var(--font-involve)', color: 'var(--text-muted)' }}>TTF</span>
+                    <span style={{ fontFamily: `'${f.name}', sans-serif`, fontSize: '1rem', color: 'var(--text)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{f.name}</span>
+                  </div>
+                  <button onClick={() => deleteCustomFont(f)} className={a.btnDanger} style={{ flexShrink: 0, padding: '0.2rem 0.6rem', fontSize: '0.65rem' }}>✕</button>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Pending file input */}
+          {pendingFontFile ? (
+            <div className="flex flex-col gap-2">
+              <p className="text-xs truncate" style={{ color: 'var(--accent)', opacity: 0.6, fontFamily: 'var(--font-involve)' }}>Файл: {pendingFontFile.name}</p>
+              <div className="flex items-center gap-2">
+                <input
+                  type="text"
+                  value={pendingFontName}
+                  onChange={e => setPendingFontName(e.target.value)}
+                  placeholder="Название шрифта (font-family)"
+                  style={{ ...INPUT_STYLE, flex: 1, padding: '0.35rem 0.6rem', fontSize: '0.82rem', borderRadius: 4 }}
+                />
+                <button onClick={saveCustomFont} disabled={uploadingFont || !pendingFontName.trim()} className={a.btn}>
+                  {uploadingFont ? 'Загружаем...' : 'Сохранить'}
+                </button>
+                <button onClick={() => { setPendingFontFile(null); setPendingFontName(''); if (fontFileRef.current) fontFileRef.current.value = '' }} className={a.btnSecondary}>
+                  Отмена
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="flex items-center gap-3">
+              <button onClick={() => fontFileRef.current?.click()} className={a.btnSecondary}>
+                + Выбрать файл (.ttf .otf .woff .woff2)
+              </button>
+            </div>
+          )}
+          <input ref={fontFileRef} type="file" accept=".ttf,.otf,.woff,.woff2,font/*" className="hidden"
+            onChange={e => e.target.files?.[0] && onFontFileSelected(e.target.files[0])} />
+          {fontUploadMsg && <span style={msgStyle(fontUploadMsg)}>{fontUploadMsg}</span>}
+        </div>
+
+        {/* Font role selectors */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
           <FontSelect
             label="Заголовки"
             value={fontHeading}
             onChange={setFontHeading}
             previewText="THREEP STYLE"
+            allFonts={allFontNames}
           />
           <FontSelect
             label="Основной текст"
             value={fontBody}
             onChange={setFontBody}
             previewText="Уличная одежда ручной работы"
+            allFonts={allFontNames}
           />
           <FontSelect
             label="Цены"
             value={fontPrice}
             onChange={setFontPrice}
             previewText="6 333 RUB"
+            allFonts={allFontNames}
           />
         </div>
 

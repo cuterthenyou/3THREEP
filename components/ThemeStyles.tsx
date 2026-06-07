@@ -1,5 +1,7 @@
 import { queryMany } from '@/lib/db'
 
+export interface CustomFont { id: number; name: string; url: string }
+
 const DEFAULTS = {
   color_bg_light:     '#a9342a',
   color_text_light:   '#f29774',
@@ -32,11 +34,22 @@ function isHex(v: string) {
   return /^#[0-9a-fA-F]{3,8}$/.test(v.trim())
 }
 
+function fontFormat(url: string): string {
+  const ext = url.split('.').pop()?.toLowerCase() ?? ''
+  const map: Record<string, string> = { woff2: 'woff2', woff: 'woff', otf: 'opentype', ttf: 'truetype' }
+  return map[ext] ?? 'truetype'
+}
+
 export default async function ThemeStyles() {
   let settings: Record<string, string | null> = {}
+  let customFonts: CustomFont[] = []
   try {
-    const rows = await queryMany('SELECT key, value FROM site_settings')
-    for (const row of rows) settings[row.key] = row.value
+    const [settingsRows, fontRows] = await Promise.all([
+      queryMany('SELECT key, value FROM site_settings'),
+      queryMany('SELECT id, name, url FROM custom_fonts ORDER BY id'),
+    ])
+    for (const row of settingsRows) settings[row.key] = row.value
+    customFonts = fontRows
   } catch {
     // DB unavailable — fall through to defaults
   }
@@ -65,14 +78,17 @@ export default async function ThemeStyles() {
   const speedScale   = get('animation_speed')
   const speedValue   = SPEED_MAP[speedScale] ?? '1'
 
-  // Only emit overrides when they differ from CSS defaults, to avoid unnecessary style bloat.
-  // We always emit so that admin changes apply instantly without globals.css edits.
   // Font aliases: override the named vars so all CSS modules (var(--font-onder) etc.) also respond
   const fontOnder   = fontHeading
   const fontInvolve = fontBody
   const fontDeutsch = fontPrice
 
-  const css = `
+  // @font-face rules for custom uploaded fonts
+  const fontFaces = customFonts.map(f =>
+    `@font-face { font-family: '${f.name}'; src: url('${f.url}') format('${fontFormat(f.url)}'); font-display: swap; }`
+  ).join('\n')
+
+  const css = `${fontFaces ? fontFaces + '\n' : ''}
 :root {
   --bg:         ${bgLight};
   --bg-2:       color-mix(in srgb, ${bgLight} 80%, black);

@@ -275,13 +275,9 @@ export default function AccountClient({ user, profile, orders, profileBg, profil
             <p className={s.collectionsLabel}>Собранные коллекции: {collections}</p>
             <div className="flex gap-2 items-center">
               {orders.length > 0 && (
-                <Image
-                  src="/images/aqua+.png"
-                  alt="AQUA+"
-                  width={32}
-                  height={32}
-                  style={{ border: '2px solid var(--accent-2)', borderRadius: '2px' }}
-                />
+                <div style={{ width: 32, height: 32, border: '2px solid var(--accent-2)', borderRadius: '2px', background: 'var(--accent-2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.55rem', fontFamily: 'var(--font-heading)', color: 'var(--accent)', letterSpacing: '0.05em' }}>
+                  3P
+                </div>
               )}
               {[...Array(7)].map((_, i) => (
                 <div key={i} className={s.collectionSlot}>★</div>

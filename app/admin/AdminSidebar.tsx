@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { toggleTheme } from '@/lib/theme'
+import ThemedLogo from '@/components/ThemedLogo'
 import s from './AdminSidebar.module.css'
 
 function IcoDash() {
@@ -170,6 +171,8 @@ export default function AdminSidebar() {
   const [collapsed, setCollapsed] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
   const [isDark, setIsDark] = useState(false)
+  const [logoIconUrl, setLogoIconUrl] = useState<string | null>(null)
+  const [logoTextUrl, setLogoTextUrl] = useState<string | null>(null)
 
   useEffect(() => {
     setIsDark(document.documentElement.dataset.theme === 'dark')
@@ -178,6 +181,16 @@ export default function AdminSidebar() {
     )
     obs.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] })
     return () => obs.disconnect()
+  }, [])
+
+  useEffect(() => {
+    fetch('/api/site-settings')
+      .then(r => r.ok ? r.json() : {})
+      .then((d: Record<string, string | null>) => {
+        if (d.logo_icon_url) setLogoIconUrl(d.logo_icon_url)
+        if (d.logo_text_url) setLogoTextUrl(d.logo_text_url)
+      })
+      .catch(() => {})
   }, [])
 
   const w = collapsed ? 60 : 220
@@ -198,8 +211,12 @@ export default function AdminSidebar() {
         {/* Logo row */}
         <div className="flex items-center justify-center px-4" style={{ minHeight: 56, borderBottom: '1px solid var(--border-soft)' }}>
           {!collapsed
-            ? <img src="/images/logo-text-63.svg" alt="THREEP" className="theme-img h-5 w-auto" />
-            : <img src="/images/logo-61.svg" alt="T" className="theme-img h-5 w-auto" />
+            ? (logoTextUrl
+                ? <ThemedLogo src={logoTextUrl} alt="THREEP" className="h-5" defaultRatio={5} />
+                : <span style={{ fontFamily: 'var(--font-heading)', fontSize: '0.9rem', letterSpacing: '0.15em', color: 'var(--accent)' }}>THREEP</span>)
+            : (logoIconUrl
+                ? <ThemedLogo src={logoIconUrl} alt="T" className="h-5" defaultRatio={1} />
+                : <span style={{ fontFamily: 'var(--font-heading)', fontSize: '0.9rem', color: 'var(--accent)' }}>3P</span>)
           }
         </div>
 
@@ -239,7 +256,10 @@ export default function AdminSidebar() {
         onClick={() => setMobileOpen(v => !v)}
         aria-label="Открыть меню"
       >
-        <img src="/images/logo-61.svg" alt="menu" className="theme-img h-6 w-auto" />
+        {logoIconUrl
+          ? <ThemedLogo src={logoIconUrl} alt="menu" className="h-6" defaultRatio={1} />
+          : <span style={{ fontFamily: 'var(--font-heading)', fontSize: '1rem', color: 'var(--accent)' }}>3P</span>
+        }
       </button>
 
       {/* ── Mobile backdrop ── */}
@@ -264,7 +284,10 @@ export default function AdminSidebar() {
       >
         {/* Logo row */}
         <div className="flex items-center justify-center px-4" style={{ minHeight: 56, borderBottom: '1px solid var(--border-soft)' }}>
-          <img src="/images/logo-text-63.svg" alt="THREEP" className="theme-img h-5 w-auto" />
+          {logoTextUrl
+            ? <ThemedLogo src={logoTextUrl} alt="THREEP" className="h-5" defaultRatio={5} />
+            : <span style={{ fontFamily: 'var(--font-heading)', fontSize: '0.9rem', letterSpacing: '0.15em', color: 'var(--accent)' }}>THREEP</span>
+          }
         </div>
 
         <NavItems pathname={pathname} collapsed={false} onNavigate={() => setMobileOpen(false)} />

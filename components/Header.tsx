@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useCart } from '@/lib/cart';
 import { toggleTheme } from '@/lib/theme';
 import UserButton from './UserButton';
+import ThemedLogo from './ThemedLogo';
 import s from './Header.module.css';
 
 function BrutalSun() {
@@ -211,16 +212,14 @@ export default function Header({ isAdminUser = false, initialCollections }: Prop
         <div className="flex items-center justify-between px-5 sm:px-8 py-4 sm:py-5">
           <Link href="/" aria-label="На главную">
             {logoIconUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={logoIconUrl} alt="THREEP Logo" className="theme-img h-7 sm:h-9 w-auto flex-shrink-0" />
+              <ThemedLogo src={logoIconUrl} alt="THREEP Logo" className="h-7 sm:h-9" defaultRatio={1} />
             ) : (
-              <span style={{ fontFamily: 'var(--font-heading)', fontSize: '1.25rem', letterSpacing: '0.1em', color: 'var(--text)' }}>3P</span>
+              <span style={{ fontFamily: 'var(--font-heading)', fontSize: '1.25rem', letterSpacing: '0.1em', color: 'var(--accent)' }}>3P</span>
             )}
           </Link>
           {/* Center logo text — hidden on mobile */}
           {logoTextUrl && (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={logoTextUrl} alt="THREEP" className="theme-img hidden xl:block h-5 sm:h-6 w-auto absolute left-1/2 -translate-x-1/2" />
+            <ThemedLogo src={logoTextUrl} alt="THREEP" className="hidden xl:block h-5 sm:h-6 absolute left-1/2 -translate-x-1/2" defaultRatio={5} />
           )}
 
           {/* Icons — on mobile spread evenly across a fixed width, on desktop tight gap */}
