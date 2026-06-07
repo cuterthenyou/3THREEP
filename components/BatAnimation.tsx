@@ -175,7 +175,7 @@ function BatInstance({ bat, onClick, onPositionUpdate }: BatInstanceProps) {
 }
 
 // ── Score counter ─────────────────────────────────────────────────────────────
-function ScoreCounter({ score, gameOver }: { score: number; gameOver: boolean }) {
+function ScoreCounter({ score, gameOver, waveNum }: { score: number; gameOver: boolean; waveNum: number }) {
   const [pulse, setPulse] = useState(false)
   const prevScore = useRef(score)
 
@@ -190,6 +190,7 @@ function ScoreCounter({ score, gameOver }: { score: number; gameOver: boolean })
 
   return (
     <div className={s.score}>
+      {waveNum > 0 && <span className={s.waveLabel}>WAVE {waveNum}</span>}
       {gameOver && <span className={s.gameOver}>GAME OVER</span>}
       <span className={s.scoreLabel}>убито</span>
       <span className={`${s.scoreNum} ${pulse ? s.pulse : ''}`}>×{score}</span>
@@ -254,9 +255,11 @@ export default function BatAnimation() {
   const [bats, setBats]           = useState<BatData[]>([])
   const [explosions, setExplosions] = useState<ExplosionData[]>([])
   const [score, setScore]         = useState(0)
+  const [waveNum, setWaveNum]     = useState(0)
 
   const waveTimerRef    = useRef<ReturnType<typeof setTimeout> | null>(null)
   const goTimerRef      = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const spawnTimersRef  = useRef<ReturnType<typeof setTimeout>[]>([])
   const batPositions    = useRef<Map<number, { x: number; y: number }>>(new Map())
   const nextWaveNRef    = useRef(0)
   const scheduleWaveRef = useRef(false)
@@ -267,34 +270,46 @@ export default function BatAnimation() {
   const spawnWaveRef = useRef<(n: number) => void>()
   spawnWaveRef.current = (n: number) => {
     if (waveTimerRef.current) { clearTimeout(waveTimerRef.current); waveTimerRef.current = null }
-    const newBats = Array.from({ length: n }, spawnBat)
-    setBats(newBats)
+    spawnTimersRef.current.forEach(clearTimeout); spawnTimersRef.current = []
+
+    // Staggered spawn — one bat every 150 ms
+    for (let i = 0; i < n; i++) {
+      const t = setTimeout(() => setBats(prev => [...prev, spawnBat()]), i * 150)
+      spawnTimersRef.current.push(t)
+    }
 
     waveTimerRef.current = setTimeout(() => {
-      // Wave timer expired — all remaining bats are game over
+      spawnTimersRef.current.forEach(clearTimeout); spawnTimersRef.current = []
       const positions = [...batPositions.current.values()]
       batPositions.current.clear()
       setBats([])
       setGameState('game_over')
-      // Stagger the explosions slightly for dramatic effect
       positions.forEach((p, i) => {
         setTimeout(() => {
           setExplosions(prev => [...prev, { id: nextId(), x: p.x, y: p.y, type: 'timeout' }])
         }, i * 100)
       })
-      // Restart game after 10s
-      goTimerRef.current = setTimeout(() => setGameState('lure'), 10000)
+      // After 3 s → idle with full reset
+      goTimerRef.current = setTimeout(() => {
+        setGameState('idle')
+        setScore(0)
+        setWaveNum(0)
+      }, 3000)
     }, 4000)
   }
 
-  // Mount: wait 3s then show first bat
+  // Idle → lure: fires on mount AND after each game-over reset
   useEffect(() => {
+    if (gameState !== 'idle') return
     const t = setTimeout(() => setGameState('lure'), 3000)
-    return () => {
-      clearTimeout(t)
-      if (waveTimerRef.current) clearTimeout(waveTimerRef.current)
-      if (goTimerRef.current)   clearTimeout(goTimerRef.current)
-    }
+    return () => clearTimeout(t)
+  }, [gameState])
+
+  // Cleanup all timers on unmount
+  useEffect(() => () => {
+    if (waveTimerRef.current) clearTimeout(waveTimerRef.current)
+    if (goTimerRef.current)   clearTimeout(goTimerRef.current)
+    spawnTimersRef.current.forEach(clearTimeout)
   }, [])
 
   // When state becomes 'lure' → spawn single bat
@@ -303,13 +318,14 @@ export default function BatAnimation() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [gameState])
 
-  // When bats array empties after all clicked → spawn next wave
+  // When bats array empties after all clicked → show next wave label, then spawn
   useEffect(() => {
     if (bats.length === 0 && scheduleWaveRef.current) {
       scheduleWaveRef.current = false
       const n = nextWaveNRef.current
       if (n > 0) {
-        const t = setTimeout(() => spawnWaveRef.current!(n), 260)
+        setWaveNum(n)
+        const t = setTimeout(() => spawnWaveRef.current!(n), 1500)
         return () => clearTimeout(t)
       }
     }
@@ -348,10 +364,12 @@ export default function BatAnimation() {
     setExplosions(prev => prev.filter(e => e.id !== id))
   }, [])
 
-  const showScore = score > 0 || gameState === 'game_over'
+  const overlayActive = gameState === 'playing' || gameState === 'game_over'
+  const showScore     = gameState === 'playing' || gameState === 'game_over'
 
   return (
     <>
+      {overlayActive && <div className={s.overlay} aria-hidden="true" />}
       {bats.map(bat => (
         <BatInstance
           key={bat.id}
@@ -367,7 +385,7 @@ export default function BatAnimation() {
           onDone={() => removeExplosion(exp.id)}
         />
       ))}
-      {showScore && <ScoreCounter score={score} gameOver={gameState === 'game_over'} />}
+      {showScore && <ScoreCounter score={score} gameOver={gameState === 'game_over'} waveNum={waveNum} />}
     </>
   )
 }
