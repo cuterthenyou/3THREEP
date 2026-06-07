@@ -106,7 +106,7 @@ export default function Header({ isAdminUser = false, initialCollections }: Prop
   useEffect(() => {
     fetch('/api/site-settings')
       .then(r => r.ok ? r.json() : {})
-      .then(d => {
+      .then((d: Record<string, string | null>) => {
         if (d.logo_icon_url) setLogoIconUrl(d.logo_icon_url);
         if (d.logo_text_url) setLogoTextUrl(d.logo_text_url);
       })
