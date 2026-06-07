@@ -3,8 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import s from './BatAnimation.module.css'
 
-// ── Pixel-art style bat SVG ──────────────────────────────────────────────────
-// 48×28 viewBox, shape-rendering: crispEdges for pixel feel
+// ── Pixel-art bat SVG ────────────────────────────────────────────────────────
 function PixelBat() {
   return (
     <svg
@@ -15,52 +14,21 @@ function PixelBat() {
       aria-hidden="true"
       style={{ shapeRendering: 'crispEdges', imageRendering: 'pixelated' }}
     >
-      {/* ── Left wing — 3 scalloped lobes ── */}
-      <path d="
-        M 18,14
-        L 0,3   L 4,10  L 0,14
-        L 3,19  L 7,21  L 10,17
-        L 5,22  L 11,24 L 15,19
-        L 12,23 L 17,22 L 19,17
-        Z
-      "/>
-      {/* Left wing finger-bone lines */}
-      <line x1="18" y1="14" x2="4" y2="10" stroke="var(--bg)" strokeWidth="0.7" opacity="0.4"/>
+      <path d="M 18,14 L 0,3 L 4,10 L 0,14 L 3,19 L 7,21 L 10,17 L 5,22 L 11,24 L 15,19 L 12,23 L 17,22 L 19,17 Z"/>
+      <line x1="18" y1="14" x2="4"  y2="10" stroke="var(--bg)" strokeWidth="0.7" opacity="0.4"/>
       <line x1="18" y1="14" x2="7"  y2="21" stroke="var(--bg)" strokeWidth="0.7" opacity="0.4"/>
       <line x1="18" y1="14" x2="11" y2="24" stroke="var(--bg)" strokeWidth="0.7" opacity="0.4"/>
-
-      {/* ── Right wing — mirror ── */}
-      <path d="
-        M 30,14
-        L 48,3   L 44,10  L 48,14
-        L 45,19  L 41,21  L 38,17
-        L 43,22  L 37,24  L 33,19
-        L 36,23  L 31,22  L 29,17
-        Z
-      "/>
-      {/* Right wing finger-bone lines */}
+      <path d="M 30,14 L 48,3 L 44,10 L 48,14 L 45,19 L 41,21 L 38,17 L 43,22 L 37,24 L 33,19 L 36,23 L 31,22 L 29,17 Z"/>
       <line x1="30" y1="14" x2="44" y2="10" stroke="var(--bg)" strokeWidth="0.7" opacity="0.4"/>
       <line x1="30" y1="14" x2="41" y2="21" stroke="var(--bg)" strokeWidth="0.7" opacity="0.4"/>
       <line x1="30" y1="14" x2="37" y2="24" stroke="var(--bg)" strokeWidth="0.7" opacity="0.4"/>
-
-      {/* ── Body ── */}
       <polygon points="24,4 27,8 28,14 27,20 24,24 21,20 20,14 21,8"/>
-
-      {/* ── Left ear ── */}
       <polygon points="21,7 17,0 23,9"/>
-      {/* Ear notch */}
       <polygon points="19,5 18,2 21,6" fill="var(--bg)" opacity="0.5"/>
-
-      {/* ── Right ear ── */}
       <polygon points="27,7 31,0 25,9"/>
-      {/* Ear notch */}
       <polygon points="29,5 30,2 27,6" fill="var(--bg)" opacity="0.5"/>
-
-      {/* ── Eyes — angular diamonds ── */}
       <polygon points="22,14 23,12 24,14 23,16" fill="var(--bg)"/>
       <polygon points="26,14 27,12 28,14 27,16" fill="var(--bg)"/>
-
-      {/* ── Mouth — tiny angry line ── */}
       <line x1="22" y1="20" x2="26" y2="20" stroke="var(--bg)" strokeWidth="1" opacity="0.6"/>
     </svg>
   )
@@ -76,75 +44,119 @@ interface BatData {
   scale: number
 }
 
+interface ExplosionData {
+  id: number
+  x: number
+  y: number
+  type: 'click' | 'timeout'
+}
+
+type GameState = 'idle' | 'lure' | 'playing' | 'game_over'
+
+// ── BatExplosion: ring + 8 flying particles ───────────────────────────────────
+const PARTICLE_ANGLES = [0, 45, 90, 135, 180, 225, 270, 315]
+const PARTICLE_DIST = 38
+
+function BatExplosion({ data, onDone }: { data: ExplosionData; onDone: () => void }) {
+  const onDoneRef = useRef(onDone)
+  onDoneRef.current = onDone
+  const isTimeout = data.type === 'timeout'
+
+  useEffect(() => {
+    const t = setTimeout(() => onDoneRef.current(), 650)
+    return () => clearTimeout(t)
+  }, [])
+
+  return (
+    <div className={s.explosion} style={{ left: data.x, top: data.y }}>
+      <div className={`${s.explosionRing} ${isTimeout ? s.explosionRingTimeout : ''}`} />
+      {PARTICLE_ANGLES.map((angle, i) => {
+        const rad = (angle * Math.PI) / 180
+        const dx = Math.cos(rad) * PARTICLE_DIST
+        const dy = Math.sin(rad) * PARTICLE_DIST
+        return (
+          <div
+            key={i}
+            className={`${s.particle} ${isTimeout ? s.particleTimeout : ''}`}
+            style={{ '--dx': `${dx}px`, '--dy': `${dy}px` } as React.CSSProperties}
+          />
+        )
+      })}
+    </div>
+  )
+}
+
+// ── BatInstance: rAF animation, bounces within viewport ──────────────────────
 interface BatInstanceProps {
   bat: BatData
   onClick: () => void
-  onExit: () => void
+  onPositionUpdate: (id: number, x: number, y: number) => void
 }
 
-// ── BatInstance — animates itself via rAF, no React re-render per frame ──────
-function BatInstance({ bat, onClick, onExit }: BatInstanceProps) {
+function BatInstance({ bat, onClick, onPositionUpdate }: BatInstanceProps) {
   const divRef = useRef<HTMLDivElement>(null)
-  const onExitRef = useRef(onExit)
   const onClickRef = useRef(onClick)
-  onExitRef.current = onExit
+  const onPosRef = useRef(onPositionUpdate)
   onClickRef.current = onClick
+  onPosRef.current = onPositionUpdate
 
   useEffect(() => {
     const div = divRef.current
     if (!div) return
 
-    const state = {
+    const st = {
       x: bat.startX,
       y: bat.startY,
       vx: bat.startVx,
       vy: bat.startVy,
       lastTime: 0,
       nextTurnAt: 0,
-      exited: false,
     }
 
     let animId: number
+    let alive = true
 
     function frame(t: number) {
-      if (state.exited) return
-      const dt = state.lastTime ? Math.min((t - state.lastTime) / 1000, 0.05) : 0
-      state.lastTime = t
+      if (!alive) return
+      const dt = st.lastTime ? Math.min((t - st.lastTime) / 1000, 0.05) : 0
+      st.lastTime = t
 
-      // Chaotic direction change every 0.6–2.0s
-      if (t > state.nextTurnAt) {
-        const currentAngle = Math.atan2(state.vy, state.vx)
+      // Random direction change every 0.6–2.0s
+      if (t > st.nextTurnAt) {
+        const curA = Math.atan2(st.vy, st.vx)
         const deflect = (Math.random() - 0.5) * Math.PI * 1.3
-        const newAngle = currentAngle + deflect
-        const speed = Math.hypot(state.vx, state.vy) * (0.8 + Math.random() * 0.4)
-        const clampedSpeed = Math.max(80, Math.min(220, speed))
-        state.vx = Math.cos(newAngle) * clampedSpeed
-        state.vy = Math.sin(newAngle) * clampedSpeed
-        state.nextTurnAt = t + 600 + Math.random() * 1400
+        const speed = Math.max(80, Math.min(220, Math.hypot(st.vx, st.vy) * (0.8 + Math.random() * 0.4)))
+        st.vx = Math.cos(curA + deflect) * speed
+        st.vy = Math.sin(curA + deflect) * speed
+        st.nextTurnAt = t + 600 + Math.random() * 1400
       }
 
-      state.x += state.vx * dt
-      state.y += state.vy * dt
+      st.x += st.vx * dt
+      st.y += st.vy * dt
 
+      // Bounce off viewport walls
       const W = window.innerWidth
       const H = window.innerHeight
-      const margin = 260
+      const bW = 72 * bat.scale
+      const bH = 42 * bat.scale
 
-      if (state.x < -margin || state.x > W + margin || state.y < -margin || state.y > H + margin) {
-        state.exited = true
-        onExitRef.current()
-        return
-      }
+      if (st.x < 0)       { st.x = 0;      st.vx =  Math.abs(st.vx) }
+      if (st.x > W - bW)  { st.x = W - bW; st.vx = -Math.abs(st.vx) }
+      if (st.y < 0)       { st.y = 0;      st.vy =  Math.abs(st.vy) }
+      if (st.y > H - bH)  { st.y = H - bH; st.vy = -Math.abs(st.vy) }
 
-      const angle = Math.atan2(state.vy, state.vx) * 180 / Math.PI
-      div!.style.transform = `translate(${state.x}px, ${state.y}px) rotate(${angle}deg) scale(${bat.scale})`
+      // Report center position to controller
+      onPosRef.current(bat.id, st.x + bW / 2, st.y + bH / 2)
+
+      const angle = Math.atan2(st.vy, st.vx) * 180 / Math.PI
+      div!.style.transform = `translate(${st.x}px, ${st.y}px) rotate(${angle}deg) scale(${bat.scale})`
 
       animId = requestAnimationFrame(frame)
     }
 
     animId = requestAnimationFrame(frame)
     return () => {
-      state.exited = true
+      alive = false
       cancelAnimationFrame(animId)
     }
   }, [bat])
@@ -157,15 +169,13 @@ function BatInstance({ bat, onClick, onExit }: BatInstanceProps) {
       onClick={() => onClickRef.current()}
       onTouchStart={e => { e.preventDefault(); onClickRef.current() }}
     >
-      <span className={s.flap}>
-        <PixelBat />
-      </span>
+      <span className={s.flap}><PixelBat /></span>
     </div>
   )
 }
 
 // ── Score counter ─────────────────────────────────────────────────────────────
-function ScoreCounter({ score }: { score: number }) {
+function ScoreCounter({ score, gameOver }: { score: number; gameOver: boolean }) {
   const [pulse, setPulse] = useState(false)
   const prevScore = useRef(score)
 
@@ -180,6 +190,7 @@ function ScoreCounter({ score }: { score: number }) {
 
   return (
     <div className={s.score}>
+      {gameOver && <span className={s.gameOver}>GAME OVER</span>}
       <span className={s.scoreLabel}>убито</span>
       <span className={`${s.scoreNum} ${pulse ? s.pulse : ''}`}>×{score}</span>
     </div>
@@ -191,40 +202,40 @@ let _idCounter = 0
 function nextId() { return ++_idCounter }
 
 function spawnBat(): BatData {
-  const W = typeof window !== 'undefined' ? window.innerWidth : 400
+  const W = typeof window !== 'undefined' ? window.innerWidth  : 400
   const H = typeof window !== 'undefined' ? window.innerHeight : 800
   const side = Math.floor(Math.random() * 4)
-  const speed = 110 + Math.random() * 90
-  const spread = (Math.random() - 0.5) * 0.6 // ±~17° from inward direction
+  const speed = 120 + Math.random() * 80
+  const spread = (Math.random() - 0.5) * 0.5
 
   let startX: number, startY: number, startVx: number, startVy: number
 
   switch (side) {
-    case 0: { // top
-      startX = Math.random() * W
-      startY = -60
+    case 0: { // top edge
+      startX = Math.random() * Math.max(1, W - 72)
+      startY = 0
       const a = Math.PI / 2 + spread
       startVx = Math.cos(a) * speed; startVy = Math.sin(a) * speed
       break
     }
-    case 1: { // right
-      startX = W + 60
-      startY = Math.random() * H
+    case 1: { // right edge
+      startX = Math.max(0, W - 72)
+      startY = Math.random() * Math.max(1, H - 42)
       const a = Math.PI + spread
       startVx = Math.cos(a) * speed; startVy = Math.sin(a) * speed
       break
     }
-    case 2: { // bottom
-      startX = Math.random() * W
-      startY = H + 60
+    case 2: { // bottom edge
+      startX = Math.random() * Math.max(1, W - 72)
+      startY = Math.max(0, H - 42)
       const a = -Math.PI / 2 + spread
       startVx = Math.cos(a) * speed; startVy = Math.sin(a) * speed
       break
     }
-    default: { // left
-      startX = -60
-      startY = Math.random() * H
-      const a = 0 + spread
+    default: { // left edge
+      startX = 0
+      startY = Math.random() * Math.max(1, H - 42)
+      const a = spread
       startVx = Math.cos(a) * speed; startVy = Math.sin(a) * speed
       break
     }
@@ -239,58 +250,105 @@ function spawnBat(): BatData {
 
 // ── Main controller ───────────────────────────────────────────────────────────
 export default function BatAnimation() {
-  const [bats, setBats] = useState<BatData[]>([])
-  const [score, setScore] = useState(0)
-  const resetTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const nextWaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const [gameState, setGameState] = useState<GameState>('idle')
+  const [bats, setBats]           = useState<BatData[]>([])
+  const [explosions, setExplosions] = useState<ExplosionData[]>([])
+  const [score, setScore]         = useState(0)
 
-  const scheduleIdleBat = useCallback(() => {
-    if (nextWaveTimerRef.current) clearTimeout(nextWaveTimerRef.current)
-    nextWaveTimerRef.current = setTimeout(() => {
-      setBats([spawnBat()])
-    }, 15000 + Math.random() * 10000)
-  }, [])
+  const waveTimerRef    = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const goTimerRef      = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const batPositions    = useRef<Map<number, { x: number; y: number }>>(new Map())
+  const nextWaveNRef    = useRef(0)
+  const scheduleWaveRef = useRef(false)
+  const gameStateRef    = useRef<GameState>('idle')
+  gameStateRef.current  = gameState
 
-  // Initial spawn
+  // spawnWave: stored in a ref so timeouts always call the latest version
+  const spawnWaveRef = useRef<(n: number) => void>()
+  spawnWaveRef.current = (n: number) => {
+    if (waveTimerRef.current) { clearTimeout(waveTimerRef.current); waveTimerRef.current = null }
+    const newBats = Array.from({ length: n }, spawnBat)
+    setBats(newBats)
+
+    waveTimerRef.current = setTimeout(() => {
+      // Wave timer expired — all remaining bats are game over
+      const positions = [...batPositions.current.values()]
+      batPositions.current.clear()
+      setBats([])
+      setGameState('game_over')
+      // Stagger the explosions slightly for dramatic effect
+      positions.forEach((p, i) => {
+        setTimeout(() => {
+          setExplosions(prev => [...prev, { id: nextId(), x: p.x, y: p.y, type: 'timeout' }])
+        }, i * 100)
+      })
+      // Restart game after 10s
+      goTimerRef.current = setTimeout(() => setGameState('lure'), 10000)
+    }, 4000)
+  }
+
+  // Mount: wait 3s then show first bat
   useEffect(() => {
-    nextWaveTimerRef.current = setTimeout(() => {
-      setBats([spawnBat()])
-    }, 2000 + Math.random() * 2500)
-
+    const t = setTimeout(() => setGameState('lure'), 3000)
     return () => {
-      if (nextWaveTimerRef.current) clearTimeout(nextWaveTimerRef.current)
-      if (resetTimerRef.current) clearTimeout(resetTimerRef.current)
+      clearTimeout(t)
+      if (waveTimerRef.current) clearTimeout(waveTimerRef.current)
+      if (goTimerRef.current)   clearTimeout(goTimerRef.current)
     }
   }, [])
 
+  // When state becomes 'lure' → spawn single bat
+  useEffect(() => {
+    if (gameState === 'lure') spawnWaveRef.current!(1)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [gameState])
+
+  // When bats array empties after all clicked → spawn next wave
+  useEffect(() => {
+    if (bats.length === 0 && scheduleWaveRef.current) {
+      scheduleWaveRef.current = false
+      const n = nextWaveNRef.current
+      if (n > 0) {
+        const t = setTimeout(() => spawnWaveRef.current!(n), 260)
+        return () => clearTimeout(t)
+      }
+    }
+  }, [bats])
+
+  const handlePositionUpdate = useCallback((id: number, x: number, y: number) => {
+    batPositions.current.set(id, { x, y })
+  }, [])
+
   const handleBatClick = useCallback((clickedId: number) => {
-    // Cancel reset timer (user was fast enough)
-    if (resetTimerRef.current) clearTimeout(resetTimerRef.current)
+    const pos = batPositions.current.get(clickedId) ?? {
+      x: (typeof window !== 'undefined' ? window.innerWidth  : 400) / 2,
+      y: (typeof window !== 'undefined' ? window.innerHeight : 800) / 2,
+    }
+    batPositions.current.delete(clickedId)
+
+    setExplosions(prev => [...prev, { id: nextId(), x: pos.x, y: pos.y, type: 'click' }])
+    setScore(s => s + 1)
 
     setBats(prev => {
       const remaining = prev.filter(b => b.id !== clickedId)
-      const nextCount = remaining.length + 1 // clicked one → spawn count + 1 new
-      return Array.from({ length: nextCount }, () => spawnBat())
-    })
-
-    setScore(s => s + 1)
-
-    // Give 4s to click next bat; if missed → reset
-    resetTimerRef.current = setTimeout(() => {
-      setBats([])
-      scheduleIdleBat()
-    }, 4000)
-  }, [scheduleIdleBat])
-
-  const handleBatExit = useCallback((exitedId: number) => {
-    setBats(prev => {
-      const remaining = prev.filter(b => b.id !== exitedId)
       if (remaining.length === 0) {
-        scheduleIdleBat()
+        // All bats in wave clicked — clear timer, queue next wave
+        if (waveTimerRef.current) { clearTimeout(waveTimerRef.current); waveTimerRef.current = null }
+        const nextN = prev.length + 1
+        nextWaveNRef.current = nextN
+        scheduleWaveRef.current = true
+        // Upgrade lure → playing state on first successful click
+        if (gameStateRef.current === 'lure') setGameState('playing')
       }
       return remaining
     })
-  }, [scheduleIdleBat])
+  }, [])
+
+  const removeExplosion = useCallback((id: number) => {
+    setExplosions(prev => prev.filter(e => e.id !== id))
+  }, [])
+
+  const showScore = score > 0 || gameState === 'game_over'
 
   return (
     <>
@@ -299,10 +357,17 @@ export default function BatAnimation() {
           key={bat.id}
           bat={bat}
           onClick={() => handleBatClick(bat.id)}
-          onExit={() => handleBatExit(bat.id)}
+          onPositionUpdate={handlePositionUpdate}
         />
       ))}
-      {score > 0 && <ScoreCounter score={score} />}
+      {explosions.map(exp => (
+        <BatExplosion
+          key={exp.id}
+          data={exp}
+          onDone={() => removeExplosion(exp.id)}
+        />
+      ))}
+      {showScore && <ScoreCounter score={score} gameOver={gameState === 'game_over'} />}
     </>
   )
 }
