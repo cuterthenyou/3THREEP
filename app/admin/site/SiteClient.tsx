@@ -565,16 +565,45 @@ export default function SiteClient({ initialSettings, initialCustomFonts = [] }:
 
       {/* ── Визуальные эффекты ── */}
       <AdminSection title="Визуальные эффекты">
-        <div className="flex flex-col gap-6">
-          {/* Grain opacity */}
-          <div className="flex flex-col gap-2">
+        {/* Animation keyframes */}
+        <style>{`
+          @keyframes eff-sweep {
+            0%   { transform: translateX(-120%); }
+            100% { transform: translateX(420%); }
+          }
+          @keyframes eff-pulse {
+            0%, 100% { opacity: 0.25; transform: scale(0.9); }
+            50%       { opacity: 1;    transform: scale(1); }
+          }
+        `}</style>
+
+        <div className="flex flex-col gap-8">
+
+          {/* ── Grain opacity ── */}
+          <div className="flex flex-col gap-3">
             <div className="flex items-center justify-between">
               <span className="text-xs uppercase tracking-widest" style={{ color: 'var(--accent)', opacity: 0.5, fontFamily: 'var(--font-involve)' }}>Зернистость (grain)</span>
               <span className="text-xs" style={{ color: 'var(--accent)', fontFamily: 'monospace' }}>{grainOpacity.toFixed(1)}%</span>
             </div>
+
+            {/* Live grain preview */}
+            <div style={{ position: 'relative', height: 88, borderRadius: 6, overflow: 'hidden', background: 'linear-gradient(135deg, #141414 0%, #2a1a14 60%, #1a1a2a 100%)', border: '1px solid var(--border-soft)' }}>
+              {/* Grain overlay */}
+              <div style={{
+                position: 'absolute', inset: 0, opacity: grainOpacity / 100,
+                backgroundImage: `url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='200' height='200' filter='url(%23n)'/></svg>")`,
+                backgroundRepeat: 'repeat', backgroundSize: '200px 200px',
+                mixBlendMode: 'overlay', pointerEvents: 'none',
+              }} />
+              {/* Sample content */}
+              <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: 4 }}>
+                <span style={{ fontFamily: 'var(--font-heading)', fontSize: '1.3rem', color: 'rgba(255,255,255,0.55)', letterSpacing: '0.12em' }}>THREEP</span>
+                <span style={{ fontFamily: 'var(--font-involve)', fontSize: '0.6rem', color: 'rgba(255,255,255,0.25)', letterSpacing: '0.25em' }}>PREVIEW</span>
+              </div>
+            </div>
+
             <input
-              type="range"
-              min={0} max={20} step={0.5}
+              type="range" min={0} max={20} step={0.5}
               value={grainOpacity}
               onChange={e => {
                 const v = parseFloat(e.target.value)
@@ -588,45 +617,77 @@ export default function SiteClient({ initialSettings, initialCustomFonts = [] }:
             </div>
           </div>
 
-          {/* Border radius */}
-          <div className="flex flex-col gap-2">
+          {/* ── Border radius ── */}
+          <div className="flex flex-col gap-3">
             <span className="text-xs uppercase tracking-widest" style={{ color: 'var(--accent)', opacity: 0.5, fontFamily: 'var(--font-involve)' }}>Скругление углов</span>
-            <div className="flex gap-3 flex-wrap">
-              {RADIUS_OPTIONS.map(opt => (
-                <label key={opt.value} className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="radio"
-                    name="radius"
-                    value={opt.value}
-                    checked={borderRadiusScale === opt.value}
-                    onChange={() => setBorderRadiusScale(opt.value)}
-                    style={{ accentColor: 'var(--accent)' }}
-                  />
-                  <span className="text-sm" style={{ fontFamily: 'var(--font-involve)', color: 'var(--text)' }}>{opt.label}</span>
-                </label>
-              ))}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
+              {RADIUS_OPTIONS.map(opt => {
+                const r = { sharp: 0, slight: 6, rounded: 14 }[opt.value as 'sharp' | 'slight' | 'rounded']
+                const active = borderRadiusScale === opt.value
+                return (
+                  <button
+                    key={opt.value}
+                    onClick={() => setBorderRadiusScale(opt.value)}
+                    style={{
+                      display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10,
+                      padding: '14px 10px', cursor: 'pointer',
+                      borderRadius: 6,
+                      background: active ? 'var(--accent-2)' : 'var(--bg-2)',
+                      border: `1.5px solid ${active ? 'var(--accent)' : 'var(--border-soft)'}`,
+                      transition: 'border-color 0.15s, background 0.15s',
+                    }}
+                  >
+                    {/* Card shape demo */}
+                    <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 5 }}>
+                      <div style={{ height: 34, borderRadius: r, background: active ? 'color-mix(in srgb, var(--accent) 30%, transparent)' : 'var(--bg-subtle)', border: `1px solid ${active ? 'var(--accent)' : 'var(--border-soft)'}` }} />
+                      <div style={{ height: 14, borderRadius: r, background: active ? 'color-mix(in srgb, var(--accent) 50%, transparent)' : 'var(--border-soft)', width: '70%', margin: '0 auto' }} />
+                    </div>
+                    <span style={{ fontSize: '0.7rem', color: active ? 'var(--accent)' : 'var(--text-muted)', fontFamily: 'var(--font-involve)' }}>{opt.label}</span>
+                  </button>
+                )
+              })}
             </div>
           </div>
 
-          {/* Animation speed */}
-          <div className="flex flex-col gap-2">
+          {/* ── Animation speed ── */}
+          <div className="flex flex-col gap-3">
             <span className="text-xs uppercase tracking-widest" style={{ color: 'var(--accent)', opacity: 0.5, fontFamily: 'var(--font-involve)' }}>Скорость анимаций</span>
-            <div className="flex gap-3 flex-wrap">
-              {SPEED_OPTIONS.map(opt => (
-                <label key={opt.value} className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="radio"
-                    name="speed"
-                    value={opt.value}
-                    checked={animationSpeed === opt.value}
-                    onChange={() => setAnimationSpeed(opt.value)}
-                    style={{ accentColor: 'var(--accent)' }}
-                  />
-                  <span className="text-sm" style={{ fontFamily: 'var(--font-involve)', color: 'var(--text)' }}>{opt.label}</span>
-                </label>
-              ))}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 6 }}>
+              {SPEED_OPTIONS.map(opt => {
+                const dur = ({ off: 0, slow: 2200, normal: 800, fast: 280 } as Record<string, number>)[opt.value] ?? 800
+                const active = animationSpeed === opt.value
+                return (
+                  <button
+                    key={opt.value}
+                    onClick={() => setAnimationSpeed(opt.value)}
+                    style={{
+                      display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10,
+                      padding: '12px 6px', cursor: 'pointer', overflow: 'hidden',
+                      borderRadius: 6,
+                      background: active ? 'var(--accent-2)' : 'var(--bg-2)',
+                      border: `1.5px solid ${active ? 'var(--accent)' : 'var(--border-soft)'}`,
+                      transition: 'border-color 0.15s, background 0.15s',
+                    }}
+                  >
+                    {/* Animation demo */}
+                    <div style={{ width: '100%', height: 6, borderRadius: 3, background: 'var(--bg-subtle)', overflow: 'hidden', position: 'relative' }}>
+                      {dur === 0 ? (
+                        <div style={{ width: '100%', height: '100%', background: active ? 'var(--accent)' : 'var(--border-soft)', opacity: 0.35 }} />
+                      ) : (
+                        <div style={{
+                          position: 'absolute', width: '35%', height: '100%', borderRadius: 3,
+                          background: active ? 'var(--accent)' : 'var(--border)',
+                          animation: `eff-sweep ${dur}ms linear infinite`,
+                        }} />
+                      )}
+                    </div>
+                    <span style={{ fontSize: '0.65rem', color: active ? 'var(--accent)' : 'var(--text-muted)', fontFamily: 'var(--font-involve)', whiteSpace: 'nowrap' }}>{opt.label}</span>
+                  </button>
+                )
+              })}
             </div>
           </div>
+
         </div>
 
         <div className="flex items-center gap-3 flex-wrap pt-2">
