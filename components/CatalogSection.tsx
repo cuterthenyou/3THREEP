@@ -50,7 +50,7 @@ export default function CatalogSection({ products, categories, categoryData = {}
   const [modalBg, setModalBg] = useState<string | null>(null)
   const [modalCollectionLogo, setModalCollectionLogo] = useState<string | null>(null)
   const [isDark, setIsDark] = useState(false)
-  const [cols, setCols] = useState<Cols>(2)
+  const [cols, setCols] = useState<Cols>(3)
   const savedScrollRef = useRef<number>(0)
 
   useEffect(() => {

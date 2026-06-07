@@ -274,6 +274,8 @@ export default function SiteClient({ initialSettings, initialCustomFonts = [] }:
   const grainDarkRaw  = parseFloat(initialSettings['grain_opacity_dark']  ?? initialSettings['grain_opacity'] ?? '0.055')
   const [grainLight, setGrainLight] = useState(isNaN(grainLightRaw) ? 8   : Math.round(grainLightRaw * 1000) / 10)
   const [grainDark,  setGrainDark]  = useState(isNaN(grainDarkRaw)  ? 5.5 : Math.round(grainDarkRaw  * 1000) / 10)
+  const grainScaleRaw = parseInt(initialSettings['grain_size'] ?? '256', 10)
+  const [grainScale, setGrainScale] = useState(isNaN(grainScaleRaw) ? 256 : Math.max(64, Math.min(512, grainScaleRaw)))
   const [borderRadiusScale, setBorderRadiusScale] = useState(initialSettings['border_radius_scale'] ?? 'sharp')
   const [animationSpeed, setAnimationSpeed] = useState(initialSettings['animation_speed'] ?? 'normal')
   const [savingEffects, setSavingEffects] = useState(false)
@@ -447,6 +449,7 @@ export default function SiteClient({ initialSettings, initialCustomFonts = [] }:
     await Promise.all([
       saveSetting('grain_opacity_light', String(grainLight / 100)),
       saveSetting('grain_opacity_dark',  String(grainDark  / 100)),
+      saveSetting('grain_size',          String(grainScale)),
       saveSetting('border_radius_scale', borderRadiusScale),
       saveSetting('animation_speed',     animationSpeed),
     ])
@@ -673,7 +676,7 @@ export default function SiteClient({ initialSettings, initialCustomFonts = [] }:
                   <div style={{
                     position: 'absolute', inset: 0, opacity: grainLight / 100,
                     backgroundImage: `url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='200' height='200' filter='url(%23n)'/></svg>")`,
-                    backgroundRepeat: 'repeat', backgroundSize: '200px 200px',
+                    backgroundRepeat: 'repeat', backgroundSize: `${grainScale}px ${grainScale}px`,
                     mixBlendMode: 'overlay', pointerEvents: 'none',
                   }} />
                   <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: 3 }}>
@@ -697,7 +700,7 @@ export default function SiteClient({ initialSettings, initialCustomFonts = [] }:
                   <div style={{
                     position: 'absolute', inset: 0, opacity: grainDark / 100,
                     backgroundImage: `url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='200' height='200' filter='url(%23n)'/></svg>")`,
-                    backgroundRepeat: 'repeat', backgroundSize: '200px 200px',
+                    backgroundRepeat: 'repeat', backgroundSize: `${grainScale}px ${grainScale}px`,
                     mixBlendMode: 'overlay', pointerEvents: 'none',
                   }} />
                   <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: 3 }}>
@@ -714,6 +717,21 @@ export default function SiteClient({ initialSettings, initialCustomFonts = [] }:
 
             <div className="flex justify-between text-xs" style={{ color: 'var(--accent)', opacity: 0.3, fontFamily: 'var(--font-involve)' }}>
               <span>0 — нет</span><span>10 — умеренно</span><span>20 — сильно</span>
+            </div>
+          </div>
+
+          {/* ── Grain scale ── */}
+          <div className="flex flex-col gap-3">
+            <div className="flex items-center justify-between">
+              <span className="text-xs uppercase tracking-widest" style={{ color: 'var(--accent)', opacity: 0.5, fontFamily: 'var(--font-involve)' }}>Крупность зерна</span>
+              <span className="text-xs" style={{ color: 'var(--accent)', fontFamily: 'monospace' }}>{grainScale}px</span>
+            </div>
+            <input type="range" min={64} max={512} step={32} value={grainScale}
+              onChange={e => { const v = parseInt(e.target.value, 10); setGrainScale(v); document.documentElement.style.setProperty('--grain-size', `${v}px`) }}
+              style={{ accentColor: 'var(--accent)', width: '100%' }}
+            />
+            <div className="flex justify-between text-xs" style={{ color: 'var(--accent)', opacity: 0.3, fontFamily: 'var(--font-involve)' }}>
+              <span>64 — мелко</span><span>256 — стандарт</span><span>512 — крупно</span>
             </div>
           </div>
 

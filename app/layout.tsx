@@ -41,7 +41,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       <head>
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(){try{var t=localStorage.getItem('threep-theme')||(matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light');document.documentElement.dataset.theme=t;}catch(e){}})();`,
+            __html: `(function(){try{var t=localStorage.getItem('threep-theme')||'light';document.documentElement.dataset.theme=t;}catch(e){}})();`,
           }}
         />
         <ThemeStyles />
@@ -62,7 +62,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             zIndex: 2,
             backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='256' height='256'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='256' height='256' filter='url(%23n)'/%3E%3C/svg%3E\")",
             backgroundRepeat: 'repeat',
-            backgroundSize: '256px 256px',
+            backgroundSize: 'var(--grain-size, 256px) var(--grain-size, 256px)',
           }}
         />
 

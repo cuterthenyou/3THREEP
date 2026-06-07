@@ -74,6 +74,9 @@ export default async function ThemeStyles() {
   const grainLight = isNaN(grainLightRaw) ? '0.08'  : String(Math.min(1, Math.max(0, grainLightRaw)))
   const grainDark  = isNaN(grainDarkRaw)  ? '0.055' : String(Math.min(1, Math.max(0, grainDarkRaw)))
 
+  const grainSizeRaw = parseInt(settings['grain_size'] ?? '256', 10)
+  const grainSize    = isNaN(grainSizeRaw) ? 256 : Math.max(64, Math.min(512, grainSizeRaw))
+
   const radiusScale  = get('border_radius_scale')
   const radiusValue  = RADIUS_MAP[radiusScale] ?? '0px'
 
@@ -118,6 +121,7 @@ export default async function ThemeStyles() {
   --font-involve:  '${fontInvolve}', sans-serif;
   --font-deutsch:  '${fontDeutsch}', sans-serif;
   --grain-opacity: ${grainLight};
+  --grain-size:    ${grainSize}px;
   --radius-base:   ${radiusValue};
   --animation-speed: ${speedValue};
   --cursor-color: ${cursorColorLight ?? 'var(--accent)'};

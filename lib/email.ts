@@ -58,6 +58,15 @@ async function fetchEmailContent(): Promise<EmailAuthContent> {
 
 export async function sendOTP(email: string, code: string) {
   const c = await fetchEmailContent()
+  const siteUrl = process.env.NEXTAUTH_URL || ''
+
+  // Prefer uploaded logo_text_url from DB; fall back to static file
+  let logoSrc = `${siteUrl}/images/logo-text-63.svg`
+  try {
+    const { queryMany } = await import('./db')
+    const logoRows = await queryMany("SELECT value FROM site_settings WHERE key = 'logo_text_url' LIMIT 1")
+    if (logoRows.length && logoRows[0].value) logoSrc = logoRows[0].value
+  } catch {}
 
   const html = `<!DOCTYPE html>
 <html lang="ru">
@@ -72,10 +81,8 @@ export async function sendOTP(email: string, code: string) {
       <table width="520" cellpadding="0" cellspacing="0" style="max-width:520px;width:100%;border:1px solid #1e1e1e;">
         <tr>
           <td style="padding:48px 44px 0;">
-            <!-- Brand header -->
-            <div style="font-size:22px;letter-spacing:0.28em;color:#f29774;font-weight:700;text-transform:uppercase;margin-bottom:36px;font-family:monospace,Courier,Arial,sans-serif;">
-              3THREEP
-            </div>
+            <!-- Brand logo -->
+            <img src="${logoSrc}" alt="3THREEP" width="186" height="23" style="display:block;margin-bottom:36px;height:23px;width:auto;max-width:220px;border:0;" />
 
             <!-- Pre-code label -->
             <div style="font-size:10px;letter-spacing:0.22em;color:#f29774;opacity:0.5;text-transform:uppercase;margin-bottom:20px;font-family:monospace,Courier,Arial,sans-serif;">
