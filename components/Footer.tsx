@@ -89,49 +89,53 @@ export default async function Footer() {
   } catch { /* table may not exist yet */ }
 
   return (
-    <footer className="py-10 sm:py-14 px-6 sm:px-8" id="footer">
-      <div className="max-w-6xl mx-auto">
+    <footer className="py-10 sm:py-14" id="footer">
 
-        <div className="flex flex-col sm:flex-row gap-4 sm:gap-6">
+      <div className="px-6 sm:px-8">
+        <div className="max-w-6xl mx-auto">
+          <div className="flex flex-col sm:flex-row gap-4 sm:gap-6">
 
-          {/* Card 1 — contact us */}
-          <div className={`flex-1 flex flex-col items-center justify-center gap-5 px-8 py-10 rounded-[10px] ${s.card}`}>
-            <h2 className={s.heading}>{content.contact_heading}</h2>
-            <p className={`text-xs text-center ${s.subtitle}`}>
-              {content.contact_subtext}
-            </p>
-            <div className="flex items-center gap-3">
-              <SocialBtn href={content.vk_direct_url} label="VK"><VKIcon /></SocialBtn>
-              <SocialBtn href={content.tg_url} label="Telegram"><TGIcon /></SocialBtn>
+            {/* Card 1 — contact us */}
+            <div className={`flex-1 flex flex-col items-center justify-center gap-5 px-8 py-10 rounded-[10px] ${s.card}`}>
+              <h2 className={s.heading}>{content.contact_heading}</h2>
+              <p className={`text-xs text-center ${s.subtitle}`}>
+                {content.contact_subtext}
+              </p>
+              <div className="flex items-center gap-3">
+                <SocialBtn href={content.vk_direct_url} label="VK"><VKIcon /></SocialBtn>
+                <SocialBtn href={content.tg_url} label="Telegram"><TGIcon /></SocialBtn>
+              </div>
             </div>
-          </div>
 
-          {/* Card 2 — follow us */}
-          <div className={`flex-1 flex flex-col items-center justify-center gap-5 px-8 py-10 rounded-[10px] ${s.card}`}>
-            <h2 className={s.heading}>{content.follow_heading}</h2>
-            <p className={`text-xs text-center ${s.subtitle}`}>
-              {content.follow_subtext}
-            </p>
-            <div className="flex items-center gap-3">
-              <SocialBtn href={content.vk_community_url} label="VK сообщество"><VKIcon /></SocialBtn>
-              <SocialBtn href={content.tiktok_url} label="TikTok"><TikTokIcon /></SocialBtn>
-              <SocialBtn href={content.instagram_url} label="Instagram*"><IGIcon /></SocialBtn>
-              <SocialBtn href={content.tg_community_url} label="Telegram канал"><TGIcon /></SocialBtn>
+            {/* Card 2 — follow us */}
+            <div className={`flex-1 flex flex-col items-center justify-center gap-5 px-8 py-10 rounded-[10px] ${s.card}`}>
+              <h2 className={s.heading}>{content.follow_heading}</h2>
+              <p className={`text-xs text-center ${s.subtitle}`}>
+                {content.follow_subtext}
+              </p>
+              <div className="flex items-center gap-3">
+                <SocialBtn href={content.vk_community_url} label="VK сообщество"><VKIcon /></SocialBtn>
+                <SocialBtn href={content.tiktok_url} label="TikTok"><TikTokIcon /></SocialBtn>
+                <SocialBtn href={content.instagram_url} label="Instagram*"><IGIcon /></SocialBtn>
+                <SocialBtn href={content.tg_community_url} label="Telegram канал"><TGIcon /></SocialBtn>
+              </div>
+              <p className={`text-xs text-center ${s.disclaimer}`}>
+                {content.meta_disclaimer}
+              </p>
             </div>
-            <p className={`text-xs text-center ${s.disclaimer}`}>
-              {content.meta_disclaimer}
-            </p>
+
           </div>
-
         </div>
+      </div>
 
-        {/* Marquee ticker */}
-        <div className="mt-6">
-          <MarqueeTicker texts={tickerTexts} />
-        </div>
+      {/* Marquee ticker — full viewport width */}
+      <div className="mt-6">
+        <MarqueeTicker texts={tickerTexts} />
+      </div>
 
-        {/* Copyright + legal */}
-        <div className="mt-8 flex flex-col items-center gap-2">
+      {/* Copyright + legal */}
+      <div className="px-6 sm:px-8 mt-8">
+        <div className="max-w-6xl mx-auto flex flex-col items-center gap-2">
           <p className={`text-sm text-center ${s.copyright}`}>
             {content.copyright}
           </p>
@@ -139,8 +143,8 @@ export default async function Footer() {
             Политика конфиденциальности
           </Link>
         </div>
-
       </div>
+
     </footer>
   )
 }

@@ -141,7 +141,7 @@ export default function OrderAdminClient({ order, messages: init, adminId }: Pro
               {String(item.product_name)}
               {item.size ? ` / ${item.size}` : ''} × {Number(item.quantity)}
             </span>
-            <span>{formatPrice(Number(item.price) * Number(item.quantity))}</span>
+            <span className={s.itemPrice}>{formatPrice(Number(item.price) * Number(item.quantity))}</span>
           </div>
         ))}
         <div className={s.totalRow}>

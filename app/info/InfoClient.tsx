@@ -38,6 +38,8 @@ export type InfoContent = {
   tiktok_handle: string
   instagram_url: string
   instagram_handle: string
+  tg_community_url: string
+  tg_community_handle: string
   contacts_meta_disclaimer: string
   location_heading: string
   location_text: string
@@ -61,7 +63,7 @@ export const INFO_DEFAULTS: InfoContent = {
   write_heading: 'Написать нам',
   vk_label: 'VK',
   vk_url: 'https://vk.me/3threep_shop',
-  vk_handle: 'vk.me/3threep_shop',
+  vk_handle: '@3threep_shop',
   tg_label: 'TG',
   tg_url: 'http://t.me/arasuka333',
   tg_handle: '@arasuka333',
@@ -69,11 +71,13 @@ export const INFO_DEFAULTS: InfoContent = {
   mail_email: '3threep.work@gmail.com',
   follow_heading: 'Следить за нами',
   vk_community_url: 'https://vk.com/3threep_shop',
-  vk_community_handle: 'vk.com/3threep_shop',
+  vk_community_handle: '@3threep_shop',
   tiktok_url: 'https://www.tiktok.com/@3threep.shop',
   tiktok_handle: '@3threep.shop',
   instagram_url: 'https://www.instagram.com/3threep.shop/',
   instagram_handle: '@3threep.shop',
+  tg_community_url: 'https://t.me/threep_shop',
+  tg_community_handle: '@threep_shop',
   contacts_meta_disclaimer: '* Meta признана экстремистской организацией в РФ',
   location_heading: 'Где мы',
   location_text: 'Пермь, Россия. Made in Russia.',
@@ -178,6 +182,10 @@ export default function InfoClient({ content }: { content: InfoContent }) {
                   <a href={c.instagram_url} target="_blank" rel="noopener noreferrer" className={s.socialRow}>
                     <span className={s.socialIcon}><IconBrandInstagram size={18}/></span>
                     <span className={s.socialHandle}>{c.instagram_handle}</span>
+                  </a>
+                  <a href={c.tg_community_url} target="_blank" rel="noopener noreferrer" className={s.socialRow}>
+                    <span className={s.socialIcon}><IconBrandTelegram size={18}/></span>
+                    <span className={s.socialHandle}>{c.tg_community_handle}</span>
                   </a>
                 </div>
                 <p className={s.disclaimer}>{c.contacts_meta_disclaimer}</p>

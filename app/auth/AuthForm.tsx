@@ -59,10 +59,19 @@ export default function AuthForm() {
   const [consent, setConsent] = useState(false);
   const [newsletter, setNewsletter] = useState(false);
   const [emailTouched, setEmailTouched] = useState(false);
+  const [isExistingUser, setIsExistingUser] = useState<boolean | null>(null);
   const [resendSeconds, setResendSeconds] = useState(0);
   const resendIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const isEmailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
+  useEffect(() => {
+    if (!isEmailValid) { setIsExistingUser(null); return; }
+    fetch(`/api/auth/check-email?email=${encodeURIComponent(email)}`)
+      .then(r => r.json())
+      .then(d => setIsExistingUser(!!d.exists))
+      .catch(() => setIsExistingUser(null));
+  }, [email, isEmailValid]);
 
   useEffect(() => () => {
     if (resendIntervalRef.current) clearInterval(resendIntervalRef.current);
@@ -136,7 +145,7 @@ export default function AuthForm() {
                 placeholder="твой@email.com"
                 value={email}
                 onChange={(e) => { setEmail(e.target.value); setEmailTouched(true); }}
-                onKeyDown={(e) => e.key === 'Enter' && !loading && isEmailValid && consent && requestCode()}
+                onKeyDown={(e) => e.key === 'Enter' && !loading && isEmailValid && (isExistingUser === true || consent) && requestCode()}
                 className={`${s.input} ${emailTouched && email ? (isEmailValid ? s.inputValid : s.inputError) : ''}`}
                 autoFocus
                 disabled={loading}
@@ -145,31 +154,35 @@ export default function AuthForm() {
                 <p className={s.fieldError}>Введите действительный email</p>
               )}
             </div>
-            <label className={s.consent}>
-              <input
-                type="checkbox"
-                checked={consent}
-                onChange={(e) => setConsent(e.target.checked)}
-                className={s.consentCheck}
-              />
-              <span>
-                Я соглашаюсь с{' '}
-                <Link href="/privacy" target="_blank" className={s.consentLink}>
-                  Политикой конфиденциальности
-                </Link>{' '}
-                и обработкой персональных данных
-              </span>
-            </label>
-            <label className={s.consent}>
-              <input
-                type="checkbox"
-                checked={newsletter}
-                onChange={(e) => setNewsletter(e.target.checked)}
-                className={s.consentCheck}
-              />
-              <span>Я хочу получать новости и акции от 3THREEP</span>
-            </label>
-            <button onClick={requestCode} disabled={loading || !isEmailValid || !consent} className={s.btn}>
+            {isExistingUser === false && (
+              <>
+                <label className={s.consent}>
+                  <input
+                    type="checkbox"
+                    checked={consent}
+                    onChange={(e) => setConsent(e.target.checked)}
+                    className={s.consentCheck}
+                  />
+                  <span>
+                    Я соглашаюсь с{' '}
+                    <Link href="/privacy" target="_blank" className={s.consentLink}>
+                      Политикой конфиденциальности
+                    </Link>{' '}
+                    и обработкой персональных данных
+                  </span>
+                </label>
+                <label className={s.consent}>
+                  <input
+                    type="checkbox"
+                    checked={newsletter}
+                    onChange={(e) => setNewsletter(e.target.checked)}
+                    className={s.consentCheck}
+                  />
+                  <span>Я хочу получать новости и акции от 3THREEP</span>
+                </label>
+              </>
+            )}
+            <button onClick={requestCode} disabled={loading || !isEmailValid || (isExistingUser === false && !consent)} className={s.btn}>
               {loading ? 'Отправляем...' : 'Получить код'}
             </button>
           </>

@@ -27,7 +27,7 @@
   font-size: 0.75rem;
   color: var(--color-accent);
   opacity: 0.3;
-  font-family: var(--font-involve);
+  font-family: var(--font-onder);
 }
 
 .card {
@@ -72,7 +72,11 @@
 }
 
 .totalAmount {
-  font-family: var(--font-onder);
+  font-family: var(--font-deutsch);
+}
+
+.itemPrice {
+  font-family: var(--font-deutsch);
 }
 
 .metaRow {
@@ -93,7 +97,7 @@
   letter-spacing: 0.1em;
   color: var(--color-accent);
   opacity: 0.5;
-  font-family: var(--font-onder);
+  font-family: var(--font-involve);
 }
 
 .statusRow {
@@ -143,7 +147,7 @@
   letter-spacing: 0.1em;
   color: var(--color-accent);
   opacity: 0.5;
-  font-family: var(--font-onder);
+  font-family: var(--font-involve);
 }
 
 .chatMessages {

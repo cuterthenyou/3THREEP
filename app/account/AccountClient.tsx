@@ -185,13 +185,6 @@ export default function AccountClient({ user, profile, orders, profileBg, profil
 
       <div className={s.content}>
         <div className={s.inner}>
-          {/* Ticker */}
-          {tickerTexts && tickerTexts.length > 0 && (
-            <div style={{ marginBottom: '0.5rem' }}>
-              <MarqueeTicker texts={tickerTexts} />
-            </div>
-          )}
-
           {/* Top nav */}
           <div className={s.topNav}>
             <Link href="/" className={s.topNavLink}>← На главную</Link>
@@ -204,6 +197,13 @@ export default function AccountClient({ user, profile, orders, profileBg, profil
               </button>
             </div>
           </div>
+
+          {/* Ticker — under nav */}
+          {tickerTexts && tickerTexts.length > 0 && (
+            <div style={{ marginBottom: '0.5rem' }}>
+              <MarqueeTicker texts={tickerTexts} />
+            </div>
+          )}
 
           {/* Profile card */}
           <div className={s.profileCard}>

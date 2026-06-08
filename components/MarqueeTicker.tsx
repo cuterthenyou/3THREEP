@@ -26,7 +26,7 @@ export default function MarqueeTicker({ texts, speed = 35 }: Props) {
         letterSpacing: '0.14em',
         textTransform: 'uppercase',
         color: 'var(--accent)',
-        opacity: 0.4,
+        opacity: 0.7,
         userSelect: 'none',
       }}>
         {doubled}
