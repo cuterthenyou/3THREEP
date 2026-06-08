@@ -636,6 +636,35 @@
   cursor: default;
 }
 
+/* Bat hunt high score card */
+.batScoreCard {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  border-radius: 3px;
+  background: var(--bg-2);
+  border: 1px solid var(--accent);
+  box-shadow: 2px 2px 0 var(--accent);
+}
+
+.batScoreLabel {
+  font-size: 0.6rem;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: var(--accent);
+  font-family: var(--font-involve);
+  opacity: 0.55;
+}
+
+.batScoreNum {
+  font-size: 1.6rem;
+  color: var(--accent);
+  font-family: var(--font-deutsch);
+  line-height: 1;
+  letter-spacing: 0.04em;
+}
+
 /* ── Mobile responsive ── */
 @media (max-width: 639px) {
   .profileCard {

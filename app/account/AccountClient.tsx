@@ -69,6 +69,7 @@ export default function AccountClient({ user, profile, orders, profileBg, profil
   const avatarRef = useRef<HTMLInputElement>(null);
   const nicknameRef = useRef<HTMLInputElement>(null);
   const [isDark, setIsDark] = useState(false);
+  const [batHighScore, setBatHighScore] = useState<number | null>(null);
 
   useEffect(() => {
     setIsDark(document.documentElement.dataset.theme === 'dark');
@@ -77,6 +78,13 @@ export default function AccountClient({ user, profile, orders, profileBg, profil
     );
     obs.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
     return () => obs.disconnect();
+  }, []);
+
+  useEffect(() => {
+    try {
+      const v = localStorage.getItem('threep-bat-hs');
+      if (v !== null) setBatHighScore(parseInt(v, 10));
+    } catch {}
   }, []);
 
   const allItems = orders.flatMap((o) => o.order_items ?? []);
@@ -293,6 +301,14 @@ export default function AccountClient({ user, profile, orders, profileBg, profil
               ))}
             </div>
           </div>
+
+          {/* Bat hunt high score */}
+          {batHighScore !== null && (
+            <div className={s.batScoreCard}>
+              <span className={s.batScoreLabel}>РЕК. ОХОТЫ</span>
+              <span className={s.batScoreNum}>×{batHighScore}</span>
+            </div>
+          )}
 
           {/* Tabs */}
           <div className={s.tabs}>
