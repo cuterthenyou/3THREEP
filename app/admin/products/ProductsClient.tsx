@@ -358,12 +358,31 @@ export default function ProductsClient({ products }: { products: Product[] }) {
               </div>
             </div>
 
-            <div className="flex flex-col gap-1">
-              <label className="text-xs uppercase tracking-widest" style={LABEL_STYLE}>Описание</label>
-              <textarea value={editing.description ?? ''} rows={2}
-                onChange={e => setEditing(ed => ({ ...ed, description: e.target.value }))}
-                className="w-full px-3 py-2 rounded-lg outline-none text-sm resize-none" style={INPUT_STYLE} />
-            </div>
+            {(() => {
+              const NOTE_SEP = '\n---NOTE---\n'
+              const parts = (editing.description ?? '').split(NOTE_SEP)
+              const mainDesc = parts[0]
+              const noteText = parts[1] ?? ''
+              return (
+                <>
+                  <div className="flex flex-col gap-1">
+                    <label className="text-xs uppercase tracking-widest" style={LABEL_STYLE}>Описание</label>
+                    <textarea value={mainDesc} rows={3}
+                      onChange={e => setEditing(ed => ({ ...ed, description: e.target.value + (noteText ? NOTE_SEP + noteText : '') }))}
+                      className="w-full px-3 py-2 rounded-lg outline-none text-sm resize-none" style={INPUT_STYLE} />
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <label className="text-xs uppercase tracking-widest" style={LABEL_STYLE}>
+                      Примечание <span style={{ opacity: 0.45, textTransform: 'none', letterSpacing: '0' }}>— маленький текст под описанием</span>
+                    </label>
+                    <textarea value={noteText} rows={2}
+                      onChange={e => setEditing(ed => ({ ...ed, description: mainDesc + (e.target.value ? NOTE_SEP + e.target.value : '') }))}
+                      className="w-full px-3 py-2 rounded-lg outline-none text-sm resize-none" style={INPUT_STYLE}
+                      placeholder="Необязательно — отображается меньшим шрифтом ниже описания" />
+                  </div>
+                </>
+              )
+            })()}
 
             <div className="grid grid-cols-2 gap-3">
               <div className="flex flex-col gap-1">

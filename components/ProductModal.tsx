@@ -245,7 +245,20 @@ export default function ProductModal({ product, visible, onClose, modalBg, colle
                   <p className={`text-lg sm:text-xl ${s.price}`}>{product.price.toLocaleString('ru-RU')} RUB</p>
                 </div>
 
-                <p className={`text-sm ${s.description}`} style={{ whiteSpace: 'pre-wrap', marginBottom: '0.5rem' }}>{product.description}</p>
+                {(() => {
+                  const NOTE_SEP = '\n---NOTE---\n'
+                  const parts = (product.description ?? '').split(NOTE_SEP)
+                  const mainDesc = parts[0]
+                  const noteText = parts[1] ?? ''
+                  return (
+                    <>
+                      <p className={`text-sm ${s.description}`} style={{ whiteSpace: 'pre-wrap', marginBottom: noteText ? '0.25rem' : '0.5rem' }}>{mainDesc}</p>
+                      {noteText && (
+                        <p style={{ whiteSpace: 'pre-wrap', fontFamily: 'var(--font-involve)', fontSize: '0.68rem', opacity: 0.45, lineHeight: 1.55, marginBottom: '0.5rem' }}>{noteText}</p>
+                      )}
+                    </>
+                  )
+                })()}
               </div>
 
               {/* Bottom section — details, sizes, button */}

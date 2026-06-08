@@ -402,8 +402,6 @@ export default function AccountClient({ user, profile, orders, profileBg, profil
             </div>
           )}
 
-          <Link href="/" className={s.backLink}>← В магазин</Link>
-
           {subscribed && (
             <button
               onClick={handleUnsubscribe}

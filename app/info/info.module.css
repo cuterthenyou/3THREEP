@@ -24,13 +24,26 @@
   letter-spacing: 0.16em;
   text-transform: uppercase;
   text-decoration: none;
-  opacity: 0.35;
   margin-bottom: 3rem;
-  transition: opacity 0.15s;
+  padding: 0.3rem 0.75rem;
+  background: var(--bg-subtle);
+  border: 1px solid var(--accent);
+  border-radius: 2px;
+  box-shadow: 2px 2px 0 var(--accent);
+  opacity: 1;
+  transition: box-shadow 0.15s, transform 0.15s, background 0.15s;
 }
 
 .backLink:hover {
-  opacity: 0.7;
+  background: var(--accent-2);
+  box-shadow: 3px 3px 0 var(--accent);
+  transform: translate(-1px, -1px);
+}
+
+.backLink:active {
+  box-shadow: 1px 1px 0 var(--accent);
+  transform: translate(1px, 1px);
+  transition-duration: 0.06s;
 }
 
 .heading {
