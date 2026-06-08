@@ -144,6 +144,11 @@
   text-overflow: ellipsis;
 }
 
+.productGrade {
+  opacity: 0.55;
+  letter-spacing: 0.08em;
+}
+
 .productName {
   color: var(--text-on-card);
   font-family: var(--font-onder);

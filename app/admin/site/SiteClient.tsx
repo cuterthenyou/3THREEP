@@ -310,13 +310,27 @@ export default function SiteClient({ initialSettings, initialCustomFonts = [] }:
     'КАЖДАЯ ВЕЩЬ — ЭТО ИСТОРИЯ',
     'UNDERGROUND. ЭКСПЕРИМЕНТАЛЬНО. ЖИВО.',
   ]
+  const DEFAULT_TICKER_ACCOUNT = [
+    'ТВОЙ ПРОФИЛЬ — ТВОЯ ИСТОРИЯ',
+    'УРОВЕНЬ РАСТЁТ С КАЖДЫМ ЗАКАЗОМ',
+    'THREEP COMMUNITY MEMBER',
+    'СОБЕРИ ВСЕ КОЛЛЕКЦИИ',
+    'СТАТУС ОБНОВЛЯЕТСЯ',
+  ]
   const [tickerTexts, setTickerTexts] = useState(
     initialSettings['ticker_texts']
       ? (JSON.parse(initialSettings['ticker_texts']) as string[]).join('\n')
       : DEFAULT_TICKER_ADMIN.join('\n')
   )
+  const [tickerTextsAccount, setTickerTextsAccount] = useState(
+    initialSettings['ticker_texts_account']
+      ? (JSON.parse(initialSettings['ticker_texts_account']) as string[]).join('\n')
+      : DEFAULT_TICKER_ACCOUNT.join('\n')
+  )
   const [savingTicker, setSavingTicker] = useState(false)
   const [tickerMsg, setTickerMsg] = useState('')
+  const [savingTickerAccount, setSavingTickerAccount] = useState(false)
+  const [tickerAccountMsg, setTickerAccountMsg] = useState('')
 
   // computed: built-in + custom font names for selectors
   const allFontNames = [...BUILTIN_FONTS, ...customFonts.map(f => f.name)]
@@ -1169,9 +1183,9 @@ export default function SiteClient({ initialSettings, initialCustomFonts = [] }:
       </AdminSection>
 
       {/* ── Бегущая строка ── */}
-      <AdminSection title="Бегущая строка">
+      <AdminSection title="Бегущая строка — Футер">
         <p className="text-xs" style={{ color: 'var(--accent)', opacity: 0.5, fontFamily: 'var(--font-involve)' }}>
-          Тексты для бегущей строки в футере и в личном кабинете. Одна строка — одна фраза.
+          Тексты для бегущей строки в футере. Одна строка — одна фраза.
         </p>
         <textarea
           value={tickerTexts}
@@ -1203,6 +1217,44 @@ export default function SiteClient({ initialSettings, initialCustomFonts = [] }:
             {savingTicker ? 'Сохраняем...' : 'Сохранить строку'}
           </button>
           {tickerMsg && <span style={msgStyle(tickerMsg)}>{tickerMsg}</span>}
+        </div>
+      </AdminSection>
+
+      {/* ── Бегущая строка — Личный кабинет ── */}
+      <AdminSection title="Бегущая строка — Личный кабинет">
+        <p className="text-xs" style={{ color: 'var(--accent)', opacity: 0.5, fontFamily: 'var(--font-involve)' }}>
+          Тексты для бегущей строки в личном кабинете. Одна строка — одна фраза.
+        </p>
+        <textarea
+          value={tickerTextsAccount}
+          onChange={e => setTickerTextsAccount(e.target.value)}
+          rows={6}
+          style={{
+            ...INPUT_STYLE,
+            width: '100%',
+            resize: 'vertical',
+            fontFamily: 'var(--font-involve)',
+            fontSize: '0.82rem',
+            lineHeight: 1.7,
+            padding: '0.6rem 0.75rem',
+          }}
+          placeholder="Одна фраза на строку..."
+        />
+        <div className="flex items-center gap-3 flex-wrap">
+          <button
+            disabled={savingTickerAccount}
+            onClick={async () => {
+              setSavingTickerAccount(true); setTickerAccountMsg('')
+              await saveSetting('ticker_texts_account', JSON.stringify(
+                tickerTextsAccount.split('\n').map(s => s.trim()).filter(Boolean)
+              ))
+              setSavingTickerAccount(false); setTickerAccountMsg('✓ Сохранено')
+            }}
+            className={a.btn}
+          >
+            {savingTickerAccount ? 'Сохраняем...' : 'Сохранить строку'}
+          </button>
+          {tickerAccountMsg && <span style={msgStyle(tickerAccountMsg)}>{tickerAccountMsg}</span>}
         </div>
       </AdminSection>
     </div>

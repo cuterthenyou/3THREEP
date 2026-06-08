@@ -42,38 +42,39 @@ interface SplatData     { id: number; x: number; y: number; variant: number; ang
 interface HitMarkerData { id: number; x: number; y: number }
 type GameState = 'idle' | 'lure' | 'playing' | 'game_over'
 
-const PARTICLE_ANGLES = [0, 45, 90, 135, 180, 225, 270, 315]
-const PARTICLE_DIST   = 38
+const TIMEOUT_PARTICLE_ANGLES = Array.from({ length: 16 }, (_, i) => i * 22.5)
+const TIMEOUT_PARTICLE_DIST   = 58
 
-// ── Timeout explosion (bat escapes) ──────────────────────────────────────────
+// ── Timeout explosion (bat escapes) — brutal shockwave ────────────────────────
 function BatExplosion({ data, onDone }: { data: ExplosionData; onDone: () => void }) {
   const cbRef = useRef(onDone); cbRef.current = onDone
-  useEffect(() => { const t = setTimeout(() => cbRef.current(), 650); return () => clearTimeout(t) }, [])
+  useEffect(() => { const t = setTimeout(() => cbRef.current(), 950); return () => clearTimeout(t) }, [])
   return (
     <div className={s.explosion} style={{ left: data.x, top: data.y }}>
-      <div className={`${s.explosionRing} ${s.explosionRingTimeout}`} />
-      {PARTICLE_ANGLES.map((angle, i) => {
+      <div className={s.explosionFlashTimeout} />
+      <div className={`${s.explosionRing} ${s.explosionRingT1}`} />
+      <div className={`${s.explosionRing} ${s.explosionRingT2}`} />
+      <div className={`${s.explosionRing} ${s.explosionRingT3}`} />
+      {TIMEOUT_PARTICLE_ANGLES.map((angle, i) => {
         const rad = (angle * Math.PI) / 180
         return (
           <div key={i} className={`${s.particle} ${s.particleTimeout}`}
-            style={{ '--dx': `${Math.cos(rad) * PARTICLE_DIST}px`, '--dy': `${Math.sin(rad) * PARTICLE_DIST}px` } as React.CSSProperties} />
+            style={{ '--dx': `${Math.cos(rad) * TIMEOUT_PARTICLE_DIST}px`, '--dy': `${Math.sin(rad) * TIMEOUT_PARTICLE_DIST}px` } as React.CSSProperties} />
         )
       })}
     </div>
   )
 }
 
-// ── COD Warzone hit marker ────────────────────────────────────────────────────
+// ── Hit marker — diagonal X ───────────────────────────────────────────────────
 function HitMarker({ data, onDone }: { data: HitMarkerData; onDone: () => void }) {
   const cbRef = useRef(onDone); cbRef.current = onDone
-  useEffect(() => { const t = setTimeout(() => cbRef.current(), 320); return () => clearTimeout(t) }, [])
+  useEffect(() => { const t = setTimeout(() => cbRef.current(), 280); return () => clearTimeout(t) }, [])
   return (
     <div className={s.hitMarker} style={{ left: data.x, top: data.y }}>
-      <svg className={s.hitMarkerSvg} viewBox="-28 -28 56 56" fill="none">
-        <line x1="-22" y1="-22" x2="-10" y2="-10" stroke="white" strokeWidth="3.5" strokeLinecap="square"/>
-        <line x1="10"  y1="-22" x2="22"  y2="-10" stroke="white" strokeWidth="3.5" strokeLinecap="square"/>
-        <line x1="-22" y1="10"  x2="-10" y2="22"  stroke="white" strokeWidth="3.5" strokeLinecap="square"/>
-        <line x1="10"  y1="10"  x2="22"  y2="22"  stroke="white" strokeWidth="3.5" strokeLinecap="square"/>
+      <svg className={s.hitMarkerSvg} viewBox="-20 -20 40 40" fill="none">
+        <line x1="-13" y1="-13" x2="13" y2="13"  stroke="white" strokeWidth="1.5" strokeLinecap="round"/>
+        <line x1="13"  y1="-13" x2="-13" y2="13" stroke="white" strokeWidth="1.5" strokeLinecap="round"/>
       </svg>
     </div>
   )
@@ -154,7 +155,7 @@ function PixelRoomba({ splats, dir, onSplatHit, onDone }: {
   useEffect(() => {
     const div = divRef.current; if (!div) return
     const W = window.innerWidth, H = window.innerHeight
-    const SIZE = 52, SPEED = 190, RADIUS = 52
+    const SIZE = 52, SPEED = 380, RADIUS = 52
     const wps = buildSnakePath(splats, dir, W, H)
     const pos = { x: dir === 'left' ? -SIZE : W + SIZE, y: wps[0]?.y ?? H * 0.65 }
     div.style.transform = `translate(${pos.x - SIZE / 2}px, ${pos.y - SIZE / 2}px)`

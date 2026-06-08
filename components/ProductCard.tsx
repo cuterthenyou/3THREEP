@@ -188,7 +188,12 @@ const ProductCard = React.memo(function ProductCard({
 
       {/* Info */}
       <div className={s.productInfo}>
-        <p className={s.productType}>{product.product_type || 'T-SHIRT'}</p>
+        <p className={s.productType}>
+          {product.product_type || 'T-SHIRT'}
+          {product.grade && (
+            <span className={s.productGrade}> · GRADE {product.grade.toUpperCase()}</span>
+          )}
+        </p>
         <div className="flex items-end justify-between gap-2">
           <h3 className={s.productName}>{product.name}</h3>
           <span className={s.productPrice}>{formatPrice(product.price)}</span>

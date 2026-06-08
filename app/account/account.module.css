@@ -444,11 +444,13 @@
   border-radius: 3px;
   padding: 2rem;
   text-align: center;
-  background: var(--bg-subtle);
+  background: var(--bg-2);
   border: 1px solid var(--border-soft);
-  color: var(--color-accent);
-  opacity: 0.5;
+  color: var(--accent);
   font-family: var(--font-involve);
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
 /* Bottom nav */
@@ -636,6 +638,34 @@
   cursor: default;
 }
 
+/* ── Ticker — full viewport width breakout ─────────────────── */
+.tickerWrap {
+  width: 100vw;
+  margin-left: calc(50% - 50vw);
+  background: var(--bg-2);
+}
+
+.tickerWrap > div {
+  border-top: none;
+  border-bottom: none;
+  padding: 0.55rem 0;
+}
+
+/* ── Gothic frame decorations ───────────────────────────────── */
+.gothicFrame {
+  display: flex;
+  align-items: center;
+  color: var(--accent);
+  flex-shrink: 0;
+}
+
+.gothicFrameMobile {
+  display: none;
+  align-items: center;
+  color: var(--accent);
+  flex-shrink: 0;
+}
+
 /* Bat hunt high score card */
 .batScoreCard {
   display: flex;
@@ -677,15 +707,25 @@
 
   .avatarCol {
     align-self: center;
-    width: 8rem;
+    width: auto;
     height: 8rem;
+    flex-direction: row;
     align-items: center;
+    gap: 0.35rem;
   }
 
   .avatarBtn {
     min-height: unset;
     width: 8rem;
     height: 8rem;
+  }
+
+  .gothicFrame {
+    display: none;
+  }
+
+  .gothicFrameMobile {
+    display: flex;
   }
 
   .username {

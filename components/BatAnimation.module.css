@@ -127,7 +127,7 @@
   z-index: 150;
 }
 
-/* Expanding ring */
+/* Expanding ring base */
 .explosionRing {
   position: absolute;
   transform: translate(-50%, -50%);
@@ -138,16 +138,31 @@
   animation: explodeRing 0.5s ease-out forwards;
 }
 
-/* Timeout explosion: slightly slower, dimmer */
-.explosionRingTimeout {
-  animation-duration: 0.65s;
-  opacity: 0.55;
-}
-
 @keyframes explodeRing {
   0%   { transform: translate(-50%, -50%) scale(0.3); opacity: 1; }
   100% { transform: translate(-50%, -50%) scale(4.5); opacity: 0; }
 }
+
+/* Brutal timeout shockwave — white flash + 3 rings */
+.explosionFlashTimeout {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: white;
+  animation: flashTimeout 0.22s ease-out forwards;
+}
+
+@keyframes flashTimeout {
+  0%   { transform: translate(-50%, -50%) scale(0.3); opacity: 0.95; }
+  55%  { transform: translate(-50%, -50%) scale(2.2); opacity: 0.55; }
+  100% { transform: translate(-50%, -50%) scale(4);   opacity: 0; }
+}
+
+.explosionRingT1 { animation-duration: 0.6s;  border-color: white; opacity: 0.75; }
+.explosionRingT2 { animation-duration: 0.78s; border-color: var(--accent, #f29774); opacity: 0.45; animation-delay: 0.07s; }
+.explosionRingT3 { animation-duration: 1s;    border-color: white; opacity: 0.2; animation-delay: 0.14s; border-width: 1px; }
 
 /* Particle dot flying outward */
 .particle {
@@ -160,9 +175,11 @@
   animation: flyOut 0.4s ease-out forwards;
 }
 
+/* Timeout: white, fly further, more visible */
 .particleTimeout {
-  animation-duration: 0.55s;
-  opacity: 0.45;
+  animation-duration: 0.65s;
+  opacity: 0.65;
+  background: white;
 }
 
 /* Uses --dx / --dy CSS custom props set inline per particle */
@@ -205,7 +222,7 @@
   will-change: transform;
 }
 
-/* ── COD Warzone hit marker ──────────────────────────────────── */
+/* ── Hit marker — diagonal X ─────────────────────────────────── */
 
 .hitMarker {
   position: fixed;
@@ -217,14 +234,14 @@
 
 .hitMarkerSvg {
   position: absolute;
-  width: 56px;
-  height: 56px;
+  width: 40px;
+  height: 40px;
   transform: translate(-50%, -50%);
-  animation: hitMarkerAnim 0.32s ease-out forwards;
+  animation: hitMarkerAnim 0.28s ease-out forwards;
 }
 
 @keyframes hitMarkerAnim {
-  0%   { transform: translate(-50%, -50%) scale(0.5);  opacity: 1; filter: brightness(6); }
-  28%  { transform: translate(-50%, -50%) scale(1.05); opacity: 1; filter: brightness(2.5); }
-  100% { transform: translate(-50%, -50%) scale(1.9);  opacity: 0; filter: brightness(1); }
+  0%   { transform: translate(-50%, -50%) scale(0.4); opacity: 1; filter: brightness(8); }
+  20%  { transform: translate(-50%, -50%) scale(1.1); opacity: 1; filter: brightness(3); }
+  100% { transform: translate(-50%, -50%) scale(2.2); opacity: 0; filter: brightness(1); }
 }

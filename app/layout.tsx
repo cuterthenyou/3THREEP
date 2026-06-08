@@ -36,12 +36,12 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="ru" className={unbounded.variable}>
+    <html lang="ru" className={unbounded.variable} data-theme="dark">
       {/* Inline theme init — runs before paint to prevent FOUC */}
       <head>
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(){try{var t=localStorage.getItem('threep-theme')||'light';document.documentElement.dataset.theme=t;}catch(e){}})();`,
+            __html: `(function(){try{var t=localStorage.getItem('threep-theme')||'dark';document.documentElement.dataset.theme=t;}catch(e){}})();`,
           }}
         />
         <ThemeStyles />

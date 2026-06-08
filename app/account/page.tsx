@@ -50,6 +50,16 @@ export default async function AccountPage() {
   const tickerRaw = settingsRows.find((r: {key: string; value: string | null}) => r.key === 'ticker_texts')?.value ?? null
   const tickerTexts: string[] = tickerRaw ? JSON.parse(tickerRaw) : TICKER_DEFAULTS
 
+  const ACCOUNT_TICKER_DEFAULTS = [
+    'ТВОЙ ПРОФИЛЬ — ТВОЯ ИСТОРИЯ',
+    'УРОВЕНЬ РАСТЁТ С КАЖДЫМ ЗАКАЗОМ',
+    'THREEP COMMUNITY MEMBER',
+    'СОБЕРИ ВСЕ КОЛЛЕКЦИИ',
+    'СТАТУС ОБНОВЛЯЕТСЯ',
+  ]
+  const accountTickerRaw = settingsRows.find((r: {key: string; value: string | null}) => r.key === 'ticker_texts_account')?.value ?? null
+  const accountTickerTexts: string[] = accountTickerRaw ? JSON.parse(accountTickerRaw) : ACCOUNT_TICKER_DEFAULTS
+
   return (
     <AccountClient
       user={{ id: user.id, email: user.email }}
@@ -59,6 +69,7 @@ export default async function AccountPage() {
       profileBgDark={profileBgDark}
       newsletterSubscribed={userRow?.newsletter_subscription === true}
       tickerTexts={tickerTexts}
+      accountTickerTexts={accountTickerTexts}
     />
   )
 }

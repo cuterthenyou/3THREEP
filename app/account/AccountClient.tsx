@@ -27,6 +27,21 @@ function LvlStar() {
 function LvlCircle() {
   return <svg width="32" height="32" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5"><polygon points="7,0.5 13.5,4 13.5,10 7,13.5 0.5,10 0.5,4"/></svg>
 }
+function GothicStrip() {
+  return (
+    <svg width="14" height="120" viewBox="0 0 14 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <line x1="7" y1="0" x2="7" y2="120" stroke="currentColor" strokeWidth="0.8" opacity="0.35"/>
+      <line x1="2" y1="24" x2="12" y2="24" stroke="currentColor" strokeWidth="0.6" opacity="0.25"/>
+      <polygon points="7,18 10,24 7,30 4,24" fill="currentColor" opacity="0.45"/>
+      <line x1="2" y1="60" x2="12" y2="60" stroke="currentColor" strokeWidth="0.6" opacity="0.25"/>
+      <polygon points="7,54 10,60 7,66 4,60" fill="currentColor" opacity="0.55"/>
+      <line x1="2" y1="96" x2="12" y2="96" stroke="currentColor" strokeWidth="0.6" opacity="0.25"/>
+      <polygon points="7,90 10,96 7,102 4,96" fill="currentColor" opacity="0.45"/>
+      <line x1="5" y1="0" x2="9" y2="0" stroke="currentColor" strokeWidth="1" opacity="0.4"/>
+      <line x1="5" y1="120" x2="9" y2="120" stroke="currentColor" strokeWidth="1" opacity="0.4"/>
+    </svg>
+  )
+}
 import EmojiPicker from '@/components/EmojiPicker';
 import MarqueeTicker from '@/components/MarqueeTicker';
 import s from './account.module.css';
@@ -39,6 +54,7 @@ interface Props {
   profileBgDark?: string | null;
   newsletterSubscribed?: boolean;
   tickerTexts?: string[];
+  accountTickerTexts?: string[];
 }
 
 function getLevel(sparks: number) {
@@ -54,7 +70,7 @@ function getUsername(email: string, name: string | null) {
   return email.split('@')[0].toUpperCase();
 }
 
-export default function AccountClient({ user, profile, orders, profileBg, profileBgDark, newsletterSubscribed, tickerTexts }: Props) {
+export default function AccountClient({ user, profile, orders, profileBg, profileBgDark, newsletterSubscribed, tickerTexts, accountTickerTexts }: Props) {
   const [loggingOut, setLoggingOut] = useState(false);
   const [activeTab, setActiveTab] = useState<'inventory' | 'orders'>('inventory');
   const [showNicknameModal, setShowNicknameModal] = useState(!profile?.name);
@@ -206,10 +222,10 @@ export default function AccountClient({ user, profile, orders, profileBg, profil
             </div>
           </div>
 
-          {/* Ticker — under nav */}
-          {tickerTexts && tickerTexts.length > 0 && (
-            <div style={{ marginBottom: '0.5rem' }}>
-              <MarqueeTicker texts={tickerTexts} />
+          {/* Ticker — under nav, full viewport width */}
+          {(accountTickerTexts ?? tickerTexts ?? []).length > 0 && (
+            <div className={s.tickerWrap}>
+              <MarqueeTicker texts={accountTickerTexts ?? tickerTexts ?? []} />
             </div>
           )}
 
@@ -258,6 +274,9 @@ export default function AccountClient({ user, profile, orders, profileBg, profil
               </div>
             </div>
 
+            {/* Gothic decorative strip — left of avatar, desktop only */}
+            <div className={s.gothicFrame} aria-hidden="true"><GothicStrip /></div>
+
             {/* Avatar — right column, full card height */}
             <div className={s.avatarCol}>
               <input
@@ -267,6 +286,8 @@ export default function AccountClient({ user, profile, orders, profileBg, profil
                 className="hidden"
                 onChange={handleAvatarChange}
               />
+              {/* Gothic strip — mobile left */}
+              <div className={s.gothicFrameMobile} aria-hidden="true"><GothicStrip /></div>
               <button
                 onClick={() => avatarRef.current?.click()}
                 disabled={uploadingAvatar}
@@ -284,6 +305,8 @@ export default function AccountClient({ user, profile, orders, profileBg, profil
                   {uploadingAvatar ? '...' : 'Сменить'}
                 </div>
               </button>
+              {/* Gothic strip — mobile right */}
+              <div className={s.gothicFrameMobile} aria-hidden="true"><GothicStrip /></div>
             </div>
           </div>
 
