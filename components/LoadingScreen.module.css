@@ -61,8 +61,8 @@
 /* Cap SVG wrapper */
 .capSvg {
   display: block;
-  width: 140px;
-  height: 140px;
+  width: 180px;
+  height: 180px;
   overflow: visible;
 }
 
@@ -83,8 +83,8 @@
 /* ── Loading phrase label ─────────────────────────────────────── */
 .sub {
   font-family: var(--font-body, monospace);
-  font-size: 0.52rem;
-  letter-spacing: 0.55em;
+  font-size: 0.72rem;
+  letter-spacing: 0.45em;
   color: var(--accent, #f29774);
   text-transform: lowercase;
   user-select: none;
@@ -101,7 +101,7 @@
 }
 
 .subVisible {
-  opacity: 0.35;
+  opacity: 0.72;
   transition: opacity 0.25s ease-in;
 }
 

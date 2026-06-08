@@ -38,8 +38,17 @@ export default async function AccountPage() {
 
   const profileBg = settingsRows.find((r: {key: string; value: string | null}) => r.key === 'profile_bg_url')?.value ?? null
   const profileBgDark = settingsRows.find((r: {key: string; value: string | null}) => r.key === 'profile_bg_url_dark')?.value ?? null
+  const TICKER_DEFAULTS = [
+    'THREEP — ЭТО СОСТОЯНИЕ ДУШИ',
+    'НОВАЯ ДРОПА УЖЕ БЛИЗКО',
+    'STREETWEAR ДЛЯ ТЕХ КТО ЧУВСТВУЕТ А НЕ ПРОСТО НОСИТ',
+    'СДЕЛАНО ПОД ВЛИЯНИЕМ АТМОСФЕРЫ',
+    'КАЖДАЯ ВЕЩЬ — ЭТО ИСТОРИЯ',
+    'UNDERGROUND. ЭКСПЕРИМЕНТАЛЬНО. ЖИВО.',
+    'ЕСЛИ ВИДИШЬ ЭТО — ТЫ УЖЕ ЧАСТЬ THREEP',
+  ]
   const tickerRaw = settingsRows.find((r: {key: string; value: string | null}) => r.key === 'ticker_texts')?.value ?? null
-  const tickerTexts: string[] | undefined = tickerRaw ? JSON.parse(tickerRaw) : undefined
+  const tickerTexts: string[] = tickerRaw ? JSON.parse(tickerRaw) : TICKER_DEFAULTS
 
   return (
     <AccountClient

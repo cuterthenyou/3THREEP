@@ -175,7 +175,7 @@ export default function CustomCursor() {
           position: 'fixed', top: 0, left: 0,
           width: 20, height: 20,
           pointerEvents: 'none',
-          zIndex: 9999,
+          zIndex: 99999,
           willChange: 'transform',
           transform: 'translate(-100px, -100px)',
         }}
@@ -194,7 +194,7 @@ export default function CustomCursor() {
           background: 'var(--cursor-color)',
           opacity: 0.5,
           pointerEvents: 'none',
-          zIndex: 9998,
+          zIndex: 99998,
           willChange: 'transform',
           transform: 'translate(-100px, -100px)',
           transition: 'width 0.2s ease, height 0.2s ease, background 0.2s ease, border 0.2s ease, opacity 0.2s ease',
