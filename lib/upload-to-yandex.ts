@@ -13,15 +13,9 @@ const FOLDER_MAX_WIDTHS: Record<string, number> = {
 async function optimizeBuffer(buf: Buffer, mimeType: string, folder: string): Promise<Buffer> {
   if (!IMAGE_MIME_TYPES.has(mimeType)) return buf;
   const width = FOLDER_MAX_WIDTHS[folder] ?? 1920;
-  if (mimeType === 'image/png') {
-    return sharp(buf)
-      .resize({ width, withoutEnlargement: true })
-      .png({ compressionLevel: 8 })
-      .toBuffer();
-  }
   return sharp(buf)
     .resize({ width, withoutEnlargement: true })
-    .webp({ quality: 85 })
+    .webp({ quality: 80 })
     .toBuffer();
 }
 
@@ -39,9 +33,6 @@ export async function uploadToYandex(
   if (!IMAGE_MIME_TYPES.has(file.type)) {
     contentType = file.type
     ext = file.name.split('.').pop() ?? 'bin'
-  } else if (file.type === 'image/png') {
-    contentType = 'image/png'
-    ext = 'png'
   } else {
     contentType = 'image/webp'
     ext = 'webp'

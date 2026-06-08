@@ -80,15 +80,13 @@
   flex-shrink: 0;
 }
 
-/* ── "loading..." label ─────────────────────────────────────── */
+/* ── Loading phrase label ─────────────────────────────────────── */
 .sub {
   font-family: var(--font-body, monospace);
   font-size: 0.52rem;
   letter-spacing: 0.55em;
   color: var(--accent, #f29774);
-  opacity: 0.35;
   text-transform: lowercase;
-  animation: blink 1.6s ease-in-out infinite;
   user-select: none;
 }
 
@@ -100,4 +98,14 @@
 @keyframes blink {
   0%, 100% { opacity: 0.25; }
   50%       { opacity: 0.55; }
+}
+
+.subVisible {
+  opacity: 0.35;
+  transition: opacity 0.25s ease-in;
+}
+
+.subHidden {
+  opacity: 0;
+  transition: opacity 0.22s ease-out;
 }

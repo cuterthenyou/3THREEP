@@ -274,6 +274,62 @@
   cursor: default;
 }
 
+/* Chat consent */
+.consentBanner {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1rem;
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  background: var(--bg-subtle);
+}
+
+.consentLabel {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  font-size: 0.8rem;
+  color: var(--accent);
+  font-family: var(--font-involve);
+  cursor: pointer;
+  line-height: 1.5;
+  opacity: 0.75;
+}
+
+.consentLabel input[type='checkbox'] {
+  margin-top: 0.1rem;
+  width: 1rem;
+  height: 1rem;
+  accent-color: var(--accent);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.consentBtn {
+  align-self: flex-start;
+  padding: 0.5rem 1.25rem;
+  font-family: var(--font-onder);
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  background: var(--accent);
+  color: var(--bg);
+  border: none;
+  border-radius: var(--radius-base, 0px);
+  cursor: pointer;
+  transition: filter 0.15s, opacity 0.15s;
+}
+
+.consentBtn:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.consentBtn:not(:disabled):hover {
+  filter: brightness(1.1);
+}
+
 /* Mobile */
 @media (max-width: 639px) {
   .page {

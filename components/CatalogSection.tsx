@@ -146,7 +146,8 @@ export default function CatalogSection({ products, categories, categoryData = {}
               width={480}
               height={112}
               className="theme-img h-16 sm:h-20 lg:h-28 w-auto"
-              unoptimized={logoTop.endsWith('.svg')}
+              unoptimized
+              priority
             />
           </div>
         ) : null
@@ -237,7 +238,7 @@ export default function CatalogSection({ products, categories, categoryData = {}
               height={64}
               className="theme-img w-32 h-auto"
               style={{ height: 'auto' }}
-              unoptimized={logoBottom.endsWith('.svg')}
+              unoptimized
             />
           </div>
         ) : null

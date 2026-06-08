@@ -102,11 +102,9 @@ export default function AuthForm() {
     setError('');
     try {
       const response = await fetch(
-        `/api/auth/callback/email?token=${code}&email=${encodeURIComponent(email)}`,
-        { redirect: 'manual' }
+        `/api/auth/callback/email?token=${code}&email=${encodeURIComponent(email)}`
       );
-      const location = response.headers.get('Location') ?? '';
-      if (response.status !== 302 || location.toLowerCase().includes('error')) {
+      if (response.url.includes('/error') || response.url.includes('error=')) {
         setError('Неверный код. Попробуй ещё раз.');
         setLoading(false);
         return;

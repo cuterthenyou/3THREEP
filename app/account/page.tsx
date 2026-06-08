@@ -38,6 +38,8 @@ export default async function AccountPage() {
 
   const profileBg = settingsRows.find((r: {key: string; value: string | null}) => r.key === 'profile_bg_url')?.value ?? null
   const profileBgDark = settingsRows.find((r: {key: string; value: string | null}) => r.key === 'profile_bg_url_dark')?.value ?? null
+  const tickerRaw = settingsRows.find((r: {key: string; value: string | null}) => r.key === 'ticker_texts')?.value ?? null
+  const tickerTexts: string[] | undefined = tickerRaw ? JSON.parse(tickerRaw) : undefined
 
   return (
     <AccountClient
@@ -47,6 +49,7 @@ export default async function AccountPage() {
       profileBg={profileBg}
       profileBgDark={profileBgDark}
       newsletterSubscribed={userRow?.newsletter_subscription === true}
+      tickerTexts={tickerTexts}
     />
   )
 }

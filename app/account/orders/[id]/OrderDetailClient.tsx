@@ -34,6 +34,17 @@ export default function OrderDetailClient({ order, messages: initialMessages, us
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
+  const hasUserMessages = initialMessages.some(m => !m.is_admin && m.sender_id === userId);
+  const [chatConsented, setChatConsented] = useState(hasUserMessages);
+  const [consentChecked, setConsentChecked] = useState(false);
+
+  useEffect(() => {
+    if (!hasUserMessages) {
+      const stored = localStorage.getItem(`chat-consent-${order.id}`);
+      if (stored === '1') setChatConsented(true);
+    }
+  }, [hasUserMessages, order.id]);
+
   useEffect(() => {
     fetch('/api/emojis').then(r => r.json()).then(setCustomEmojis).catch(() => {});
   }, []);
@@ -199,25 +210,48 @@ export default function OrderDetailClient({ order, messages: initialMessages, us
             <div ref={bottomRef} />
           </div>
 
-          <div className={s.chatInputRow}>
-            <EmojiPicker onSelect={insertEmoji} />
-            <input
-              ref={inputRef}
-              type="text"
-              placeholder="Написать сообщение..."
-              value={text}
-              onChange={(e) => setText(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && sendMessage()}
-              className={s.chatInput}
-            />
-            <button
-              onClick={sendMessage}
-              disabled={sending || !text.trim()}
-              className={s.chatSendBtn}
-            >
-              →
-            </button>
-          </div>
+          {!chatConsented ? (
+            <div className={s.consentBanner}>
+              <label className={s.consentLabel}>
+                <input
+                  type="checkbox"
+                  checked={consentChecked}
+                  onChange={e => setConsentChecked(e.target.checked)}
+                />
+                <span>Я согласен с хранением переписки о заказе</span>
+              </label>
+              <button
+                disabled={!consentChecked}
+                onClick={() => {
+                  localStorage.setItem(`chat-consent-${order.id}`, '1');
+                  setChatConsented(true);
+                }}
+                className={s.consentBtn}
+              >
+                Начать чат
+              </button>
+            </div>
+          ) : (
+            <div className={s.chatInputRow}>
+              <EmojiPicker onSelect={insertEmoji} />
+              <input
+                ref={inputRef}
+                type="text"
+                placeholder="Написать сообщение..."
+                value={text}
+                onChange={(e) => setText(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && sendMessage()}
+                className={s.chatInput}
+              />
+              <button
+                onClick={sendMessage}
+                disabled={sending || !text.trim()}
+                className={s.chatSendBtn}
+              >
+                →
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </main>

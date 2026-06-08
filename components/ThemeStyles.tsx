@@ -98,6 +98,12 @@ export default async function ThemeStyles() {
   const cursorColorLight = cursorColorLightRaw && isHex(cursorColorLightRaw) ? cursorColorLightRaw : null
   const cursorColorDark  = cursorColorDarkRaw  && isHex(cursorColorDarkRaw)  ? cursorColorDarkRaw  : null
 
+  let loadingPhrases: string[] | null = null
+  try {
+    const raw = settings['loading_phrases']
+    if (raw) loadingPhrases = JSON.parse(raw)
+  } catch { /* invalid JSON — ignore */ }
+
   const css = `${fontFaces ? fontFaces + '\n' : ''}
 :root {
   --bg:         ${bgLight};
@@ -146,5 +152,14 @@ export default async function ThemeStyles() {
 }
 `.trim()
 
-  return <style dangerouslySetInnerHTML={{ __html: css }} />
+  return (
+    <>
+      <style dangerouslySetInnerHTML={{ __html: css }} />
+      {loadingPhrases && (
+        <script dangerouslySetInnerHTML={{
+          __html: `window.__THREEP_LOADING_PHRASES__=${JSON.stringify(loadingPhrases)};`
+        }} />
+      )}
+    </>
+  )
 }

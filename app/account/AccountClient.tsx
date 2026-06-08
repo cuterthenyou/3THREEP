@@ -28,6 +28,7 @@ function LvlCircle() {
   return <svg width="32" height="32" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5"><polygon points="7,0.5 13.5,4 13.5,10 7,13.5 0.5,10 0.5,4"/></svg>
 }
 import EmojiPicker from '@/components/EmojiPicker';
+import MarqueeTicker from '@/components/MarqueeTicker';
 import s from './account.module.css';
 
 interface Props {
@@ -37,6 +38,7 @@ interface Props {
   profileBg?: string | null;
   profileBgDark?: string | null;
   newsletterSubscribed?: boolean;
+  tickerTexts?: string[];
 }
 
 function getLevel(sparks: number) {
@@ -52,7 +54,7 @@ function getUsername(email: string, name: string | null) {
   return email.split('@')[0].toUpperCase();
 }
 
-export default function AccountClient({ user, profile, orders, profileBg, profileBgDark, newsletterSubscribed }: Props) {
+export default function AccountClient({ user, profile, orders, profileBg, profileBgDark, newsletterSubscribed, tickerTexts }: Props) {
   const [loggingOut, setLoggingOut] = useState(false);
   const [activeTab, setActiveTab] = useState<'inventory' | 'orders'>('inventory');
   const [showNicknameModal, setShowNicknameModal] = useState(!profile?.name);
@@ -183,6 +185,13 @@ export default function AccountClient({ user, profile, orders, profileBg, profil
 
       <div className={s.content}>
         <div className={s.inner}>
+          {/* Ticker */}
+          {tickerTexts && tickerTexts.length > 0 && (
+            <div style={{ marginBottom: '0.5rem' }}>
+              <MarqueeTicker texts={tickerTexts} />
+            </div>
+          )}
+
           {/* Top nav */}
           <div className={s.topNav}>
             <Link href="/" className={s.topNavLink}>← На главную</Link>

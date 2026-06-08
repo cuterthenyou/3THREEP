@@ -287,6 +287,37 @@ export default function SiteClient({ initialSettings, initialCustomFonts = [] }:
   const [savingGlitter, setSavingGlitter] = useState(false)
   const [glitterMsg, setGlitterMsg] = useState('')
 
+  // ── Loading phrases ─────────────────────────────────────────────
+  const DEFAULT_LOADING_PHRASES_ADMIN = [
+    'загрузка...', 'глажу котят', 'думаю', 'загружаю космическую станцию',
+    'почти готово', 'собираю пазл', 'наношу дропс', 'калибрую вибрации',
+    'настраиваю атмосферу', 'сканирую будущее',
+  ]
+  const [loadingPhrases, setLoadingPhrases] = useState(
+    initialSettings['loading_phrases']
+      ? (JSON.parse(initialSettings['loading_phrases']) as string[]).join('\n')
+      : DEFAULT_LOADING_PHRASES_ADMIN.join('\n')
+  )
+  const [savingPhrases, setSavingPhrases] = useState(false)
+  const [phrasesMsg, setPhrasesMsg] = useState('')
+
+  // ── Ticker texts ────────────────────────────────────────────────
+  const DEFAULT_TICKER_ADMIN = [
+    'THREEP — ЭТО СОСТОЯНИЕ ДУШИ',
+    'НОВАЯ ДРОПА УЖЕ БЛИЗКО',
+    'STREETWEAR ДЛЯ ТЕХ КТО ЧУВСТВУЕТ А НЕ ПРОСТО НОСИТ',
+    'СДЕЛАНО ПОД ВЛИЯНИЕМ АТМОСФЕРЫ',
+    'КАЖДАЯ ВЕЩЬ — ЭТО ИСТОРИЯ',
+    'UNDERGROUND. ЭКСПЕРИМЕНТАЛЬНО. ЖИВО.',
+  ]
+  const [tickerTexts, setTickerTexts] = useState(
+    initialSettings['ticker_texts']
+      ? (JSON.parse(initialSettings['ticker_texts']) as string[]).join('\n')
+      : DEFAULT_TICKER_ADMIN.join('\n')
+  )
+  const [savingTicker, setSavingTicker] = useState(false)
+  const [tickerMsg, setTickerMsg] = useState('')
+
   // computed: built-in + custom font names for selectors
   const allFontNames = [...BUILTIN_FONTS, ...customFonts.map(f => f.name)]
 
@@ -1096,6 +1127,82 @@ export default function SiteClient({ initialSettings, initialCustomFonts = [] }:
             onChange={e => e.target.files?.[0] && uploadProfileBgDark(e.target.files[0])} />
           {profileBgDark && <button onClick={removeProfileBgDark} disabled={savingProfileDark} className={a.btnDanger}>Удалить</button>}
           {profileDarkMsg && <span style={msgStyle(profileDarkMsg)}>{profileDarkMsg}</span>}
+        </div>
+      </AdminSection>
+
+      {/* ── Фразы загрузки ── */}
+      <AdminSection title="Фразы загрузки">
+        <p className="text-xs" style={{ color: 'var(--accent)', opacity: 0.5, fontFamily: 'var(--font-involve)' }}>
+          Фразы крутятся во время загрузки сайта. Одна фраза — одна строка.
+        </p>
+        <textarea
+          value={loadingPhrases}
+          onChange={e => setLoadingPhrases(e.target.value)}
+          rows={10}
+          style={{
+            ...INPUT_STYLE,
+            width: '100%',
+            resize: 'vertical',
+            fontFamily: 'var(--font-involve)',
+            fontSize: '0.82rem',
+            lineHeight: 1.7,
+            padding: '0.6rem 0.75rem',
+          }}
+          placeholder="Одна фраза на строку..."
+        />
+        <div className="flex items-center gap-3 flex-wrap">
+          <button
+            disabled={savingPhrases}
+            onClick={async () => {
+              setSavingPhrases(true); setPhrasesMsg('')
+              await saveSetting('loading_phrases', JSON.stringify(
+                loadingPhrases.split('\n').map(s => s.trim()).filter(Boolean)
+              ))
+              setSavingPhrases(false); setPhrasesMsg('✓ Сохранено')
+            }}
+            className={a.btn}
+          >
+            {savingPhrases ? 'Сохраняем...' : 'Сохранить фразы'}
+          </button>
+          {phrasesMsg && <span style={msgStyle(phrasesMsg)}>{phrasesMsg}</span>}
+        </div>
+      </AdminSection>
+
+      {/* ── Бегущая строка ── */}
+      <AdminSection title="Бегущая строка">
+        <p className="text-xs" style={{ color: 'var(--accent)', opacity: 0.5, fontFamily: 'var(--font-involve)' }}>
+          Тексты для бегущей строки в футере и в личном кабинете. Одна строка — одна фраза.
+        </p>
+        <textarea
+          value={tickerTexts}
+          onChange={e => setTickerTexts(e.target.value)}
+          rows={8}
+          style={{
+            ...INPUT_STYLE,
+            width: '100%',
+            resize: 'vertical',
+            fontFamily: 'var(--font-involve)',
+            fontSize: '0.82rem',
+            lineHeight: 1.7,
+            padding: '0.6rem 0.75rem',
+          }}
+          placeholder="Одна фраза на строку..."
+        />
+        <div className="flex items-center gap-3 flex-wrap">
+          <button
+            disabled={savingTicker}
+            onClick={async () => {
+              setSavingTicker(true); setTickerMsg('')
+              await saveSetting('ticker_texts', JSON.stringify(
+                tickerTexts.split('\n').map(s => s.trim()).filter(Boolean)
+              ))
+              setSavingTicker(false); setTickerMsg('✓ Сохранено')
+            }}
+            className={a.btn}
+          >
+            {savingTicker ? 'Сохраняем...' : 'Сохранить строку'}
+          </button>
+          {tickerMsg && <span style={msgStyle(tickerMsg)}>{tickerMsg}</span>}
         </div>
       </AdminSection>
     </div>

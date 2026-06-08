@@ -1,6 +1,17 @@
 import Link from 'next/link';
 import { queryOne } from '@/lib/db'
+import MarqueeTicker from './MarqueeTicker'
 import s from './Footer.module.css'
+
+const TICKER_DEFAULTS = [
+  'THREEP — ЭТО СОСТОЯНИЕ ДУШИ',
+  'НОВАЯ ДРОПА УЖЕ БЛИЗКО',
+  'STREETWEAR ДЛЯ ТЕХ КТО ЧУВСТВУЕТ А НЕ ПРОСТО НОСИТ',
+  'СДЕЛАНО ПОД ВЛИЯНИЕМ АТМОСФЕРЫ',
+  'КАЖДАЯ ВЕЩЬ — ЭТО ИСТОРИЯ',
+  'UNDERGROUND. ЭКСПЕРИМЕНТАЛЬНО. ЖИВО.',
+  'ЕСЛИ ВИДИШЬ ЭТО — ТЫ УЖЕ ЧАСТЬ THREEP',
+]
 
 export type FooterContent = {
   contact_heading: string
@@ -12,6 +23,7 @@ export type FooterContent = {
   vk_community_url: string
   tiktok_url: string
   instagram_url: string
+  tg_community_url: string
   meta_disclaimer: string
   copyright: string
 }
@@ -26,6 +38,7 @@ export const FOOTER_DEFAULTS: FooterContent = {
   vk_community_url: 'https://vk.com/3threep_shop',
   tiktok_url: 'https://www.tiktok.com/@3threep.shop',
   instagram_url: 'https://www.instagram.com/3threep.shop/',
+  tg_community_url: 'https://t.me/threep_shop',
   meta_disclaimer: '*Meta Platforms признана экстремистской организацией в РФ',
   copyright: '© 2024 THREEP. All rights reserved. Custom streetwear for the bold.',
 }
@@ -65,9 +78,14 @@ function SocialBtn({ href, label, children }: { href: string; label: string; chi
 
 export default async function Footer() {
   let content = FOOTER_DEFAULTS
+  let tickerTexts: string[] = TICKER_DEFAULTS
   try {
-    const row = await queryOne<{ value: string }>(`SELECT value FROM site_settings WHERE key = 'footer_content'`)
-    if (row?.value) content = { ...FOOTER_DEFAULTS, ...JSON.parse(row.value) }
+    const [footerRow, tickerRow] = await Promise.all([
+      queryOne<{ value: string }>(`SELECT value FROM site_settings WHERE key = 'footer_content'`),
+      queryOne<{ value: string }>(`SELECT value FROM site_settings WHERE key = 'ticker_texts'`),
+    ])
+    if (footerRow?.value) content = { ...FOOTER_DEFAULTS, ...JSON.parse(footerRow.value) }
+    if (tickerRow?.value) tickerTexts = JSON.parse(tickerRow.value)
   } catch { /* table may not exist yet */ }
 
   return (
@@ -98,12 +116,18 @@ export default async function Footer() {
               <SocialBtn href={content.vk_community_url} label="VK сообщество"><VKIcon /></SocialBtn>
               <SocialBtn href={content.tiktok_url} label="TikTok"><TikTokIcon /></SocialBtn>
               <SocialBtn href={content.instagram_url} label="Instagram*"><IGIcon /></SocialBtn>
+              <SocialBtn href={content.tg_community_url} label="Telegram канал"><TGIcon /></SocialBtn>
             </div>
             <p className={`text-xs text-center ${s.disclaimer}`}>
               {content.meta_disclaimer}
             </p>
           </div>
 
+        </div>
+
+        {/* Marquee ticker */}
+        <div className="mt-6">
+          <MarqueeTicker texts={tickerTexts} />
         </div>
 
         {/* Copyright + legal */}
