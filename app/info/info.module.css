@@ -50,28 +50,45 @@
 .heading {
   color: var(--accent);
   font-family: var(--font-onder);
-  font-size: clamp(2rem, 8vw, 4rem);
-  letter-spacing: 0.04em;
-  line-height: 0.88;
+  font-size: clamp(2.1rem, 8vw, 4.2rem);
+  letter-spacing: 0.08em;
+  line-height: 1.02;
   margin-bottom: 1.25rem;
   display: block;
+  text-shadow: 0 0 28px color-mix(in srgb, var(--accent) 38%, transparent);
+  animation: infoReveal 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 .divider {
   height: 2px;
-  background: var(--accent);
-  opacity: 0.2;
-  width: 3.5rem;
+  background: linear-gradient(90deg, var(--accent), transparent);
+  opacity: 0.55;
+  width: 4rem;
   margin-bottom: 0.9rem;
+  transform-origin: left center;
+  animation: infoDivider 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.15s both;
 }
 
 .subhead {
   font-family: var(--font-involve);
   font-size: 0.72rem;
   color: var(--accent);
-  opacity: 0.3;
-  letter-spacing: 0.08em;
+  opacity: 0.5;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
+  animation: infoReveal 0.7s ease 0.28s both;
+}
+
+@keyframes infoReveal {
+  from { opacity: 0; transform: translateY(14px); filter: blur(3px); }
+  to   { opacity: 1; transform: translateY(0); filter: blur(0); }
+}
+@keyframes infoDivider {
+  from { transform: scaleX(0); opacity: 0; }
+  to   { transform: scaleX(1); opacity: 0.55; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .heading, .divider, .subhead { animation: none; }
 }
 
 /* Body */

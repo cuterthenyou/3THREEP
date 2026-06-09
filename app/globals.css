@@ -196,6 +196,9 @@ h4,
 h5,
 h6 {
   font-family: var(--font-heading);
+  /* ONDER is a tall display face — give wrapped headings breathing room so
+     two lines never overlap */
+  line-height: 1.18;
 }
 
 h1 { font-size: var(--fs-h1); }
