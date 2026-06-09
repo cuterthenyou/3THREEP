@@ -35,7 +35,11 @@ export async function POST(req: NextRequest) {
       userId = session?.user?.id ?? null
     } catch { /* anonymous */ }
 
-    const safeMeta = meta && typeof meta === 'object' ? meta : {}
+    // Device (desktop/mobile) — для раздельных топов игры. Определяем по UA
+    // на сервере, чтобы клиент не мог подделать. iPad/планшеты → mobile (тач).
+    const ua = req.headers.get('user-agent') || ''
+    const device = /Mobi|Android|iPhone|iPad|iPod|Tablet|Touch/i.test(ua) ? 'mobile' : 'desktop'
+    const safeMeta = { ...(meta && typeof meta === 'object' ? meta : {}), device }
     await ensureEventsTable()
     await query(
       `INSERT INTO events (session_id, user_id, type, meta) VALUES ($1, $2, $3, $4)`,

@@ -85,7 +85,7 @@ export async function GET(req: NextRequest) {
 
   // ── Expanded analytics (events table may not exist on first run → defaults) ──
   const [
-    uaRows, referrerRows, sessionMetrics, funnel, productViews, repeat, batScores, batPlays,
+    uaRows, referrerRows, sessionMetrics, funnel, productViews, repeat, batScoresDesktop, batScoresMobile, batPlays,
   ] = await Promise.all([
     queryMany(`
       SELECT user_agent, COUNT(*) AS c
@@ -140,7 +140,15 @@ export async function GET(req: NextRequest) {
 
     queryMany(`
       SELECT (meta->>'score')::int AS score, created_at
-      FROM events WHERE type='bat_score' AND meta->>'score' ~ '^[0-9]+$' ${pf}
+      FROM events WHERE type='bat_score' AND meta->>'score' ~ '^[0-9]+$'
+        AND COALESCE(meta->>'device', 'desktop') = 'desktop' ${pf}
+      ORDER BY score DESC LIMIT 10
+    `).catch(() => [] as Array<{ score: number; created_at: string }>),
+
+    queryMany(`
+      SELECT (meta->>'score')::int AS score, created_at
+      FROM events WHERE type='bat_score' AND meta->>'score' ~ '^[0-9]+$'
+        AND meta->>'device' = 'mobile' ${pf}
       ORDER BY score DESC LIMIT 10
     `).catch(() => [] as Array<{ score: number; created_at: string }>),
 
@@ -184,7 +192,8 @@ export async function GET(req: NextRequest) {
     funnel,
     productViews,
     repeat,
-    batScores,
+    batScoresDesktop,
+    batScoresMobile,
     batPlays,
   })
 }

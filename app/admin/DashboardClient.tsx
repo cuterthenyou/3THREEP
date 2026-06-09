@@ -28,7 +28,8 @@ interface DashboardData {
   funnel?: { visits: string; product_views: string; cart_adds: string; checkouts: string; orders: string }
   productViews?: { name: string; views: string }[]
   repeat?: { buyers: string; repeat_buyers: string }
-  batScores?: { score: number; created_at: string }[]
+  batScoresDesktop?: { score: number; created_at: string }[]
+  batScoresMobile?: { score: number; created_at: string }[]
   batPlays?: { plays: string; players: string }
 }
 
@@ -299,30 +300,37 @@ export default function DashboardClient() {
         </div>
       )}
 
-      {/* Bat game leaderboard */}
+      {/* Bat game leaderboards — desktop (хардкор) vs mobile */}
       {!loading && data && (
-        <div style={panelStyle}>
-          <p style={panelTitle}>
-            Игра «Охота» — лидеры
-            {data.batPlays && Number(data.batPlays.plays) > 0 && (
-              <span style={{ opacity: 0.6, marginLeft: '0.5rem' }}>
-                · {data.batPlays.plays} игр · {data.batPlays.players} игроков
-              </span>
-            )}
-          </p>
-          {(data.batScores ?? []).length === 0 ? (
-            <p style={{ color: accent, opacity: 0.3, fontFamily: 'var(--font-involve)', fontSize: '0.8rem' }}>Нет данных</p>
-          ) : (
-            (data.batScores ?? []).map((b, i) => (
-              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', padding: '0.4rem 0', borderBottom: i < (data.batScores!.length - 1) ? '1px solid var(--bg-subtle)' : 'none' }}>
-                <span style={{ fontFamily: 'var(--font-involve)', fontSize: '0.7rem', color: accent, opacity: 0.35, minWidth: '1.4rem' }}>#{i + 1}</span>
-                <span style={{ fontFamily: 'var(--font-deutsch)', fontSize: '0.95rem', color: accent, flex: 1 }}>×{b.score}</span>
-                <span style={{ fontFamily: 'var(--font-involve)', fontSize: '0.65rem', color: accent, opacity: 0.4 }}>
-                  {new Date(b.created_at).toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' })}
-                </span>
-              </div>
-            ))
-          )}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {([
+            { title: 'Охота — DESKTOP (хардкор)', rows: data.batScoresDesktop ?? [] },
+            { title: 'Охота — MOBILE', rows: data.batScoresMobile ?? [] },
+          ] as const).map((board) => (
+            <div key={board.title} style={panelStyle}>
+              <p style={panelTitle}>
+                {board.title}
+                {data.batPlays && Number(data.batPlays.plays) > 0 && (
+                  <span style={{ opacity: 0.6, marginLeft: '0.5rem' }}>
+                    · {data.batPlays.plays} игр · {data.batPlays.players} игроков
+                  </span>
+                )}
+              </p>
+              {board.rows.length === 0 ? (
+                <p style={{ color: accent, opacity: 0.3, fontFamily: 'var(--font-involve)', fontSize: '0.8rem' }}>Нет данных</p>
+              ) : (
+                board.rows.map((b, i) => (
+                  <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', padding: '0.4rem 0', borderBottom: i < (board.rows.length - 1) ? '1px solid var(--bg-subtle)' : 'none' }}>
+                    <span style={{ fontFamily: 'var(--font-involve)', fontSize: '0.7rem', color: accent, opacity: 0.35, minWidth: '1.4rem' }}>#{i + 1}</span>
+                    <span style={{ fontFamily: 'var(--font-deutsch)', fontSize: '0.95rem', color: accent, flex: 1 }}>×{b.score}</span>
+                    <span style={{ fontFamily: 'var(--font-involve)', fontSize: '0.65rem', color: accent, opacity: 0.4 }}>
+                      {new Date(b.created_at).toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' })}
+                    </span>
+                  </div>
+                ))
+              )}
+            </div>
+          ))}
         </div>
       )}
     </div>
