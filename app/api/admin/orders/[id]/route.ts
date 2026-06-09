@@ -1,5 +1,6 @@
 import { requireAdmin } from '@/lib/adminAuth'
 import { query } from '@/lib/db'
+import { awardOrderXp, notifyOrderStatus } from '@/lib/gamification'
 import { NextResponse, type NextRequest } from 'next/server'
 
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -13,6 +14,16 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     'UPDATE orders SET status = COALESCE($1, status), tracking_number = COALESCE($2, tracking_number) WHERE id = $3',
     [status ?? null, tracking_number ?? null, id]
   )
+
+  // Геймификация — не должна ломать смену статуса (отдельный try/catch).
+  if (status) {
+    try {
+      await notifyOrderStatus(id, status)
+      await awardOrderXp(id) // идемпотентно; начислит искры только при оплаченном статусе
+    } catch (e) {
+      console.error('[gamification] order status hook failed:', e)
+    }
+  }
 
   return NextResponse.json({ ok: true })
 }

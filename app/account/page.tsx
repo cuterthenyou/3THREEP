@@ -2,6 +2,12 @@ import { redirect } from 'next/navigation'
 import { auth } from '@/lib/auth'
 import AccountClient from './AccountClient'
 import { queryOne, queryMany } from '@/lib/db'
+import { parseLevelingConfig, levelProgress, getDiscount, getTier, sparksForOrder } from '@/lib/leveling'
+import type { Order } from '@/lib/types'
+
+// Искры начисляются только за доставленные заказы (анти-чит) — fallback
+// для пользователей до бэкфилла должен считать по тому же правилу.
+const XP_STATUSES = ['delivered']
 
 export default async function AccountPage() {
   const session = await auth()
@@ -60,6 +66,24 @@ export default async function AccountPage() {
   const accountTickerRaw = settingsRows.find((r: {key: string; value: string | null}) => r.key === 'ticker_texts_account')?.value ?? null
   const accountTickerTexts: string[] = accountTickerRaw ? JSON.parse(accountTickerRaw) : ACCOUNT_TICKER_DEFAULTS
 
+  // ── Геймификация: уровень/искры/скидка ──────────────────────────────
+  const levelingRaw = settingsRows.find((r: {key: string; value: string | null}) => r.key === 'leveling_config')?.value ?? null
+  const cfg = parseLevelingConfig(levelingRaw)
+  // Источник истины — кэш profiles.sparks; для пользователей до бэкфилла
+  // (кэш ещё 0) выводим значение из оплаченных заказов по той же формуле.
+  let sparks = profile?.sparks ?? 0
+  if (!sparks) {
+    sparks = orders
+      .filter((o: Order) => XP_STATUSES.includes(o.status))
+      .reduce((sum: number, o: Order) => {
+        const units = (o.order_items ?? []).reduce((q, i) => q + (i.quantity ?? 0), 0)
+        return sum + sparksForOrder(units, cfg)
+      }, 0)
+  }
+  const progress = levelProgress(sparks, cfg)
+  const discount = getDiscount(progress.level, cfg)
+  const tier = getTier(progress.level)
+
   return (
     <AccountClient
       user={{ id: user.id, email: user.email }}
@@ -70,6 +94,15 @@ export default async function AccountPage() {
       newsletterSubscribed={userRow?.newsletter_subscription === true}
       tickerTexts={tickerTexts}
       accountTickerTexts={accountTickerTexts}
+      gamification={{
+        sparks,
+        level: progress.level,
+        discount,
+        progressPct: progress.pct,
+        toNext: progress.toNext,
+        tierKey: tier.key,
+        tierLabel: tier.label,
+      }}
     />
   )
 }

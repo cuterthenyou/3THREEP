@@ -18,6 +18,7 @@ export interface Product {
   article: string | null
   material: string | null
   cut: string | null
+  coming_soon?: boolean
   created_at: string
 }
 
@@ -81,6 +82,57 @@ export interface Profile {
   name: string | null
   email: string | null
   avatar_url: string | null
+  sparks?: number
+  level?: number
+  discount_percent?: number
+  created_at: string
+}
+
+// ── Gamification ──────────────────────────────────────────────────────
+export interface XpEvent {
+  id: string
+  user_id: string
+  source: 'order' | 'achievement' | 'manual'
+  ref_id: string | null
+  amount: number
+  created_at: string
+}
+
+export type AchievementCondition =
+  | 'profile_created'
+  | 'first_purchase'
+  | 'multi_buy'
+  | 'full_collection'
+  | 'game_score'
+
+export interface Achievement {
+  key: string
+  title: string
+  description: string | null
+  medal_key: string | null
+  condition_type: AchievementCondition
+  threshold: number
+  sort_order: number
+  active: boolean
+}
+
+export interface UserAchievement {
+  user_id: string
+  achievement_key: string
+  unlocked_at: string
+  showcased: boolean
+}
+
+export type NotificationType = 'order_status' | 'chat_message' | 'achievement' | 'level_up'
+
+export interface Notification {
+  id: string
+  user_id: string
+  type: NotificationType
+  title: string
+  body: string | null
+  link: string | null
+  read: boolean
   created_at: string
 }
 

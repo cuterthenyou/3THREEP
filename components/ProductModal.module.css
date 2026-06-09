@@ -103,6 +103,15 @@
   white-space: nowrap;
 }
 
+.priceOld {
+  font-family: var(--font-involve);
+  font-size: 0.7rem;
+  text-decoration: line-through;
+  opacity: 0.5;
+  margin-right: 0.3rem;
+  vertical-align: middle;
+}
+
 .description {
   color: var(--accent);
   font-family: var(--font-involve);

@@ -179,6 +179,24 @@
   white-space: nowrap;
 }
 
+/* Discounted price — struck base above, discounted below */
+.priceWrap {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.productPriceOld {
+  font-family: var(--font-involve);
+  font-size: 0.6rem;
+  text-decoration: line-through;
+  opacity: 0.5;
+  color: var(--text-on-card);
+  white-space: nowrap;
+}
+
 /* Swipe dot indicator animation hint */
 @keyframes swipeHint {
   0%, 100% { transform: translateX(0); }

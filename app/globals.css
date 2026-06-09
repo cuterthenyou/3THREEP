@@ -92,6 +92,13 @@
   --status-paid-soft:  rgba(46, 107, 70, 0.15);
   --status-error-soft: rgba(138, 32, 32, 0.15);
 
+  /* ── Level tiers (metallic accents, theme-agnostic) ── */
+  --tier-bronze:   #d98a4f;
+  --tier-silver:   #c9ccd6;
+  --tier-gold:     #f2c761;
+  --tier-platinum: #9fd0e6;
+  --tier-prestige: #ff8db0;
+
   /* ── Status colors (light/terracotta theme — darker tones readable on red bg) ── */
   --status-new:         #c4501a;
   --status-paid:        #2e6b46;

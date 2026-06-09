@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react'
 import Image from 'next/image'
 import type { Product, Category } from '@/lib/types'
-import { formatPrice } from '@/lib/utils'
+import { formatPrice, applyDiscount } from '@/lib/utils'
 import s from './CatalogSection.module.css'
 
 const TEXTS = ['Посмотреть', 'чекнуть', 'чё, по чём?', 'скок стоит?', 'сколько денег?', 'чё по цене?']
@@ -14,12 +14,14 @@ const ProductCard = React.memo(function ProductCard({
   onOpen,
   categoryData,
   isDark,
+  discount = 0,
 }: {
   product: Product
   index: number
   onOpen: (p: Product) => void
   categoryData: Record<string, Category>
   isDark: boolean
+  discount?: number
 }) {
   const [currentImg, setCurrentImg] = useState(0)
   const [btnText, setBtnText] = useState('Посмотреть')
@@ -199,7 +201,14 @@ const ProductCard = React.memo(function ProductCard({
         </p>
         <div className="flex items-end justify-between gap-2">
           <h3 className={s.productName}>{product.name}</h3>
-          <span className={s.productPrice}>{formatPrice(product.price)}</span>
+          {discount > 0 ? (
+            <span className={s.priceWrap}>
+              <span className={s.productPriceOld}>{formatPrice(product.price)}</span>
+              <span className={s.productPrice}>{formatPrice(applyDiscount(product.price, discount))}</span>
+            </span>
+          ) : (
+            <span className={s.productPrice}>{formatPrice(product.price)}</span>
+          )}
         </div>
       </div>
     </div>

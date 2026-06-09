@@ -65,6 +65,12 @@
   font-family: var(--font-involve);
 }
 
+.badgeRow {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
 .levelBadge {
   font-size: 0.6rem;
   padding: 0.125rem 0.5rem;
@@ -76,6 +82,64 @@
   color: var(--color-accent);
   font-family: var(--font-onder);
   align-self: flex-start;
+}
+
+/* Level tier — colored frame/text by tier band (Steam-like) */
+.tier[data-tier='bronze']   { border-color: var(--tier-bronze);   color: var(--tier-bronze); }
+.tier[data-tier='silver']   { border-color: var(--tier-silver);   color: var(--tier-silver); }
+.tier[data-tier='gold']     { border-color: var(--tier-gold);     color: var(--tier-gold); }
+.tier[data-tier='platinum'] { border-color: var(--tier-platinum); color: var(--tier-platinum); }
+.tier[data-tier='prestige'] { border-color: var(--tier-prestige); color: var(--tier-prestige); }
+
+.discountBadge {
+  font-size: 0.6rem;
+  padding: 0.125rem 0.5rem;
+  border-radius: 2px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  background: var(--accent);
+  color: var(--bg);
+  border: 1px solid var(--accent);
+  font-family: var(--font-onder);
+}
+
+/* Sparks progress bar */
+.sparksBar {
+  position: relative;
+  height: 1.05rem;
+  width: 100%;
+  max-width: 18rem;
+  background: var(--bg-subtle);
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.sparksFill {
+  height: 100%;
+  background: var(--accent);
+  opacity: 0.55;
+  transition: width 0.5s ease;
+}
+
+.sparksBar[data-tier='bronze']   .sparksFill { background: var(--tier-bronze); }
+.sparksBar[data-tier='silver']   .sparksFill { background: var(--tier-silver); }
+.sparksBar[data-tier='gold']     .sparksFill { background: var(--tier-gold); }
+.sparksBar[data-tier='platinum'] .sparksFill { background: var(--tier-platinum); }
+.sparksBar[data-tier='prestige'] .sparksFill { background: var(--tier-prestige); }
+
+.sparksHint {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-onder);
+  font-size: 0.5rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+  white-space: nowrap;
 }
 
 .username {

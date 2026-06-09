@@ -36,9 +36,11 @@ interface Props {
   products: Product[]
   categories: ProductCategory[]
   categoryData?: Record<string, Category>
+  /** Скидка залогиненного пользователя, % (0 — без скидки) */
+  discount?: number
 }
 
-export default function CatalogSection({ products, categories, categoryData = {} }: Props) {
+export default function CatalogSection({ products, categories, categoryData = {}, discount = 0 }: Props) {
   const searchParams = useSearchParams()
   const rawCategory = searchParams.get('category') ?? 'all'
   const rawType = searchParams.get('type') ?? 'all'
@@ -201,7 +203,7 @@ export default function CatalogSection({ products, categories, categoryData = {}
 
         <div className={`grid ${GRID_CLASS[cols]} gap-y-8 gap-x-6 max-w-6xl mx-auto`}>
           {filtered.map((product, idx) => (
-            <ProductCard key={product.id} product={product} index={idx} onOpen={openModal} categoryData={categoryData} isDark={isDark} />
+            <ProductCard key={product.id} product={product} index={idx} onOpen={openModal} categoryData={categoryData} isDark={isDark} discount={discount} />
           ))}
         </div>
       </section>
@@ -244,7 +246,7 @@ export default function CatalogSection({ products, categories, categoryData = {}
         ) : null
       })()}
 
-      <ProductModal product={openProduct} visible={modalVisible} onClose={closeModal} modalBg={modalBg} collectionLogo={modalCollectionLogo} />
+      <ProductModal product={openProduct} visible={modalVisible} onClose={closeModal} modalBg={modalBg} collectionLogo={modalCollectionLogo} discount={discount} />
     </>
   )
 }

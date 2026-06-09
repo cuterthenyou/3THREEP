@@ -5,6 +5,7 @@ import Image from 'next/image'
 import type { Product } from '@/lib/types'
 import { useCart } from '@/lib/cart'
 import { trackEvent } from '@/lib/track'
+import { formatPrice, applyDiscount } from '@/lib/utils'
 import s from './ProductModal.module.css'
 
 interface Props {
@@ -13,6 +14,7 @@ interface Props {
   onClose: () => void
   modalBg?: string | null
   collectionLogo?: string | null
+  discount?: number
 }
 
 function AddToCartButton({ product, size, onClose }: { product: Product; size: string; onClose: () => void }) {
@@ -32,7 +34,7 @@ function AddToCartButton({ product, size, onClose }: { product: Product; size: s
   )
 }
 
-export default function ProductModal({ product, visible, onClose, modalBg, collectionLogo }: Props) {
+export default function ProductModal({ product, visible, onClose, modalBg, collectionLogo, discount = 0 }: Props) {
   const [activeImg, setActiveImg] = useState(0)
   const [selectedSize, setSelectedSize] = useState('S')
   const [touchStart, setTouchStart] = useState<{ x: number; y: number } | null>(null)
@@ -250,7 +252,14 @@ export default function ProductModal({ product, visible, onClose, modalBg, colle
 
                 <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-2">
                   <h2 className={`text-lg sm:text-xl ${s.name}`}>{product.name}</h2>
-                  <p className={`text-lg sm:text-xl ${s.price}`}>{product.price.toLocaleString('ru-RU')} RUB</p>
+                  {discount > 0 ? (
+                    <p className={`text-lg sm:text-xl ${s.price}`}>
+                      <span className={s.priceOld}>{formatPrice(product.price)}</span>
+                      {' '}{formatPrice(applyDiscount(product.price, discount))}
+                    </p>
+                  ) : (
+                    <p className={`text-lg sm:text-xl ${s.price}`}>{formatPrice(product.price)}</p>
+                  )}
                 </div>
 
                 {(() => {

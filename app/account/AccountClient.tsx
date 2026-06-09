@@ -14,6 +14,16 @@ import MarqueeTicker from '@/components/MarqueeTicker';
 import { BrutalSun, BrutalMoon, LvlFire, LvlBolt, LvlStar, LvlCircle, GothicStrip } from './parts/icons';
 import s from './account.module.css';
 
+interface Gamification {
+  sparks: number;
+  level: number;
+  discount: number;
+  progressPct: number;
+  toNext: number;
+  tierKey: string;
+  tierLabel: string;
+}
+
 interface Props {
   user: { id: string; email: string };
   profile: Profile | null;
@@ -23,14 +33,7 @@ interface Props {
   newsletterSubscribed?: boolean;
   tickerTexts?: string[];
   accountTickerTexts?: string[];
-}
-
-function getLevel(sparks: number) {
-  if (sparks === 0) return 1;
-  if (sparks <= 2) return 2;
-  if (sparks <= 5) return 3;
-  if (sparks <= 9) return 4;
-  return 5;
+  gamification: Gamification;
 }
 
 function getUsername(email: string, name: string | null) {
@@ -38,7 +41,7 @@ function getUsername(email: string, name: string | null) {
   return email.split('@')[0].toUpperCase();
 }
 
-export default function AccountClient({ user, profile, orders, profileBg, profileBgDark, newsletterSubscribed, tickerTexts, accountTickerTexts }: Props) {
+export default function AccountClient({ user, profile, orders, profileBg, profileBgDark, newsletterSubscribed, tickerTexts, accountTickerTexts, gamification }: Props) {
   const [loggingOut, setLoggingOut] = useState(false);
   const [activeTab, setActiveTab] = useState<'inventory' | 'orders'>('inventory');
   const [showNicknameModal, setShowNicknameModal] = useState(!profile?.name);
@@ -72,9 +75,8 @@ export default function AccountClient({ user, profile, orders, profileBg, profil
   }, []);
 
   const allItems = orders.flatMap((o) => o.order_items ?? []);
-  const sparks = allItems.reduce((sum, i) => sum + i.quantity, 0);
   const uniqueItems = [...new Map(allItems.map((i) => [i.product_id, i])).values()];
-  const level = getLevel(sparks);
+  const { sparks, level, discount, progressPct, toNext, tierLabel } = gamification;
   const username = getUsername(user.email, displayName);
   const collections = [...new Set(orders.map(() => 'AQUA+'))].length;
 
@@ -200,7 +202,14 @@ export default function AccountClient({ user, profile, orders, profileBg, profil
           {/* Profile card */}
           <div className={`${s.profileCard} hud-corners`}>
             <div className={s.profileInfo}>
-              <span className={s.levelBadge}>LVL {level}</span>
+              <div className={s.badgeRow}>
+                <span className={`${s.levelBadge} ${s.tier}`} data-tier={gamification.tierKey} title={tierLabel}>
+                  LVL {level}
+                </span>
+                {discount > 0 && (
+                  <span className={s.discountBadge} title="Твоя скидка на покупки">−{discount}%</span>
+                )}
+              </div>
               <h2 className={s.username}>{username}</h2>
 
               <div className="flex gap-2">
@@ -239,6 +248,14 @@ export default function AccountClient({ user, profile, orders, profileBg, profil
                     <span>{value}</span>
                   </p>
                 ))}
+              </div>
+
+              {/* Sparks progress bar — до следующего уровня */}
+              <div className={s.sparksBar} data-tier={gamification.tierKey}>
+                <div className={s.sparksFill} style={{ width: `${Math.round(progressPct * 100)}%` }} />
+                <span className={s.sparksHint}>
+                  {toNext > 0 ? `до LVL ${level + 1}: ${toNext} искр` : 'максимум'}
+                </span>
               </div>
             </div>
 

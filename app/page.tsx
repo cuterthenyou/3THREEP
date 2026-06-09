@@ -4,10 +4,11 @@ import Hero from '@/components/Hero';
 import TornEdge from '@/components/TornEdge';
 import CatalogSection from '@/components/CatalogSection';
 import Footer from '@/components/Footer';
-import { queryMany } from '@/lib/db';
+import { queryMany, queryOne } from '@/lib/db';
 import { auth } from '@/lib/auth';
 import { isAdmin } from '@/lib/isAdmin';
 import { staticProducts, staticCategories } from '@/lib/staticData';
+import { getLevel, getDiscount } from '@/lib/leveling';
 import type { ProductCategory, Category } from '@/lib/types';
 
 export const revalidate = 60
@@ -16,6 +17,21 @@ export default async function HomePage() {
   const session = await auth();
   const isAdminUser = isAdmin(session?.user?.email);
   console.log('[HOME] session email:', session?.user?.email ?? 'none', '| isAdminUser:', isAdminUser)
+
+  // Скидка залогиненного пользователя — цены в каталоге показываем со скидкой.
+  // Берём кэш profiles.discount_percent; если он ещё 0 (новый юзер / до бэкфилла) —
+  // считаем от уровня по искрам, чтобы каталог совпадал с личным кабинетом.
+  let userDiscount = 0
+  if (session?.user?.id) {
+    const prof = await queryOne<{ sparks: number; discount_percent: number }>(
+      `SELECT sparks, discount_percent FROM profiles WHERE id = $1`, [session.user.id]
+    ).catch(() => null)
+    if (prof) {
+      userDiscount = prof.discount_percent && prof.discount_percent > 0
+        ? prof.discount_percent
+        : getDiscount(getLevel(prof.sparks ?? 0))
+    }
+  }
 
   let products = staticProducts;
   let categories = staticCategories;
@@ -89,7 +105,7 @@ export default async function HomePage() {
       <Hero videoUrl={heroVideoUrl} mp4Url={heroVideoMp4Url} posterUrl={heroPosterUrl} />
       <TornEdge />
       <Suspense fallback={<div id="catalog" />}>
-        <CatalogSection products={products} categories={categories} categoryData={categoryData} />
+        <CatalogSection products={products} categories={categories} categoryData={categoryData} discount={userDiscount} />
       </Suspense>
       <Footer />
     </main>
