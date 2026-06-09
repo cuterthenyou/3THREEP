@@ -38,9 +38,12 @@ interface Props {
   categoryData?: Record<string, Category>
   /** Скидка залогиненного пользователя, % (0 — без скидки) */
   discount?: number
+  /** id товаров, уже купленных пользователем (для маркера «В ИНВЕНТАРЕ») */
+  ownedIds?: string[]
 }
 
-export default function CatalogSection({ products, categories, categoryData = {}, discount = 0 }: Props) {
+export default function CatalogSection({ products, categories, categoryData = {}, discount = 0, ownedIds = [] }: Props) {
+  const ownedSet = React.useMemo(() => new Set(ownedIds), [ownedIds])
   const searchParams = useSearchParams()
   const rawCategory = searchParams.get('category') ?? 'all'
   const rawType = searchParams.get('type') ?? 'all'
@@ -203,7 +206,7 @@ export default function CatalogSection({ products, categories, categoryData = {}
 
         <div className={`grid ${GRID_CLASS[cols]} gap-y-8 gap-x-6 max-w-6xl mx-auto`}>
           {filtered.map((product, idx) => (
-            <ProductCard key={product.id} product={product} index={idx} onOpen={openModal} categoryData={categoryData} isDark={isDark} discount={discount} />
+            <ProductCard key={product.id} product={product} index={idx} onOpen={openModal} categoryData={categoryData} isDark={isDark} discount={discount} owned={ownedSet.has(product.id)} />
           ))}
         </div>
       </section>

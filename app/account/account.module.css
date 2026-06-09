@@ -423,6 +423,126 @@
   font-size: 1.2rem;
 }
 
+/* ── Collection / type selector chips ── */
+.chipRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.chip,
+.chipActive {
+  font-family: var(--font-onder);
+  font-size: 0.6rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 0.28rem 0.65rem;
+  border-radius: 2px;
+  border: 1px solid var(--accent);
+  box-shadow: 2px 2px 0 var(--accent);
+  cursor: pointer;
+  transition: box-shadow 0.12s, transform 0.1s, background 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.chip {
+  background: transparent;
+  color: var(--color-accent);
+  opacity: 0.7;
+}
+
+.chipActive {
+  background: var(--accent);
+  color: var(--bg);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .chip:hover,
+  .chipActive:hover {
+    box-shadow: 3px 3px 0 var(--accent);
+    transform: translate(-1px, -1px);
+  }
+}
+
+/* ── Inventory product tiles (collection-driven) ── */
+.invItemOwned,
+.invItemLocked {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  border-radius: 3px;
+  overflow: hidden;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-subtle);
+  transition: transform 0.15s, filter 0.2s;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.invItemOwned {
+  border: 2px solid var(--accent);
+}
+
+.invItemLocked {
+  border: 2px solid var(--border-soft);
+  filter: grayscale(1) brightness(0.62);
+  opacity: 0.85;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .invItemOwned:hover { transform: scale(1.05); }
+  .invItemLocked:hover { filter: grayscale(0.4) brightness(0.85); opacity: 1; }
+}
+
+.invItemName {
+  font-family: var(--font-onder);
+  font-size: 0.55rem;
+  text-align: center;
+  color: var(--color-accent);
+  padding: 0.25rem;
+}
+
+.invOwnedTag {
+  position: absolute;
+  top: 3px;
+  right: 4px;
+  font-size: 0.7rem;
+  line-height: 1;
+  color: var(--bg);
+  background: var(--accent);
+  border-radius: 2px;
+  padding: 1px 3px;
+}
+
+/* ── Collection summary badges ── */
+.collBadge,
+.collBadgeDone {
+  min-width: 2rem;
+  height: 2rem;
+  padding: 0 0.4rem;
+  border-radius: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-heading);
+  font-size: 0.55rem;
+  letter-spacing: 0.05em;
+}
+
+.collBadge {
+  background: var(--bg-subtle);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+}
+
+.collBadgeDone {
+  background: var(--accent-2);
+  border: 1px solid var(--accent);
+  color: var(--accent);
+}
+
 .ctaBtn {
   display: block;
   width: 100%;

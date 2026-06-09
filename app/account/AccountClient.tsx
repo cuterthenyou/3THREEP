@@ -1,8 +1,8 @@
 'use client';
 
 import { signOut } from 'next-auth/react';
-import { useState, useRef, useEffect } from 'react';
-import type { Order, Profile, OrderStatus } from '@/lib/types';
+import { useState, useRef, useEffect, useMemo } from 'react';
+import type { Order, Profile, OrderStatus, Product, Category } from '@/lib/types';
 import { ORDER_STATUS_LABELS, STATUS_COLORS } from '@/lib/types';
 import { formatPrice } from '@/lib/utils';
 import Link from 'next/link';
@@ -10,6 +10,7 @@ import Image from 'next/image';
 import { toggleTheme } from '@/lib/theme';
 
 import EmojiPicker from '@/components/EmojiPicker';
+import ProductModal from '@/components/ProductModal';
 import MarqueeTicker from '@/components/MarqueeTicker';
 import { BrutalSun, BrutalMoon, LvlFire, LvlBolt, LvlStar, LvlCircle, GothicStrip } from './parts/icons';
 import s from './account.module.css';
@@ -34,6 +35,8 @@ interface Props {
   tickerTexts?: string[];
   accountTickerTexts?: string[];
   gamification: Gamification;
+  catalogProducts?: Product[];
+  catalogCategories?: Category[];
 }
 
 function getUsername(email: string, name: string | null) {
@@ -41,7 +44,7 @@ function getUsername(email: string, name: string | null) {
   return email.split('@')[0].toUpperCase();
 }
 
-export default function AccountClient({ user, profile, orders, profileBg, profileBgDark, newsletterSubscribed, tickerTexts, accountTickerTexts, gamification }: Props) {
+export default function AccountClient({ user, profile, orders, profileBg, profileBgDark, newsletterSubscribed, tickerTexts, accountTickerTexts, gamification, catalogProducts = [], catalogCategories = [] }: Props) {
   const [loggingOut, setLoggingOut] = useState(false);
   const [activeTab, setActiveTab] = useState<'inventory' | 'orders'>('inventory');
   const [showNicknameModal, setShowNicknameModal] = useState(!profile?.name);
@@ -78,10 +81,62 @@ export default function AccountClient({ user, profile, orders, profileBg, profil
   const uniqueItems = [...new Map(allItems.map((i) => [i.product_id, i])).values()];
   const { sparks, level, discount, progressPct, toNext, tierLabel } = gamification;
   const username = getUsername(user.email, displayName);
-  const collections = [...new Set(orders.map(() => 'AQUA+'))].length;
 
-  const TOTAL_SLOTS = 6;
-  const inventorySlots = Array.from({ length: TOTAL_SLOTS }, (_, i) => uniqueItems[i] ?? null);
+  // ── Коллекции из БД ───────────────────────────────────────────────────
+  const ownedIds = useMemo(
+    () => new Set(allItems.map((i) => i.product_id).filter(Boolean) as string[]),
+    [allItems]
+  );
+
+  // Категории, у которых есть товары (= коллекции бренда)
+  const collectionsList = useMemo(() => {
+    const withProducts = new Set(catalogProducts.map((p) => p.category));
+    return catalogCategories.filter((c) => withProducts.has(c.slug));
+  }, [catalogCategories, catalogProducts]);
+
+  const [invCategory, setInvCategory] = useState<string>('');
+  const [invType, setInvType] = useState<string>('all');
+  const [modalProduct, setModalProduct] = useState<Product | null>(null);
+  const [modalVisible, setModalVisible] = useState(false);
+
+  // Дефолтная выбранная коллекция — первая доступная
+  useEffect(() => {
+    if (!invCategory && collectionsList.length) setInvCategory(collectionsList[0].slug);
+  }, [collectionsList, invCategory]);
+
+  const activeCategory = invCategory || collectionsList[0]?.slug || '';
+  const categoryProducts = useMemo(
+    () => catalogProducts.filter((p) => p.category === activeCategory),
+    [catalogProducts, activeCategory]
+  );
+  const invTypes = useMemo(
+    () => [...new Set(categoryProducts.map((p) => p.product_type).filter(Boolean))] as string[],
+    [categoryProducts]
+  );
+  const invItems = useMemo(
+    () => (invType === 'all' ? categoryProducts : categoryProducts.filter((p) => p.product_type === invType)),
+    [categoryProducts, invType]
+  );
+
+  // «Собранные коллекции»: куплены все нескрытые товары категории
+  const collectedCount = useMemo(() => {
+    return collectionsList.filter((c) => {
+      const items = catalogProducts.filter((p) => p.category === c.slug && !p.coming_soon);
+      return items.length > 0 && items.every((p) => ownedIds.has(p.id));
+    }).length;
+  }, [collectionsList, catalogProducts, ownedIds]);
+
+  const activeCat = catalogCategories.find((c) => c.slug === activeCategory);
+  const modalBg = (isDark ? activeCat?.modal_bg_url_dark : activeCat?.modal_bg_url) ?? null;
+
+  function openProductModal(p: Product) {
+    setModalProduct(p);
+    setModalVisible(true);
+  }
+  function closeProductModal() {
+    setModalVisible(false);
+    setTimeout(() => setModalProduct(null), 250);
+  }
 
   async function handleSaveNickname() {
     const trimmed = nicknameInput.trim();
@@ -297,16 +352,21 @@ export default function AccountClient({ user, profile, orders, profileBg, profil
 
           {/* Collections */}
           <div className={`${s.collectionsCard} hud-corners`}>
-            <p className={s.collectionsLabel}>Собранные коллекции: {collections}</p>
-            <div className="flex gap-2 items-center">
-              {orders.length > 0 && (
-                <div style={{ width: 32, height: 32, border: '2px solid var(--accent-2)', borderRadius: '2px', background: 'var(--accent-2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.55rem', fontFamily: 'var(--font-heading)', color: 'var(--accent)', letterSpacing: '0.05em' }}>
-                  3P
-                </div>
-              )}
-              {[...Array(7)].map((_, i) => (
-                <div key={i} className={s.collectionSlot}>★</div>
-              ))}
+            <p className={s.collectionsLabel}>
+              Собранные коллекции: {collectedCount} / {collectionsList.length}
+            </p>
+            <div className="flex gap-2 items-center flex-wrap">
+              {collectionsList.length === 0 &&
+                [...Array(3)].map((_, i) => <div key={i} className={s.collectionSlot}>★</div>)}
+              {collectionsList.map((c) => {
+                const items = catalogProducts.filter((p) => p.category === c.slug && !p.coming_soon);
+                const done = items.length > 0 && items.every((p) => ownedIds.has(p.id));
+                return (
+                  <div key={c.slug} className={done ? s.collBadgeDone : s.collBadge} title={c.name}>
+                    {c.name.slice(0, 3).toUpperCase()}
+                  </div>
+                );
+              })}
             </div>
           </div>
 
@@ -339,48 +399,64 @@ export default function AccountClient({ user, profile, orders, profileBg, profil
                   <p className={s.collectionsLabel}>Инвентарь</p>
                   <p className={s.inventoryTitle}>ШМОТ</p>
                 </div>
-                {sparks < 3 && (
-                  <p className={s.inventoryHint}>
-                    «До открытия секретки осталось {3 - sparks} искорки»
-                  </p>
-                )}
               </div>
+
+              {/* Выбор коллекции */}
+              {collectionsList.length > 1 && (
+                <div className={s.chipRow}>
+                  {collectionsList.map((c) => (
+                    <button
+                      key={c.slug}
+                      onClick={() => { setInvCategory(c.slug); setInvType('all'); }}
+                      className={c.slug === activeCategory ? s.chipActive : s.chip}
+                    >
+                      {c.name}
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              {/* Выбор типа вещи */}
+              {invTypes.length > 0 && (
+                <div className={s.chipRow}>
+                  <button onClick={() => setInvType('all')} className={invType === 'all' ? s.chipActive : s.chip}>Все</button>
+                  {invTypes.map((t) => (
+                    <button key={t} onClick={() => setInvType(t)} className={invType === t ? s.chipActive : s.chip}>{t}</button>
+                  ))}
+                </div>
+              )}
 
               <div className={s.inventoryGrid}>
-                {inventorySlots.map((item, i) =>
-                  item ? (
-                    <Link
-                      key={i}
-                      href={`/account/orders/${orders.find((o) => o.order_items?.some((oi) => oi.id === item.id))?.id ?? ''}`}
-                      className={s.inventorySlot}
-                    >
-                      {item.product_image ? (
-                        <Image
-                          src={item.product_image}
-                          alt={item.product_name}
-                          fill
-                          className="object-cover"
-                          sizes="80px"
-                        />
-                      ) : (
-                        <div
-                          className="w-full h-full flex items-center justify-center"
-                          style={{ background: 'var(--bg-subtle)' }}
-                        >
-                          <span style={{ color: 'var(--accent)', fontFamily: "var(--font-onder)", fontSize: '0.55rem' }}>
-                            {item.product_name}
-                          </span>
-                        </div>
-                      )}
-                    </Link>
-                  ) : (
-                    <div key={i} className={s.inventorySlotEmpty}>?</div>
-                  )
+                {invItems.length === 0 ? (
+                  <div className={s.inventorySlotEmpty}>?</div>
+                ) : (
+                  invItems.map((p) => {
+                    const owned = ownedIds.has(p.id);
+                    if (p.coming_soon && !owned) {
+                      return <div key={p.id} className={s.inventorySlotEmpty} title="Скоро">?</div>;
+                    }
+                    return (
+                      <button
+                        key={p.id}
+                        type="button"
+                        onClick={() => openProductModal(p)}
+                        className={owned ? s.invItemOwned : s.invItemLocked}
+                        title={owned ? p.name : `${p.name} — ещё не в инвентаре`}
+                      >
+                        {p.images?.[0] ? (
+                          <Image src={p.images[0]} alt={p.name} fill className="object-cover" sizes="80px" />
+                        ) : (
+                          <span className={s.invItemName}>{p.name}</span>
+                        )}
+                        {owned && <span className={s.invOwnedTag} aria-label="В инвентаре">✓</span>}
+                      </button>
+                    );
+                  })
                 )}
               </div>
 
-              <Link href="/#catalog" className={s.ctaBtn}>
-                {sparks === 0 ? 'Собери коллекцию' : 'Добить коллекцию'}
+              <Link href={`/?category=${activeCategory}#catalog`} className={s.ctaBtn}>
+                {categoryProducts.some((p) => ownedIds.has(p.id)) ? 'Добить коллекцию' : 'Собери коллекцию'}
               </Link>
             </div>
           )}
@@ -445,6 +521,16 @@ export default function AccountClient({ user, profile, orders, profileBg, profil
           )}
         </div>
       </div>
+
+      {/* Product modal — покупка прямо из ЛК (переиспользуем каталожную модалку) */}
+      <ProductModal
+        product={modalProduct}
+        visible={modalVisible}
+        onClose={closeProductModal}
+        modalBg={modalBg}
+        collectionLogo={activeCat?.logo_top_url ?? null}
+        discount={discount}
+      />
     </div>
   );
 }

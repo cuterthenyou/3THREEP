@@ -22,15 +22,24 @@ export default async function HomePage() {
   // Берём кэш profiles.discount_percent; если он ещё 0 (новый юзер / до бэкфилла) —
   // считаем от уровня по искрам, чтобы каталог совпадал с личным кабинетом.
   let userDiscount = 0
+  let ownedIds: string[] = []
   if (session?.user?.id) {
-    const prof = await queryOne<{ sparks: number; discount_percent: number }>(
-      `SELECT sparks, discount_percent FROM profiles WHERE id = $1`, [session.user.id]
-    ).catch(() => null)
+    const [prof, ownedRows] = await Promise.all([
+      queryOne<{ sparks: number; discount_percent: number }>(
+        `SELECT sparks, discount_percent FROM profiles WHERE id = $1`, [session.user.id]
+      ).catch(() => null),
+      queryMany<{ product_id: string }>(
+        `SELECT DISTINCT oi.product_id FROM order_items oi
+         JOIN orders o ON o.id = oi.order_id
+         WHERE o.user_id = $1 AND oi.product_id IS NOT NULL`, [session.user.id]
+      ).catch(() => [] as { product_id: string }[]),
+    ])
     if (prof) {
       userDiscount = prof.discount_percent && prof.discount_percent > 0
         ? prof.discount_percent
         : getDiscount(getLevel(prof.sparks ?? 0))
     }
+    ownedIds = ownedRows.map((r) => r.product_id)
   }
 
   let products = staticProducts;
@@ -105,7 +114,7 @@ export default async function HomePage() {
       <Hero videoUrl={heroVideoUrl} mp4Url={heroVideoMp4Url} posterUrl={heroPosterUrl} />
       <TornEdge />
       <Suspense fallback={<div id="catalog" />}>
-        <CatalogSection products={products} categories={categories} categoryData={categoryData} discount={userDiscount} />
+        <CatalogSection products={products} categories={categories} categoryData={categoryData} discount={userDiscount} ownedIds={ownedIds} />
       </Suspense>
       <Footer />
     </main>

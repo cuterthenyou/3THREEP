@@ -15,6 +15,7 @@ const ProductCard = React.memo(function ProductCard({
   categoryData,
   isDark,
   discount = 0,
+  owned = false,
 }: {
   product: Product
   index: number
@@ -22,6 +23,7 @@ const ProductCard = React.memo(function ProductCard({
   categoryData: Record<string, Category>
   isDark: boolean
   discount?: number
+  owned?: boolean
 }) {
   const [currentImg, setCurrentImg] = useState(0)
   const [btnText, setBtnText] = useState('Посмотреть')
@@ -104,7 +106,7 @@ const ProductCard = React.memo(function ProductCard({
 
   return (
     <div
-      className={`flex flex-col w-full ${s.productCard}`}
+      className={`flex flex-col w-full ${s.productCard} ${owned ? s.productCardOwned : ''}`}
       style={bgUrl
         ? { backgroundImage: `url(${bgUrl})`, backgroundSize: 'cover', backgroundPosition: 'center' }
         : { background: 'var(--bg-card)' }
@@ -114,6 +116,9 @@ const ProductCard = React.memo(function ProductCard({
     >
       {/* Dark theme texture overlay */}
       <div className={s.themeOverlay} />
+
+      {/* Уже в инвентаре пользователя */}
+      {owned && <span className={s.ownedRibbon}>✓ В ИНВЕНТАРЕ</span>}
 
       {/* Image carousel */}
       <div

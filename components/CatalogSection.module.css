@@ -61,6 +61,33 @@
   -webkit-tap-highlight-color: transparent;
 }
 
+/* Owned — товар уже в инвентаре пользователя: приглушаем, чтобы взгляд шёл
+   на непокупленные (более яркие) карточки */
+.productCardOwned {
+  opacity: 0.62;
+  filter: saturate(0.8);
+}
+
+.productCardOwned:hover {
+  opacity: 0.85;
+}
+
+.ownedRibbon {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 4;
+  font-family: var(--font-onder);
+  font-size: 0.5rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--bg);
+  background: var(--accent);
+  border-radius: 2px;
+  padding: 0.15rem 0.4rem;
+  pointer-events: none;
+}
+
 /* Dark theme overlay over card texture */
 .themeOverlay {
   position: absolute;

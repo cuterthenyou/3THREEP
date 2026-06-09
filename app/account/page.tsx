@@ -23,7 +23,7 @@ export default async function AccountPage() {
     email: session.user.email ?? '',
   }
 
-  const [profile, orders, settingsRows, userRow] = await Promise.all([
+  const [profile, orders, settingsRows, userRow, catalogProductsRaw, catalogCategoriesRaw] = await Promise.all([
     queryOne(`SELECT * FROM profiles WHERE id = $1`, [user.id]),
     queryMany(
       `SELECT o.*,
@@ -40,7 +40,16 @@ export default async function AccountPage() {
     ),
     queryMany(`SELECT key, value FROM site_settings`).catch(() => [] as Array<{key: string; value: string | null}>),
     queryOne(`SELECT newsletter_subscription FROM users WHERE id = $1`, [user.id]).catch(() => null),
+    queryMany(`SELECT * FROM products WHERE active = true OR coming_soon = true ORDER BY created_at`).catch(() => [] as any[]),
+    queryMany(`SELECT * FROM categories`).catch(() => [] as any[]),
   ])
+
+  // Коллекции = активные категории, у которых есть товары
+  const inactiveCatSlugs = new Set(
+    catalogCategoriesRaw.filter((c: { active?: boolean }) => c.active === false).map((c: { slug: string }) => c.slug)
+  )
+  const catalogProducts = catalogProductsRaw.filter((p: { category: string }) => !inactiveCatSlugs.has(p.category))
+  const catalogCategories = catalogCategoriesRaw.filter((c: { active?: boolean }) => c.active !== false)
 
   const profileBg = settingsRows.find((r: {key: string; value: string | null}) => r.key === 'profile_bg_url')?.value ?? null
   const profileBgDark = settingsRows.find((r: {key: string; value: string | null}) => r.key === 'profile_bg_url_dark')?.value ?? null
@@ -103,6 +112,8 @@ export default async function AccountPage() {
         tierKey: tier.key,
         tierLabel: tier.label,
       }}
+      catalogProducts={catalogProducts}
+      catalogCategories={catalogCategories}
     />
   )
 }
