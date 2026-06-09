@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from 'react'
 import a from '../admin.module.css'
 import { AdminSection, AdminPageTitle } from '../components'
 import { CHECKBOARD_LIGHT, CHECKBOARD_DARK, INPUT_STYLE } from '../adminStyles'
+import { ColorPicker, FontSelect, GlitterPreview } from './parts'
 import type { CustomFont } from '@/components/ThemeStyles'
 
 interface Props {
@@ -27,181 +28,6 @@ const SPEED_OPTIONS = [
   { value: 'fast',   label: 'Быстро' },
 ] as const
 
-// ── Color picker sub-component ──────────────────────────────────
-function ColorPicker({
-  label,
-  value,
-  cssVar,
-  onChange,
-}: {
-  label: string
-  value: string
-  cssVar?: string
-  onChange: (v: string) => void
-}) {
-  const [hex, setHex] = useState(value)
-
-  function handleHexInput(v: string) {
-    setHex(v)
-    if (/^#[0-9a-fA-F]{6}$/.test(v)) {
-      onChange(v)
-      if (cssVar) document.documentElement.style.setProperty(cssVar, v)
-    }
-  }
-
-  function handleColorPicker(v: string) {
-    setHex(v)
-    onChange(v)
-    if (cssVar) document.documentElement.style.setProperty(cssVar, v)
-  }
-
-  return (
-    <div className="flex flex-col gap-1.5">
-      <span className="text-xs uppercase tracking-widest" style={{ color: 'var(--accent)', opacity: 0.5, fontFamily: 'var(--font-involve)' }}>
-        {label}
-      </span>
-      <div className="flex items-center gap-2">
-        <input
-          type="color"
-          value={hex.length === 7 ? hex : '#000000'}
-          onChange={e => handleColorPicker(e.target.value)}
-          style={{
-            width: 38, height: 38, padding: 3,
-            background: 'var(--bg-2)',
-            border: '1px solid var(--border)',
-            borderRadius: 4,
-            cursor: 'pointer',
-            flexShrink: 0,
-          }}
-        />
-        <input
-          type="text"
-          value={hex}
-          maxLength={7}
-          onChange={e => handleHexInput(e.target.value)}
-          style={{
-            ...INPUT_STYLE,
-            width: 110,
-            padding: '0.3rem 0.5rem',
-            fontFamily: 'monospace',
-            fontSize: '0.82rem',
-            borderRadius: 4,
-          }}
-        />
-        <div
-          style={{
-            width: 28, height: 28,
-            background: /^#[0-9a-fA-F]{6}$/.test(hex) ? hex : 'var(--border)',
-            border: '1px solid var(--border)',
-            borderRadius: 3,
-            flexShrink: 0,
-          }}
-        />
-      </div>
-    </div>
-  )
-}
-
-// ── Font selector sub-component ─────────────────────────────────
-function FontSelect({
-  label,
-  value,
-  onChange,
-  previewText,
-  allFonts,
-}: {
-  label: string
-  value: FontName
-  onChange: (v: FontName) => void
-  previewText: string
-  allFonts: string[]
-}) {
-  return (
-    <div className="flex flex-col gap-2">
-      <span className="text-xs uppercase tracking-widest" style={{ color: 'var(--accent)', opacity: 0.5, fontFamily: 'var(--font-involve)' }}>
-        {label}
-      </span>
-      <select
-        value={value}
-        onChange={e => onChange(e.target.value)}
-        style={{
-          ...INPUT_STYLE,
-          padding: '0.4rem 0.6rem',
-          fontSize: '0.82rem',
-          borderRadius: 4,
-          cursor: 'pointer',
-          width: '100%',
-        }}
-      >
-        {allFonts.map(f => (
-          <option key={f} value={f}>{f}</option>
-        ))}
-      </select>
-      <p style={{ fontFamily: `'${value}', sans-serif`, fontSize: '1.05rem', color: 'var(--text)', lineHeight: 1.3 }}>
-        {previewText}
-      </p>
-    </div>
-  )
-}
-
-// ── Glitter preview mini-canvas ────────────────────────────────────
-function GlitterPreview({ intensity, enabled }: { intensity: number; enabled: boolean }) {
-  const ref = useRef<HTMLCanvasElement>(null)
-  useEffect(() => {
-    const canvas = ref.current
-    if (!canvas || !enabled) return
-    const ctx = canvas.getContext('2d')!
-
-    let id: number
-
-    function init() {
-      const W = canvas!.width  = canvas!.offsetWidth || 400
-      const H = canvas!.height = 88
-      const count = Math.max(2, Math.round((W * H / 2500) * (intensity / 100)))
-      const particles = Array.from({ length: count }, () => ({
-        x: Math.random() * W, y: Math.random() * H,
-        size: Math.random() < 0.25 ? 2 : 1,
-        phase: Math.random() * Math.PI * 2,
-        speed: 0.4 + Math.random() * 2.0,
-        colorShift: Math.random(),
-      }))
-      const start = performance.now()
-      cancelAnimationFrame(id)
-      function draw() {
-        const t = (performance.now() - start) / 1000
-        ctx.clearRect(0, 0, W, H)
-        const sweepX = ((Math.sin(t * 0.12) + 1) / 2) * W
-        for (const p of particles) {
-          const b = Math.pow(Math.sin(t * p.speed + p.phase), 3)
-          const dist = Math.abs(p.x - sweepX) / W
-          const boost = dist < 0.18 ? 0.45 * (1 - dist / 0.18) : 0
-          const bright = Math.max(0, Math.min(1, b + boost))
-          if (bright < 0.05) continue
-          ctx.fillStyle = `rgba(255, ${Math.round(160 + p.colorShift * 50)}, ${Math.round(170 + p.colorShift * 30)}, ${bright})`
-          ctx.fillRect(p.x, p.y, p.size, p.size)
-        }
-        id = requestAnimationFrame(draw)
-      }
-      id = requestAnimationFrame(draw)
-    }
-
-    init()
-    window.addEventListener('resize', init)
-    return () => { cancelAnimationFrame(id); window.removeEventListener('resize', init) }
-  }, [intensity, enabled])
-
-  return (
-    <div style={{ position: 'relative', height: 88, borderRadius: 6, overflow: 'hidden', background: '#1c1c1e', border: '1px solid var(--border-soft)' }}>
-      <canvas ref={ref} style={{ display: 'block', width: '100%', height: 88, opacity: enabled ? 1 : 0.15, transition: 'opacity 0.3s' }} />
-      {!enabled && (
-        <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <span style={{ fontFamily: 'var(--font-involve)', fontSize: '0.65rem', color: 'rgba(255,255,255,0.25)', letterSpacing: '0.2em' }}>ВЫКЛЮЧЕНО</span>
-        </div>
-      )}
-    </div>
-  )
-}
-
 export default function SiteClient({ initialSettings, initialCustomFonts = [] }: Props) {
   // ── Hero video ──────────────────────────────────────────────────
   const [heroUrl, setHeroUrl] = useState<string | null>(initialSettings['hero_video_url'] ?? null)
@@ -209,6 +35,15 @@ export default function SiteClient({ initialSettings, initialCustomFonts = [] }:
   const [savingHero, setSavingHero] = useState(false)
   const [heroMsg, setHeroMsg] = useState('')
   const heroRef = useRef<HTMLInputElement>(null)
+  // Hero MP4 (iOS Safari can't decode WebM) + poster image
+  const [heroMp4Url, setHeroMp4Url] = useState<string | null>(initialSettings['hero_video_url_mp4'] ?? null)
+  const [uploadingHeroMp4, setUploadingHeroMp4] = useState(false)
+  const [heroMp4Msg, setHeroMp4Msg] = useState('')
+  const heroMp4Ref = useRef<HTMLInputElement>(null)
+  const [heroPosterUrl, setHeroPosterUrl] = useState<string | null>(initialSettings['hero_poster_url'] ?? null)
+  const [uploadingHeroPoster, setUploadingHeroPoster] = useState(false)
+  const [heroPosterMsg, setHeroPosterMsg] = useState('')
+  const heroPosterRef = useRef<HTMLInputElement>(null)
 
   // ── Profile backgrounds ─────────────────────────────────────────
   const [profileBg, setProfileBg] = useState<string | null>(initialSettings['profile_bg_url'] ?? null)
@@ -427,6 +262,30 @@ export default function SiteClient({ initialSettings, initialCustomFonts = [] }:
     await saveSetting('hero_video_url', data.url)
     setSavingHero(false)
     setHeroMsg('✓ Видео обновлено')
+  }
+
+  async function uploadHeroMp4(file: File) {
+    setUploadingHeroMp4(true); setHeroMp4Msg('')
+    const fd = new FormData(); fd.append('file', file); fd.append('folder', 'assets')
+    const res = await fetch('/api/admin/upload', { method: 'POST', body: fd })
+    const data = await res.json()
+    setUploadingHeroMp4(false)
+    if (!data.url) { setHeroMp4Msg(data.error ?? 'Ошибка загрузки'); return }
+    setHeroMp4Url(data.url)
+    await saveSetting('hero_video_url_mp4', data.url)
+    setHeroMp4Msg('✓ MP4 обновлён')
+  }
+
+  async function uploadHeroPoster(file: File) {
+    setUploadingHeroPoster(true); setHeroPosterMsg('')
+    const fd = new FormData(); fd.append('file', file); fd.append('folder', 'assets')
+    const res = await fetch('/api/admin/upload', { method: 'POST', body: fd })
+    const data = await res.json()
+    setUploadingHeroPoster(false)
+    if (!data.url) { setHeroPosterMsg(data.error ?? 'Ошибка загрузки'); return }
+    setHeroPosterUrl(data.url)
+    await saveSetting('hero_poster_url', data.url)
+    setHeroPosterMsg('✓ Постер обновлён')
   }
 
   // ── Profile bg ──────────────────────────────────────────────────
@@ -1072,8 +931,12 @@ export default function SiteClient({ initialSettings, initialCustomFonts = [] }:
       {/* ── Hero video ── */}
       <AdminSection title="Видео Hero секции">
         <p className="text-xs" style={{ color: 'var(--accent)', opacity: 0.5, fontFamily: 'var(--font-involve)' }}>
-          Видео показывается на главной странице поверх всего. Рекомендуется WebM или MP4.
+          WebM — основное видео для десктопа и Android. MP4 (H.264) обязателен для iPhone/iPad —
+          Safari не умеет проигрывать WebM. Постер показывается, пока видео грузится.
         </p>
+
+        {/* WebM */}
+        <p className="text-xs font-semibold" style={{ color: 'var(--accent)', fontFamily: 'var(--font-onder)', letterSpacing: '0.08em' }}>WEBM (десктоп / Android)</p>
         {heroUrl && (
           <div className="rounded-xl overflow-hidden" style={{ maxHeight: 240, background: 'var(--bg-2)' }}>
             <video key={heroUrl} src={heroUrl} autoPlay muted loop playsInline className="w-full h-full object-cover" style={{ maxHeight: 240 }} />
@@ -1084,11 +947,45 @@ export default function SiteClient({ initialSettings, initialCustomFonts = [] }:
         )}
         <div className="flex items-center gap-3">
           <button onClick={() => heroRef.current?.click()} disabled={uploadingHero || savingHero} className={a.btn}>
-            {uploadingHero ? 'Загружаем...' : savingHero ? 'Сохраняем...' : 'Загрузить видео'}
+            {uploadingHero ? 'Загружаем...' : savingHero ? 'Сохраняем...' : 'Загрузить WebM'}
           </button>
-          <input ref={heroRef} type="file" accept="video/*" className="hidden"
+          <input ref={heroRef} type="file" accept="video/webm,video/*" className="hidden"
             onChange={e => e.target.files?.[0] && uploadHero(e.target.files[0])} />
           {heroMsg && <span style={msgStyle(heroMsg)}>{heroMsg}</span>}
+        </div>
+
+        {/* MP4 — iOS */}
+        <p className="text-xs font-semibold mt-4" style={{ color: 'var(--accent)', fontFamily: 'var(--font-onder)', letterSpacing: '0.08em' }}>MP4 / H.264 (iPhone / iPad)</p>
+        {heroMp4Url && (
+          <div className="rounded-xl overflow-hidden" style={{ maxHeight: 240, background: 'var(--bg-2)' }}>
+            <video key={heroMp4Url} src={heroMp4Url} autoPlay muted loop playsInline className="w-full h-full object-cover" style={{ maxHeight: 240 }} />
+          </div>
+        )}
+        {heroMp4Url && (
+          <p className="text-xs truncate" style={{ color: 'var(--accent)', opacity: 0.45, fontFamily: 'var(--font-involve)' }}>{heroMp4Url.split('/').pop()}</p>
+        )}
+        <div className="flex items-center gap-3">
+          <button onClick={() => heroMp4Ref.current?.click()} disabled={uploadingHeroMp4} className={a.btn}>
+            {uploadingHeroMp4 ? 'Загружаем...' : 'Загрузить MP4'}
+          </button>
+          <input ref={heroMp4Ref} type="file" accept="video/mp4,video/*" className="hidden"
+            onChange={e => e.target.files?.[0] && uploadHeroMp4(e.target.files[0])} />
+          {heroMp4Msg && <span style={msgStyle(heroMp4Msg)}>{heroMp4Msg}</span>}
+        </div>
+
+        {/* Poster */}
+        <p className="text-xs font-semibold mt-4" style={{ color: 'var(--accent)', fontFamily: 'var(--font-onder)', letterSpacing: '0.08em' }}>ПОСТЕР (заставка)</p>
+        {heroPosterUrl && (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={heroPosterUrl} alt="poster" className="rounded-xl object-cover" style={{ maxHeight: 200, background: 'var(--bg-2)' }} />
+        )}
+        <div className="flex items-center gap-3">
+          <button onClick={() => heroPosterRef.current?.click()} disabled={uploadingHeroPoster} className={a.btn}>
+            {uploadingHeroPoster ? 'Загружаем...' : 'Загрузить постер'}
+          </button>
+          <input ref={heroPosterRef} type="file" accept="image/*" className="hidden"
+            onChange={e => e.target.files?.[0] && uploadHeroPoster(e.target.files[0])} />
+          {heroPosterMsg && <span style={msgStyle(heroPosterMsg)}>{heroPosterMsg}</span>}
         </div>
       </AdminSection>
 

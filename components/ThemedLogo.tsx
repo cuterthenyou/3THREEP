@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { preload } from 'react-dom'
 
 interface Props {
   src: string
@@ -48,6 +49,12 @@ export default function ThemedLogo({
   }, [src])
 
   if (!src) return null
+
+  const proxied = src.startsWith('/') || src.startsWith('data:') || src.startsWith('blob:')
+    ? src
+    : `/api/proxy?url=${encodeURIComponent(src)}`
+  // Early preload hint (fires during render, before the measuring effect)
+  preload(proxied, { as: 'image' })
 
   const maskUrl = toMaskUrl(src)
 

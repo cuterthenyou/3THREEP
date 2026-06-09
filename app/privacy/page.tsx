@@ -16,11 +16,11 @@ const PRIVACY_DEFAULTS: PrivacySection[] = [
   },
   {
     heading: '2. Какие персональные данные мы собираем',
-    body: '• Контактные данные: адрес электронной почты (при регистрации и авторизации).\n• Профильные данные: никнейм (при желании пользователя), аватар.\n• Данные заказов: адрес доставки, состав и история заказов.\n• Технические данные: IP-адрес, тип браузера, данные сессии (cookie).\n\nМы не собираем и не обрабатываем специальные категории персональных данных (расовое происхождение, политические взгляды, состояние здоровья и пр.).',
+    body: '• Контактные данные: адрес электронной почты (при регистрации и авторизации), а также имя, телефон и адрес доставки — при оформлении заказа.\n• Профильные данные: никнейм (по желанию пользователя), аватар.\n• Данные заказов: состав, сумма и история заказов, переписка в чате заказа.\n• Технические данные: IP-адрес, тип устройства и браузера, данные сессии (cookie).\n• Обезличенная аналитика: просмотренные страницы, источник перехода, тип устройства и браузера — собираются в агрегированном виде для статистики посещаемости и улучшения работы сайта и не используются для идентификации конкретного человека.\n\nМы не собираем и не обрабатываем специальные категории персональных данных (расовое происхождение, политические взгляды, состояние здоровья и пр.).',
   },
   {
     heading: '3. Цели обработки персональных данных',
-    body: '• Идентификация пользователя и предоставление доступа к личному кабинету.\n• Обработка и исполнение заказов, организация доставки.\n• Коммуникация с пользователем по вопросам заказов (email, чат в ЛК).\n• Направление кода авторизации (OTP) на указанный email.\n• Обеспечение безопасности и предотвращение мошенничества.\n• Исполнение требований законодательства РФ.',
+    body: '• Идентификация пользователя и предоставление доступа к личному кабинету.\n• Обработка и исполнение заказов, организация доставки.\n• Коммуникация с пользователем по вопросам заказов (email, чат в личном кабинете).\n• Направление кода авторизации (OTP) на указанный email.\n• Сбор обезличенной статистики посещаемости для улучшения работы сайта.\n• Обеспечение безопасности и предотвращение мошенничества.\n• Исполнение требований законодательства РФ.',
   },
   {
     heading: '4. Правовое основание обработки',
@@ -59,86 +59,83 @@ export default async function PrivacyPage() {
     if (row?.value) sections = JSON.parse(row.value)
   } catch { /* table may not exist yet */ }
 
+  const updated = new Date().toLocaleDateString('ru-RU', { month: 'long', year: 'numeric' }) + ' г.'
+
   return (
     <main style={{ background: 'var(--bg)', minHeight: '100vh', padding: '2rem 1rem' }}>
       <div style={{ maxWidth: '720px', margin: '0 auto' }}>
 
-        <Link
-          href="/"
-          style={{
-            display: 'inline-block',
-            marginBottom: '2rem',
-            color: 'var(--text)',
-            fontFamily: "var(--font-onder)",
-            fontSize: '0.75rem',
-            textTransform: 'uppercase',
-            letterSpacing: '0.1em',
-            opacity: 0.5,
-            textDecoration: 'none',
-          }}
-        >
+        <Link href="/" className="neo-btn" style={{
+          display: 'inline-block', marginBottom: '2rem', padding: '0.4rem 0.9rem',
+          color: 'var(--bg)', background: 'var(--accent)',
+          fontFamily: 'var(--font-onder)', fontSize: '0.62rem',
+          textTransform: 'uppercase', letterSpacing: '0.14em',
+          textDecoration: 'none', borderRadius: 'var(--radius-base, 0px)',
+        }}>
           ← На главную
         </Link>
 
+        <span style={{
+          display: 'block', fontFamily: 'var(--font-involve)', fontSize: '0.5rem',
+          letterSpacing: '0.3em', textTransform: 'uppercase', color: 'var(--accent)',
+          opacity: 0.45, marginBottom: '0.6rem',
+        }}>
+          // LEGAL / DATA POLICY
+        </span>
+
         <h1 style={{
-          color: 'var(--text)',
-          fontFamily: "var(--font-onder)",
-          fontSize: '1.5rem',
-          textTransform: 'uppercase',
-          letterSpacing: '0.05em',
-          marginBottom: '0.5rem',
+          color: 'var(--text)', fontFamily: 'var(--font-onder)', fontSize: '1.6rem',
+          textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.5rem', lineHeight: 1.1,
         }}>
           Политика конфиденциальности
         </h1>
         <p style={{
-          color: 'var(--text)',
-          fontFamily: "var(--font-involve)",
-          fontSize: '0.8rem',
-          opacity: 0.45,
-          marginBottom: '2.5rem',
+          color: 'var(--text)', fontFamily: 'var(--font-involve)', fontSize: '0.78rem',
+          opacity: 0.45, marginBottom: '2.5rem',
         }}>
-          Последнее обновление: июнь 2026 г.
+          Последнее обновление: {updated}
         </p>
 
-        {sections.map((section, i) => (
-          <div key={i} style={{ marginBottom: '2rem' }}>
-            <h2 style={{
-              color: 'var(--text)',
-              fontFamily: "var(--font-onder)",
-              fontSize: '1rem',
-              textTransform: 'uppercase',
-              letterSpacing: '0.08em',
-              marginBottom: '0.75rem',
-            }}>
-              {section.heading}
-            </h2>
-            <p style={{
-              color: 'var(--text)',
-              fontFamily: "var(--font-involve)",
-              fontSize: '0.875rem',
-              lineHeight: '1.7',
-              opacity: 0.85,
-              whiteSpace: 'pre-line',
-            }}>
-              {section.body}
-            </p>
-          </div>
-        ))}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          {sections.map((section, i) => (
+            <div
+              key={i}
+              className="hud-corners"
+              style={{
+                position: 'relative',
+                background: 'var(--bg-2)',
+                border: '1px solid var(--border-soft)',
+                borderRadius: 'var(--radius-base, 0px)',
+                padding: '1.4rem 1.4rem 1.5rem',
+              }}
+            >
+              <span style={{
+                fontFamily: 'var(--font-deutsch)', fontSize: '0.7rem', letterSpacing: '0.15em',
+                color: 'var(--accent)', opacity: 0.4, display: 'block', marginBottom: '0.5rem',
+              }}>
+                {String(i + 1).padStart(2, '0')}
+              </span>
+              <h2 style={{
+                color: 'var(--text)', fontFamily: 'var(--font-onder)', fontSize: '0.95rem',
+                textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '0.75rem', lineHeight: 1.25,
+              }}>
+                {section.heading.replace(/^\d+\.\s*/, '')}
+              </h2>
+              <p style={{
+                color: 'var(--text)', fontFamily: 'var(--font-involve)', fontSize: '0.85rem',
+                lineHeight: 1.75, opacity: 0.82, whiteSpace: 'pre-line',
+              }}>
+                {section.body}
+              </p>
+            </div>
+          ))}
+        </div>
 
-        <Link
-          href="/"
-          style={{
-            display: 'inline-block',
-            marginTop: '2rem',
-            color: 'var(--text)',
-            fontFamily: "var(--font-onder)",
-            fontSize: '0.75rem',
-            textTransform: 'uppercase',
-            letterSpacing: '0.1em',
-            opacity: 0.4,
-            textDecoration: 'none',
-          }}
-        >
+        <Link href="/" style={{
+          display: 'inline-block', marginTop: '2rem', color: 'var(--text)',
+          fontFamily: 'var(--font-onder)', fontSize: '0.7rem', textTransform: 'uppercase',
+          letterSpacing: '0.1em', opacity: 0.4, textDecoration: 'none',
+        }}>
           ← На главную
         </Link>
       </div>

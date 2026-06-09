@@ -26,6 +26,20 @@ function formatDate(iso: string) {
   });
 }
 
+function sameDay(a: string, b: string) {
+  return new Date(a).toDateString() === new Date(b).toDateString();
+}
+
+function dayLabel(iso: string) {
+  const d = new Date(iso);
+  const today = new Date();
+  const yest = new Date();
+  yest.setDate(today.getDate() - 1);
+  if (d.toDateString() === today.toDateString()) return 'СЕГОДНЯ';
+  if (d.toDateString() === yest.toDateString()) return 'ВЧЕРА';
+  return d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' }).toUpperCase();
+}
+
 export default function OrderDetailClient({ order, messages: initialMessages, userId }: Props) {
   const [messages, setMessages] = useState<Message[]>(initialMessages);
   const [text, setText] = useState('');
@@ -33,6 +47,8 @@ export default function OrderDetailClient({ order, messages: initialMessages, us
   const [customEmojis, setCustomEmojis] = useState<CustomEmoji[]>([]);
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const messagesRef = useRef<HTMLDivElement>(null);
+  const didInitialScroll = useRef(false);
 
   const hasUserMessages = initialMessages.some(m => !m.is_admin && m.sender_id === userId);
   const [chatConsented, setChatConsented] = useState(hasUserMessages);
@@ -50,7 +66,17 @@ export default function OrderDetailClient({ order, messages: initialMessages, us
   }, []);
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+    const el = messagesRef.current;
+    if (!el) return;
+    // First render: jump to bottom. After that, only follow if the reader is
+    // already near the bottom (don't yank them while scrolled up reading).
+    if (!didInitialScroll.current) {
+      didInitialScroll.current = true;
+      bottomRef.current?.scrollIntoView();
+      return;
+    }
+    const nearBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 120;
+    if (nearBottom) bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
   const fetchMessages = useCallback(async () => {
@@ -189,21 +215,26 @@ export default function OrderDetailClient({ order, messages: initialMessages, us
 
         <div className={s.chatSection}>
           <h3 className={s.chatTitle}>Чат по заказу</h3>
-          <div className={s.chatMessages}>
+          <div className={`${s.chatMessages} hud-corners`} ref={messagesRef}>
             {messages.length === 0 && (
               <p className={s.chatEmpty}>Напиши нам по деталям заказа</p>
             )}
-            {messages.map((msg) => (
-              <div key={msg.id} className={msg.is_admin ? s.msgAdmin : s.msgUser}>
-                <div className={msg.is_admin ? s.msgBubbleAdmin : s.msgBubbleUser}>
-                  {msg.is_admin && <p className={s.msgSender}>THREEP</p>}
-                  <p className={s.msgText}>{renderMessage(msg.text, customEmojis)}</p>
-                  <p className={s.msgTime}>
-                    {new Date(msg.created_at).toLocaleTimeString('ru-RU', {
-                      hour: '2-digit',
-                      minute: '2-digit',
-                    })}
-                  </p>
+            {messages.map((msg, i) => (
+              <div key={msg.id}>
+                {(i === 0 || !sameDay(messages[i - 1].created_at, msg.created_at)) && (
+                  <div className={s.dateSep}><span>{dayLabel(msg.created_at)}</span></div>
+                )}
+                <div className={msg.is_admin ? s.msgAdmin : s.msgUser}>
+                  <div className={msg.is_admin ? s.msgBubbleAdmin : s.msgBubbleUser}>
+                    {msg.is_admin && <p className={s.msgSender}>THREEP</p>}
+                    <p className={s.msgText}>{renderMessage(msg.text, customEmojis)}</p>
+                    <p className={s.msgTime}>
+                      {new Date(msg.created_at).toLocaleTimeString('ru-RU', {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                      })}
+                    </p>
+                  </div>
                 </div>
               </div>
             ))}

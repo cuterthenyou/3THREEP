@@ -310,15 +310,6 @@ h4 { font-size: var(--fs-h4); }
   transition: box-shadow 0.12s, transform 0.1s, background 0.15s;
   -webkit-tap-highlight-color: transparent;
 }
-.neo-btn:hover {
-  box-shadow: 3px 3px 0 var(--accent);
-  transform: translate(-1px, -1px);
-}
-.neo-btn:active {
-  box-shadow: 1px 1px 0 var(--accent);
-  transform: translate(1px, 1px);
-  transition-duration: 0.06s;
-}
 
 /* ── Neo-brutal card hover ── */
 .neo-card {
@@ -326,15 +317,68 @@ h4 { font-size: var(--fs-h4); }
   box-shadow: 2px 2px 0 var(--border);
   transition: box-shadow 0.15s, transform 0.15s, border-color 0.15s;
 }
-.neo-card:hover {
-  border-color: var(--accent);
-  box-shadow: 3px 3px 0 var(--accent);
-  transform: translate(-1px, -1px);
+
+/* Press/hover transforms only on real pointers — touch fires :active on tap-start
+   (iOS), which jitters during scroll/swipe. */
+@media (hover: hover) and (pointer: fine) {
+  .neo-btn:hover {
+    box-shadow: 3px 3px 0 var(--accent);
+    transform: translate(-1px, -1px);
+  }
+  .neo-btn:active {
+    box-shadow: 1px 1px 0 var(--accent);
+    transform: translate(1px, 1px);
+    transition-duration: 0.06s;
+  }
+  .neo-card:hover {
+    border-color: var(--accent);
+    box-shadow: 3px 3px 0 var(--accent);
+    transform: translate(-1px, -1px);
+  }
+  .neo-card:active {
+    box-shadow: 1px 1px 0 var(--accent);
+    transform: translate(1px, 1px);
+    transition-duration: 0.06s;
+  }
 }
-.neo-card:active {
-  box-shadow: 1px 1px 0 var(--accent);
-  transform: translate(1px, 1px);
-  transition-duration: 0.06s;
+
+/* ── Accessibility: visible keyboard focus ring ── */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+/* Pointer users don't get the ring (only keyboard nav) */
+:focus:not(:focus-visible) { outline: none; }
+
+/* ── HUD corner brackets — opt-in utility, 4 L-shapes via gradients ── */
+.hud-corners {
+  --hud-c: var(--accent);
+  --hud-len: 14px;
+  --hud-w: 2px;
+  background-image:
+    linear-gradient(var(--hud-c), var(--hud-c)), linear-gradient(var(--hud-c), var(--hud-c)),
+    linear-gradient(var(--hud-c), var(--hud-c)), linear-gradient(var(--hud-c), var(--hud-c)),
+    linear-gradient(var(--hud-c), var(--hud-c)), linear-gradient(var(--hud-c), var(--hud-c)),
+    linear-gradient(var(--hud-c), var(--hud-c)), linear-gradient(var(--hud-c), var(--hud-c));
+  background-repeat: no-repeat;
+  background-size:
+    var(--hud-len) var(--hud-w), var(--hud-w) var(--hud-len),  /* TL */
+    var(--hud-len) var(--hud-w), var(--hud-w) var(--hud-len),  /* TR */
+    var(--hud-len) var(--hud-w), var(--hud-w) var(--hud-len),  /* BL */
+    var(--hud-len) var(--hud-w), var(--hud-w) var(--hud-len);  /* BR */
+  background-position:
+    top left, top left,
+    top right, top right,
+    bottom left, bottom left,
+    bottom right, bottom right;
+}
+
+/* ── On-enter reveal — fade up; stagger with inline animation-delay ── */
+.reveal-up {
+  animation: fadeInUp 0.5s ease both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .reveal-up { animation: none; }
 }
 
 /* Custom scrollbar */

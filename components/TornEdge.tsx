@@ -48,6 +48,11 @@ const MOBILE_PATH = [
   'L 414 140 Z',
 ].join(' ')
 
+// Edge-only variants (the zigzag without the closing rectangle) — used to
+// trace a thin accent hairline along the tear for depth.
+const DESKTOP_EDGE = DESKTOP_PATH.replace('M 0 220 L 0 175', 'M 0 175').replace('L 1440 220 Z', '')
+const MOBILE_EDGE = MOBILE_PATH.replace('M 0 140 L 0 95', 'M 0 95').replace('L 414 140 Z', '')
+
 const filterProps = {
   x: '-2%', y: '-25%', width: '104%', height: '150%',
 }
@@ -78,6 +83,13 @@ export default function TornEdge() {
             </filter>
           </defs>
           <path style={{ fill: 'var(--bg)' }} filter="url(#torn-texture-d)" d={DESKTOP_PATH}/>
+          {/* Accent hairline tracing the tear */}
+          <path
+            d={DESKTOP_EDGE}
+            filter="url(#torn-texture-d)"
+            style={{ fill: 'none', stroke: 'var(--accent)', strokeWidth: 1.5, opacity: 0.45 }}
+            vectorEffect="non-scaling-stroke"
+          />
         </svg>
       </div>
 
@@ -99,6 +111,13 @@ export default function TornEdge() {
             </filter>
           </defs>
           <path style={{ fill: 'var(--bg)' }} filter="url(#torn-texture-m)" d={MOBILE_PATH}/>
+          {/* Accent hairline tracing the tear */}
+          <path
+            d={MOBILE_EDGE}
+            filter="url(#torn-texture-m)"
+            style={{ fill: 'none', stroke: 'var(--accent)', strokeWidth: 1.5, opacity: 0.45 }}
+            vectorEffect="non-scaling-stroke"
+          />
         </svg>
       </div>
 

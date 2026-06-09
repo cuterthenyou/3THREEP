@@ -1,7 +1,7 @@
 .page {
   position: relative;
   min-height: 100vh;
-  overflow: hidden;
+  overflow-x: clip;
   background: var(--bg);
 }
 
@@ -226,10 +226,13 @@
 .tabs {
   display: flex;
   gap: 0.5rem;
+  width: 100%;
 }
 
 .tab,
 .tabActive {
+  flex: 1 1 0;
+  min-width: 0;
   padding: 0.5rem 1rem;
   font-size: 0.75rem;
   text-transform: uppercase;
@@ -239,6 +242,7 @@
   cursor: pointer;
   transition: background 0.15s, color 0.15s;
   border: none;
+  text-align: center;
 }
 
 .tab {
@@ -569,14 +573,24 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  row-gap: 0.5rem;
   padding: 0.25rem 0;
   margin-bottom: 0.25rem;
+}
+
+.topNavActions {
+  display: flex;
+  align-items: stretch;
+  gap: 0.5rem;
 }
 
 .topNavLink {
   display: inline-flex;
   align-items: center;
   gap: 0.3rem;
+  min-height: 1.9rem;
   font-size: 0.7rem;
   text-transform: uppercase;
   letter-spacing: 0.1em;
@@ -606,6 +620,7 @@
 .topNavBtn {
   font-size: 0.7rem;
   padding: 0.3rem 0.75rem;
+  min-height: 1.9rem;
   text-transform: uppercase;
   letter-spacing: 0.1em;
   background: var(--bg-subtle);
@@ -618,6 +633,7 @@
   transition: box-shadow 0.12s, transform 0.1s, background 0.15s;
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 0.3rem;
 }
 
@@ -641,8 +657,10 @@
 /* ── Ticker — full viewport width breakout ─────────────────── */
 .tickerWrap {
   width: 100vw;
+  max-width: 100vw;
   margin-left: calc(50% - 50vw);
   background: var(--bg-2);
+  overflow: hidden;
 }
 
 .tickerWrap > div {

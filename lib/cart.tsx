@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react'
 import type { CartItem, Product } from './types'
+import { trackEvent } from './track'
 
 interface CartContextValue {
   items: CartItem[]
@@ -45,6 +46,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       return [...prev, { product, size, color, quantity: 1 }]
     })
     setOpen(true)
+    trackEvent('cart_add', { id: product.id, name: product.name, size })
   }, [])
 
   const removeItem = useCallback((productId: string, size: string) => {

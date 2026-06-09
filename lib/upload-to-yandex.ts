@@ -10,12 +10,20 @@ const FOLDER_MAX_WIDTHS: Record<string, number> = {
   products: 1920,
 }
 
+// Hero/product imagery wants crisper output; avatars stay leaner.
+const FOLDER_QUALITY: Record<string, number> = {
+  avatars: 80,
+  assets: 85,
+  products: 85,
+}
+
 async function optimizeBuffer(buf: Buffer, mimeType: string, folder: string): Promise<Buffer> {
   if (!IMAGE_MIME_TYPES.has(mimeType)) return buf;
   const width = FOLDER_MAX_WIDTHS[folder] ?? 1920;
+  const quality = FOLDER_QUALITY[folder] ?? 82;
   return sharp(buf)
     .resize({ width, withoutEnlargement: true })
-    .webp({ quality: 80 })
+    .webp({ quality })
     .toBuffer();
 }
 

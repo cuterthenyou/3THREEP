@@ -18,12 +18,104 @@
   animation: batFlap 0.26s ease-in-out infinite;
 }
 
+/* Third eye — pulsing accent glow */
+.thirdEye {
+  transform-origin: center;
+  animation: thirdEyePulse 1.4s ease-in-out infinite;
+}
+
+@keyframes thirdEyePulse {
+  0%, 100% { opacity: 0.65; filter: drop-shadow(0 0 0.5px var(--accent, #f29774)); }
+  50%       { opacity: 1;    filter: drop-shadow(0 0 2px var(--accent, #f29774)); }
+}
+
 @keyframes batFlap {
-  0%, 100% { transform: scaleY(1) scaleX(1); }
-  18%       { transform: scaleY(0.08) scaleX(1.18); }
-  38%       { transform: scaleY(0.68); }
-  58%       { transform: scaleY(0.09) scaleX(1.16); }
-  78%       { transform: scaleY(1.05) scaleX(0.98); }
+  0%, 100% { transform: scaleY(1) scaleX(1) translateY(0); }
+  18%       { transform: scaleY(0.08) scaleX(1.2) translateY(2px); }
+  38%       { transform: scaleY(0.7) scaleX(1.02) translateY(-1px); }
+  58%       { transform: scaleY(0.09) scaleX(1.18) translateY(2px); }
+  78%       { transform: scaleY(1.06) scaleX(0.97) translateY(-1.5px); }
+}
+
+/* ── Special bat variants ───────────────────────────────────── */
+.batGold {
+  color: #ffcf3f;
+  filter: drop-shadow(0 0 5px #ffcf3f) drop-shadow(0 0 11px rgba(255, 180, 40, 0.5));
+}
+.batArmored {
+  color: #9aa5b1;
+  filter: drop-shadow(0 0 2px rgba(160, 170, 185, 0.6));
+}
+.batCracked {
+  animation: batCrack 0.28s ease-out;
+}
+@keyframes batCrack {
+  0%   { filter: brightness(2.6); }
+  100% { filter: brightness(1); }
+}
+
+/* ── Power-up token ─────────────────────────────────────────── */
+.powerup {
+  position: fixed;
+  z-index: 140;
+  width: 38px;
+  height: 38px;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  border: 2px solid currentColor;
+  background: color-mix(in srgb, var(--bg, #090909) 70%, transparent);
+  color: var(--accent, #f29774);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-body, monospace);
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+  pointer-events: auto;
+  box-shadow: 0 0 10px currentColor;
+  animation: powerupPulse 1s ease-in-out infinite;
+  -webkit-tap-highlight-color: transparent;
+}
+.power_slowmo { color: #5ad1ff; }
+.power_freeze { color: #9fe8ff; }
+.power_double { color: #ffcf3f; }
+
+@keyframes powerupPulse {
+  0%, 100% { box-shadow: 0 0 7px currentColor; }
+  50%       { box-shadow: 0 0 16px currentColor; }
+}
+
+/* ── Combo + active-effect HUD labels ───────────────────────── */
+.comboLabel {
+  margin-top: 0.32rem;
+  font-family: var(--font-body, monospace);
+  font-size: 0.5rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #ffcf3f;
+  align-self: flex-end;
+}
+.effectLabel {
+  margin-top: 0.25rem;
+  font-family: var(--font-body, monospace);
+  font-size: 0.5rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #5ad1ff;
+  align-self: flex-end;
+  animation: blink 1s steps(1) infinite;
+}
+
+/* ── Screen shake (bat escaped) ─────────────────────────────── */
+.overlayShake {
+  animation: overlayShake 0.42s cubic-bezier(0.36, 0.07, 0.19, 0.97);
+}
+@keyframes overlayShake {
+  10%, 90% { transform: translate(-1px, 0); }
+  20%, 80% { transform: translate(2px, 0); }
+  30%, 50%, 70% { transform: translate(-4px, 1px); }
+  40%, 60% { transform: translate(4px, -1px); }
 }
 
 /* ── Dark overlay — blocks page while game is active ────────── */
@@ -92,6 +184,27 @@
 .scoreNum.pulse {
   transform: scale(1.55);
   opacity: 0.65;
+}
+
+.recordLabel {
+  margin-top: 0.4rem;
+  font-family: var(--font-body, monospace);
+  font-size: 0.42rem;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  opacity: 0.5;
+  align-self: flex-end;
+}
+
+.recordNew {
+  opacity: 1;
+  color: var(--accent, #f29774);
+  animation: recordBlink 0.6s steps(1) infinite;
+}
+
+@keyframes recordBlink {
+  0%, 60% { opacity: 1; }
+  61%, 100% { opacity: 0.35; }
 }
 
 /* GAME OVER — centered fullscreen banner */
@@ -220,6 +333,39 @@
   color: var(--accent, #f29774);
   filter: drop-shadow(0 0 6px var(--accent, #f29774));
   will-change: transform;
+}
+
+/* Inner body — wobble while sweeping (outer transform is JS-driven) */
+.roombaBody {
+  display: block;
+  transform-origin: center 70%;
+  animation: roombaWobble 0.4s ease-in-out infinite;
+}
+
+@keyframes roombaWobble {
+  0%, 100% { transform: rotate(-4deg); }
+  50%       { transform: rotate(4deg); }
+}
+
+/* Brush bar — quick horizontal scrub */
+.roombaBrush {
+  transform-origin: center;
+  animation: roombaBrush 0.18s steps(2) infinite;
+}
+
+@keyframes roombaBrush {
+  0%, 100% { transform: translateX(-0.6px); opacity: 0.55; }
+  50%       { transform: translateX(0.6px); opacity: 0.85; }
+}
+
+/* Status LED — blink */
+.roombaLed {
+  animation: roombaLed 0.5s steps(1) infinite;
+}
+
+@keyframes roombaLed {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0.15; }
 }
 
 /* ── Hit marker — diagonal X ─────────────────────────────────── */

@@ -143,6 +143,22 @@ export async function register() {
       );
     `).catch((e: Error) => console.error('[migration] guest/newsletter/emoji failed:', e.message))
 
+    // Analytics: page_views extra columns + generic events table
+    await pool.query(`
+      ALTER TABLE page_views ADD COLUMN IF NOT EXISTS referrer   TEXT;
+      ALTER TABLE page_views ADD COLUMN IF NOT EXISTS user_agent TEXT;
+      CREATE TABLE IF NOT EXISTS events (
+        id         BIGSERIAL PRIMARY KEY,
+        session_id TEXT,
+        user_id    UUID,
+        type       TEXT NOT NULL,
+        meta       JSONB DEFAULT '{}'::jsonb,
+        created_at TIMESTAMPTZ DEFAULT now()
+      );
+      CREATE INDEX IF NOT EXISTS idx_events_type_created ON events(type, created_at DESC);
+      CREATE INDEX IF NOT EXISTS idx_events_session ON events(session_id);
+    `).catch((e: Error) => console.error('[migration] analytics events failed:', e.message))
+
     const navConfigDefault = JSON.stringify({ hiddenCollections: [], customItems: [], collectionsOrder: [] })
 
     for (const [key, value] of [

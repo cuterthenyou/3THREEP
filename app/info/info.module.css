@@ -1,6 +1,7 @@
 .page {
   background: var(--bg);
   min-height: 100vh;
+  overflow-x: clip;
 }
 
 .hero {
@@ -245,6 +246,23 @@
 }
 
 @media (max-width: 480px) {
+  .hero {
+    padding: 5rem 1rem 2.5rem;
+  }
+
+  .body {
+    padding: 0 1rem 5rem;
+  }
+
+  .backLink {
+    margin-bottom: 2rem;
+  }
+
+  .tabs {
+    padding: 1.5rem 0 0.25rem;
+    margin-bottom: 2rem;
+  }
+
   .tabBtn {
     padding: 0.4rem 0.75rem;
     font-size: 0.58rem;

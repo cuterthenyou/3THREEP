@@ -83,8 +83,11 @@ export default function LoadingScreen() {
 
     let minPassed = false
     let pageDone = false
+    let dismissed = false
 
     function dismiss() {
+      if (dismissed) return
+      dismissed = true
       setExit(true)
       setTimeout(() => setShow(false), 580)
     }
@@ -94,10 +97,13 @@ export default function LoadingScreen() {
       if (minPassed) dismiss()
     }
 
+    // Min on-screen time so the brand beat lands; max cap so a hanging
+    // resource can never leave the loader stuck.
     const minTimer = setTimeout(() => {
       minPassed = true
       if (pageDone) dismiss()
-    }, 1900)
+    }, 1200)
+    const maxTimer = setTimeout(dismiss, 4000)
 
     if (document.readyState === 'complete') {
       onPageReady()
@@ -107,6 +113,7 @@ export default function LoadingScreen() {
 
     return () => {
       clearTimeout(minTimer)
+      clearTimeout(maxTimer)
       window.removeEventListener('load', onPageReady)
     }
   }, [])

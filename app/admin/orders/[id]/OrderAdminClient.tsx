@@ -9,6 +9,19 @@ import EmojiPicker, { type CustomEmoji } from '@/components/EmojiPicker';
 import { renderMessage } from '@/components/renderEmoji';
 import s from './order-admin.module.css';
 
+function sameDay(a: string, b: string) {
+  return new Date(a).toDateString() === new Date(b).toDateString();
+}
+function dayLabel(iso: string) {
+  const d = new Date(iso);
+  const today = new Date();
+  const yest = new Date();
+  yest.setDate(today.getDate() - 1);
+  if (d.toDateString() === today.toDateString()) return 'СЕГОДНЯ';
+  if (d.toDateString() === yest.toDateString()) return 'ВЧЕРА';
+  return d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' }).toUpperCase();
+}
+
 const STATUSES: OrderStatus[] = [
   'new',
   'paid',
@@ -35,13 +48,23 @@ export default function OrderAdminClient({ order, messages: init, adminId }: Pro
   const [customEmojis, setCustomEmojis] = useState<CustomEmoji[]>([]);
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const messagesRef = useRef<HTMLDivElement>(null);
+  const didInitialScroll = useRef(false);
 
   useEffect(() => {
     fetch('/api/emojis').then(r => r.json()).then(setCustomEmojis).catch(() => {});
   }, []);
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+    const el = messagesRef.current;
+    if (!el) return;
+    if (!didInitialScroll.current) {
+      didInitialScroll.current = true;
+      bottomRef.current?.scrollIntoView();
+      return;
+    }
+    const nearBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 120;
+    if (nearBottom) bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
   const fetchMessages = useCallback(async () => {
@@ -204,15 +227,20 @@ export default function OrderAdminClient({ order, messages: init, adminId }: Pro
       {/* Chat */}
       <div className="flex flex-col gap-3">
         <h3 className={s.chatTitle}>Чат с клиентом</h3>
-        <div className={s.chatMessages}>
+        <div className={`${s.chatMessages} hud-corners`} ref={messagesRef}>
           {messages.length === 0 && (
             <p className={s.chatEmpty}>Нет сообщений</p>
           )}
-          {messages.map((msg) => (
-            <div key={msg.id} className={msg.is_admin ? s.msgAdmin : s.msgClient}>
-              <div className={msg.is_admin ? s.msgBubbleAdmin : s.msgBubbleClient}>
-                {!msg.is_admin && <p className={s.msgSender}>Клиент</p>}
-                <p className={s.msgText}>{renderMessage(msg.text, customEmojis)}</p>
+          {messages.map((msg, i) => (
+            <div key={msg.id}>
+              {(i === 0 || !sameDay(messages[i - 1].created_at, msg.created_at)) && (
+                <div className={s.dateSep}><span>{dayLabel(msg.created_at)}</span></div>
+              )}
+              <div className={msg.is_admin ? s.msgAdmin : s.msgClient}>
+                <div className={msg.is_admin ? s.msgBubbleAdmin : s.msgBubbleClient}>
+                  {!msg.is_admin && <p className={s.msgSender}>Клиент</p>}
+                  <p className={s.msgText}>{renderMessage(msg.text, customEmojis)}</p>
+                </div>
               </div>
             </div>
           ))}

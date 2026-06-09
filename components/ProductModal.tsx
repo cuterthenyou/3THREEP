@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import Image from 'next/image'
 import type { Product } from '@/lib/types'
 import { useCart } from '@/lib/cart'
+import { trackEvent } from '@/lib/track'
 import s from './ProductModal.module.css'
 
 interface Props {
@@ -72,6 +73,13 @@ export default function ProductModal({ product, visible, onClose, modalBg, colle
       setSelectedSize(product.sizes?.[0] || 'S')
     }
   }, [product])
+
+  // Track product views (funnel stage 1) when the modal actually opens
+  useEffect(() => {
+    if (visible && product) {
+      trackEvent('product_view', { id: product.id, name: product.name })
+    }
+  }, [visible, product])
 
   // Ensure body scroll is restored on unmount
   useEffect(() => () => { document.body.style.overflow = '' }, [])

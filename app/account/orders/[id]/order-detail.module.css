@@ -170,6 +170,27 @@
   font-family: var(--font-involve);
 }
 
+/* Date separator between days */
+.dateSep {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0.35rem 0;
+}
+
+.dateSep span {
+  font-family: var(--font-involve);
+  font-size: 0.55rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+  opacity: 0.4;
+  padding: 0.15rem 0.6rem;
+  border: 1px solid var(--border-soft);
+  border-radius: 2px;
+  background: var(--bg-subtle);
+}
+
 .msgAdmin {
   display: flex;
   justify-content: flex-start;

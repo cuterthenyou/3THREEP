@@ -33,14 +33,45 @@
 }
 
 .card {
+  position: relative;
   width: 100%;
   max-width: 24rem;
-  border-radius: 0.75rem;
+  border-radius: 0.4rem;
   padding: 2rem;
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
   background: var(--color-primary);
+}
+
+/* HUD system tag, top-left of the card */
+.cardTag {
+  position: absolute;
+  top: 0.7rem;
+  left: 1rem;
+  font-family: var(--font-involve, monospace);
+  font-size: 0.5rem;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+  opacity: 0.4;
+}
+
+/* Wrong-code shake + red flash */
+.codeShake {
+  animation: codeShake 0.42s cubic-bezier(0.36, 0.07, 0.19, 0.97);
+}
+
+.codeShake .slot {
+  border-color: var(--status-error, #8a2020);
+  border-bottom-color: var(--status-error, #8a2020);
+}
+
+@keyframes codeShake {
+  10%, 90% { transform: translateX(-1px); }
+  20%, 80% { transform: translateX(2px); }
+  30%, 50%, 70% { transform: translateX(-4px); }
+  40%, 60% { transform: translateX(4px); }
 }
 
 .title {

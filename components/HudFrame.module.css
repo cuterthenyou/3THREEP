@@ -1,0 +1,52 @@
+.frame {
+  position: relative;
+}
+
+.panel {
+  padding: 1.1rem 1.15rem;
+  background: var(--bg-2);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-base, 0px);
+}
+
+.inline {
+  padding: 0;
+  background: transparent;
+}
+
+/* ── Corner brackets — thin accent L-shapes ─────────────────── */
+.corner {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  pointer-events: none;
+  color: var(--accent);
+  z-index: 2;
+}
+
+.tl { top: -1px; left: -1px;  border-top: 2px solid currentColor; border-left: 2px solid currentColor; }
+.tr { top: -1px; right: -1px; border-top: 2px solid currentColor; border-right: 2px solid currentColor; }
+.bl { bottom: -1px; left: -1px;  border-bottom: 2px solid currentColor; border-left: 2px solid currentColor; }
+.br { bottom: -1px; right: -1px; border-bottom: 2px solid currentColor; border-right: 2px solid currentColor; }
+
+/* ── Mono system label ──────────────────────────────────────── */
+.label {
+  position: absolute;
+  top: -0.62rem;
+  left: 0.9rem;
+  padding: 0 0.4rem;
+  background: var(--bg-2);
+  font-family: var(--font-involve, monospace);
+  font-size: 0.5rem;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--accent);
+  opacity: 0.55;
+  z-index: 3;
+  white-space: nowrap;
+}
+
+/* On inline frames the label sits on whatever is behind it */
+.inline .label {
+  background: var(--bg);
+}

@@ -44,6 +44,10 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             __html: `(function(){try{var t=localStorage.getItem('threep-theme')||'dark';document.documentElement.dataset.theme=t;}catch(e){}})();`,
           }}
         />
+        {/* Preload brand fonts — biggest first-paint win (text/buttons paint instantly) */}
+        <link rel="preload" as="font" type="font/ttf" href="/fonts/ONDER-REGULAR.TTF" crossOrigin="anonymous" />
+        <link rel="preload" as="font" type="font/ttf" href="/fonts/Involve-VF.ttf" crossOrigin="anonymous" />
+        <link rel="preload" as="font" type="font/ttf" href="/fonts/DeutschGothic-RAMA.ttf" crossOrigin="anonymous" />
         <ThemeStyles />
       </head>
       <body className="overflow-x-hidden">

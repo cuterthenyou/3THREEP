@@ -96,7 +96,7 @@ export default async function Footer() {
           <div className="flex flex-col sm:flex-row gap-4 sm:gap-6">
 
             {/* Card 1 — contact us */}
-            <div className={`flex-1 flex flex-col items-center justify-center gap-5 px-8 py-10 rounded-[10px] ${s.card}`}>
+            <div className={`flex-1 flex flex-col items-center justify-center gap-5 px-5 py-8 sm:px-8 sm:py-10 rounded-[10px] ${s.card}`}>
               <h2 className={s.heading}>{content.contact_heading}</h2>
               <p className={`text-xs text-center ${s.subtitle}`}>
                 {content.contact_subtext}
@@ -108,7 +108,7 @@ export default async function Footer() {
             </div>
 
             {/* Card 2 — follow us */}
-            <div className={`flex-1 flex flex-col items-center justify-center gap-5 px-8 py-10 rounded-[10px] ${s.card}`}>
+            <div className={`flex-1 flex flex-col items-center justify-center gap-5 px-5 py-8 sm:px-8 sm:py-10 rounded-[10px] ${s.card}`}>
               <h2 className={s.heading}>{content.follow_heading}</h2>
               <p className={`text-xs text-center ${s.subtitle}`}>
                 {content.follow_subtext}

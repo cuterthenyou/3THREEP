@@ -64,6 +64,12 @@
   width: 180px;
   height: 180px;
   overflow: visible;
+  animation: capGlow 1.8s ease-in-out infinite;
+}
+
+@keyframes capGlow {
+  0%, 100% { filter: drop-shadow(0 0 2px var(--accent, #f29774)); }
+  50%       { filter: drop-shadow(0 0 9px var(--accent, #f29774)); }
 }
 
 /* The spinning group inside the SVG — transform-origin set inline */

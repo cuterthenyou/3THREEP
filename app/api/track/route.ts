@@ -10,9 +10,13 @@ async function ensurePageViewsTable() {
       id         UUID DEFAULT gen_random_uuid() PRIMARY KEY,
       path       TEXT NOT NULL,
       session_id TEXT NOT NULL,
+      referrer   TEXT,
+      user_agent TEXT,
       created_at TIMESTAMPTZ DEFAULT now()
     )
   `)
+  await query(`ALTER TABLE page_views ADD COLUMN IF NOT EXISTS referrer TEXT`)
+  await query(`ALTER TABLE page_views ADD COLUMN IF NOT EXISTS user_agent TEXT`)
   await query(`CREATE INDEX IF NOT EXISTS idx_page_views_created_at ON page_views(created_at DESC)`)
   await query(`CREATE INDEX IF NOT EXISTS idx_page_views_session ON page_views(session_id)`)
   pageViewsReady = true
@@ -20,12 +24,18 @@ async function ensurePageViewsTable() {
 
 export async function POST(req: NextRequest) {
   try {
-    const { path, session_id } = await req.json()
+    const { path, session_id, referrer } = await req.json()
     if (!path || !session_id) return new NextResponse(null, { status: 204 })
+    const ua = req.headers.get('user-agent') ?? null
     await ensurePageViewsTable()
     await query(
-      'INSERT INTO page_views (path, session_id) VALUES ($1, $2)',
-      [String(path).slice(0, 500), String(session_id).slice(0, 100)]
+      'INSERT INTO page_views (path, session_id, referrer, user_agent) VALUES ($1, $2, $3, $4)',
+      [
+        String(path).slice(0, 500),
+        String(session_id).slice(0, 100),
+        referrer ? String(referrer).slice(0, 500) : null,
+        ua ? ua.slice(0, 400) : null,
+      ]
     )
   } catch {
     // silent fail

@@ -21,6 +21,8 @@ export default async function HomePage() {
   let categories = staticCategories;
   let categoryData: Record<string, Category> = {};
   let heroVideoUrl: string | null = null;
+  let heroVideoMp4Url: string | null = null;
+  let heroPosterUrl: string | null = null;
   let logoIconUrl: string | null = null;
   let logoTextUrl: string | null = null;
   let initialCollections: { slug: string; name: string; types: string[] }[] = [];
@@ -33,6 +35,8 @@ export default async function HomePage() {
     ])
     for (const row of settingsData) {
       if (row.key === 'hero_video_url') heroVideoUrl = row.value
+      if (row.key === 'hero_video_url_mp4') heroVideoMp4Url = row.value
+      if (row.key === 'hero_poster_url') heroPosterUrl = row.value
       if (row.key === 'logo_icon_url') logoIconUrl = row.value
       if (row.key === 'logo_text_url') logoTextUrl = row.value
     }
@@ -82,7 +86,7 @@ export default async function HomePage() {
   return (
     <main className="min-h-screen">
       <Header isAdminUser={isAdminUser} initialCollections={initialCollections} logoIconUrl={logoIconUrl} logoTextUrl={logoTextUrl} />
-      <Hero videoUrl={heroVideoUrl} />
+      <Hero videoUrl={heroVideoUrl} mp4Url={heroVideoMp4Url} posterUrl={heroPosterUrl} />
       <TornEdge />
       <Suspense fallback={<div id="catalog" />}>
         <CatalogSection products={products} categories={categories} categoryData={categoryData} />

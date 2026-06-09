@@ -9,6 +9,7 @@ import { useCart } from '@/lib/cart'
 import Image from 'next/image'
 import Link from 'next/link'
 import { formatPrice } from '@/lib/utils'
+import { trackEvent } from '@/lib/track'
 import s from './page.module.css'
 
 type Mode = 'loading' | 'user' | 'choose' | 'guest'
@@ -34,6 +35,13 @@ export default function CheckoutPage() {
     if (status === 'authenticated') setMode('user')
     else if (status === 'unauthenticated') setMode('choose')
   }, [status])
+
+  // Funnel stage 3: reaching checkout with a non-empty cart
+  useEffect(() => {
+    if (items.length > 0) trackEvent('checkout_start', { items: items.length, total })
+    // fire once on mount
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const isGuestEmailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(guestEmail)
 

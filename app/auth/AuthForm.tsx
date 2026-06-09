@@ -7,15 +7,16 @@ import Link from 'next/link';
 import s from './auth.module.css';
 
 // ── 6-slot animated code input ───────────────────────────────────────────────
-function CodeInput({ value, onChange, disabled }: {
+function CodeInput({ value, onChange, disabled, shake }: {
   value: string
   onChange: (v: string) => void
   disabled?: boolean
+  shake?: boolean
 }) {
   const inputRef = useRef<HTMLInputElement>(null)
 
   return (
-    <div className={s.codeWrap} onClick={() => inputRef.current?.focus()}>
+    <div className={`${s.codeWrap} ${shake ? s.codeShake : ''}`} onClick={() => inputRef.current?.focus()}>
       {Array.from({ length: 6 }, (_, i) => {
         const char = value[i] ?? null
         const isActive = i === value.length && value.length < 6
@@ -38,6 +39,11 @@ function CodeInput({ value, onChange, disabled }: {
         autoFocus
         maxLength={6}
         onChange={e => onChange(e.target.value.replace(/\D/g, '').slice(0, 6))}
+        onPaste={e => {
+          e.preventDefault()
+          const pasted = (e.clipboardData.getData('text') || '').replace(/\D/g, '').slice(0, 6)
+          if (pasted) onChange(pasted)
+        }}
         className={s.hiddenInput}
       />
     </div>
@@ -61,7 +67,9 @@ export default function AuthForm() {
   const [emailTouched, setEmailTouched] = useState(false);
   const [isExistingUser, setIsExistingUser] = useState<boolean | null>(null);
   const [resendSeconds, setResendSeconds] = useState(0);
+  const [shake, setShake] = useState(false);
   const resendIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const verifyingRef = useRef(false);
 
   const isEmailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
@@ -107,6 +115,8 @@ export default function AuthForm() {
   }
 
   async function verifyCode() {
+    if (verifyingRef.current) return;
+    verifyingRef.current = true;
     setLoading(true);
     setError('');
     try {
@@ -115,7 +125,10 @@ export default function AuthForm() {
       );
       if (response.url.includes('/error') || response.url.includes('error=')) {
         setError('Неверный код. Попробуй ещё раз.');
+        setShake(true);
+        setTimeout(() => { setShake(false); setCode(''); }, 450);
         setLoading(false);
+        verifyingRef.current = false;
         return;
       }
       if (newsletter) {
@@ -125,15 +138,25 @@ export default function AuthForm() {
     } catch {
       setError('Произошла ошибка. Попробуй ещё раз.');
       setLoading(false);
+      verifyingRef.current = false;
     }
   }
+
+  // Auto-submit once all 6 digits are entered
+  useEffect(() => {
+    if (step === 'code' && code.length === 6 && !verifyingRef.current) {
+      verifyCode();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [code, step]);
 
   return (
     <main className={s.page}>
       <button onClick={() => router.back()} className={s.authBack}>
         ← НАЗАД
       </button>
-      <div className={s.card}>
+      <div className={`${s.card} hud-corners`}>
+        <span className={s.cardTag}>// ACCESS</span>
         <h1 className={s.title}>Вход</h1>
 
         {step === 'email' ? (
@@ -195,6 +218,7 @@ export default function AuthForm() {
               value={code}
               onChange={setCode}
               disabled={loading}
+              shake={shake}
             />
             <button
               onClick={verifyCode}

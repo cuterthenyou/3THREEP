@@ -22,7 +22,16 @@ export default function VisitTracker() {
   useEffect(() => {
     if (pathname?.startsWith('/admin')) return
     const sid = getOrCreateSessionId()
-    const body = JSON.stringify({ path: pathname, session_id: sid })
+    // Only record referrer for the first hit of a session (external source)
+    let referrer: string | null = null
+    try {
+      if (!sessionStorage.getItem('threep_ref_done')) {
+        const r = document.referrer
+        if (r && !r.includes(location.host)) referrer = r
+        sessionStorage.setItem('threep_ref_done', '1')
+      }
+    } catch { /* ignore */ }
+    const body = JSON.stringify({ path: pathname, session_id: sid, referrer })
     try {
       navigator.sendBeacon('/api/track', new Blob([body], { type: 'application/json' }))
     } catch {
