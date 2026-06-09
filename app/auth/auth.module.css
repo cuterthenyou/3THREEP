@@ -175,6 +175,7 @@
   to   { transform: translateY(0);   opacity: 1; }
 }
 
+/* Primary CTA — matches the site-wide neo-brutal filled button (.modalBtn / .ctaBtn) */
 .btn {
   width: 100%;
   padding: 0.75rem;
@@ -182,29 +183,34 @@
   letter-spacing: 0.1em;
   background: var(--color-accent);
   color: var(--color-primary);
-  border-radius: 5px;
+  border-radius: 3px;
   font-family: var(--font-onder);
   font-size: 0.8rem;
-  transition: filter 0.2s, transform 0.15s, box-shadow 0.2s;
-  border: none;
+  border: 1px solid var(--accent);
+  box-shadow: 2px 2px 0 var(--accent);
+  transition: box-shadow 0.12s, transform 0.1s;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
 }
 
 .btn:hover:not(:disabled) {
-  filter: brightness(1.1);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 16px var(--accent-glow);
+  box-shadow: 3px 3px 0 var(--accent);
+  transform: translate(-1px, -1px);
 }
 
 .btn:active:not(:disabled) {
-  transform: translateY(0) scale(0.98);
-  transition-duration: 0.08s;
+  box-shadow: 1px 1px 0 var(--accent);
+  transform: translate(1px, 1px);
+  transition-duration: 0.06s;
 }
 
 .btn:disabled {
   opacity: 0.5;
   cursor: default;
+}
+
+@media (max-width: 639px) {
+  .btn { font-size: var(--btn-fz-mobile); }
 }
 
 .backLink {

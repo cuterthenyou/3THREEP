@@ -256,3 +256,46 @@ not:
 function → marketing → conversion → generic UI
 
 The goal is to create an immersive digital identity for THREEP.
+
+---
+
+# Technical Guide (engineering)
+
+This section is the engineering counterpart to the brand guide above. Deep, task-specific knowledge lives in the project skills under `.claude/skills/` — read them before working:
+- **`threep-design`** — design tokens, CSS-variable system, button/card patterns, no-hardcode rules.
+- **`threep-animations`** — existing keyframes, VHS/glitch/grain/marquee patterns, motion principles.
+- **`threep-backend`** — DB schema, `lib/db.ts` helpers, `site_settings`, auth, admin conventions.
+
+Subagents for delegation live in `.claude/agents/`: `frontend`, `backend`, `design-reviewer`.
+
+## Stack & structure
+- **Next.js 16 (App Router) + TypeScript + TailwindCSS + CSS Modules**, **PostgreSQL** via raw SQL (no ORM), **NextAuth 5** (email + 6-digit OTP). Files on S3/Yandex (`@aws-sdk/client-s3` + `sharp`).
+- **server/client split**: `page.tsx` (server) fetches data via `lib/db` + `auth()` → passes props to `*Client.tsx` (`'use client'`) which holds state/interactivity. Don't fetch in client components.
+- API routes in `app/api/**/route.ts`. Shared components in `components/`; page-specific components sit next to their page (e.g. `app/account/parts/`).
+- Data access: `queryOne` / `queryMany` from `lib/db.ts`, parameterized (`$1`). Types in `lib/types.ts`.
+
+## Clean code — NO hardcoding
+- Colors, fonts, radii: **only CSS variables** (`var(--bg)`, `var(--accent)`, `var(--font-heading|body|price)`, `var(--radius-base)`). No `#hex`/`rgb()`/named colors in JSX or module CSS — the only exception is the token definitions in `app/globals.css` and the dynamic ones in `components/ThemeStyles.tsx`.
+- Prefer the **role tokens** `--font-heading/body/price` over raw aliases `--font-onder/involve/deutsch`.
+- Any new configurable visual/content value goes into the `site_settings` table (read via `/api/site-settings`, themed via `ThemeStyles.tsx`), not into a constant.
+
+## Component separation
+- Small, reusable components; **reuse** shared widgets (`ProductModal`, `MarqueeTicker`, `EmojiPicker`) instead of duplicating markup.
+- Keep server-fetch and client-state responsibilities separate (the `page.tsx` → `*Client.tsx` pattern).
+
+## Modular CSS
+- **One `*.module.css` per component.** Shared patterns (`.neo-btn`, `.neo-card`, `.hud-corners`, grain, keyframes) live in `globals.css`.
+- Avoid sprawling inline styles — the codebase has some legacy inline styling; prefer module classes and migrate inline → class when you touch a file.
+- **Buttons** = neo-brutal: sharp corners, `border: 1px solid var(--accent)`, `box-shadow: 2px 2px 0 var(--accent)`, hover `translate(-1px,-1px)` + bigger shadow. Never smooth-rounded "brightness-hover" buttons.
+
+## Responsive & themes
+- Mobile breakpoint **`max-width: 639px`** (Tailwind `sm`). Wrap hover/`:active` transforms in `@media (hover: hover) and (pointer: fine)` (touch fires `:active` on tap-start). Inputs use `font-size: 16px` to avoid iOS zoom. Mobile button font: `var(--btn-fz-mobile)`.
+- Themes: light (terracotta) / dark (charcoal + warm pink) via `data-theme` on `<html>` (`lib/theme.ts`). Theme-reactive client visuals observe `data-theme` with a `MutationObserver`.
+- Always test against iOS Safari quirks (custom fonts, `:active`, autoplay video).
+
+## Money (brand 333 — "the three of us")
+All prices are multiples of 3. Logged-in users get a level-based discount; the discounted price is rounded **down** to a multiple of 3 (`Math.floor(x/3)*3`). Format via `lib/utils.ts`.
+
+## Workflow
+- After type/import changes run `npm run build`. Report changes as `file:line`. Don't claim visual/iOS correctness you couldn't actually verify — flag it for device testing instead.
+- DB migrations: numbered idempotent `.sql` in `migration/`; apply against the live (Amvera) DB only with explicit confirmation.

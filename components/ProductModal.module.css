@@ -212,6 +212,11 @@
     height: 40px;
     font-size: 0.6rem;
   }
+
+  .addBtn {
+    padding: 0.85rem;
+    font-size: var(--btn-fz-mobile);
+  }
 }
 
 /* ── Tablet ── */

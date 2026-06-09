@@ -82,7 +82,10 @@
 
 .itemPrice {
   color: var(--color-accent);
-  font-family: var(--font-onder);
+  font-family: var(--font-price);
+  font-size: 1.05rem;
+  line-height: 1;
+  white-space: nowrap;
 }
 
 .totalRow {
@@ -101,9 +104,10 @@
 }
 
 .totalAmount {
-  font-size: 1.25rem;
+  font-size: 1.35rem;
   color: var(--color-accent);
-  font-family: var(--font-onder);
+  font-family: var(--font-price);
+  line-height: 1;
 }
 
 .deliveryRow {
@@ -362,7 +366,31 @@
   }
 
   .totalAmount {
-    font-size: 1.1rem;
+    font-size: 1.2rem;
+  }
+
+  .itemPrice {
+    font-size: 0.95rem;
+  }
+
+  /* Chat input row — keep input, emoji picker and send button on one line
+     without overflow on narrow screens */
+  .chatInputRow {
+    gap: 0.35rem;
+  }
+
+  .chatInput {
+    padding: 0.6rem 0.75rem;
+    font-size: 16px; /* prevents iOS zoom on focus */
+  }
+
+  .chatSendBtn {
+    padding: 0.6rem 0.85rem;
+    font-size: var(--btn-fz-mobile);
+  }
+
+  .consentBtn {
+    font-size: 0.65rem;
   }
 }
 

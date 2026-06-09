@@ -45,6 +45,9 @@
   --radius-base:         0px;
   --animation-speed:     1;
 
+  /* ── Buttons ── */
+  --btn-fz-mobile:       0.7rem;   /* unified primary-button font size on <640px */
+
   /* ── Fluid typography ── */
   --fs-h1: clamp(1.6rem, 5vw, 3.5rem);
   --fs-h2: clamp(1.3rem, 4vw, 2.5rem);

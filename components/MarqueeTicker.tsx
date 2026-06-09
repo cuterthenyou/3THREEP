@@ -7,8 +7,11 @@ interface Props {
 
 export default function MarqueeTicker({ texts, speed = 35 }: Props) {
   if (!texts.length) return null
-  const content = texts.join('  ·  ')
-  const doubled = content + '  ·  ' + content
+  // The unit must INCLUDE its trailing separator so the two halves are exactly
+  // equal width — only then does translateX(-50%) land on a seam and loop
+  // without a visible jump.
+  const unit = texts.join('  ·  ') + '  ·  '
+  const doubled = unit + unit
 
   return (
     <div style={{

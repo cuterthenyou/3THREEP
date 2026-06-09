@@ -82,8 +82,10 @@
   font-size: 1.5rem;
   line-height: 1.3;
   color: var(--color-accent);
-  font-family: var(--font-onder);
+  font-family: var(--font-heading);
   letter-spacing: 0.05em;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
 .avatarThumb {
@@ -760,5 +762,16 @@
 
   .profileCard {
     padding: 1rem;
+  }
+
+  /* Smaller button typography on mobile */
+  .ctaBtn,
+  .modalBtn {
+    font-size: var(--btn-fz-mobile);
+  }
+
+  .topNavBtn {
+    font-size: 0.62rem;
+    padding: 0.28rem 0.6rem;
   }
 }

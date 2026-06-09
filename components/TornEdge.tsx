@@ -57,8 +57,6 @@ const filterProps = {
   x: '-2%', y: '-25%', width: '104%', height: '150%',
 }
 
-const GRAIN_DATA_URI = "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='256' height='256'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='256' height='256' filter='url(%23n)'/%3E%3C/svg%3E\")"
-
 export default function TornEdge() {
   return (
     <div
@@ -120,19 +118,9 @@ export default function TornEdge() {
           />
         </svg>
       </div>
-
-      {/* Grain overlay — viewport-anchored to match global grain layer */}
-      <div
-        className="grain-fixed"
-        style={{
-          position: 'absolute',
-          inset: 0,
-          backgroundImage: GRAIN_DATA_URI,
-          backgroundRepeat: 'repeat',
-          backgroundSize: 'var(--grain-size, 256px) var(--grain-size, 256px)',
-          backgroundAttachment: 'fixed',
-        }}
-      />
+      {/* Grain is supplied globally by the viewport-fixed .grain-fixed layer in
+          layout.tsx — a local copy here only doubled the noise over this band,
+          producing a visible rectangular seam over the hero. */}
     </div>
   )
 }

@@ -152,8 +152,8 @@
 }
 
 .productGrade {
-  opacity: 0.55;
-  letter-spacing: 0.08em;
+  opacity: 0.7;
+  letter-spacing: 0.1em;
 }
 
 .productName {
@@ -281,6 +281,12 @@
 
   .filterBtn {
     font-size: 0.65rem;
+  }
+
+  .typeBtn,
+  .typeBtnSoon {
+    font-size: 0.58rem;
+    padding: 0.3rem 0.7rem;
   }
 }
 
