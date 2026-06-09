@@ -3,11 +3,14 @@ import { auth } from '@/lib/auth'
 import AccountClient from './AccountClient'
 import { queryOne, queryMany } from '@/lib/db'
 import { parseLevelingConfig, levelProgress, getDiscount, getTier, sparksForOrder } from '@/lib/leveling'
+import { awardAchievement } from '@/lib/gamification'
 import type { Order } from '@/lib/types'
 
 // Искры начисляются только за доставленные заказы (анти-чит) — fallback
 // для пользователей до бэкфилла должен считать по тому же правилу.
 const XP_STATUSES = ['delivered']
+// Вещь «в инвентаре»/куплена = оплачена и не отменена.
+const OWNED_STATUSES = ['paid', 'in_progress', 'shipped', 'delivered']
 
 export default async function AccountPage() {
   const session = await auth()
@@ -23,7 +26,7 @@ export default async function AccountPage() {
     email: session.user.email ?? '',
   }
 
-  const [profile, orders, settingsRows, userRow, catalogProductsRaw, catalogCategoriesRaw] = await Promise.all([
+  const [profile, orders, settingsRows, userRow, catalogProductsRaw, catalogCategoriesRaw, achievementsCatalog, maxBatRow] = await Promise.all([
     queryOne(`SELECT * FROM profiles WHERE id = $1`, [user.id]),
     queryMany(
       `SELECT o.*,
@@ -42,7 +45,13 @@ export default async function AccountPage() {
     queryOne(`SELECT newsletter_subscription FROM users WHERE id = $1`, [user.id]).catch(() => null),
     queryMany(`SELECT * FROM products WHERE active = true OR coming_soon = true ORDER BY created_at`).catch(() => [] as any[]),
     queryMany(`SELECT * FROM categories`).catch(() => [] as any[]),
-  ])
+    queryMany(`SELECT * FROM achievements WHERE active = true ORDER BY sort_order`).catch(() => [] as any[]),
+    queryOne<{ hs: number }>(
+      `SELECT MAX((meta->>'score')::int) AS hs FROM events
+       WHERE type = 'bat_score' AND user_id = $1 AND meta->>'score' ~ '^[0-9]+$'`,
+      [user.id]
+    ).catch(() => null),
+  ]) as any[]
 
   // Коллекции = активные категории, у которых есть товары
   const inactiveCatSlugs = new Set(
@@ -93,6 +102,46 @@ export default async function AccountPage() {
   const discount = getDiscount(progress.level, cfg)
   const tier = getTier(progress.level)
 
+  // ── Ачивки: idempotent-выдача детектируемых на загрузке + витрина ──────
+  const ownedSet = new Set(
+    orders
+      .filter((o: Order) => OWNED_STATUSES.includes(o.status))
+      .flatMap((o: Order) => (o.order_items ?? []).map((i) => i.product_id))
+      .filter(Boolean) as string[]
+  )
+  const anyCollectionComplete = catalogCategories.some((c: { slug: string }) => {
+    const items = catalogProducts.filter((p: any) => p.category === c.slug && !p.coming_soon)
+    return items.length > 0 && items.every((p: any) => ownedSet.has(p.id))
+  })
+  try {
+    const tasks: Promise<unknown>[] = [awardAchievement(user.id, 'profile_created')]
+    const ownedOrders = orders.filter((o: Order) => OWNED_STATUSES.includes(o.status))
+    if (ownedOrders.length) {
+      tasks.push(awardAchievement(user.id, 'first_purchase'))
+      const maxUnits = Math.max(0, ...ownedOrders.map((o: Order) => (o.order_items ?? []).reduce((q, i) => q + (i.quantity ?? 0), 0)))
+      if (maxUnits >= 3) tasks.push(awardAchievement(user.id, 'multi_buy'))
+    }
+    if (anyCollectionComplete) tasks.push(awardAchievement(user.id, 'full_collection'))
+    if ((maxBatRow?.hs ?? 0) >= 50) tasks.push(awardAchievement(user.id, 'game_hunter'))
+    await Promise.all(tasks)
+  } catch (e) {
+    console.error('[achievements] sync failed:', e)
+  }
+
+  const userAchRows = await queryMany<{ achievement_key: string; showcased: boolean }>(
+    `SELECT achievement_key, showcased FROM user_achievements WHERE user_id = $1`,
+    [user.id]
+  ).catch(() => [] as { achievement_key: string; showcased: boolean }[])
+  const unlockedMap = new Map(userAchRows.map((r) => [r.achievement_key, r.showcased]))
+  const achievements = (achievementsCatalog as any[]).map((a) => ({
+    key: a.key,
+    title: a.title,
+    description: a.description,
+    medal_key: a.medal_key,
+    unlocked: unlockedMap.has(a.key),
+    showcased: unlockedMap.get(a.key) === true,
+  }))
+
   return (
     <AccountClient
       user={{ id: user.id, email: user.email }}
@@ -114,6 +163,7 @@ export default async function AccountPage() {
       }}
       catalogProducts={catalogProducts}
       catalogCategories={catalogCategories}
+      achievements={achievements}
     />
   )
 }

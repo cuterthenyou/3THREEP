@@ -18,6 +18,48 @@ export function LvlStar() {
 export function LvlCircle() {
   return <svg width="32" height="32" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.5"><polygon points="7,0.5 13.5,4 13.5,10 7,13.5 0.5,10 0.5,4"/></svg>
 }
+// Медаль достижения — общий шестиугольный «жетон» + глиф по типу.
+// Цвет берётся из currentColor (locked/unlocked задаётся в CSS).
+export function Medal({ kind, size = 34 }: { kind: string; size?: number }) {
+  const glyph = (() => {
+    switch (kind) {
+      case 'signal': // позывной — концентрические дуги
+        return <>
+          <circle cx="12" cy="12" r="2" fill="currentColor" />
+          <path d="M8 12a4 4 0 0 1 8 0M6 12a6 6 0 0 1 12 0" fill="none" stroke="currentColor" strokeWidth="1.3" />
+        </>
+      case 'first': // первая охота — мишень
+        return <>
+          <circle cx="12" cy="12" r="5.5" fill="none" stroke="currentColor" strokeWidth="1.3" />
+          <circle cx="12" cy="12" r="2" fill="currentColor" />
+        </>
+      case 'multi': // оптовик — три ромба
+        return <>
+          <polygon points="12,5 14,8 12,11 10,8" fill="currentColor" />
+          <polygon points="8,11 10,14 8,17 6,14" fill="currentColor" />
+          <polygon points="16,11 18,14 16,17 14,14" fill="currentColor" />
+        </>
+      case 'collection': // коллекционер — сетка 2x2
+        return <>
+          <rect x="7" y="7" width="4" height="4" fill="currentColor" />
+          <rect x="13" y="7" width="4" height="4" fill="currentColor" />
+          <rect x="7" y="13" width="4" height="4" fill="currentColor" />
+          <rect x="13" y="13" width="4" height="4" fill="currentColor" />
+        </>
+      case 'game': // охотник — молния
+        return <path d="M13 5 L8 13 H11 L10 19 L16 11 H12 Z" fill="currentColor" />
+      default:
+        return <circle cx="12" cy="12" r="3" fill="currentColor" />
+    }
+  })()
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <polygon points="12,1.5 21.5,6.5 21.5,17.5 12,22.5 2.5,17.5 2.5,6.5" fill="none" stroke="currentColor" strokeWidth="1.4" />
+      {glyph}
+    </svg>
+  )
+}
+
 export function GothicStrip() {
   return (
     <svg width="14" height="120" viewBox="0 0 14 120" fill="none" xmlns="http://www.w3.org/2000/svg">

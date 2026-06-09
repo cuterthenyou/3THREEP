@@ -13,7 +13,7 @@ import EmojiPicker from '@/components/EmojiPicker';
 import ProductModal from '@/components/ProductModal';
 import NotificationBell from '@/components/NotificationBell';
 import MarqueeTicker from '@/components/MarqueeTicker';
-import { BrutalSun, BrutalMoon, LvlFire, LvlBolt, LvlStar, LvlCircle, GothicStrip } from './parts/icons';
+import { BrutalSun, BrutalMoon, LvlFire, LvlBolt, LvlStar, LvlCircle, GothicStrip, Medal } from './parts/icons';
 import s from './account.module.css';
 
 interface Gamification {
@@ -24,6 +24,15 @@ interface Gamification {
   toNext: number;
   tierKey: string;
   tierLabel: string;
+}
+
+interface AchievementView {
+  key: string;
+  title: string;
+  description: string | null;
+  medal_key: string | null;
+  unlocked: boolean;
+  showcased: boolean;
 }
 
 interface Props {
@@ -38,6 +47,7 @@ interface Props {
   gamification: Gamification;
   catalogProducts?: Product[];
   catalogCategories?: Category[];
+  achievements?: AchievementView[];
 }
 
 // Вещь «в инвентаре» = заказ оплачен и не отменён. Появляется после оплаты,
@@ -49,7 +59,7 @@ function getUsername(email: string, name: string | null) {
   return email.split('@')[0].toUpperCase();
 }
 
-export default function AccountClient({ user, profile, orders, profileBg, profileBgDark, newsletterSubscribed, tickerTexts, accountTickerTexts, gamification, catalogProducts = [], catalogCategories = [] }: Props) {
+export default function AccountClient({ user, profile, orders, profileBg, profileBgDark, newsletterSubscribed, tickerTexts, accountTickerTexts, gamification, catalogProducts = [], catalogCategories = [], achievements = [] }: Props) {
   const [loggingOut, setLoggingOut] = useState(false);
   const [activeTab, setActiveTab] = useState<'inventory' | 'orders'>('inventory');
   const [showNicknameModal, setShowNicknameModal] = useState(!profile?.name);
@@ -144,6 +154,22 @@ export default function AccountClient({ user, profile, orders, profileBg, profil
     setModalVisible(false);
     setTimeout(() => setModalProduct(null), 250);
   }
+
+  // ── Ачивки: витрина (showcase) ────────────────────────────────────────
+  const [showcase, setShowcase] = useState<Record<string, boolean>>(
+    () => Object.fromEntries(achievements.map((a) => [a.key, a.showcased]))
+  );
+  async function toggleShowcase(key: string) {
+    const next = !showcase[key];
+    setShowcase((s) => ({ ...s, [key]: next }));
+    const res = await fetch('/api/account/achievements/showcase', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ key, showcased: next }),
+    }).catch(() => null);
+    if (!res || !res.ok) setShowcase((s) => ({ ...s, [key]: !next })); // откат (в т.ч. лимит витрины)
+  }
+  const unlockedCount = achievements.filter((a) => a.unlocked).length;
 
   async function handleSaveNickname() {
     const trimmed = nicknameInput.trim();
@@ -274,6 +300,29 @@ export default function AccountClient({ user, profile, orders, profileBg, profil
                 )}
               </div>
               <h2 className={s.username}>{username}</h2>
+
+              {/* Ачивки-медали */}
+              {achievements.length > 0 && (
+                <div className={s.medalsRow}>
+                  {achievements.map((a) => (
+                    <button
+                      key={a.key}
+                      type="button"
+                      disabled={!a.unlocked}
+                      onClick={() => a.unlocked && toggleShowcase(a.key)}
+                      className={`${s.medal} ${a.unlocked ? s.medalUnlocked : s.medalLocked} ${showcase[a.key] ? s.medalShowcased : ''}`}
+                      title={
+                        a.unlocked
+                          ? `${a.title}${a.description ? ' — ' + a.description : ''} (клик — на витрину)`
+                          : `🔒 ${a.title}${a.description ? ': ' + a.description : ''}`
+                      }
+                    >
+                      <Medal kind={a.medal_key ?? ''} size={24} />
+                    </button>
+                  ))}
+                  <span className={s.medalsCount}>{unlockedCount}/{achievements.length}</span>
+                </div>
+              )}
 
               <div className="flex gap-2">
                 {uniqueItems.slice(0, 4).map((item, i) => (

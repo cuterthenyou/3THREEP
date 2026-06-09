@@ -71,6 +71,58 @@
   gap: 0.4rem;
 }
 
+/* ── Achievements / medals ── */
+.medalsRow {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.medal {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.1rem;
+  height: 2.1rem;
+  padding: 0;
+  border: none;
+  background: transparent;
+  border-radius: 2px;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 0.12s, filter 0.15s, opacity 0.15s;
+}
+
+.medalUnlocked {
+  color: var(--accent);
+  cursor: pointer;
+}
+
+.medalLocked {
+  color: var(--text-muted);
+  opacity: 0.4;
+  filter: grayscale(1);
+  cursor: default;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .medalUnlocked:hover { transform: translateY(-1px); }
+}
+
+/* Витринная (showcased) ачивка — подсвеченный жетон */
+.medalShowcased {
+  background: var(--accent-2);
+  box-shadow: 0 0 0 1px var(--accent);
+}
+
+.medalsCount {
+  font-family: var(--font-onder);
+  font-size: 0.55rem;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  margin-left: 0.15rem;
+}
+
 .levelBadge {
   font-size: 0.6rem;
   padding: 0.125rem 0.5rem;
