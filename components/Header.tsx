@@ -87,6 +87,7 @@ export default function Header({ isAdminUser = false, initialCollections, logoIc
   const headerRef = useRef<HTMLElement>(null);
   const { count, setOpen } = useCart();
   const [scrolled, setScrolled] = useState(false);
+  const [hidden, setHidden] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [expanded, setExpanded] = useState<string | null>(null);
   const [collections, setCollections] = useState<Collection[]>(initialCollections ?? []);
@@ -133,12 +134,22 @@ export default function Header({ isAdminUser = false, initialCollections, logoIc
     return () => obs.disconnect();
   }, []);
 
-  // Sticky + backdrop-filter on scroll
+  // Sticky styling + direction-aware hide/reveal
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 50);
+    let lastY = window.scrollY;
+    const onScroll = () => {
+      const y = window.scrollY;
+      setScrolled(y > 50);
+      if (y > lastY + 5 && y > 140) setHidden(true);   // scroll down → hide
+      else if (y < lastY - 5) setHidden(false);         // scroll up → reveal
+      lastY = y;
+    };
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
+
+  // Never hide the bar while the menu is open
+  useEffect(() => { if (menuOpen) setHidden(false); }, [menuOpen]);
 
   // iOS-safe scroll lock when menu open
   useEffect(() => {
@@ -203,12 +214,7 @@ export default function Header({ isAdminUser = false, initialCollections, logoIc
     <>
       <header
         ref={headerRef}
-        className="fixed top-0 left-0 right-0 z-50"
-        style={{
-          backgroundColor: scrolled ? 'var(--header-scrolled-bg)' : 'transparent',
-          backdropFilter: scrolled ? 'blur(12px) saturate(1.4)' : 'none',
-          WebkitBackdropFilter: scrolled ? 'blur(12px) saturate(1.4)' : 'none',
-        }}
+        className={`fixed top-0 left-0 right-0 z-50 ${s.headerBase} ${scrolled ? s.headerScrolled : s.headerTop} ${hidden ? s.headerHidden : ''}`}
       >
         <div className="flex items-center justify-between px-5 sm:px-8 py-4 sm:py-5">
           <Link href="/" aria-label="На главную">

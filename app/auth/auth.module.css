@@ -36,12 +36,30 @@
   position: relative;
   width: 100%;
   max-width: 24rem;
-  border-radius: 0.4rem;
-  padding: 2rem;
+  border-radius: 3px;
+  padding: 2.25rem 2rem 2rem;
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
   background: var(--color-primary);
+  border: 1px solid var(--accent);
+  box-shadow: 4px 4px 0 var(--accent);
+}
+
+/* HUD scanline accent across the top of the card */
+.card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: repeating-linear-gradient(
+    90deg,
+    var(--accent) 0 10px,
+    transparent 10px 16px
+  );
+  opacity: 0.5;
 }
 
 /* HUD system tag, top-left of the card */
@@ -78,9 +96,10 @@
   font-size: 1.5rem;
   text-align: center;
   text-transform: uppercase;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.16em;
   color: var(--color-accent);
   font-family: var(--font-onder);
+  -webkit-font-smoothing: antialiased;
 }
 
 .hint {

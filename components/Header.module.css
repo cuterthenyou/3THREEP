@@ -1,3 +1,66 @@
+/* ── Header bar — branded sticky/hide/reveal ── */
+.headerBase {
+  transition:
+    transform 0.42s cubic-bezier(0.22, 1, 0.36, 1),
+    background-color 0.3s ease,
+    box-shadow 0.3s ease,
+    border-color 0.3s ease;
+  border-bottom: 1px solid transparent;
+  will-change: transform;
+}
+
+/* Accent hairline that wipes in when the header sticks */
+.headerBase::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 1px;
+  background: var(--accent);
+  transform: scaleX(0);
+  transform-origin: left center;
+  opacity: 0;
+  transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.3s ease;
+}
+
+/* At the very top — faint branded veil over the hero (not fully transparent) */
+.headerTop {
+  background: linear-gradient(to bottom, color-mix(in srgb, var(--bg) 50%, transparent), transparent);
+}
+
+/* Scrolled — solid blurred bar + neo accent + stick pop */
+.headerScrolled {
+  background: var(--header-scrolled-bg);
+  backdrop-filter: blur(12px) saturate(1.4);
+  -webkit-backdrop-filter: blur(12px) saturate(1.4);
+  border-bottom-color: color-mix(in srgb, var(--accent) 35%, transparent);
+  box-shadow: 0 6px 22px rgba(0, 0, 0, 0.28);
+  animation: headerStick 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.headerScrolled::after {
+  transform: scaleX(1);
+  opacity: 0.45;
+}
+
+/* Hidden on scroll-down, slides back in on scroll-up */
+.headerHidden {
+  transform: translateY(-105%);
+}
+
+@keyframes headerStick {
+  0%   { box-shadow: 0 0 0 rgba(0, 0, 0, 0); }
+  45%  { box-shadow: 0 10px 26px rgba(0, 0, 0, 0.34); }
+  100% { box-shadow: 0 6px 22px rgba(0, 0, 0, 0.28); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .headerBase, .headerBase::after { transition: none; }
+  .headerScrolled { animation: none; }
+  .headerHidden { transform: none; }
+}
+
 .navBtn {
   background: var(--bg-subtle);
   color: var(--accent);
@@ -278,13 +341,14 @@
 }
 
 .menuUserName {
-  font-family: var(--font-deutsch);
+  font-family: var(--font-heading);
   font-size: clamp(1.2rem, 5vw, 1.6rem);
-  letter-spacing: 0.1em;
+  letter-spacing: 0.05em;
   text-transform: uppercase;
   color: var(--accent);
-  opacity: 0.85;
-  line-height: 1;
+  opacity: 0.9;
+  line-height: 1.1;
+  -webkit-font-smoothing: antialiased;
 }
 
 .menuUserLevel {

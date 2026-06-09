@@ -334,6 +334,17 @@ function ScoreCounter({ score, waveNum, best, combo, effect, bonus }: {
 
 function GameOverBanner() { return <div className={s.gameOverCenter}>GAME OVER</div> }
 
+// Центральное оповещение о новой волне (incoming)
+function WaveBanner({ waveNum, bonus }: { waveNum: number; bonus: boolean }) {
+  return (
+    <div className={`${s.waveBanner} ${bonus ? s.waveBannerBonus : ''}`} aria-hidden="true">
+      <span className={s.waveBannerKick}>{bonus ? '// СВАРМ' : '// ВХОДЯЩАЯ'}</span>
+      <span className={s.waveBannerNum}>{bonus ? 'BONUS WAVE' : `WAVE ${waveNum}`}</span>
+      <span className={s.waveBannerBar} />
+    </div>
+  )
+}
+
 // ── Helpers ───────────────────────────────────────────────────────────────────
 let _id = 0
 function nextId() { return ++_id }
@@ -389,6 +400,7 @@ export default function BatAnimation() {
   const [activeEffect, setActiveEffect]     = useState<{ kind: PowerKind } | null>(null)
   const [screenShake, setScreenShake]       = useState(false)
   const [bonusWave, setBonusWave]           = useState(false)
+  const [waveBanner, setWaveBanner]         = useState(false)
 
   const batsRef            = useRef<BatData[]>([])
   batsRef.current          = bats
@@ -491,6 +503,14 @@ export default function BatAnimation() {
     if (gameState === 'lure') spawnWaveRef.current!(1)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [gameState])
+
+  // Центральное оповещение о новой волне
+  useEffect(() => {
+    if (waveNum <= 0 || gameState !== 'playing') return
+    setWaveBanner(true)
+    const t = setTimeout(() => setWaveBanner(false), 1700)
+    return () => clearTimeout(t)
+  }, [waveNum, gameState])
 
   // Bats cleared → start roomba sweep
   useEffect(() => {
@@ -640,6 +660,9 @@ export default function BatAnimation() {
           onSplatHit={handleSplatHit} onDone={handleRoombaDone} />
       )}
       {gameState === 'game_over' && <GameOverBanner />}
+      {waveBanner && gameState === 'playing' && (
+        <WaveBanner waveNum={waveNum} bonus={waveNum >= 5 && waveNum % 5 === 0} />
+      )}
       {showScore && (
         <ScoreCounter score={score} waveNum={waveNum} best={bestScore}
           combo={comboDisplay} effect={activeEffect} bonus={bonusWave} />
