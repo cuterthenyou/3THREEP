@@ -40,6 +40,10 @@ interface Props {
   catalogCategories?: Category[];
 }
 
+// Вещь «в инвентаре» = заказ оплачен и не отменён. Появляется после оплаты,
+// исчезает при отмене. (Искры/скидка — отдельно, только при 'delivered'.)
+const OWNED_STATUSES: OrderStatus[] = ['paid', 'in_progress', 'shipped', 'delivered'];
+
 function getUsername(email: string, name: string | null) {
   if (name) return name.toUpperCase();
   return email.split('@')[0].toUpperCase();
@@ -78,7 +82,9 @@ export default function AccountClient({ user, profile, orders, profileBg, profil
     } catch {}
   }, []);
 
-  const allItems = orders.flatMap((o) => o.order_items ?? []);
+  // Только оплаченные (не отменённые) заказы попадают в инвентарь
+  const ownedOrders = orders.filter((o) => OWNED_STATUSES.includes(o.status));
+  const allItems = ownedOrders.flatMap((o) => o.order_items ?? []);
   const uniqueItems = [...new Map(allItems.map((i) => [i.product_id, i])).values()];
   const { sparks, level, discount, progressPct, toNext, tierLabel } = gamification;
   const username = getUsername(user.email, displayName);

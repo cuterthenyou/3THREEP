@@ -31,7 +31,8 @@ export default async function HomePage() {
       queryMany<{ product_id: string }>(
         `SELECT DISTINCT oi.product_id FROM order_items oi
          JOIN orders o ON o.id = oi.order_id
-         WHERE o.user_id = $1 AND oi.product_id IS NOT NULL`, [session.user.id]
+         WHERE o.user_id = $1 AND oi.product_id IS NOT NULL
+           AND o.status IN ('paid','in_progress','shipped','delivered')`, [session.user.id]
       ).catch(() => [] as { product_id: string }[]),
     ])
     if (prof) {
