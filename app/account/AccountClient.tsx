@@ -11,6 +11,7 @@ import { toggleTheme } from '@/lib/theme';
 
 import EmojiPicker from '@/components/EmojiPicker';
 import ProductModal from '@/components/ProductModal';
+import NotificationBell from '@/components/NotificationBell';
 import MarqueeTicker from '@/components/MarqueeTicker';
 import { BrutalSun, BrutalMoon, LvlFire, LvlBolt, LvlStar, LvlCircle, GothicStrip } from './parts/icons';
 import s from './account.module.css';
@@ -238,6 +239,7 @@ export default function AccountClient({ user, profile, orders, profileBg, profil
           <div className={s.topNav}>
             <Link href="/" className={s.topNavLink}>← На главную</Link>
             <div className={s.topNavActions}>
+              <NotificationBell />
               <button onClick={handleLogout} disabled={loggingOut} className={s.topNavBtn}>
                 {loggingOut ? '...' : 'Выйти'}
               </button>

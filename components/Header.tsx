@@ -6,6 +6,7 @@ import { useCart } from '@/lib/cart';
 import { toggleTheme } from '@/lib/theme';
 import UserButton from './UserButton';
 import ThemedLogo from './ThemedLogo';
+import NotificationBell from './NotificationBell';
 import s from './Header.module.css';
 
 function BrutalSun() {
@@ -233,6 +234,9 @@ export default function Header({ isAdminUser = false, initialCollections, logoIc
               {isDark ? <BrutalSun /> : <BrutalMoon />}
               <span>{isDark ? 'LIGHT' : 'DARK'}</span>
             </button>
+
+            {/* Notifications */}
+            <NotificationBell />
 
             {/* User button */}
             <UserButton />
