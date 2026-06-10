@@ -112,7 +112,7 @@
 @media (hover: hover) and (pointer: fine) {
   .productCard:hover {
     border-color: var(--accent);
-    box-shadow: 3px 3px 0 var(--accent);
+    box-shadow: 3px 3px 0 var(--accent), 0 0 22px var(--accent-2);
     transform: translate(-1px, -1px);
   }
 

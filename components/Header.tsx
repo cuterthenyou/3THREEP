@@ -350,6 +350,7 @@ export default function Header({ isAdminUser = false, initialCollections, logoIc
 
         {/* Footer links */}
         <div className={s.overlayFooter}>
+          <span className={s.menuBrand}><b>333</b> · НАРОДНЫЙ КАСТОМ · СДЕЛАНО ХЛОРКОЙ</span>
           <Link href="/privacy" onClick={() => setMenuOpen(false)} className={s.footerLink}>Политика конфиденциальности</Link>
         </div>
       </div>
