@@ -137,11 +137,104 @@
   font-family: var(--font-involve);
 }
 
+/* ── Status timeline ── */
+.timeline {
+  display: flex;
+  margin: 0.25rem 0;
+}
+
+.tlStep {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  position: relative;
+}
+
+.tlStep::before {
+  content: '';
+  position: absolute;
+  top: 5px;
+  left: -50%;
+  width: 100%;
+  height: 2px;
+  background: var(--border);
+  z-index: 0;
+}
+.tlStep:first-child::before { display: none; }
+.tlStepDone::before { background: var(--accent); }
+
+.tlDot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--bg-2);
+  border: 2px solid var(--border);
+  z-index: 1;
+  transition: background 0.2s, border-color 0.2s, box-shadow 0.2s;
+}
+.tlStepDone .tlDot {
+  background: var(--accent);
+  border-color: var(--accent);
+  box-shadow: 0 0 8px var(--accent);
+}
+
+.tlLabel {
+  font-family: var(--font-involve);
+  font-size: 0.5rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+  opacity: 0.4;
+  text-align: center;
+  line-height: 1.2;
+}
+.tlStepDone .tlLabel { opacity: 0.85; }
+
+.timelineCancelled {
+  font-family: var(--font-onder);
+  font-size: 0.7rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--status-cancelled);
+  border: 1px solid var(--status-cancelled);
+  border-radius: 2px;
+  padding: 0.4rem 0.75rem;
+  text-align: center;
+}
+
 /* Chat */
 .chatSection {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
+  position: relative;
+}
+
+.scrollDownBtn {
+  position: absolute;
+  right: 0.6rem;
+  bottom: 4.2rem;
+  width: 2.1rem;
+  height: 2.1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--accent);
+  color: var(--bg);
+  border: none;
+  cursor: pointer;
+  font-size: 1.1rem;
+  z-index: 5;
+  box-shadow: 0 4px 14px var(--shadow-on-card-2xl);
+  animation: scrollBtnIn 0.18s ease both;
+  -webkit-tap-highlight-color: transparent;
+}
+@keyframes scrollBtnIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 .chatTitle {

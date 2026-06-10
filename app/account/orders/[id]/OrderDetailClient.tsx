@@ -54,6 +54,7 @@ export default function OrderDetailClient({ order, messages: initialMessages, us
   const [chatConsented, setChatConsented] = useState(hasUserMessages);
   const [consentChecked, setConsentChecked] = useState(false);
   const [copied, setCopied] = useState<string>('');
+  const [atBottom, setAtBottom] = useState(true);
 
   function copy(value: string, label: string) {
     navigator.clipboard?.writeText(value)
@@ -177,6 +178,23 @@ export default function OrderDetailClient({ order, messages: initialMessages, us
 
           <p className={s.orderDate}>{formatDate(order.created_at)}</p>
 
+          {/* Status timeline */}
+          {order.status === 'cancelled' ? (
+            <div className={s.timelineCancelled}>{ORDER_STATUS_LABELS.cancelled}</div>
+          ) : (
+            <div className={s.timeline}>
+              {(['new', 'paid', 'in_progress', 'shipped', 'delivered'] as OrderStatus[]).map((st, i, arr) => {
+                const done = arr.indexOf(order.status as OrderStatus) >= i
+                return (
+                  <div key={st} className={`${s.tlStep} ${done ? s.tlStepDone : ''}`}>
+                    <span className={s.tlDot} />
+                    <span className={s.tlLabel}>{ORDER_STATUS_LABELS[st]}</span>
+                  </div>
+                )
+              })}
+            </div>
+          )}
+
           <div className="flex flex-col gap-3">
             {order.order_items?.map((item) => (
               <div key={item.id} className={s.itemRow}>
@@ -239,7 +257,14 @@ export default function OrderDetailClient({ order, messages: initialMessages, us
 
         <div className={s.chatSection}>
           <h3 className={s.chatTitle}>Чат по заказу</h3>
-          <div className={`${s.chatMessages} hud-corners`} ref={messagesRef}>
+          <div
+            className={`${s.chatMessages} hud-corners`}
+            ref={messagesRef}
+            onScroll={(e) => {
+              const el = e.currentTarget;
+              setAtBottom(el.scrollHeight - el.scrollTop - el.clientHeight < 80);
+            }}
+          >
             {messages.length === 0 && (
               <p className={s.chatEmpty}>Напиши нам по деталям заказа</p>
             )}
@@ -264,6 +289,17 @@ export default function OrderDetailClient({ order, messages: initialMessages, us
             ))}
             <div ref={bottomRef} />
           </div>
+
+          {!atBottom && (
+            <button
+              type="button"
+              className={s.scrollDownBtn}
+              onClick={() => bottomRef.current?.scrollIntoView({ behavior: 'smooth' })}
+              aria-label="К последним сообщениям"
+            >
+              ↓
+            </button>
+          )}
 
           {!chatConsented ? (
             <div className={s.consentBanner}>
