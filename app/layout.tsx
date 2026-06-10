@@ -59,6 +59,8 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <CustomCursor />
         <VisitTracker />
         <GlitterCanvas />
+        {/* TRIP theme — drifting psychedelic colour field (visible only in [data-theme="trip"]) */}
+        <div aria-hidden="true" className="trip-fx" />
         {/* Grain/noise texture overlay — opacity controlled by --grain-opacity CSS var */}
         <div
           aria-hidden="true"

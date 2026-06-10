@@ -229,6 +229,10 @@
 }
 
 @media (max-width: 639px) {
+  .btn { font-size: 0.7rem; }
+}
+
+@media (max-width: 639px) {
   .btn { font-size: var(--btn-fz-mobile); }
 }
 

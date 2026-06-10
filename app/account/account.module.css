@@ -123,6 +123,17 @@
   margin-left: 0.15rem;
 }
 
+/* Меньше шрифт у кнопок на мобиле */
+@media (max-width: 639px) {
+  .ctaBtn,
+  .modalBtn,
+  .topNavBtn,
+  .tab,
+  .tabActive { font-size: 0.65rem; }
+  .chip,
+  .chipActive { font-size: 0.55rem; }
+}
+
 .levelBadge {
   font-size: 0.6rem;
   padding: 0.125rem 0.5rem;

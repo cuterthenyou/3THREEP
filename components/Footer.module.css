@@ -6,11 +6,13 @@
 .heading {
   color: var(--bg);
   font-family: var(--font-onder);
-  font-size: 1.35rem;
+  font-size: clamp(1.4rem, 4vw, 2rem);
+  line-height: 1.32;            /* ONDER высокий — стопка строк не должна слипаться */
   letter-spacing: 0.05em;
   text-transform: uppercase;
   word-break: break-word;
   text-align: center;
+  text-wrap: balance;           /* ровнее разбивка на 2 строки */
 }
 
 .subtitle {

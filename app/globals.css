@@ -150,6 +150,66 @@
   --status-error:       #E08080;
 }
 
+/* ── TRIP — скрытая психоделическая тема (3 нажатия на смену темы) ── */
+html[data-theme="trip"] {
+  --color-primary: #241047;
+  --color-accent:  #ff5ad0;
+  --color-bg:      #160a2b;
+  --color-bg-dark: #0d0518;
+
+  --bg:         #160a2b;
+  --bg-2:       #241047;
+  --bg-card:    #ff5ad0;
+  --text:       #cdbcff;
+  --text-muted: rgba(205, 188, 255, 0.6);
+  --accent:     #ff5ad0;
+  --accent-2:   rgba(255, 90, 208, 0.25);
+  --border:     rgba(255, 90, 208, 0.28);
+  --text-on-card: #160a2b;
+
+  --header-scrolled-bg: rgba(22, 10, 43, 0.85);
+  --bg-subtle:   rgba(255, 90, 208, 0.10);
+  --border-soft: rgba(255, 90, 208, 0.16);
+  --border-mid:  rgba(255, 90, 208, 0.32);
+  --overlay-bg:  rgba(10, 4, 20, 0.97);
+  --accent-glow: rgba(255, 90, 208, 0.45);
+  --grain-opacity: 0.06;
+}
+
+/* Цвет «дышит» и медленно плывёт */
+@media (prefers-reduced-motion: no-preference) {
+  html[data-theme="trip"] body { animation: tripBreathe 18s ease-in-out infinite; }
+}
+@keyframes tripBreathe {
+  0%, 100% { filter: hue-rotate(0deg) saturate(1.15); }
+  50%       { filter: hue-rotate(38deg) saturate(1.45); }
+}
+
+/* Плывущие цветовые пятна — видны только в trip */
+.trip-fx {
+  position: fixed;
+  inset: -20%;
+  z-index: 3;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.7s ease;
+  mix-blend-mode: screen;
+  filter: blur(60px);
+  background:
+    radial-gradient(38% 38% at 28% 30%, rgba(255, 60, 190, 0.50), transparent 70%),
+    radial-gradient(42% 42% at 72% 58%, rgba(70, 220, 255, 0.42), transparent 70%),
+    radial-gradient(46% 46% at 50% 82%, rgba(170, 80, 255, 0.45), transparent 70%);
+}
+html[data-theme="trip"] .trip-fx { opacity: 1; }
+@media (prefers-reduced-motion: no-preference) {
+  html[data-theme="trip"] .trip-fx { animation: tripDrift 16s ease-in-out infinite alternate; }
+}
+@keyframes tripDrift {
+  0%   { transform: translate3d(-4%, -3%, 0) scale(1.05) rotate(-3deg); }
+  50%  { transform: translate3d(3%, 2%, 0)  scale(1.15) rotate(2deg); }
+  100% { transform: translate3d(4%, 4%, 0)  scale(1.08) rotate(4deg); }
+}
+
 /* Grain/shagreen overlay utility */
 .grain-overlay {
   position: relative;
@@ -196,9 +256,9 @@ h4,
 h5,
 h6 {
   font-family: var(--font-heading);
-  /* ONDER is a tall display face — give wrapped headings breathing room so
-     two lines never overlap */
-  line-height: 1.18;
+  /* ONDER is a tall display face — give wrapped headings generous leading so
+     two stacked lines never overlap */
+  line-height: 1.3;
 }
 
 h1 { font-size: var(--fs-h1); }
