@@ -11,6 +11,15 @@
   user-select: none;
 }
 
+/* Touch devices: enlarge the tap target around each bat (visual unchanged) */
+@media (hover: none) and (pointer: coarse) {
+  .bat::before {
+    content: '';
+    position: absolute;
+    inset: -14px;
+  }
+}
+
 /* Wing flap — double-beat realistic pattern */
 .flap {
   display: block;
@@ -226,6 +235,35 @@
 @keyframes recordBlink {
   0%, 60% { opacity: 1; }
   61%, 100% { opacity: 0.35; }
+}
+
+/* Lure hint — discreet prompt while a single bat is luring the player in */
+.lureHint {
+  position: fixed;
+  left: 50%;
+  bottom: 2rem;
+  transform: translateX(-50%);
+  z-index: 120;
+  pointer-events: none;
+  font-family: var(--font-body, monospace);
+  font-size: 0.6rem;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--accent, #f29774);
+  background: color-mix(in srgb, var(--bg, #090909) 70%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent, #f29774) 35%, transparent);
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius-base, 0px);
+  animation: lureHintPulse 1.8s ease-in-out infinite;
+}
+
+@keyframes lureHintPulse {
+  0%, 100% { opacity: 0.35; }
+  50%       { opacity: 0.8; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lureHint { animation: none; opacity: 0.6; }
 }
 
 /* GAME OVER — centered fullscreen banner */

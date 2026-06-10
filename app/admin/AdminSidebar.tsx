@@ -141,12 +141,13 @@ function NavItems({ pathname, collapsed, onNavigate }: { pathname: string; colla
             href={href}
             onClick={onNavigate}
             title={collapsed ? label : undefined}
+            className={s.navLink}
             style={{
               display: 'flex', alignItems: 'center', gap: '0.75rem',
               padding: collapsed ? '0.6rem' : '0.55rem 0.75rem',
               justifyContent: collapsed ? 'center' : 'flex-start',
               borderRadius: '3px',
-              background: active ? 'var(--accent-2)' : 'transparent',
+              background: active ? 'var(--accent-2)' : undefined,
               color: active ? 'var(--accent)' : 'var(--text-muted)',
               textDecoration: 'none',
               whiteSpace: 'nowrap',

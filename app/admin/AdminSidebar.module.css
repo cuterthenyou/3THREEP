@@ -1,3 +1,9 @@
+/* Nav link hover feedback (inactive items) */
+.navLink:hover {
+  background: var(--bg-subtle) !important;
+  color: var(--accent) !important;
+}
+
 /* Neo-brutal sidebar footer buttons */
 
 .sidebarBtnAccent {

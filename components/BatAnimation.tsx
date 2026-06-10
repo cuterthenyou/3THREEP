@@ -483,6 +483,28 @@ export default function BatAnimation() {
     return () => clearTimeout(t)
   }, [gameState])
 
+  // Уход со вкладки: rAF замораживает нетопырей, но таймер «улёта» продолжает
+  // тикать → нечестный game over. Не штрафуем — мягко сбрасываем раунд в idle.
+  useEffect(() => {
+    function onHidden() {
+      if (!document.hidden) return
+      const gs = gameStateRef.current
+      if (gs !== 'playing' && gs !== 'lure') return
+      if (waveTimerRef.current) { clearTimeout(waveTimerRef.current); waveTimerRef.current = null }
+      if (goTimerRef.current) { clearTimeout(goTimerRef.current); goTimerRef.current = null }
+      if (comboTimerRef.current) { clearTimeout(comboTimerRef.current); comboTimerRef.current = null }
+      spawnTimersRef.current.forEach(clearTimeout); spawnTimersRef.current = []
+      batPositions.current.clear(); batHpRef.current.clear()
+      setBats([]); setPowerups([]); setCrackedIds(new Set())
+      setScore(0); scoreRef.current = 0; setWaveNum(0)
+      setComboDisplay(0); comboRef.current = 0; setActiveEffect(null); setBonusWave(false)
+      speedMultRef.current = 1; scoreMultRef.current = 1
+      setGameState('idle')
+    }
+    document.addEventListener('visibilitychange', onHidden)
+    return () => document.removeEventListener('visibilitychange', onHidden)
+  }, [])
+
   useEffect(() => () => {
     if (waveTimerRef.current)   clearTimeout(waveTimerRef.current)
     if (goTimerRef.current)     clearTimeout(goTimerRef.current)
@@ -658,6 +680,9 @@ export default function BatAnimation() {
       {roombaSweeping && (
         <PixelRoomba key={waveNum} splats={roombaSplats} dir={roombaDir}
           onSplatHit={handleSplatHit} onDone={handleRoombaDone} />
+      )}
+      {gameState === 'lure' && (
+        <div className={s.lureHint} aria-hidden="true">Поймай нетопыря — начни охоту</div>
       )}
       {gameState === 'game_over' && <GameOverBanner />}
       {waveBanner && gameState === 'playing' && (
