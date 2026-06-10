@@ -53,6 +53,13 @@ export default function OrderDetailClient({ order, messages: initialMessages, us
   const hasUserMessages = initialMessages.some(m => !m.is_admin && m.sender_id === userId);
   const [chatConsented, setChatConsented] = useState(hasUserMessages);
   const [consentChecked, setConsentChecked] = useState(false);
+  const [copied, setCopied] = useState<string>('');
+
+  function copy(value: string, label: string) {
+    navigator.clipboard?.writeText(value)
+      .then(() => { setCopied(label); setTimeout(() => setCopied(''), 1500); })
+      .catch(() => {});
+  }
 
   useEffect(() => {
     if (!hasUserMessages) {
@@ -142,9 +149,18 @@ export default function OrderDetailClient({ order, messages: initialMessages, us
       <div className={s.container}>
         <Link href="/account" className={s.backLink}>← Мои заказы</Link>
 
-        <div className={s.orderCard}>
+        <div className={`${s.orderCard} hud-corners`}>
           <div className={s.orderHeader}>
-            <span className={s.orderId}>Заказ #{order.id.slice(0, 8)}</span>
+            <span
+              className={s.orderId}
+              role="button"
+              tabIndex={0}
+              style={{ cursor: 'pointer' }}
+              title="Скопировать номер заказа"
+              onClick={() => copy(order.id, 'id')}
+            >
+              Заказ #{order.id.slice(0, 8)} <span style={{ opacity: 0.5 }}>{copied === 'id' ? '✓' : '⧉'}</span>
+            </span>
             <span
               className="text-xs px-3 py-1 rounded-full uppercase tracking-widest"
               style={{
@@ -201,7 +217,15 @@ export default function OrderDetailClient({ order, messages: initialMessages, us
           {order.tracking_number && (
             <p className={s.trackingRow}>
               <span style={{ opacity: 0.5 }}>Трек-номер: </span>
-              <strong>{order.tracking_number}</strong>
+              <strong
+                role="button"
+                tabIndex={0}
+                style={{ cursor: 'pointer' }}
+                title="Скопировать трек-номер"
+                onClick={() => copy(order.tracking_number!, 'track')}
+              >
+                {order.tracking_number} <span style={{ opacity: 0.5, fontWeight: 400 }}>{copied === 'track' ? '✓' : '⧉'}</span>
+              </strong>
             </p>
           )}
 

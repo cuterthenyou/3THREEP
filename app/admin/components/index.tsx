@@ -1,7 +1,12 @@
-import type React from 'react'
+'use client'
+
+import { createContext, useContext, type ReactNode } from 'react'
 import { SECTION_TITLE } from '../adminStyles'
 
-export function AdminPageTitle({ children }: { children: React.ReactNode }) {
+/** Active settings tab — AdminSection hides itself if its `tab` doesn't match. */
+export const AdminTabContext = createContext<string | null>(null)
+
+export function AdminPageTitle({ children }: { children: ReactNode }) {
   return (
     <h1
       className="uppercase tracking-widest"
@@ -12,10 +17,12 @@ export function AdminPageTitle({ children }: { children: React.ReactNode }) {
   )
 }
 
-export function AdminSection({ title, children }: { title?: string; children: React.ReactNode }) {
+export function AdminSection({ title, tab, children }: { title?: string; tab?: string; children: ReactNode }) {
+  const active = useContext(AdminTabContext)
+  if (tab && active && tab !== active) return null
   return (
     <div
-      className="rounded-2xl p-5 flex flex-col gap-4"
+      className="rounded-2xl p-5 flex flex-col gap-4 hud-corners"
       style={{ background: 'var(--bg-subtle)', border: '1px solid var(--border-soft)' }}
     >
       {title && <p style={SECTION_TITLE}>{title}</p>}
@@ -24,7 +31,7 @@ export function AdminSection({ title, children }: { title?: string; children: Re
   )
 }
 
-export function AdminEmptyState({ children }: { children: React.ReactNode }) {
+export function AdminEmptyState({ children }: { children: ReactNode }) {
   return (
     <p className="text-sm" style={{ color: 'var(--accent)', opacity: 0.4, fontFamily: 'var(--font-involve)' }}>
       {children}
@@ -39,7 +46,7 @@ export function AdminModal({
 }: {
   title: string
   onClose: () => void
-  children: React.ReactNode
+  children: ReactNode
 }) {
   return (
     <div

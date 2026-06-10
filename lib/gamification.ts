@@ -114,6 +114,22 @@ export async function awardOrderXp(orderId: string): Promise<void> {
   if (order.units >= 3) await awardAchievement(order.user_id, 'multi_buy')
 }
 
+/**
+ * Снять искры за заказ (удаление/отмена) и пересчитать профиль.
+ * user_id берём из самой записи xp_events — работает даже если заказ уже удалён.
+ * Идемпотентно: если искр за заказ не было, ничего не делает.
+ */
+export async function revokeOrderXp(orderId: string): Promise<void> {
+  const ev = await queryOne<{ user_id: string }>(
+    `SELECT user_id FROM xp_events WHERE source = 'order' AND ref_id = $1 LIMIT 1`,
+    [orderId]
+  )
+  if (!ev?.user_id) return
+  await query(`DELETE FROM xp_events WHERE source = 'order' AND ref_id = $1`, [orderId])
+  const cfg = await loadLevelingConfig()
+  await recomputeProfile(ev.user_id, cfg) // уровень/скидка пересчитываются вниз
+}
+
 /** Уведомление о смене статуса заказа (для колокольчика, Фаза 6). */
 export async function notifyOrderStatus(orderId: string, status: string): Promise<void> {
   const order = await queryOne<{ user_id: string | null }>(

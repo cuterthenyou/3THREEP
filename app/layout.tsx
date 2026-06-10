@@ -44,6 +44,10 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             __html: `(function(){try{var t=localStorage.getItem('threep-theme')||'dark';document.documentElement.dataset.theme=t;}catch(e){}})();`,
           }}
         />
+        {/* Warm the asset-host connection (logos/images/video on S3) so collection
+            SVGs and product images don't wait on a cold DNS+TLS handshake */}
+        <link rel="preconnect" href="https://storage.yandexcloud.net" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="https://storage.yandexcloud.net" />
         {/* Preload brand fonts — biggest first-paint win (text/buttons paint instantly) */}
         <link rel="preload" as="font" type="font/ttf" href="/fonts/ONDER-REGULAR.TTF" crossOrigin="anonymous" />
         <link rel="preload" as="font" type="font/ttf" href="/fonts/Involve-VF.ttf" crossOrigin="anonymous" />

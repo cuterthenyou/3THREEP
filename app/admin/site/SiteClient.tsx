@@ -2,10 +2,19 @@
 
 import { useState, useRef, useEffect } from 'react'
 import a from '../admin.module.css'
-import { AdminSection, AdminPageTitle } from '../components'
+import { AdminSection, AdminPageTitle, AdminTabContext } from '../components'
 import { CHECKBOARD_LIGHT, CHECKBOARD_DARK, INPUT_STYLE } from '../adminStyles'
 import { ColorPicker, FontSelect, GlitterPreview } from './parts'
+import { parseLevelingConfig, getDiscount } from '@/lib/leveling'
 import type { CustomFont } from '@/components/ThemeStyles'
+
+type SettingsTab = 'general' | 'catalog' | 'account' | 'menu'
+const SETTINGS_TABS: { id: SettingsTab; label: string }[] = [
+  { id: 'general', label: 'Общие' },
+  { id: 'catalog', label: 'Каталог' },
+  { id: 'account', label: 'Личный кабинет' },
+  { id: 'menu',    label: 'Меню' },
+]
 
 interface Props {
   initialSettings: Record<string, string | null>
@@ -29,6 +38,17 @@ const SPEED_OPTIONS = [
 ] as const
 
 export default function SiteClient({ initialSettings, initialCustomFonts = [] }: Props) {
+  const [activeTab, setActiveTab] = useState<SettingsTab>('general')
+
+  // ── Тюнер геймификации (leveling_config) ──
+  const _lvl = parseLevelingConfig(initialSettings['leveling_config'])
+  const [lvlSparkOrder, setLvlSparkOrder]   = useState(String(_lvl.spark_per_order))
+  const [lvlSparkExtra, setLvlSparkExtra]   = useState(String(_lvl.spark_per_extra_unit))
+  const [lvlThresholds, setLvlThresholds]   = useState(_lvl.thresholds.join(', '))
+  const [lvlIncrement, setLvlIncrement]     = useState(String(_lvl.increment_after))
+  const [lvlDiscountMax, setLvlDiscountMax] = useState(String(_lvl.discount_max))
+  const [savingLvl, setSavingLvl] = useState(false)
+  const [lvlMsg, setLvlMsg] = useState('')
   // ── Hero video ──────────────────────────────────────────────────
   const [heroUrl, setHeroUrl] = useState<string | null>(initialSettings['hero_video_url'] ?? null)
   const [uploadingHero, setUploadingHero] = useState(false)
@@ -224,6 +244,25 @@ export default function SiteClient({ initialSettings, initialCustomFonts = [] }:
     })
   }
 
+  function buildLevelingCfg() {
+    const thresholds = lvlThresholds.split(',').map(s => parseInt(s.trim(), 10)).filter(n => Number.isFinite(n))
+    return {
+      spark_per_order: parseInt(lvlSparkOrder, 10) || 0,
+      spark_per_extra_unit: parseInt(lvlSparkExtra, 10) || 0,
+      thresholds: thresholds.length ? thresholds : undefined,
+      increment_after: parseInt(lvlIncrement, 10) || 0,
+      discount_max: parseInt(lvlDiscountMax, 10) || 0,
+    }
+  }
+
+  async function saveLeveling() {
+    setSavingLvl(true)
+    await saveSetting('leveling_config', JSON.stringify(buildLevelingCfg()))
+    setSavingLvl(false)
+    setLvlMsg('✓ Сохранено')
+    setTimeout(() => setLvlMsg(''), 2000)
+  }
+
   async function uploadFile(
     file: File,
     folder: string,
@@ -366,8 +405,23 @@ export default function SiteClient({ initialSettings, initialCustomFonts = [] }:
     <div className="px-6 py-6 max-w-3xl mx-auto flex flex-col gap-8">
       <AdminPageTitle>Настройки сайта</AdminPageTitle>
 
+      {/* Tabs */}
+      <div className="flex flex-wrap gap-2">
+        {SETTINGS_TABS.map(t => (
+          <button
+            key={t.id}
+            onClick={() => setActiveTab(t.id)}
+            className={activeTab === t.id ? a.btn : a.btnSecondary}
+          >
+            {t.label}
+          </button>
+        ))}
+      </div>
+
+      <AdminTabContext.Provider value={activeTab}>
+
       {/* ── Логотипы ── */}
-      <AdminSection title="Логотипы сайта">
+      <AdminSection title="Логотипы сайта" tab="general">
         <p className="text-xs" style={{ color: 'var(--accent)', opacity: 0.5, fontFamily: 'var(--font-involve)' }}>
           SVG-логотипы отображаются в шапке сайта. Иконка — слева, текстовый — по центру (только на широких экранах).
         </p>
@@ -424,7 +478,7 @@ export default function SiteClient({ initialSettings, initialCustomFonts = [] }:
       </AdminSection>
 
       {/* ── Цвета ── */}
-      <AdminSection title="Цвета">
+      <AdminSection title="Цвета" tab="general">
         <p className="text-xs" style={{ color: 'var(--accent)', opacity: 0.5, fontFamily: 'var(--font-involve)' }}>
           Кликните на цвет для визуального выбора или введите HEX вручную. Предпросмотр применяется сразу на страницу, сохранение — постоянно.
         </p>
@@ -460,7 +514,7 @@ export default function SiteClient({ initialSettings, initialCustomFonts = [] }:
       </AdminSection>
 
       {/* ── Шрифты ── */}
-      <AdminSection title="Шрифты">
+      <AdminSection title="Шрифты" tab="general">
         <p className="text-xs" style={{ color: 'var(--accent)', opacity: 0.5, fontFamily: 'var(--font-involve)' }}>
           Выбранный шрифт применяется ко всем элементам сайта. Загрузи свой шрифт ниже — он сразу появится в списке.
         </p>
@@ -550,7 +604,7 @@ export default function SiteClient({ initialSettings, initialCustomFonts = [] }:
       </AdminSection>
 
       {/* ── Визуальные эффекты ── */}
-      <AdminSection title="Визуальные эффекты">
+      <AdminSection title="Визуальные эффекты" tab="general">
         {/* Animation keyframes */}
         <style>{`
           @keyframes eff-sweep {
@@ -721,7 +775,7 @@ export default function SiteClient({ initialSettings, initialCustomFonts = [] }:
       </AdminSection>
 
       {/* ── Блёстки ── */}
-      <AdminSection title="Блёстки (тёмная тема)">
+      <AdminSection title="Блёстки (тёмная тема)" tab="general">
         <p className="text-xs" style={{ color: 'var(--accent)', opacity: 0.5, fontFamily: 'var(--font-involve)' }}>
           Анимированные частицы на фоне в тёмной теме.
         </p>
@@ -789,7 +843,7 @@ export default function SiteClient({ initialSettings, initialCustomFonts = [] }:
       </AdminSection>
 
       {/* ── Курсор ── */}
-      <AdminSection title="Кастомный курсор">
+      <AdminSection title="Кастомный курсор" tab="general">
         <p className="text-xs" style={{ color: 'var(--accent)', opacity: 0.5, fontFamily: 'var(--font-involve)' }}>
           Только на десктопе (pointer: fine). Работает сразу после включения (перезагрузка не нужна).
         </p>
@@ -929,7 +983,7 @@ export default function SiteClient({ initialSettings, initialCustomFonts = [] }:
       </AdminSection>
 
       {/* ── Hero video ── */}
-      <AdminSection title="Видео Hero секции">
+      <AdminSection title="Видео Hero секции" tab="catalog">
         <p className="text-xs" style={{ color: 'var(--accent)', opacity: 0.5, fontFamily: 'var(--font-involve)' }}>
           WebM — основное видео для десктопа и Android. MP4 (H.264) обязателен для iPhone/iPad —
           Safari не умеет проигрывать WebM. Постер показывается, пока видео грузится.
@@ -990,7 +1044,7 @@ export default function SiteClient({ initialSettings, initialCustomFonts = [] }:
       </AdminSection>
 
       {/* ── Profile bg light ── */}
-      <AdminSection title="Фон страницы профиля">
+      <AdminSection title="Фон страницы профиля" tab="account">
         <p className="text-xs" style={{ color: 'var(--accent)', opacity: 0.5, fontFamily: 'var(--font-involve)' }}>
           PNG с прозрачностью — фон для всех профилей пользователей (светлая тема).
         </p>
@@ -1016,7 +1070,7 @@ export default function SiteClient({ initialSettings, initialCustomFonts = [] }:
       </AdminSection>
 
       {/* ── Profile bg dark ── */}
-      <AdminSection title="Фон профиля (тёмная тема)">
+      <AdminSection title="Фон профиля (тёмная тема)" tab="account">
         <p className="text-xs" style={{ color: 'var(--accent)', opacity: 0.5, fontFamily: 'var(--font-involve)' }}>
           PNG-фон для тёмной темы. Если не задан — используется светлый.
         </p>
@@ -1042,7 +1096,7 @@ export default function SiteClient({ initialSettings, initialCustomFonts = [] }:
       </AdminSection>
 
       {/* ── Фразы загрузки ── */}
-      <AdminSection title="Фразы загрузки">
+      <AdminSection title="Фразы загрузки" tab="general">
         <p className="text-xs" style={{ color: 'var(--accent)', opacity: 0.5, fontFamily: 'var(--font-involve)' }}>
           Фразы крутятся во время загрузки сайта. Одна фраза — одна строка.
         </p>
@@ -1080,7 +1134,7 @@ export default function SiteClient({ initialSettings, initialCustomFonts = [] }:
       </AdminSection>
 
       {/* ── Бегущая строка ── */}
-      <AdminSection title="Бегущая строка — Футер">
+      <AdminSection title="Бегущая строка — Футер" tab="general">
         <p className="text-xs" style={{ color: 'var(--accent)', opacity: 0.5, fontFamily: 'var(--font-involve)' }}>
           Тексты для бегущей строки в футере. Одна строка — одна фраза.
         </p>
@@ -1118,7 +1172,7 @@ export default function SiteClient({ initialSettings, initialCustomFonts = [] }:
       </AdminSection>
 
       {/* ── Бегущая строка — Личный кабинет ── */}
-      <AdminSection title="Бегущая строка — Личный кабинет">
+      <AdminSection title="Бегущая строка — Личный кабинет" tab="account">
         <p className="text-xs" style={{ color: 'var(--accent)', opacity: 0.5, fontFamily: 'var(--font-involve)' }}>
           Тексты для бегущей строки в личном кабинете. Одна строка — одна фраза.
         </p>
@@ -1154,6 +1208,70 @@ export default function SiteClient({ initialSettings, initialCustomFonts = [] }:
           {tickerAccountMsg && <span style={msgStyle(tickerAccountMsg)}>{tickerAccountMsg}</span>}
         </div>
       </AdminSection>
+
+      {/* ── Тюнер уровней / скидок ── */}
+      <AdminSection title="Уровни и скидки" tab="account">
+        <p className="text-xs" style={{ color: 'var(--accent)', opacity: 0.5, fontFamily: 'var(--font-involve)' }}>
+          Формула геймификации. Искры за заказ = «за заказ» + «за доп. вещь» × (кол-во вещей − 1).
+          Пороги — кумулятивные искры для каждого уровня (через запятую); далее каждый уровень дороже на «шаг сверх таблицы».
+        </p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <label className="flex flex-col gap-1">
+            <span className="text-xs uppercase tracking-widest" style={{ color: 'var(--accent)', opacity: 0.5, fontFamily: 'var(--font-involve)' }}>Искры за заказ</span>
+            <input type="number" value={lvlSparkOrder} onChange={e => setLvlSparkOrder(e.target.value)} style={{ ...INPUT_STYLE, borderRadius: '2px', padding: '0.5rem 0.75rem', outline: 'none' }} />
+          </label>
+          <label className="flex flex-col gap-1">
+            <span className="text-xs uppercase tracking-widest" style={{ color: 'var(--accent)', opacity: 0.5, fontFamily: 'var(--font-involve)' }}>Искры за доп. вещь</span>
+            <input type="number" value={lvlSparkExtra} onChange={e => setLvlSparkExtra(e.target.value)} style={{ ...INPUT_STYLE, borderRadius: '2px', padding: '0.5rem 0.75rem', outline: 'none' }} />
+          </label>
+          <label className="flex flex-col gap-1">
+            <span className="text-xs uppercase tracking-widest" style={{ color: 'var(--accent)', opacity: 0.5, fontFamily: 'var(--font-involve)' }}>Шаг сверх таблицы</span>
+            <input type="number" value={lvlIncrement} onChange={e => setLvlIncrement(e.target.value)} style={{ ...INPUT_STYLE, borderRadius: '2px', padding: '0.5rem 0.75rem', outline: 'none' }} />
+          </label>
+          <label className="flex flex-col gap-1">
+            <span className="text-xs uppercase tracking-widest" style={{ color: 'var(--accent)', opacity: 0.5, fontFamily: 'var(--font-involve)' }}>Макс. скидка, %</span>
+            <input type="number" value={lvlDiscountMax} onChange={e => setLvlDiscountMax(e.target.value)} style={{ ...INPUT_STYLE, borderRadius: '2px', padding: '0.5rem 0.75rem', outline: 'none' }} />
+          </label>
+        </div>
+        <label className="flex flex-col gap-1">
+          <span className="text-xs uppercase tracking-widest" style={{ color: 'var(--accent)', opacity: 0.5, fontFamily: 'var(--font-involve)' }}>Пороги уровней (кумулятивно, через запятую)</span>
+          <input value={lvlThresholds} onChange={e => setLvlThresholds(e.target.value)} style={{ ...INPUT_STYLE, borderRadius: '2px', padding: '0.5rem 0.75rem', outline: 'none', fontFamily: 'var(--font-involve)' }} />
+        </label>
+
+        {/* Превью: уровень → скидка */}
+        {(() => {
+          const cfg = parseLevelingConfig(JSON.stringify(buildLevelingCfg()))
+          const rows = [1, 2, 5, 10, 11, 15, 20]
+          return (
+            <div className="flex flex-wrap gap-2" style={{ marginTop: '0.25rem' }}>
+              {rows.map(L => (
+                <span key={L} style={{ fontFamily: 'var(--font-onder)', fontSize: '0.6rem', letterSpacing: '0.06em', color: 'var(--accent)', background: 'var(--bg-2)', border: '1px solid var(--border)', borderRadius: '2px', padding: '0.25rem 0.5rem' }}>
+                  LVL {L} → {getDiscount(L, cfg)}%
+                </span>
+              ))}
+            </div>
+          )
+        })()}
+
+        <div className="flex items-center gap-3 flex-wrap">
+          <button disabled={savingLvl} onClick={saveLeveling} className={a.btn}>
+            {savingLvl ? 'Сохраняем...' : 'Сохранить формулу'}
+          </button>
+          {lvlMsg && <span style={msgStyle(lvlMsg)}>{lvlMsg}</span>}
+        </div>
+      </AdminSection>
+
+      {/* ── Меню (на отдельной странице) ── */}
+      <AdminSection title="Меню сайта" tab="menu">
+        <p className="text-xs" style={{ color: 'var(--accent)', opacity: 0.5, fontFamily: 'var(--font-involve)' }}>
+          Видимость и порядок коллекций, кастомные пункты и превью бургер-меню — на отдельной странице.
+        </p>
+        <a href="/admin/menu" className={a.btn} style={{ alignSelf: 'flex-start', textDecoration: 'none' }}>
+          Открыть настройки меню →
+        </a>
+      </AdminSection>
+
+      </AdminTabContext.Provider>
     </div>
   )
 }

@@ -910,16 +910,27 @@
 /* ── Gothic frame decorations ───────────────────────────────── */
 .gothicFrame {
   display: flex;
-  align-items: center;
+  align-self: stretch;        /* тянется на всю высоту карточки */
+  width: 18px;
   color: var(--accent);
   flex-shrink: 0;
+  opacity: 0.85;
 }
 
 .gothicFrameMobile {
   display: none;
-  align-items: center;
+  align-self: stretch;        /* на мобиле — на всю высоту аватарки */
+  width: 18px;
   color: var(--accent);
   flex-shrink: 0;
+  opacity: 0.85;
+}
+
+.gothicFrame svg,
+.gothicFrameMobile svg {
+  display: block;
+  width: 100%;
+  height: 100%;
 }
 
 /* Bat hunt high score card */
@@ -966,8 +977,8 @@
     width: auto;
     height: 8rem;
     flex-direction: row;
-    align-items: center;
-    gap: 0.35rem;
+    align-items: stretch;       /* рамки тянутся на всю высоту аватарки */
+    gap: 0.5rem;
   }
 
   .avatarBtn {
@@ -982,6 +993,7 @@
 
   .gothicFrameMobile {
     display: flex;
+    width: 20px;                /* шире и детальнее на мобиле */
   }
 
   .username {

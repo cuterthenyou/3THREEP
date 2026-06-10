@@ -60,18 +60,28 @@ export function Medal({ kind, size = 34 }: { kind: string; size?: number }) {
   )
 }
 
+// Industrial/cyberpunk HUD rail that stretches to the avatar's full height.
+// preserveAspectRatio="none" stretches geometry; non-scaling-stroke keeps lines crisp.
 export function GothicStrip() {
+  const ticks = Array.from({ length: 13 }, (_, i) => i * 8 + 2) // y positions 2..98
   return (
-    <svg width="14" height="120" viewBox="0 0 14 120" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <line x1="7" y1="0" x2="7" y2="120" stroke="currentColor" strokeWidth="0.8" opacity="0.35"/>
-      <line x1="2" y1="24" x2="12" y2="24" stroke="currentColor" strokeWidth="0.6" opacity="0.25"/>
-      <polygon points="7,18 10,24 7,30 4,24" fill="currentColor" opacity="0.45"/>
-      <line x1="2" y1="60" x2="12" y2="60" stroke="currentColor" strokeWidth="0.6" opacity="0.25"/>
-      <polygon points="7,54 10,60 7,66 4,60" fill="currentColor" opacity="0.55"/>
-      <line x1="2" y1="96" x2="12" y2="96" stroke="currentColor" strokeWidth="0.6" opacity="0.25"/>
-      <polygon points="7,90 10,96 7,102 4,96" fill="currentColor" opacity="0.45"/>
-      <line x1="5" y1="0" x2="9" y2="0" stroke="currentColor" strokeWidth="1" opacity="0.4"/>
-      <line x1="5" y1="120" x2="9" y2="120" stroke="currentColor" strokeWidth="1" opacity="0.4"/>
+    <svg width="100%" height="100%" viewBox="0 0 20 100" preserveAspectRatio="none" fill="none" xmlns="http://www.w3.org/2000/svg">
+      {/* twin rails */}
+      <line x1="4"  y1="0" x2="4"  y2="100" stroke="currentColor" strokeWidth="1"   opacity="0.55" vectorEffect="non-scaling-stroke"/>
+      <line x1="16" y1="0" x2="16" y2="100" stroke="currentColor" strokeWidth="1"   opacity="0.3"  vectorEffect="non-scaling-stroke"/>
+      {/* dashed center spine */}
+      <line x1="10" y1="0" x2="10" y2="100" stroke="currentColor" strokeWidth="0.8" opacity="0.18" strokeDasharray="3 4" vectorEffect="non-scaling-stroke"/>
+      {/* rungs */}
+      {ticks.map((y, i) => (
+        <line key={i} x1="4" y1={y} x2="16" y2={y} stroke="currentColor" strokeWidth="0.8" opacity={i % 3 === 0 ? 0.4 : 0.16} vectorEffect="non-scaling-stroke"/>
+      ))}
+      {/* accent nodes at thirds — bold rungs (crisp at any height) */}
+      {[18, 50, 82].map((y, i) => (
+        <line key={i} x1="2" y1={y} x2="18" y2={y} stroke="currentColor" strokeWidth={i === 1 ? 2.4 : 1.8} opacity={i === 1 ? 0.7 : 0.5} vectorEffect="non-scaling-stroke"/>
+      ))}
+      {/* end caps */}
+      <line x1="1" y1="1"  x2="19" y2="1"  stroke="currentColor" strokeWidth="1.4" opacity="0.65" vectorEffect="non-scaling-stroke"/>
+      <line x1="1" y1="99" x2="19" y2="99" stroke="currentColor" strokeWidth="1.4" opacity="0.65" vectorEffect="non-scaling-stroke"/>
     </svg>
   )
 }

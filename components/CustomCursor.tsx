@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect, useRef, useCallback } from 'react'
-import { usePathname } from 'next/navigation'
 
 function CrosshairShape() {
   return (
@@ -37,7 +36,6 @@ function SvgMask({ url }: { url: string }) {
 }
 
 export default function CustomCursor() {
-  const pathname = usePathname()
   const [mounted, setMounted] = useState(false)
   const [enabled, setEnabled] = useState(false)
   const [svgUrl, setSvgUrl] = useState<string | null>(null)
@@ -51,8 +49,6 @@ export default function CustomCursor() {
   const prevHovering = useRef(false)
   const rafId = useRef<number>(0)
   const reducedMotion = useRef(false)
-
-  const isAdminPath = pathname?.startsWith('/admin') ?? false
 
   // Mount + pointer detection
   useEffect(() => {
@@ -76,7 +72,7 @@ export default function CustomCursor() {
       .catch(() => {})
   }, [])
 
-  const active = mounted && enabled && isFinePointer && !isAdminPath
+  const active = mounted && enabled && isFinePointer
 
   // cursor: none injection
   useEffect(() => {
