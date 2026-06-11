@@ -4,7 +4,7 @@
 // Всё идемпотентно. Любая ошибка здесь НЕ должна ломать вызывающий поток
 // (вызывать через try/catch). См. .claude/skills/threep-backend.
 // ════════════════════════════════════════════════════════════════════
-import { query, queryOne } from '@/lib/db'
+import { query, queryOne, queryMany } from '@/lib/db'
 import {
   getLevel,
   getDiscount,
@@ -112,6 +112,25 @@ export async function awardOrderXp(orderId: string): Promise<void> {
   // Ачивки, привязанные к покупке
   await awardAchievement(order.user_id, 'first_purchase')
   if (order.units >= 3) await awardAchievement(order.user_id, 'multi_buy')
+}
+
+/**
+ * Привязать «гостевые» заказы (user_id IS NULL) к аккаунту по email и начислить
+ * искры за уже доставленные. Вызывается при регистрации/входе — для офлайн-продаж:
+ * админ оформляет заказ на email, при логине с тем же email заказы «прилетают»
+ * в ЛК с уровнем/скидкой. Идемпотентно (awardOrderXp защищён ON CONFLICT).
+ */
+export async function attachGuestOrders(userId: string, email: string): Promise<void> {
+  if (!userId || !email) return
+  const rows = await queryMany<{ id: string }>(
+    `UPDATE orders SET user_id = $1
+     WHERE user_id IS NULL AND lower(guest_email) = lower($2)
+     RETURNING id`,
+    [userId, email]
+  )
+  for (const r of rows) {
+    try { await awardOrderXp(r.id) } catch { /* не ломаем поток логина */ }
+  }
 }
 
 /**

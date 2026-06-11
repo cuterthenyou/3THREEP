@@ -9,6 +9,7 @@ import s from './Header.module.css'
 interface UserData {
   name: string
   level: number
+  discount?: number
 }
 
 function PersonIcon() {
@@ -72,6 +73,16 @@ export default function UserButton() {
 
       {open && (
         <div className={s.userDropdown}>
+          {/* Шапка аккаунта — имя + уровень + скидка (как в ЛК / бургер-меню) */}
+          <div className={s.userDropdownHead}>
+            <span className={s.userDropdownName}>{user.name}</span>
+            <span className={s.menuUserMeta}>
+              <span className={s.menuUserLevel}>LVL {user.level}</span>
+              {!!user.discount && user.discount > 0 && (
+                <span className={s.menuUserDiscount}>−{user.discount}%</span>
+              )}
+            </span>
+          </div>
           <Link href="/account" onClick={() => setOpen(false)} className={s.userDropdownItem}>
             Личный кабинет
           </Link>

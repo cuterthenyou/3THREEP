@@ -65,6 +65,14 @@ function PostgresAdapter(): Adapter {
         console.error('[PROFILE CREATE ERROR]')
         console.error(err)
       }
+
+      // Офлайн-продажи: привязать гостевые заказы по email + начислить искры.
+      try {
+        const { attachGuestOrders } = await import('./gamification')
+        await attachGuestOrders(result.id, result.email)
+      } catch (err) {
+        console.error('[ATTACH GUEST ORDERS ERROR]', err)
+      }
       
       return {
         id: result.id,
@@ -330,6 +338,15 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     async signIn({ user }) {
       // Разрешаем вход всем верифицированным пользователям
       console.log(`[NextAuth] signIn callback for: ${user.email}`)
+      // Офлайн-продажи: привязать гостевые заказы, появившиеся уже после регистрации.
+      if (user?.id && user?.email) {
+        try {
+          const { attachGuestOrders } = await import('./gamification')
+          await attachGuestOrders(user.id, user.email)
+        } catch (err) {
+          console.error('[ATTACH GUEST ORDERS ON SIGNIN ERROR]', err)
+        }
+      }
       return true
     },
 

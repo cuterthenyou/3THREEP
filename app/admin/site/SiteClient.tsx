@@ -167,6 +167,14 @@ export default function SiteClient({ initialSettings, initialCustomFonts = [] }:
   const [savingHeroSpeed, setSavingHeroSpeed] = useState(false)
   const [heroSpeedMsg, setHeroSpeedMsg] = useState('')
 
+  // ── Игра (баланс нетопырей) ──
+  const [gameRoombaSpeed, setGameRoombaSpeed] = useState(numInit('game_roomba_speed', 1))
+  const [gameBatSpeed,    setGameBatSpeed]    = useState(numInit('game_bat_speed', 1))
+  const [gameBatScale,    setGameBatScale]    = useState(numInit('game_bat_scale', 1))
+  const [gamePowerup,     setGamePowerup]     = useState(numInit('game_powerup_chance', 1))
+  const [savingGame, setSavingGame] = useState(false)
+  const [gameMsg, setGameMsg] = useState('')
+
   // Текущая тема админки — чтобы живой предпросмотр цвета бил по нужной теме
   const [adminTheme, setAdminTheme] = useState<'light' | 'dark' | 'trip'>('dark')
   useEffect(() => {
@@ -477,6 +485,18 @@ export default function SiteClient({ initialSettings, initialCustomFonts = [] }:
     setSavingHeroSpeed(true); setHeroSpeedMsg('')
     await saveSetting('hero_speed_default', String(heroSpeedDefault))
     setSavingHeroSpeed(false); setHeroSpeedMsg('✓ Сохранено (сбрасывает ручной выбор скорости у посетителей)')
+  }
+
+  // ── Save game balance ───────────────────────────────────────────
+  async function saveGame() {
+    setSavingGame(true); setGameMsg('')
+    await Promise.all([
+      saveSetting('game_roomba_speed',  String(gameRoombaSpeed)),
+      saveSetting('game_bat_speed',     String(gameBatSpeed)),
+      saveSetting('game_bat_scale',     String(gameBatScale)),
+      saveSetting('game_powerup_chance', String(gamePowerup)),
+    ])
+    setSavingGame(false); setGameMsg('✓ Баланс игры сохранён — откройте страницу ИНФА для проверки')
   }
 
   const msgStyle = (m: string) => ({ color: m.startsWith('✓') ? 'var(--status-delivered)' : 'var(--status-error)', fontFamily: 'var(--font-involve)', fontSize: '0.75rem' })
@@ -977,6 +997,26 @@ export default function SiteClient({ initialSettings, initialCustomFonts = [] }:
             {savingTrip ? 'Сохраняем...' : 'Сохранить эффекты trip'}
           </button>
           {tripMsg && <span style={msgStyle(tripMsg)}>{tripMsg}</span>}
+        </div>
+      </AdminSection>
+
+      {/* ── Игра «Охота» (баланс) ── */}
+      <AdminSection title="Игра «Охота» — баланс" tab="general">
+        <p className="text-xs" style={{ color: 'var(--accent)', opacity: 0.5, fontFamily: 'var(--font-involve)' }}>
+          Мини-игра на странице ИНФА. Множители: 1.0 = базово. Скорость пылесоса уже авто-подстраивается
+          под ширину экрана (фикс «медленно на десктопе / быстро на мобиле») — здесь общий множитель сверху.
+        </p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-4">
+          <RangeRow label="Скорость пылесоса" value={gameRoombaSpeed} set={setGameRoombaSpeed} cssVar="--game-noop-1" min={0.4} max={2} step={0.05} />
+          <RangeRow label="Скорость нетопырей" value={gameBatSpeed} set={setGameBatSpeed} cssVar="--game-noop-2" min={0.4} max={2} step={0.05} />
+          <RangeRow label="Размер нетопырей" value={gameBatScale} set={setGameBatScale} cssVar="--game-noop-3" min={0.6} max={1.8} step={0.05} />
+          <RangeRow label="Шанс пауэрапов" value={gamePowerup} set={setGamePowerup} cssVar="--game-noop-4" min={0.2} max={3} step={0.1} />
+        </div>
+        <div className="flex items-center gap-3 flex-wrap pt-2">
+          <button onClick={saveGame} disabled={savingGame} className={a.btn}>
+            {savingGame ? 'Сохраняем...' : 'Сохранить баланс'}
+          </button>
+          {gameMsg && <span style={msgStyle(gameMsg)}>{gameMsg}</span>}
         </div>
       </AdminSection>
 

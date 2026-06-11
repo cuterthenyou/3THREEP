@@ -139,18 +139,22 @@ export async function GET(req: NextRequest) {
     `).catch(() => ({ buyers: '0', repeat_buyers: '0' })),
 
     queryMany(`
-      SELECT (meta->>'score')::int AS score, created_at
-      FROM events WHERE type='bat_score' AND meta->>'score' ~ '^[0-9]+$'
-        AND COALESCE(meta->>'device', 'desktop') = 'desktop' ${pf}
+      SELECT (e.meta->>'score')::int AS score, e.created_at, p.name AS player
+      FROM events e
+      LEFT JOIN profiles p ON p.id = e.user_id
+      WHERE e.type='bat_score' AND e.meta->>'score' ~ '^[0-9]+$'
+        AND COALESCE(e.meta->>'device', 'desktop') = 'desktop' ${periodFilter(period, 'e.created_at')}
       ORDER BY score DESC LIMIT 10
-    `).catch(() => [] as Array<{ score: number; created_at: string }>),
+    `).catch(() => [] as Array<{ score: number; created_at: string; player: string | null }>),
 
     queryMany(`
-      SELECT (meta->>'score')::int AS score, created_at
-      FROM events WHERE type='bat_score' AND meta->>'score' ~ '^[0-9]+$'
-        AND meta->>'device' = 'mobile' ${pf}
+      SELECT (e.meta->>'score')::int AS score, e.created_at, p.name AS player
+      FROM events e
+      LEFT JOIN profiles p ON p.id = e.user_id
+      WHERE e.type='bat_score' AND e.meta->>'score' ~ '^[0-9]+$'
+        AND e.meta->>'device' = 'mobile' ${periodFilter(period, 'e.created_at')}
       ORDER BY score DESC LIMIT 10
-    `).catch(() => [] as Array<{ score: number; created_at: string }>),
+    `).catch(() => [] as Array<{ score: number; created_at: string; player: string | null }>),
 
     queryOne(`
       SELECT COUNT(*) AS plays, COUNT(DISTINCT session_id) AS players

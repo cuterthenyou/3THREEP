@@ -178,13 +178,14 @@
 
 .sectionLabel {
   font-family: var(--font-onder);
-  font-size: 0.6rem;
+  font-size: 0.68rem;
   letter-spacing: 0.2em;
-  opacity: 0.4;
+  opacity: 0.95;
   margin-bottom: 0.5rem;
   text-transform: uppercase;
   color: var(--accent);
   display: block;
+  text-shadow: 0 0 16px color-mix(in srgb, var(--accent) 30%, transparent);
 }
 
 .text {
@@ -214,13 +215,14 @@
 
 .socialGroupLabel {
   font-family: var(--font-onder);
-  font-size: 0.58rem;
+  font-size: 0.64rem;
   letter-spacing: 0.2em;
-  opacity: 0.35;
+  opacity: 0.95;
   margin-bottom: 0.1rem;
   text-transform: uppercase;
   color: var(--accent);
   display: block;
+  text-shadow: 0 0 16px color-mix(in srgb, var(--accent) 30%, transparent);
 }
 
 .socialList {

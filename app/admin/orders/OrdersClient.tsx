@@ -6,7 +6,8 @@ import Link from 'next/link'
 import type { OrderStatus } from '@/lib/types'
 import { ORDER_STATUS_LABELS, STATUS_COLORS } from '@/lib/types'
 import { formatPrice } from '@/lib/utils'
-import { AdminPageTitle, AdminEmptyState } from '../components'
+import { AdminPageTitle, AdminEmptyState, AdminModal } from '../components'
+import { INPUT_STYLE } from '../adminStyles'
 import a from '../admin.module.css'
 
 type SortKey = 'date' | 'total'
@@ -42,6 +43,52 @@ export default function OrdersClient({ orders }: { orders: Order[] }) {
   const [sortDir, setSortDir] = useState<SortDir>((searchParams.get('dir') as SortDir) ?? 'desc')
   const [confirmId, setConfirmId] = useState<string | null>(null)
   const [deleting, setDeleting] = useState(false)
+
+  // ── Создание заказа (офлайн-продажи) ──
+  type NewItem = { product_name: string; size: string; quantity: string; price: string }
+  const emptyItem: NewItem = { product_name: '', size: '', quantity: '1', price: '' }
+  const [showCreate, setShowCreate] = useState(false)
+  const [cEmail, setCEmail] = useState('')
+  const [cName, setCName] = useState('')
+  const [cAddress, setCAddress] = useState('')
+  const [cStatus, setCStatus] = useState<OrderStatus>('delivered')
+  const [cItems, setCItems] = useState<NewItem[]>([{ ...emptyItem }])
+  const [creating, setCreating] = useState(false)
+  const [createErr, setCreateErr] = useState('')
+
+  const createTotal = cItems.reduce((sum, it) => sum + (parseFloat(it.price) || 0) * (parseInt(it.quantity, 10) || 1), 0)
+
+  function resetCreate() {
+    setCEmail(''); setCName(''); setCAddress(''); setCStatus('delivered')
+    setCItems([{ ...emptyItem }]); setCreateErr('')
+  }
+
+  async function submitCreate() {
+    setCreateErr('')
+    if (!cEmail.trim()) { setCreateErr('Укажи email'); return }
+    const items = cItems
+      .filter(it => it.product_name.trim() && parseFloat(it.price) > 0)
+      .map(it => ({
+        product_name: it.product_name.trim(),
+        size: it.size.trim() || null,
+        quantity: parseInt(it.quantity, 10) || 1,
+        price: parseFloat(it.price) || 0,
+      }))
+    if (items.length === 0) { setCreateErr('Добавь хотя бы одну позицию (название + цена)'); return }
+    setCreating(true)
+    const res = await fetch('/api/admin/orders', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        guest_email: cEmail.trim(), guest_name: cName.trim() || null,
+        delivery_address: cAddress.trim() || null, status: cStatus, items,
+      }),
+    })
+    setCreating(false)
+    if (!res.ok) { const d = await res.json().catch(() => ({})); setCreateErr(d.error ?? 'Ошибка создания'); return }
+    setShowCreate(false); resetCreate()
+    router.refresh()
+  }
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -100,8 +147,9 @@ export default function OrdersClient({ orders }: { orders: Order[] }) {
 
   return (
     <div className="px-6 py-6 max-w-4xl mx-auto">
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex items-center justify-between mb-4 gap-3 flex-wrap">
         <AdminPageTitle>Заказы ({filtered.length}/{orders.length})</AdminPageTitle>
+        <button onClick={() => { resetCreate(); setShowCreate(true) }} className={a.btn}>+ Заказ по email</button>
       </div>
 
       {/* Search + Filters */}
@@ -278,6 +326,63 @@ export default function OrdersClient({ orders }: { orders: Order[] }) {
           )
         })}
       </div>
+
+      {/* Создание заказа по email (офлайн-продажи) */}
+      {showCreate && (
+        <AdminModal title="Новый заказ по email" onClose={() => setShowCreate(false)}>
+          <p className="text-xs" style={{ color: 'var(--accent)', opacity: 0.5, fontFamily: 'var(--font-involve)' }}>
+            Если пользователь с таким email уже есть — заказ привяжется сразу. Иначе прилетит в его ЛК при
+            первом входе с этим email (с искрами/скидкой при статусе «доставлен»).
+          </p>
+
+          <div className="flex flex-col gap-2">
+            <input value={cEmail} onChange={e => setCEmail(e.target.value)} placeholder="email покупателя *"
+              style={{ ...INPUT_STYLE, borderRadius: 4, padding: '0.5rem 0.7rem', outline: 'none' }} />
+            <div className="flex gap-2 flex-wrap">
+              <input value={cName} onChange={e => setCName(e.target.value)} placeholder="Имя (необязательно)"
+                style={{ ...INPUT_STYLE, borderRadius: 4, padding: '0.5rem 0.7rem', outline: 'none', flex: 1, minWidth: 140 }} />
+              <select value={cStatus} onChange={e => setCStatus(e.target.value as OrderStatus)}
+                style={{ ...INPUT_STYLE, borderRadius: 4, padding: '0.5rem 0.7rem', outline: 'none' }}>
+                {(Object.keys(ORDER_STATUS_LABELS) as OrderStatus[]).map(st => (
+                  <option key={st} value={st}>{ORDER_STATUS_LABELS[st]}</option>
+                ))}
+              </select>
+            </div>
+            <input value={cAddress} onChange={e => setCAddress(e.target.value)} placeholder="Адрес доставки (необязательно)"
+              style={{ ...INPUT_STYLE, borderRadius: 4, padding: '0.5rem 0.7rem', outline: 'none' }} />
+          </div>
+
+          {/* Позиции */}
+          <div className="flex flex-col gap-2">
+            <span className="text-xs uppercase tracking-widest" style={{ color: 'var(--accent)', opacity: 0.5, fontFamily: 'var(--font-involve)' }}>Позиции</span>
+            {cItems.map((it, i) => (
+              <div key={i} className="flex gap-2 flex-wrap items-center">
+                <input value={it.product_name} onChange={e => setCItems(arr => arr.map((x, j) => j === i ? { ...x, product_name: e.target.value } : x))}
+                  placeholder="Товар" style={{ ...INPUT_STYLE, borderRadius: 4, padding: '0.4rem 0.6rem', outline: 'none', flex: 2, minWidth: 120 }} />
+                <input value={it.size} onChange={e => setCItems(arr => arr.map((x, j) => j === i ? { ...x, size: e.target.value } : x))}
+                  placeholder="Размер" style={{ ...INPUT_STYLE, borderRadius: 4, padding: '0.4rem 0.6rem', outline: 'none', width: 70 }} />
+                <input value={it.quantity} onChange={e => setCItems(arr => arr.map((x, j) => j === i ? { ...x, quantity: e.target.value } : x))}
+                  inputMode="numeric" placeholder="Кол-во" style={{ ...INPUT_STYLE, borderRadius: 4, padding: '0.4rem 0.6rem', outline: 'none', width: 60 }} />
+                <input value={it.price} onChange={e => setCItems(arr => arr.map((x, j) => j === i ? { ...x, price: e.target.value } : x))}
+                  inputMode="numeric" placeholder="Цена" style={{ ...INPUT_STYLE, borderRadius: 4, padding: '0.4rem 0.6rem', outline: 'none', width: 80 }} />
+                {cItems.length > 1 && (
+                  <button onClick={() => setCItems(arr => arr.filter((_, j) => j !== i))} className={a.btnDanger} style={{ padding: '0.3rem 0.6rem' }}>✕</button>
+                )}
+              </div>
+            ))}
+            <button onClick={() => setCItems(arr => [...arr, { ...emptyItem }])} className={a.btnSecondary} style={{ alignSelf: 'flex-start' }}>+ позиция</button>
+          </div>
+
+          <div className="flex items-center justify-between flex-wrap gap-2 pt-1">
+            <span style={{ fontFamily: 'var(--font-deutsch)', fontSize: '1.1rem', color: 'var(--accent)' }}>Итого: {formatPrice(createTotal)}</span>
+            <div className="flex items-center gap-2">
+              <button onClick={() => setShowCreate(false)} className={a.btnSecondary}>Отмена</button>
+              <button onClick={submitCreate} disabled={creating} className={a.btn}>{creating ? 'Создаём...' : 'Создать заказ'}</button>
+            </div>
+          </div>
+          {createErr && <span style={{ color: 'var(--status-error)', fontFamily: 'var(--font-involve)', fontSize: '0.78rem' }}>{createErr}</span>}
+        </AdminModal>
+      )}
     </div>
   )
 }

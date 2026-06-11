@@ -9,7 +9,7 @@ import {
   IconBrandTiktok,
   IconBrandInstagram,
 } from '@tabler/icons-react'
-import BatAnimation from '@/components/BatAnimation'
+import BatAnimation, { type GameConfig } from '@/components/BatAnimation'
 import s from './info.module.css'
 
 export type InfoContent = {
@@ -90,7 +90,7 @@ export const INFO_DEFAULTS: InfoContent = {
 
 type TabId = 'delivery' | 'contacts' | 'about'
 
-export default function InfoClient({ content }: { content: InfoContent }) {
+export default function InfoClient({ content, gameConfig }: { content: InfoContent; gameConfig?: GameConfig }) {
   const c = content
   const tabs: { id: TabId; label: string }[] = [
     { id: 'delivery', label: c.tab1_label },
@@ -111,7 +111,7 @@ export default function InfoClient({ content }: { content: InfoContent }) {
           </div>
           <span className={s.heading}>ИНФА</span>
           <div className={s.divider} />
-          <p className={s.subhead}>О бренде · Доставка · Контакты</p>
+          <p className={s.subhead}>Доставка · Контакты · О бренде</p>
         </div>
       </div>
 
@@ -214,7 +214,7 @@ export default function InfoClient({ content }: { content: InfoContent }) {
         </div>
       </div>
 
-      <BatAnimation />
+      <BatAnimation config={gameConfig} />
     </main>
   )
 }

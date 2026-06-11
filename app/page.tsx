@@ -52,6 +52,8 @@ export default async function HomePage() {
   let logoIconUrl: string | null = null;
   let logoTextUrl: string | null = null;
   let initialCollections: { slug: string; name: string; types: string[] }[] = [];
+  let navCustomItems: { label: string; href: string }[] = [];
+  let navConfigRaw: string | null = null;
 
   try {
     const [productsData, categoriesData, settingsData] = await Promise.all([
@@ -65,6 +67,7 @@ export default async function HomePage() {
       if (row.key === 'hero_poster_url') heroPosterUrl = row.value
       if (row.key === 'logo_icon_url') logoIconUrl = row.value
       if (row.key === 'logo_text_url') logoTextUrl = row.value
+      if (row.key === 'nav_config') navConfigRaw = row.value
     }
 
     const inactiveCatSlugs = new Set(
@@ -105,13 +108,31 @@ export default async function HomePage() {
         products.filter(p => p.category === slug).map(p => p.product_type as string).filter(Boolean)
       )].sort(),
     }))
+
+    // Apply admin nav-config (hidden / order / custom items) so the burger menu
+    // on the homepage matches /admin/menu — без этого кастомные пункты «не работали».
+    if (navConfigRaw) {
+      try {
+        const nav = JSON.parse(navConfigRaw) as {
+          hiddenCollections?: string[]; collectionsOrder?: string[]; customItems?: { label: string; href: string }[]
+        }
+        const hidden = new Set(nav.hiddenCollections ?? [])
+        initialCollections = initialCollections.filter(c => !hidden.has(c.slug))
+        const order = nav.collectionsOrder ?? []
+        if (order.length > 0) {
+          const rank = (slug: string) => { const i = order.indexOf(slug); return i === -1 ? order.length : i }
+          initialCollections = [...initialCollections].sort((a, b) => rank(a.slug) - rank(b.slug))
+        }
+        navCustomItems = nav.customItems ?? []
+      } catch { /* invalid nav_config JSON — ignore */ }
+    }
   } catch {
     // fallback to static data
   }
 
   return (
     <main className="min-h-screen">
-      <Header isAdminUser={isAdminUser} initialCollections={initialCollections} logoIconUrl={logoIconUrl} logoTextUrl={logoTextUrl} />
+      <Header isAdminUser={isAdminUser} initialCollections={initialCollections} customItems={navCustomItems} logoIconUrl={logoIconUrl} logoTextUrl={logoTextUrl} />
       <Hero videoUrl={heroVideoUrl} mp4Url={heroVideoMp4Url} posterUrl={heroPosterUrl} />
       <TornEdge />
       <Suspense fallback={<div id="catalog" />}>

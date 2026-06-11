@@ -28,8 +28,8 @@ interface DashboardData {
   funnel?: { visits: string; product_views: string; cart_adds: string; checkouts: string; orders: string }
   productViews?: { name: string; views: string }[]
   repeat?: { buyers: string; repeat_buyers: string }
-  batScoresDesktop?: { score: number; created_at: string }[]
-  batScoresMobile?: { score: number; created_at: string }[]
+  batScoresDesktop?: { score: number; created_at: string; player?: string | null }[]
+  batScoresMobile?: { score: number; created_at: string; player?: string | null }[]
   batPlays?: { plays: string; players: string }
 }
 
@@ -322,7 +322,10 @@ export default function DashboardClient() {
                 board.rows.map((b, i) => (
                   <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', padding: '0.4rem 0', borderBottom: i < (board.rows.length - 1) ? '1px solid var(--bg-subtle)' : 'none' }}>
                     <span style={{ fontFamily: 'var(--font-involve)', fontSize: '0.7rem', color: accent, opacity: 0.35, minWidth: '1.4rem' }}>#{i + 1}</span>
-                    <span style={{ fontFamily: 'var(--font-deutsch)', fontSize: '0.95rem', color: accent, flex: 1 }}>×{b.score}</span>
+                    <span style={{ fontFamily: 'var(--font-deutsch)', fontSize: '0.95rem', color: accent, minWidth: '3rem' }}>×{b.score}</span>
+                    <span style={{ fontFamily: 'var(--font-involve)', fontSize: '0.72rem', color: accent, opacity: b.player ? 0.85 : 0.4, flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {b.player || 'Аноним'}
+                    </span>
                     <span style={{ fontFamily: 'var(--font-involve)', fontSize: '0.65rem', color: accent, opacity: 0.4 }}>
                       {new Date(b.created_at).toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' })}
                     </span>

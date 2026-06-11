@@ -67,8 +67,8 @@
 .powerup {
   position: fixed;
   z-index: 140;
-  width: 38px;
-  height: 38px;
+  width: 52px;
+  height: 52px;
   transform: translate(-50%, -50%);
   border-radius: 50%;
   border: 2px solid currentColor;
@@ -78,7 +78,7 @@
   align-items: center;
   justify-content: center;
   font-family: var(--font-body, monospace);
-  font-size: 1rem;
+  font-size: 1.35rem;
   line-height: 1;
   cursor: pointer;
   pointer-events: auto;
@@ -349,6 +349,90 @@
   18%  { transform: scaleX(1); }
   80%  { transform: scaleX(1); opacity: 0.55; }
   100% { transform: scaleX(0); opacity: 0; }
+}
+
+/* ── Difficulty chooser (after first kill) ──────────────────── */
+.chooseWrap {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 210;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.1rem;
+  text-align: center;
+  width: min(92vw, 460px);
+  animation: chooseIn 0.4s cubic-bezier(0.2, 0.85, 0.25, 1) both;
+}
+
+.chooseKick {
+  font-family: var(--font-body, monospace);
+  font-size: 0.55rem;
+  letter-spacing: 0.4em;
+  text-transform: uppercase;
+  color: var(--accent, #f29774);
+  opacity: 0.8;
+}
+
+.chooseRow {
+  display: flex;
+  gap: 0.6rem;
+  width: 100%;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.chooseBtn {
+  flex: 1 1 0;
+  min-width: 92px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.85rem 0.6rem;
+  cursor: pointer;
+  background: color-mix(in srgb, var(--bg, #090909) 72%, transparent);
+  color: var(--accent, #f29774);
+  border: 1px solid var(--accent, #f29774);
+  border-radius: var(--radius-btn, 2px);
+  box-shadow: 2px 2px 0 var(--accent, #f29774);
+  transition: box-shadow 0.12s, transform 0.1s, background 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .chooseBtn:hover {
+    background: color-mix(in srgb, var(--accent, #f29774) 18%, transparent);
+    box-shadow: 3px 3px 0 var(--accent, #f29774);
+    transform: translate(-1px, -1px);
+  }
+}
+.chooseBtn:active {
+  box-shadow: 1px 1px 0 var(--accent, #f29774);
+  transform: translate(1px, 1px);
+  transition-duration: 0.06s;
+}
+
+.chooseBtnLabel {
+  font-family: var(--font-heading, 'ONDER', sans-serif);
+  font-size: 0.9rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.chooseBtnHint {
+  font-family: var(--font-body, monospace);
+  font-size: 0.55rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  opacity: 0.6;
+}
+
+@keyframes chooseIn {
+  0%   { opacity: 0; transform: translate(-50%, -50%) scale(0.92); filter: blur(4px); }
+  100% { opacity: 1; transform: translate(-50%, -50%) scale(1); filter: blur(0); }
 }
 
 /* ── Explosion ──────────────────────────────────────────────── */

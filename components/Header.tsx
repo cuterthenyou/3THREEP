@@ -61,9 +61,12 @@ function IconHex() {
   )
 }
 
+interface CustomItem { label: string; href: string }
+
 interface Props {
   isAdminUser?: boolean;
   initialCollections?: Collection[];
+  customItems?: CustomItem[];
   logoIconUrl?: string | null;
   logoTextUrl?: string | null;
 }
@@ -83,7 +86,7 @@ const ADMIN_LINKS = [
 
 interface Collection { slug: string; name: string; types?: string[]; href?: string }
 
-export default function Header({ isAdminUser = false, initialCollections, logoIconUrl: initialLogoIconUrl, logoTextUrl: initialLogoTextUrl }: Props) {
+export default function Header({ isAdminUser = false, initialCollections, customItems: initialCustomItems, logoIconUrl: initialLogoIconUrl, logoTextUrl: initialLogoTextUrl }: Props) {
   const headerRef = useRef<HTMLElement>(null);
   const { count, setOpen } = useCart();
   const [scrolled, setScrolled] = useState(false);
@@ -91,6 +94,7 @@ export default function Header({ isAdminUser = false, initialCollections, logoIc
   const [menuOpen, setMenuOpen] = useState(false);
   const [expanded, setExpanded] = useState<string | null>(null);
   const [collections, setCollections] = useState<Collection[]>(initialCollections ?? []);
+  const [customItems, setCustomItems] = useState<CustomItem[]>(initialCustomItems ?? []);
   const [collectionsLoading, setCollectionsLoading] = useState(!initialCollections);
   const [isDark, setIsDark] = useState(false);
   const [menuUser, setMenuUser] = useState<{ name: string; level: number; discount?: number } | null>(null);
@@ -116,12 +120,23 @@ export default function Header({ isAdminUser = false, initialCollections, logoIc
       .catch(() => {});
   }, []);
 
-  // Load collections — skip fetch if SSR already provided them
+  // Load collections — skip fetch if SSR already provided them.
+  // /api/collections appends custom items as pseudo-collections (slug `_custom_*`);
+  // split them out so they render as top-level menu items, not inside «Коллекции».
   useEffect(() => {
     if (initialCollections && initialCollections.length > 0) return;
     fetch('/api/collections')
       .then(r => r.ok ? r.json() : { collections: [] })
-      .then(d => { setCollections(d.collections ?? []); setCollectionsLoading(false); })
+      .then(d => {
+        const all: Collection[] = d.collections ?? [];
+        const real = all.filter(c => !String(c.slug).startsWith('_custom_'));
+        const custom = all
+          .filter(c => String(c.slug).startsWith('_custom_'))
+          .map(c => ({ label: c.name, href: c.href ?? '#' }));
+        setCollections(real);
+        if (custom.length) setCustomItems(custom);
+        setCollectionsLoading(false);
+      })
       .catch(() => setCollectionsLoading(false));
   }, [initialCollections]);
 
@@ -364,6 +379,20 @@ export default function Header({ isAdminUser = false, initialCollections, logoIc
                 }
               </div>
             </div>
+
+            {/* Кастомные пункты меню (из админки) — верхнеуровневые */}
+            {customItems.map((item, i) => {
+              const external = /^https?:\/\//i.test(item.href);
+              return external ? (
+                <a key={`ci-${i}`} href={item.href} target="_blank" rel="noopener noreferrer" onClick={() => setMenuOpen(false)} className={s.navLink}>
+                  <IconDiamond /> {item.label}
+                </a>
+              ) : (
+                <Link key={`ci-${i}`} href={item.href} onClick={() => setMenuOpen(false)} className={s.navLink}>
+                  <IconDiamond /> {item.label}
+                </Link>
+              );
+            })}
 
             {/* Инфа */}
             <Link href="/info" onClick={() => setMenuOpen(false)} className={s.navLink}>

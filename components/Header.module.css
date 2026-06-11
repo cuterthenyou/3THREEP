@@ -150,8 +150,13 @@
   transition-duration: 0.06s;
 }
 
-/* Hide the speed-pill label on the narrowest phones to save the row */
-@media (max-width: 380px) {
+/* Mobile: освобождаем место в ряду иконок. Тема — только иконка (солнце/луна
+   понятны без подписи), скорость видео оставляем С цифрой (это полезная часть). */
+@media (max-width: 639px) {
+  .themeBadge span { display: none; }
+  .themeBadge { padding: 0.3rem 0.5rem; }
+}
+@media (max-width: 340px) {
   .speedBadge span { display: none; }
   .speedBadge { padding: 0.3rem 0.4rem; }
 }
@@ -509,6 +514,26 @@
   overflow: hidden;
   z-index: 100;
   box-shadow: 0 8px 24px var(--shadow-on-card-2xl);
+}
+
+.userDropdownHead {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--border-soft);
+}
+
+.userDropdownName {
+  font-family: var(--font-heading);
+  font-size: 0.95rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--accent);
+  line-height: 1.1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .userDropdownItem {

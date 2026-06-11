@@ -4,6 +4,25 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import s from './BatAnimation.module.css'
 import { trackEvent } from '@/lib/track'
 
+// ── Admin-tunable balance (site_settings → info/page.tsx → prop) ──────────────
+export interface GameConfig {
+  roombaSpeed: number    // множитель скорости пылесоса
+  batSpeed: number       // множитель скорости нетопырей
+  batScale: number       // множитель размера нетопырей
+  powerupChance: number  // множитель шанса дропа пауэрапа
+}
+export const DEFAULT_GAME_CONFIG: GameConfig = {
+  roombaSpeed: 1, batSpeed: 1, batScale: 1, powerupChance: 1,
+}
+
+// Сложность (выбор после первого нетопыря): множитель скорости + стартовая волна
+type Difficulty = 'chill' | 'normal' | 'hard'
+const DIFFICULTY: Record<Difficulty, { label: string; speed: number; startWave: number; hint: string }> = {
+  chill:  { label: 'ЧИЛЛ',   speed: 0.8, startWave: 1, hint: 'спокойно' },
+  normal: { label: 'НОРМ',   speed: 1.0, startWave: 2, hint: 'как надо' },
+  hard:   { label: 'ХАРДКОР', speed: 1.35, startWave: 5, hint: 'жёстко' },
+}
+
 // ── Pixel-art bat ─────────────────────────────────────────────────────────────
 function PixelBat() {
   return (
@@ -50,7 +69,7 @@ interface ExplosionData { id: number; x: number; y: number }
 interface SplatData     { id: number; x: number; y: number; variant: number; angle: number }
 interface HitMarkerData { id: number; x: number; y: number; kind?: 'kill' | 'clink' }
 interface PowerUpData   { id: number; x: number; y: number; kind: PowerKind }
-type GameState = 'idle' | 'lure' | 'playing' | 'game_over'
+type GameState = 'idle' | 'lure' | 'choose' | 'playing' | 'game_over'
 
 const VARIANT_BASE: Record<BatVariant, number> = { normal: 1, golden: 3, armored: 2 }
 const POWER_LABELS: Record<PowerKind, string> = { slowmo: 'ЗАМЕДЛЕНИЕ', freeze: 'ЗАМОРОЗКА', double: 'ОЧКИ ×2' }
@@ -180,9 +199,10 @@ function buildSnakePath(splats: SplatData[], dir: 'left' | 'right', W: number, H
 }
 
 // ── Pixel roomba — JS rAF driven ──────────────────────────────────────────────
-function PixelRoomba({ splats, dir, onSplatHit, onDone }: {
+function PixelRoomba({ splats, dir, speedMult = 1, onSplatHit, onDone }: {
   splats: SplatData[]
   dir: 'left' | 'right'
+  speedMult?: number
   onSplatHit: (id: number) => void
   onDone: () => void
 }) {
@@ -193,7 +213,10 @@ function PixelRoomba({ splats, dir, onSplatHit, onDone }: {
   useEffect(() => {
     const div = divRef.current; if (!div) return
     const W = window.innerWidth, H = window.innerHeight
-    const SIZE = 52, SPEED = 380, RADIUS = 52
+    // Скорость пропорциональна ширине вьюпорта (фикс «медленно на десктопе /
+    // быстро на мобиле») × админ-множитель. Время прохода ≈ постоянно на всех экранах.
+    const SIZE = 52, RADIUS = 52
+    const SPEED = Math.max(200, Math.min(W * 0.5, 820)) * (speedMult || 1)
     const wps = buildSnakePath(splats, dir, W, H)
     const pos = { x: dir === 'left' ? -SIZE : W + SIZE, y: wps[0]?.y ?? H * 0.65 }
     div.style.transform = `translate(${pos.x - SIZE / 2}px, ${pos.y - SIZE / 2}px)`
@@ -303,9 +326,9 @@ function BatInstance({ bat, cracked, speedRef, onClick, onPositionUpdate }: {
 }
 
 // ── Score + Game Over ─────────────────────────────────────────────────────────
-function ScoreCounter({ score, waveNum, best, combo, effect, bonus }: {
+function ScoreCounter({ score, waveNum, best, combo, effect, bonus, difficultyLabel }: {
   score: number; waveNum: number; best: number; combo: number
-  effect: { kind: PowerKind } | null; bonus: boolean
+  effect: { kind: PowerKind } | null; bonus: boolean; difficultyLabel?: string
 }) {
   const [pulse, setPulse] = useState(false)
   const prev = useRef(score)
@@ -316,7 +339,11 @@ function ScoreCounter({ score, waveNum, best, combo, effect, bonus }: {
   const comboMult = Math.min(1 + Math.floor((combo - 1) / 3), 5)
   return (
     <div className={s.score}>
-      {waveNum > 0 && <span className={s.waveLabel}>{bonus ? 'BONUS WAVE' : `WAVE ${waveNum}`}</span>}
+      {waveNum > 0 && (
+        <span className={s.waveLabel}>
+          {bonus ? 'BONUS WAVE' : `WAVE ${waveNum}`}{difficultyLabel ? ` · ${difficultyLabel}` : ''}
+        </span>
+      )}
       <span className={s.scoreLabel}>очки</span>
       <span className={`${s.scoreNum} ${pulse ? s.pulse : ''}`}>×{score}</span>
       {combo >= 2 && (
@@ -349,7 +376,7 @@ function WaveBanner({ waveNum, bonus }: { waveNum: number; bonus: boolean }) {
 let _id = 0
 function nextId() { return ++_id }
 
-function spawnBat(waveNum = 0, allowSpecial = false, goldenBoost = 0): BatData {
+function spawnBat(waveNum = 0, allowSpecial = false, goldenBoost = 0, cfg: GameConfig = DEFAULT_GAME_CONFIG, diffMult = 1): BatData {
   const W = typeof window !== 'undefined' ? window.innerWidth  : 400
   const H = typeof window !== 'undefined' ? window.innerHeight : 800
 
@@ -361,13 +388,15 @@ function spawnBat(waveNum = 0, allowSpecial = false, goldenBoost = 0): BatData {
     else if (r < 0.30 && waveNum >= 2) variant = 'armored'
   }
 
-  // Difficulty: base speed grows with wave (capped)
+  // Difficulty: base speed grows with wave (capped) × admin/difficulty multipliers
   const diff = 1 + Math.min(waveNum, 12) * 0.05
-  let speed = (120 + Math.random() * 80) * diff
-  let scale = 0.6 + Math.random() * 0.75
+  const speedMul = (cfg.batSpeed || 1) * (diffMult || 1)
+  let speed = (120 + Math.random() * 80) * diff * speedMul
+  // нетопыри чуть крупнее (Яна) + админ-множитель размера
+  let scale = (0.72 + Math.random() * 0.78) * (cfg.batScale || 1)
   let hp = 1
-  if (variant === 'golden')  { speed *= 1.6; scale = 0.5 + Math.random() * 0.25; hp = 1 }
-  if (variant === 'armored') { speed *= 0.92; scale = 0.9 + Math.random() * 0.4; hp = 2 }
+  if (variant === 'golden')  { speed *= 1.6; scale = (0.6 + Math.random() * 0.28) * (cfg.batScale || 1); hp = 1 }
+  if (variant === 'armored') { speed *= 0.92; scale = (1.0 + Math.random() * 0.42) * (cfg.batScale || 1); hp = 2 }
 
   const side = Math.floor(Math.random() * 4)
   const spread = (Math.random() - 0.5) * 0.5
@@ -382,7 +411,10 @@ function spawnBat(waveNum = 0, allowSpecial = false, goldenBoost = 0): BatData {
 }
 
 // ── Main controller ───────────────────────────────────────────────────────────
-export default function BatAnimation() {
+export default function BatAnimation({ config = DEFAULT_GAME_CONFIG }: { config?: GameConfig } = {}) {
+  const cfgRef = useRef<GameConfig>(config); cfgRef.current = config
+  const difficultyRef = useRef<Difficulty>('normal')
+  const firstKillRef = useRef(false)
   const [gameState, setGameState]           = useState<GameState>('idle')
   const [bats, setBats]                     = useState<BatData[]>([])
   const [explosions, setExplosions]         = useState<ExplosionData[]>([])
@@ -433,11 +465,12 @@ export default function BatAnimation() {
     const count = isBonus ? Math.round(n * 1.6) + 2 : n
     const allowSpecial = n >= 2
     const interval = isBonus ? 90 : 150
+    const diffMult = DIFFICULTY[difficultyRef.current].speed
     if (waveTimerRef.current) { clearTimeout(waveTimerRef.current); waveTimerRef.current = null }
     spawnTimersRef.current.forEach(clearTimeout); spawnTimersRef.current = []
     for (let i = 0; i < count; i++) {
       spawnTimersRef.current.push(setTimeout(
-        () => setBats(prev => [...prev, spawnBat(n, allowSpecial, isBonus ? 0.18 : 0)]),
+        () => setBats(prev => [...prev, spawnBat(n, allowSpecial, isBonus ? 0.18 : 0, cfgRef.current, diffMult)]),
         i * interval
       ))
     }
@@ -456,6 +489,15 @@ export default function BatAnimation() {
       })
       if (gameStateRef.current === 'lure') {
         setGameState('idle')
+      } else if (isBonus) {
+        // Бонус-волна не наказывает: улетевшие нетопыри просто исчезают,
+        // очки не теряются — сразу запускаем пылесос и следующую волну.
+        const n2 = currentWaveSizeRef.current + 1
+        pendingWaveRef.current = n2
+        setWaveNum(n2)
+        setRoombaDir(n2 % 2 === 0 ? 'right' : 'left')
+        setRoombaSplats([...splatsRef.current])
+        setRoombaSweeping(true)
       } else {
         setGameState('game_over')
         try {
@@ -472,6 +514,7 @@ export default function BatAnimation() {
           setPowerups([]); setCrackedIds(new Set()); setComboDisplay(0); setActiveEffect(null)
           setBonusWave(false)
           comboRef.current = 0; speedMultRef.current = 1; scoreMultRef.current = 1
+          firstKillRef.current = false; difficultyRef.current = 'normal'
         }, 3000)
       }
     }, 4000)
@@ -499,6 +542,7 @@ export default function BatAnimation() {
       setScore(0); scoreRef.current = 0; setWaveNum(0)
       setComboDisplay(0); comboRef.current = 0; setActiveEffect(null); setBonusWave(false)
       speedMultRef.current = 1; scoreMultRef.current = 1
+      firstKillRef.current = false; difficultyRef.current = 'normal'
       setGameState('idle')
     }
     document.addEventListener('visibilitychange', onHidden)
@@ -608,7 +652,8 @@ export default function BatAnimation() {
 
     // Power-up drop (only mid-game, ~9% — golden bats are more generous)
     if (gameStateRef.current === 'playing') {
-      const dropChance = bat.variant === 'golden' ? 0.35 : 0.09
+      const pc = cfgRef.current.powerupChance || 1
+      const dropChance = (bat.variant === 'golden' ? 0.45 : 0.14) * pc
       if (Math.random() < dropChance) {
         const kinds: PowerKind[] = ['slowmo', 'freeze', 'double']
         const kind = kinds[Math.floor(Math.random() * kinds.length)]
@@ -620,6 +665,12 @@ export default function BatAnimation() {
       const remaining = prev.filter(b => b.id !== clickedId)
       if (remaining.length === 0) {
         if (waveTimerRef.current) { clearTimeout(waveTimerRef.current); waveTimerRef.current = null }
+        // Первый убитый нетопырь (в lure) → экран выбора сложности, а не сразу игра
+        if (gameStateRef.current === 'lure' && !firstKillRef.current) {
+          firstKillRef.current = true
+          setGameState('choose')
+          return remaining
+        }
         nextWaveNRef.current = currentWaveSizeRef.current + 1
         scheduleWaveRef.current = true
         if (gameStateRef.current === 'lure') setGameState('playing')
@@ -627,6 +678,16 @@ export default function BatAnimation() {
       return remaining
     })
   }, [bumpCombo])
+
+  // Выбор сложности после первого нетопыря → старт игры с выбранной волны
+  const chooseDifficulty = useCallback((d: Difficulty) => {
+    difficultyRef.current = d
+    const startWave = DIFFICULTY[d].startWave
+    setSplats([])
+    setWaveNum(startWave)
+    setGameState('playing')
+    spawnWaveRef.current?.(startWave)
+  }, [])
 
   const collectPowerUp = useCallback((id: number, kind: PowerKind) => {
     setPowerups(prev => prev.filter(p => p.id !== id))
@@ -654,7 +715,7 @@ export default function BatAnimation() {
   const removeExplosion  = useCallback((id: number) => setExplosions(prev => prev.filter(e => e.id !== id)), [])
   const removeHitMarker  = useCallback((id: number) => setHitMarkers(prev => prev.filter(h => h.id !== id)), [])
 
-  const overlayActive = gameState === 'playing' || gameState === 'game_over'
+  const overlayActive = gameState === 'playing' || gameState === 'game_over' || gameState === 'choose'
   const showScore     = gameState === 'playing' || gameState === 'game_over'
 
   return (
@@ -679,10 +740,25 @@ export default function BatAnimation() {
       ))}
       {roombaSweeping && (
         <PixelRoomba key={waveNum} splats={roombaSplats} dir={roombaDir}
+          speedMult={cfgRef.current.roombaSpeed}
           onSplatHit={handleSplatHit} onDone={handleRoombaDone} />
       )}
       {gameState === 'lure' && (
         <div className={s.lureHint} aria-hidden="true">Поймай нетопыря — начни охоту</div>
+      )}
+      {gameState === 'choose' && (
+        <div className={s.chooseWrap}>
+          <span className={s.chooseKick}>// ВЫБЕРИ СЛОЖНОСТЬ</span>
+          <div className={s.chooseRow}>
+            {(Object.keys(DIFFICULTY) as Difficulty[]).map(d => (
+              <button key={d} className={s.chooseBtn} onClick={() => chooseDifficulty(d)}
+                onTouchStart={e => { e.preventDefault(); chooseDifficulty(d) }}>
+                <span className={s.chooseBtnLabel}>{DIFFICULTY[d].label}</span>
+                <span className={s.chooseBtnHint}>{DIFFICULTY[d].hint}</span>
+              </button>
+            ))}
+          </div>
+        </div>
       )}
       {gameState === 'game_over' && <GameOverBanner />}
       {waveBanner && gameState === 'playing' && (
@@ -690,7 +766,8 @@ export default function BatAnimation() {
       )}
       {showScore && (
         <ScoreCounter score={score} waveNum={waveNum} best={bestScore}
-          combo={comboDisplay} effect={activeEffect} bonus={bonusWave} />
+          combo={comboDisplay} effect={activeEffect} bonus={bonusWave}
+          difficultyLabel={DIFFICULTY[difficultyRef.current].label} />
       )}
     </>
   )
