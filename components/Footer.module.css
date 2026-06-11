@@ -6,8 +6,8 @@
 .heading {
   color: var(--bg);
   font-family: var(--font-onder);
-  font-size: clamp(1.4rem, 4vw, 2rem);
-  line-height: 1.32;            /* ONDER высокий — стопка строк не должна слипаться */
+  font-size: calc(clamp(1.4rem, 4vw, 2rem) * var(--type-footer-heading-scale, 1));
+  line-height: var(--type-heading-leading, 1.32); /* ONDER высокий — межстрочное из админки */
   letter-spacing: 0.05em;
   text-transform: uppercase;
   word-break: break-word;
@@ -18,6 +18,8 @@
 .subtitle {
   color: var(--bg);
   font-family: var(--font-involve);
+  font-size: calc(0.75rem * var(--type-footer-body-scale, 1));
+  line-height: 1.6;
   opacity: 0.7;
   max-width: 220px;
 }
@@ -48,6 +50,8 @@
 .disclaimer {
   color: var(--bg);
   font-family: var(--font-involve);
+  font-size: calc(0.7rem * var(--type-footer-body-scale, 1));
+  line-height: 1.5;
   opacity: 0.7;
   word-break: break-word;
 }
@@ -56,6 +60,8 @@
 .copyright {
   color: var(--text);
   font-family: var(--font-involve);
+  font-size: calc(0.8rem * var(--type-footer-body-scale, 1));
+  line-height: 1.5;
   opacity: 0.6;
 }
 

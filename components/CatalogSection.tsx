@@ -1,11 +1,11 @@
 'use client'
 
 import React, { useState, useEffect, useCallback, useRef } from 'react'
-import Image from 'next/image'
 import { useSearchParams } from 'next/navigation'
 import type { Product, ProductCategory, Category } from '@/lib/types'
 import ProductModal from './ProductModal'
 import ProductCard from './ProductCard'
+import ThemedLogo from './ThemedLogo'
 import s from './CatalogSection.module.css'
 
 type Cols = 2 | 3
@@ -145,14 +145,11 @@ export default function CatalogSection({ products, categories, categoryData = {}
         const logoTop = activeCat?.logo_top_url
         return logoTop ? (
           <div className="flex justify-center pt-6 pb-2">
-            <Image
+            <ThemedLogo
               src={logoTop}
               alt="Collection"
-              width={480}
-              height={112}
-              className="theme-img h-16 sm:h-20 lg:h-28 w-auto"
-              unoptimized
-              priority
+              className="h-16 sm:h-20 lg:h-28 w-auto"
+              defaultRatio={4}
             />
           </div>
         ) : null
@@ -184,19 +181,7 @@ export default function CatalogSection({ products, categories, categoryData = {}
                 key={n}
                 onClick={() => setColsAndSave(n)}
                 aria-label={`${n} в ряд`}
-                style={{
-                  width: '30px',
-                  height: '30px',
-                  border: `1px solid ${cols === n ? 'var(--accent)' : 'var(--border)'}`,
-                  background: cols === n ? 'var(--accent)' : 'transparent',
-                  borderRadius: '2px',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  transition: 'background 0.12s, border-color 0.12s',
-                  boxShadow: cols === n ? '2px 2px 0 var(--accent)' : 'none',
-                }}
+                className={`${s.gridBtn} ${cols === n ? s.gridBtnActive : ''}`}
               >
                 <GridIcon cols={n} active={cols === n} />
               </button>
@@ -215,17 +200,8 @@ export default function CatalogSection({ products, categories, categoryData = {}
       {activeCategory !== 'all' && (() => {
         const desc = categoryData[activeCategory]?.description
         return desc ? (
-          <div style={{ textAlign: 'center', padding: '0 2rem 1.5rem', maxWidth: '560px', margin: '0 auto' }}>
-            <p style={{
-              fontFamily: 'var(--font-involve)',
-              fontSize: '0.72rem',
-              color: 'var(--accent)',
-              opacity: 0.5,
-              letterSpacing: '0.03em',
-              lineHeight: 1.8,
-            }}>
-              {desc}
-            </p>
+          <div className={s.collectionDescWrap}>
+            <p className={s.collectionDesc}>{desc}</p>
           </div>
         ) : null
       })()}
@@ -236,14 +212,11 @@ export default function CatalogSection({ products, categories, categoryData = {}
         const logoBottom = activeCat?.logo_bottom_url
         return logoBottom ? (
           <div className="flex justify-center pb-16">
-            <Image
+            <ThemedLogo
               src={logoBottom}
               alt="Collection"
-              width={128}
-              height={64}
-              className="theme-img w-32 h-auto"
-              style={{ height: 'auto' }}
-              unoptimized
+              className="w-32 h-auto"
+              defaultRatio={2}
             />
           </div>
         ) : null

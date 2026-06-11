@@ -208,7 +208,10 @@ const ProductCard = React.memo(function ProductCard({
           <h3 className={s.productName}>{product.name}</h3>
           {discount > 0 ? (
             <span className={s.priceWrap}>
-              <span className={s.productPriceOld}>{formatPrice(product.price)}</span>
+              <span className={s.priceOldRow}>
+                <span className={s.priceBadge}>−{discount}%</span>
+                <span className={s.productPriceOld}>{formatPrice(product.price)}</span>
+              </span>
               <span className={s.productPrice}>{formatPrice(applyDiscount(product.price, discount))}</span>
             </span>
           ) : (

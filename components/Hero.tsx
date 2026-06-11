@@ -27,6 +27,30 @@ export default function Hero({ videoUrl, mp4Url, posterUrl }: HeroProps) {
     });
   }, []);
 
+  // Playback speed — user override (localStorage, set from the header pill) falls
+  // back to the admin default exposed on the --hero-speed CSS var.
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    const apply = (v: number) => { if (!isNaN(v) && v > 0) video.playbackRate = v; };
+    const resolve = (): number => {
+      const stored = parseFloat(localStorage.getItem('hero-speed') ?? '');
+      if (!isNaN(stored)) return stored;
+      const def = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--hero-speed'));
+      return isNaN(def) ? 1 : def;
+    };
+    apply(resolve());
+    // keep rate after loops/source swaps
+    const onLoaded = () => apply(resolve());
+    video.addEventListener('loadeddata', onLoaded);
+    const onSpeed = (e: Event) => apply((e as CustomEvent<number>).detail);
+    window.addEventListener('threep-hero-speed', onSpeed as EventListener);
+    return () => {
+      video.removeEventListener('loadeddata', onLoaded);
+      window.removeEventListener('threep-hero-speed', onSpeed as EventListener);
+    };
+  }, []);
+
   // Desktop only: pause on press-hold. Touch devices just watch the loop
   // (touch-to-pause fights iOS autoplay and can leave the video stopped).
   const handlePause = useCallback(() => videoRef.current?.pause(), []);

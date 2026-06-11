@@ -93,9 +93,10 @@ export default function Header({ isAdminUser = false, initialCollections, logoIc
   const [collections, setCollections] = useState<Collection[]>(initialCollections ?? []);
   const [collectionsLoading, setCollectionsLoading] = useState(!initialCollections);
   const [isDark, setIsDark] = useState(false);
-  const [menuUser, setMenuUser] = useState<{ name: string; level: number } | null>(null);
+  const [menuUser, setMenuUser] = useState<{ name: string; level: number; discount?: number } | null>(null);
   const [logoIconUrl, setLogoIconUrl] = useState<string | null>(initialLogoIconUrl ?? null);
   const [logoTextUrl, setLogoTextUrl] = useState<string | null>(initialLogoTextUrl ?? null);
+  const [heroSpeed, setHeroSpeed] = useState<number | null>(null);
   const menuHistoryPushed = useRef(false);
 
   function closeMenu() {
@@ -210,6 +211,34 @@ export default function Header({ isAdminUser = false, initialCollections, logoIc
     setExpanded(v => v === section ? null : section);
   }
 
+  // Hero video playback speed — cycles through adequate values, persisted +
+  // broadcast to the Hero component via a custom event.
+  const SPEED_STEPS = [0.5, 0.75, 1, 1.5];
+  useEffect(() => {
+    const stored = parseFloat(localStorage.getItem('hero-speed') ?? '');
+    if (!isNaN(stored)) { setHeroSpeed(stored); return; }
+    // fall back to the admin default exposed on --hero-speed
+    const def = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--hero-speed'));
+    setHeroSpeed(isNaN(def) ? 1 : def);
+  }, []);
+
+  function cycleSpeed() {
+    setHeroSpeed(prev => {
+      const cur = prev ?? 1;
+      const idx = SPEED_STEPS.findIndex(v => Math.abs(v - cur) < 0.01);
+      const next = SPEED_STEPS[(idx + 1) % SPEED_STEPS.length];
+      localStorage.setItem('hero-speed', String(next));
+      window.dispatchEvent(new CustomEvent('threep-hero-speed', { detail: next }));
+      return next;
+    });
+  }
+
+  // Show speed pill only on the home page (where the hero video lives)
+  const [onHome, setOnHome] = useState(false);
+  useEffect(() => { setOnHome(window.location.pathname === '/'); }, []);
+
+  const fmtSpeed = (v: number) => (Number.isInteger(v) ? `${v}×` : `${v}×`).replace('.', ',');
+
   return (
     <>
       <header
@@ -240,6 +269,21 @@ export default function Header({ isAdminUser = false, initialCollections, logoIc
               {isDark ? <BrutalSun /> : <BrutalMoon />}
               <span>{isDark ? 'LIGHT' : 'DARK'}</span>
             </button>
+
+            {/* Hero video speed — only on home, where the hero plays */}
+            {onHome && heroSpeed != null && (
+              <button
+                onClick={cycleSpeed}
+                className={s.speedBadge}
+                aria-label={`Скорость видео ${fmtSpeed(heroSpeed)}`}
+                title="Скорость видео в шапке"
+              >
+                <svg width="11" height="11" viewBox="0 0 14 14" fill="currentColor" aria-hidden="true">
+                  <path d="M7 0a7 7 0 100 14A7 7 0 007 0zm0 12.5A5.5 5.5 0 117 1.5a5.5 5.5 0 010 11zM7 3.2L4 7h2v3.8L9 7H7z"/>
+                </svg>
+                <span>{fmtSpeed(heroSpeed)}</span>
+              </button>
+            )}
 
             {/* Notifications */}
             <NotificationBell />
@@ -291,7 +335,12 @@ export default function Header({ isAdminUser = false, initialCollections, logoIc
         {menuUser && (
           <div className={s.menuUserInfo}>
             <span className={s.menuUserName}>{menuUser.name}</span>
-            <span className={s.menuUserLevel}>LVL {menuUser.level}</span>
+            <span className={s.menuUserMeta}>
+              <span className={s.menuUserLevel}>LVL {menuUser.level}</span>
+              {!!menuUser.discount && menuUser.discount > 0 && (
+                <span className={s.menuUserDiscount}>−{menuUser.discount}%</span>
+              )}
+            </span>
           </div>
         )}
 

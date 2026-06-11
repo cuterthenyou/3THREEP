@@ -1,47 +1,44 @@
-/* ── Header bar — branded sticky/hide/reveal ── */
+/* ── Header bar — frosted-glass (iOS-style), sticky/hide/reveal ──
+   Стекло-фон живёт на ::before и затухает книзу через mask-градиент (плотное
+   сверху, прозрачное снизу). Маскируем именно псевдоэлемент, а НЕ сам хэдер,
+   иначе вместе с фоном «растворятся» логотип и кнопки. Контент — поверх (z-index). */
 .headerBase {
-  transition:
-    transform 0.42s cubic-bezier(0.22, 1, 0.36, 1),
-    background-color 0.3s ease,
-    box-shadow 0.3s ease,
-    border-color 0.3s ease;
-  border-bottom: 1px solid transparent;
+  position: fixed;
+  transition: transform 0.42s cubic-bezier(0.22, 1, 0.36, 1);
   will-change: transform;
 }
 
-/* Accent hairline that wipes in when the header sticks */
-.headerBase::after {
+/* Контент хэдера всегда поверх стеклянного слоя */
+.headerBase > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* Frosted-glass слой — рисуется на ::before, затухает книзу */
+.headerBase::before {
   content: '';
   position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  height: 1px;
-  background: var(--accent);
-  transform: scaleX(0);
-  transform-origin: left center;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
   opacity: 0;
-  transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.3s ease;
-}
-
-/* At the very top — faint branded veil over the hero (not fully transparent) */
-.headerTop {
-  background: linear-gradient(to bottom, color-mix(in srgb, var(--bg) 50%, transparent), transparent);
-}
-
-/* Scrolled — solid blurred bar + neo accent + stick pop */
-.headerScrolled {
   background: var(--header-scrolled-bg);
-  backdrop-filter: blur(12px) saturate(1.4);
-  -webkit-backdrop-filter: blur(12px) saturate(1.4);
-  border-bottom-color: color-mix(in srgb, var(--accent) 35%, transparent);
-  box-shadow: 0 6px 22px rgba(0, 0, 0, 0.28);
-  animation: headerStick 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+  backdrop-filter: blur(20px) saturate(1.6);
+  -webkit-backdrop-filter: blur(20px) saturate(1.6);
+  /* плотное матовое стекло сверху → прозрачно снизу */
+  -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 55%, transparent 100%);
+          mask-image: linear-gradient(to bottom, #000 0%, #000 55%, transparent 100%);
+  transition: opacity 0.32s ease;
 }
 
-.headerScrolled::after {
-  transform: scaleX(1);
-  opacity: 0.45;
+/* At the very top — едва заметная вуаль над hero (без стекла) */
+.headerTop::before {
+  opacity: 0;
+}
+
+/* Scrolled — стеклянный слой проявляется */
+.headerScrolled::before {
+  opacity: 1;
 }
 
 /* Hidden on scroll-down, slides back in on scroll-up */
@@ -49,15 +46,8 @@
   transform: translateY(-105%);
 }
 
-@keyframes headerStick {
-  0%   { box-shadow: 0 0 0 rgba(0, 0, 0, 0); }
-  45%  { box-shadow: 0 10px 26px rgba(0, 0, 0, 0.34); }
-  100% { box-shadow: 0 6px 22px rgba(0, 0, 0, 0.28); }
-}
-
 @media (prefers-reduced-motion: reduce) {
-  .headerBase, .headerBase::after { transition: none; }
-  .headerScrolled { animation: none; }
+  .headerBase, .headerBase::before { transition: none; }
   .headerHidden { transform: none; }
 }
 
@@ -98,7 +88,7 @@
   gap: 0.35rem;
   padding: 0.3rem 0.6rem;
   height: 2.25rem;
-  border-radius: 3px;
+  border-radius: var(--radius-btn, 3px);
   font-family: var(--font-onder);
   font-size: 0.55rem;
   letter-spacing: 0.14em;
@@ -123,6 +113,47 @@
   box-shadow: 1px 1px 0 var(--accent);
   transform: translate(1px, 1px);
   transition-duration: 0.06s;
+}
+
+/* ── Hero video speed pill (mirrors themeBadge) ── */
+.speedBadge {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.3rem 0.55rem;
+  height: 2.25rem;
+  border-radius: var(--radius-btn, 3px);
+  font-family: var(--font-onder);
+  font-size: 0.55rem;
+  letter-spacing: 0.1em;
+  background: var(--bg-subtle);
+  color: var(--accent);
+  border: 1px solid var(--accent);
+  box-shadow: 2px 2px 0 var(--accent);
+  cursor: pointer;
+  transition: box-shadow 0.15s, transform 0.12s, background 0.15s;
+  white-space: nowrap;
+  -webkit-tap-highlight-color: transparent;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .speedBadge:hover {
+    background: var(--accent-2);
+    box-shadow: 3px 3px 0 var(--accent);
+    transform: translate(-1px, -1px);
+  }
+}
+
+.speedBadge:active {
+  box-shadow: 1px 1px 0 var(--accent);
+  transform: translate(1px, 1px);
+  transition-duration: 0.06s;
+}
+
+/* Hide the speed-pill label on the narrowest phones to save the row */
+@media (max-width: 380px) {
+  .speedBadge span { display: none; }
+  .speedBadge { padding: 0.3rem 0.4rem; }
 }
 
 /* ── Burger lines ── */
@@ -186,7 +217,7 @@
   flex-direction: column;
   align-items: flex-start;
   width: 100%;
-  gap: 0.35rem;
+  gap: var(--menu-item-gap, 0.5rem);
 }
 
 @media (min-width: 768px) {
@@ -310,8 +341,10 @@
   border-left: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
   margin-left: 0.55rem;
   padding-left: 1.2rem;
-  margin-top: 0.15rem;
-  margin-bottom: 0.25rem;
+  /* Без вертикальных margin — иначе свёрнутый аккордеон «съедает» отступ и
+     ломает равный ритм пунктов меню (постулат равных отступов). */
+  margin-top: 0;
+  margin-bottom: 0;
 }
 
 .subOpen {
@@ -351,6 +384,12 @@
   -webkit-font-smoothing: antialiased;
 }
 
+.menuUserMeta {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
 .menuUserLevel {
   font-family: var(--font-onder);
   font-size: 0.62rem;
@@ -358,6 +397,18 @@
   text-transform: uppercase;
   color: var(--accent);
   opacity: 0.4;
+}
+
+/* Скидка у никнейма — как в ЛК: акцентный бейдж */
+.menuUserDiscount {
+  font-family: var(--font-onder);
+  font-size: 0.6rem;
+  letter-spacing: 0.1em;
+  line-height: 1;
+  color: var(--bg);
+  background: var(--accent);
+  border-radius: var(--radius-btn, 2px);
+  padding: 0.18rem 0.4rem;
 }
 
 .subLink {

@@ -24,12 +24,6 @@ interface Props {
 const BUILTIN_FONTS = ['ONDER', 'Involve', 'DeutschGothic'] as const
 type FontName = string
 
-const RADIUS_OPTIONS = [
-  { value: 'sharp',   label: 'Острые' },
-  { value: 'slight',  label: 'Лёгкие' },
-  { value: 'rounded', label: 'Скруглённые' },
-] as const
-
 const SPEED_OPTIONS = [
   { value: 'off',    label: 'Выкл' },
   { value: 'slow',   label: 'Медленно' },
@@ -131,10 +125,57 @@ export default function SiteClient({ initialSettings, initialCustomFonts = [] }:
   const [grainDark,  setGrainDark]  = useState(isNaN(grainDarkRaw)  ? 5.5 : Math.round(grainDarkRaw  * 1000) / 10)
   const grainScaleRaw = parseInt(initialSettings['grain_size'] ?? '256', 10)
   const [grainScale, setGrainScale] = useState(isNaN(grainScaleRaw) ? 256 : Math.max(64, Math.min(512, grainScaleRaw)))
-  const [borderRadiusScale, setBorderRadiusScale] = useState(initialSettings['border_radius_scale'] ?? 'sharp')
   const [animationSpeed, setAnimationSpeed] = useState(initialSettings['animation_speed'] ?? 'normal')
   const [savingEffects, setSavingEffects] = useState(false)
   const [effectsMsg, setEffectsMsg] = useState('')
+
+  // Скругление — ползунки в px (новые ключи; fallback на старый пресет)
+  const presetRadiusPx = ({ sharp: 0, slight: 4, rounded: 10 } as Record<string, number>)[initialSettings['border_radius_scale'] ?? 'sharp'] ?? 0
+  const [radiusPx, setRadiusPx] = useState(
+    initialSettings['border_radius_px'] != null ? Math.round(parseFloat(initialSettings['border_radius_px'])) : presetRadiusPx
+  )
+  const [btnRadiusPx, setBtnRadiusPx] = useState(
+    initialSettings['button_radius_px'] != null ? Math.round(parseFloat(initialSettings['button_radius_px'])) : presetRadiusPx
+  )
+
+  // ── Типографика (шкалы + межстрочное заголовков) ──
+  const numInit = (k: string, def: number) => { const v = parseFloat(initialSettings[k] ?? ''); return isNaN(v) ? def : v }
+  const [typeHeadingScale,   setTypeHeadingScale]   = useState(numInit('type_heading_scale', 1))
+  const [typeHeadingLeading, setTypeHeadingLeading] = useState(numInit('type_heading_leading', 1.3))
+  const [typeBodyScale,      setTypeBodyScale]      = useState(numInit('type_body_scale', 1))
+  const [typePriceScale,     setTypePriceScale]     = useState(numInit('type_price_scale', 1))
+  const [typeCatHeading, setTypeCatHeading] = useState(numInit('type_catalog_heading_scale', 1))
+  const [typeCatBody,    setTypeCatBody]    = useState(numInit('type_catalog_body_scale', 1))
+  const [typeFootHeading,setTypeFootHeading]= useState(numInit('type_footer_heading_scale', 1))
+  const [typeFootBody,   setTypeFootBody]   = useState(numInit('type_footer_body_scale', 1))
+  const [typeModalBody,  setTypeModalBody]  = useState(numInit('type_modal_body_scale', 1))
+  const [savingType, setSavingType] = useState(false)
+  const [typeMsg, setTypeMsg] = useState('')
+
+  // ── Trip-тема (цвета + эффекты) ──
+  const [colorBgTrip, setColorBgTrip]         = useState(initialSettings['color_bg_trip'] ?? '#160a2b')
+  const [colorTextTrip, setColorTextTrip]     = useState(initialSettings['color_text_trip'] ?? '#cdbcff')
+  const [colorAccentTrip, setColorAccentTrip] = useState(initialSettings['color_accent_trip'] ?? '#ff5ad0')
+  const [tripBreathe, setTripBreathe]   = useState(initialSettings['trip_breathe'] !== 'false')
+  const [tripDriftSpeed, setTripDriftSpeed] = useState(numInit('trip_drift_speed', 16))
+  const [tripBlobOpacity, setTripBlobOpacity] = useState(numInit('trip_blob_opacity', 1))
+  const [savingTrip, setSavingTrip] = useState(false)
+  const [tripMsg, setTripMsg] = useState('')
+
+  // ── Скорость видео Hero (дефолт) ──
+  const [heroSpeedDefault, setHeroSpeedDefault] = useState(numInit('hero_speed_default', 1))
+  const [savingHeroSpeed, setSavingHeroSpeed] = useState(false)
+  const [heroSpeedMsg, setHeroSpeedMsg] = useState('')
+
+  // Текущая тема админки — чтобы живой предпросмотр цвета бил по нужной теме
+  const [adminTheme, setAdminTheme] = useState<'light' | 'dark' | 'trip'>('dark')
+  useEffect(() => {
+    const read = () => setAdminTheme((document.documentElement.dataset.theme as 'light' | 'dark' | 'trip') ?? 'dark')
+    read()
+    const obs = new MutationObserver(read)
+    obs.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] })
+    return () => obs.disconnect()
+  }, [])
 
   // ── Glitter ──────────────────────────────────────────────────────
   const [glitterEnabled,  setGlitterEnabled]  = useState(initialSettings['glitter_enabled']  !== 'false')
@@ -371,6 +412,9 @@ export default function SiteClient({ initialSettings, initialCustomFonts = [] }:
       saveSetting('color_bg_dark',      colorBgDark),
       saveSetting('color_text_dark',    colorTextDark),
       saveSetting('color_accent_dark',  colorAccentDark),
+      saveSetting('color_bg_trip',      colorBgTrip),
+      saveSetting('color_text_trip',    colorTextTrip),
+      saveSetting('color_accent_trip',  colorAccentTrip),
     ])
     setSavingColors(false); setColorsMsg('✓ Цвета сохранены — перезагрузите страницу для проверки')
   }
@@ -393,13 +437,68 @@ export default function SiteClient({ initialSettings, initialCustomFonts = [] }:
       saveSetting('grain_opacity_light', String(grainLight / 100)),
       saveSetting('grain_opacity_dark',  String(grainDark  / 100)),
       saveSetting('grain_size',          String(grainScale)),
-      saveSetting('border_radius_scale', borderRadiusScale),
+      saveSetting('border_radius_px',    String(radiusPx)),
+      saveSetting('button_radius_px',    String(btnRadiusPx)),
       saveSetting('animation_speed',     animationSpeed),
     ])
     setSavingEffects(false); setEffectsMsg('✓ Эффекты сохранены — перезагрузите страницу для проверки')
   }
 
+  // ── Save typography ─────────────────────────────────────────────
+  async function saveTypography() {
+    setSavingType(true); setTypeMsg('')
+    await Promise.all([
+      saveSetting('type_heading_scale',   String(typeHeadingScale)),
+      saveSetting('type_heading_leading', String(typeHeadingLeading)),
+      saveSetting('type_body_scale',      String(typeBodyScale)),
+      saveSetting('type_price_scale',     String(typePriceScale)),
+      saveSetting('type_catalog_heading_scale', String(typeCatHeading)),
+      saveSetting('type_catalog_body_scale',    String(typeCatBody)),
+      saveSetting('type_footer_heading_scale',  String(typeFootHeading)),
+      saveSetting('type_footer_body_scale',     String(typeFootBody)),
+      saveSetting('type_modal_body_scale',      String(typeModalBody)),
+    ])
+    setSavingType(false); setTypeMsg('✓ Типографика сохранена — перезагрузите страницу для проверки')
+  }
+
+  // ── Save trip effects (цвета trip сохраняются кнопкой «Сохранить цвета») ──
+  async function saveTrip() {
+    setSavingTrip(true); setTripMsg('')
+    await Promise.all([
+      saveSetting('trip_breathe',      String(tripBreathe)),
+      saveSetting('trip_drift_speed',  String(tripDriftSpeed)),
+      saveSetting('trip_blob_opacity', String(tripBlobOpacity)),
+    ])
+    setSavingTrip(false); setTripMsg('✓ Trip-эффекты сохранены — перезагрузите страницу для проверки')
+  }
+
+  // ── Save hero speed default ─────────────────────────────────────
+  async function saveHeroSpeed() {
+    setSavingHeroSpeed(true); setHeroSpeedMsg('')
+    await saveSetting('hero_speed_default', String(heroSpeedDefault))
+    setSavingHeroSpeed(false); setHeroSpeedMsg('✓ Сохранено (сбрасывает ручной выбор скорости у посетителей)')
+  }
+
   const msgStyle = (m: string) => ({ color: m.startsWith('✓') ? 'var(--status-delivered)' : 'var(--status-error)', fontFamily: 'var(--font-involve)', fontSize: '0.75rem' })
+
+  // Переиспользуемый ползунок с живым предпросмотром через CSS-переменную
+  function RangeRow({ label, value, set, cssVar, min, max, step, suffix = '×' }: {
+    label: string; value: number; set: (v: number) => void; cssVar: string
+    min: number; max: number; step: number; suffix?: string
+  }) {
+    return (
+      <div className="flex flex-col gap-1.5">
+        <div className="flex items-center justify-between">
+          <span className="text-xs" style={{ color: 'var(--accent)', fontFamily: 'var(--font-involve)' }}>{label}</span>
+          <span className="text-xs" style={{ color: 'var(--accent)', fontFamily: 'monospace' }}>{value.toFixed(2)}{suffix}</span>
+        </div>
+        <input type="range" min={min} max={max} step={step} value={value}
+          onChange={e => { const v = parseFloat(e.target.value); set(v); document.documentElement.style.setProperty(cssVar, suffix === 'px' ? `${v}px` : String(v)) }}
+          style={{ accentColor: 'var(--accent)', width: '100%' }}
+        />
+      </div>
+    )
+  }
 
   return (
     <div className="px-6 py-6 max-w-3xl mx-auto flex flex-col gap-8">
@@ -480,18 +579,20 @@ export default function SiteClient({ initialSettings, initialCustomFonts = [] }:
       {/* ── Цвета ── */}
       <AdminSection title="Цвета" tab="general">
         <p className="text-xs" style={{ color: 'var(--accent)', opacity: 0.5, fontFamily: 'var(--font-involve)' }}>
-          Кликните на цвет для визуального выбора или введите HEX вручную. Предпросмотр применяется сразу на страницу, сохранение — постоянно.
+          Кликните на цвет или введите HEX. Живой предпросмотр применяется к <b>текущей теме админки</b>
+          (сейчас: {adminTheme === 'dark' ? '☾ тёмная' : adminTheme === 'trip' ? '✦ trip' : '☀ светлая'}).
+          После сохранения перекрашивается весь сайт — перезагрузите страницу для финальной проверки.
         </p>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
           {/* Light theme */}
           <div className="flex flex-col gap-4">
             <div className="flex items-center gap-2 pb-1" style={{ borderBottom: '1px solid var(--border-soft)' }}>
               <span className="text-xs uppercase tracking-widest font-bold" style={{ fontFamily: 'var(--font-involve)', color: 'var(--accent)' }}>☀ Светлая тема</span>
             </div>
-            <ColorPicker label="Фон (bg)" value={colorBgLight} cssVar="--bg" onChange={setColorBgLight} />
-            <ColorPicker label="Текст" value={colorTextLight} cssVar="--text" onChange={setColorTextLight} />
-            <ColorPicker label="Акцент" value={colorAccentLight} cssVar="--accent" onChange={setColorAccentLight} />
+            <ColorPicker label="Фон (bg)" value={colorBgLight} cssVar={adminTheme === 'light' ? '--bg' : undefined} onChange={setColorBgLight} />
+            <ColorPicker label="Текст" value={colorTextLight} cssVar={adminTheme === 'light' ? '--text' : undefined} onChange={setColorTextLight} />
+            <ColorPicker label="Акцент" value={colorAccentLight} cssVar={adminTheme === 'light' ? '--accent' : undefined} onChange={setColorAccentLight} />
           </div>
 
           {/* Dark theme */}
@@ -499,9 +600,19 @@ export default function SiteClient({ initialSettings, initialCustomFonts = [] }:
             <div className="flex items-center gap-2 pb-1" style={{ borderBottom: '1px solid var(--border-soft)' }}>
               <span className="text-xs uppercase tracking-widest font-bold" style={{ fontFamily: 'var(--font-involve)', color: 'var(--accent)' }}>☾ Тёмная тема</span>
             </div>
-            <ColorPicker label="Фон (bg)" value={colorBgDark} onChange={setColorBgDark} />
-            <ColorPicker label="Текст" value={colorTextDark} onChange={setColorTextDark} />
-            <ColorPicker label="Акцент" value={colorAccentDark} onChange={setColorAccentDark} />
+            <ColorPicker label="Фон (bg)" value={colorBgDark} cssVar={adminTheme === 'dark' ? '--bg' : undefined} onChange={setColorBgDark} />
+            <ColorPicker label="Текст" value={colorTextDark} cssVar={adminTheme === 'dark' ? '--text' : undefined} onChange={setColorTextDark} />
+            <ColorPicker label="Акцент" value={colorAccentDark} cssVar={adminTheme === 'dark' ? '--accent' : undefined} onChange={setColorAccentDark} />
+          </div>
+
+          {/* Trip theme (скрытая психоделика) */}
+          <div className="flex flex-col gap-4">
+            <div className="flex items-center gap-2 pb-1" style={{ borderBottom: '1px solid var(--border-soft)' }}>
+              <span className="text-xs uppercase tracking-widest font-bold" style={{ fontFamily: 'var(--font-involve)', color: 'var(--accent)' }}>✦ Trip (скрытая)</span>
+            </div>
+            <ColorPicker label="Фон (bg)" value={colorBgTrip} cssVar={adminTheme === 'trip' ? '--bg' : undefined} onChange={setColorBgTrip} />
+            <ColorPicker label="Текст" value={colorTextTrip} cssVar={adminTheme === 'trip' ? '--text' : undefined} onChange={setColorTextTrip} />
+            <ColorPicker label="Акцент" value={colorAccentTrip} cssVar={adminTheme === 'trip' ? '--accent' : undefined} onChange={setColorAccentTrip} />
           </div>
         </div>
 
@@ -603,6 +714,44 @@ export default function SiteClient({ initialSettings, initialCustomFonts = [] }:
         </div>
       </AdminSection>
 
+      {/* ── Типографика ── */}
+      <AdminSection title="Типографика (размеры и межстрочные)" tab="general">
+        <p className="text-xs" style={{ color: 'var(--accent)', opacity: 0.5, fontFamily: 'var(--font-involve)' }}>
+          Глобальные множители размера и межстрочное заголовков — применяются ко всему сайту.
+          Ниже — отдельные оверрайды для каталога, футера и модалки. Предпросмотр сразу, сохранение — постоянно.
+        </p>
+
+        {/* Live preview */}
+        <div className="flex flex-col gap-2 p-4 rounded-xl" style={{ background: 'var(--bg-2)', border: '1px solid var(--border-soft)' }}>
+          <span style={{ fontFamily: 'var(--font-heading)', fontSize: `calc(1.6rem * var(--type-heading-scale, 1))`, lineHeight: 'var(--type-heading-leading, 1.3)', color: 'var(--accent)', textTransform: 'uppercase' }}>THREEP STYLE<br/>ВТОРАЯ СТРОКА</span>
+          <span style={{ fontFamily: 'var(--font-body)', fontSize: `calc(0.9rem * var(--type-body-scale, 1))`, color: 'var(--text)' }}>Уличная одежда ручной работы — атмосфера первой, информация второй.</span>
+          <span style={{ fontFamily: 'var(--font-price)', fontSize: `calc(1.4rem * var(--type-price-scale, 1))`, color: 'var(--accent)' }}>6 333 ₽</span>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-4">
+          <RangeRow label="Заголовки — размер" value={typeHeadingScale} set={setTypeHeadingScale} cssVar="--type-heading-scale" min={0.6} max={1.8} step={0.05} />
+          <RangeRow label="Заголовки — межстрочное" value={typeHeadingLeading} set={setTypeHeadingLeading} cssVar="--type-heading-leading" min={0.9} max={2} step={0.02} suffix="" />
+          <RangeRow label="Основной текст — размер" value={typeBodyScale} set={setTypeBodyScale} cssVar="--type-body-scale" min={0.6} max={1.8} step={0.05} />
+          <RangeRow label="Цены — размер" value={typePriceScale} set={setTypePriceScale} cssVar="--type-price-scale" min={0.6} max={1.8} step={0.05} />
+        </div>
+
+        <p className="text-xs uppercase tracking-widest pt-2" style={{ color: 'var(--accent)', opacity: 0.5, fontFamily: 'var(--font-involve)' }}>Оверрайды по секциям</p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-4">
+          <RangeRow label="Каталог — заголовки" value={typeCatHeading} set={setTypeCatHeading} cssVar="--type-catalog-heading-scale" min={0.6} max={1.8} step={0.05} />
+          <RangeRow label="Каталог — текст" value={typeCatBody} set={setTypeCatBody} cssVar="--type-catalog-body-scale" min={0.6} max={1.8} step={0.05} />
+          <RangeRow label="Футер — заголовки" value={typeFootHeading} set={setTypeFootHeading} cssVar="--type-footer-heading-scale" min={0.6} max={1.8} step={0.05} />
+          <RangeRow label="Футер — текст" value={typeFootBody} set={setTypeFootBody} cssVar="--type-footer-body-scale" min={0.6} max={1.8} step={0.05} />
+          <RangeRow label="Модалка — текст" value={typeModalBody} set={setTypeModalBody} cssVar="--type-modal-body-scale" min={0.6} max={1.8} step={0.05} />
+        </div>
+
+        <div className="flex items-center gap-3 flex-wrap pt-2">
+          <button onClick={saveTypography} disabled={savingType} className={a.btn}>
+            {savingType ? 'Сохраняем...' : 'Сохранить типографику'}
+          </button>
+          {typeMsg && <span style={msgStyle(typeMsg)}>{typeMsg}</span>}
+        </div>
+      </AdminSection>
+
       {/* ── Визуальные эффекты ── */}
       <AdminSection title="Визуальные эффекты" tab="general">
         {/* Animation keyframes */}
@@ -693,35 +842,41 @@ export default function SiteClient({ initialSettings, initialCustomFonts = [] }:
             </div>
           </div>
 
-          {/* ── Border radius ── */}
-          <div className="flex flex-col gap-3">
+          {/* ── Border radius — ползунки (общий + кнопки отдельно) ── */}
+          <div className="flex flex-col gap-4">
             <span className="text-xs uppercase tracking-widest" style={{ color: 'var(--accent)', opacity: 0.5, fontFamily: 'var(--font-involve)' }}>Скругление углов</span>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
-              {RADIUS_OPTIONS.map(opt => {
-                const r = { sharp: 0, slight: 6, rounded: 14 }[opt.value as 'sharp' | 'slight' | 'rounded']
-                const active = borderRadiusScale === opt.value
-                return (
-                  <button
-                    key={opt.value}
-                    onClick={() => setBorderRadiusScale(opt.value)}
-                    style={{
-                      display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10,
-                      padding: '14px 10px', cursor: 'pointer',
-                      borderRadius: 6,
-                      background: active ? 'var(--accent-2)' : 'var(--bg-2)',
-                      border: `1.5px solid ${active ? 'var(--accent)' : 'var(--border-soft)'}`,
-                      transition: 'border-color 0.15s, background 0.15s',
-                    }}
-                  >
-                    {/* Card shape demo */}
-                    <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 5 }}>
-                      <div style={{ height: 34, borderRadius: r, background: active ? 'color-mix(in srgb, var(--accent) 30%, transparent)' : 'var(--bg-subtle)', border: `1px solid ${active ? 'var(--accent)' : 'var(--border-soft)'}` }} />
-                      <div style={{ height: 14, borderRadius: r, background: active ? 'color-mix(in srgb, var(--accent) 50%, transparent)' : 'var(--border-soft)', width: '70%', margin: '0 auto' }} />
-                    </div>
-                    <span style={{ fontSize: '0.7rem', color: active ? 'var(--accent)' : 'var(--text-muted)', fontFamily: 'var(--font-involve)' }}>{opt.label}</span>
-                  </button>
-                )
-              })}
+
+            {/* Превью: карточка + кнопка */}
+            <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+              <div style={{ flex: 1, height: 52, borderRadius: radiusPx, background: 'var(--bg-subtle)', border: '1px solid var(--border-mid)' }} />
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 40, padding: '0 18px', borderRadius: btnRadiusPx, background: 'var(--accent)', color: 'var(--bg)', fontFamily: 'var(--font-onder)', fontSize: '0.7rem', boxShadow: '2px 2px 0 var(--accent)' }}>КНОПКА</div>
+            </div>
+
+            {/* Общий радиус (карточки/блоки) */}
+            <div className="flex flex-col gap-2">
+              <div className="flex items-center justify-between">
+                <span className="text-xs" style={{ color: 'var(--accent)', fontFamily: 'var(--font-involve)' }}>Общий (карточки, блоки)</span>
+                <span className="text-xs" style={{ color: 'var(--accent)', fontFamily: 'monospace' }}>{radiusPx}px</span>
+              </div>
+              <input type="range" min={0} max={24} step={1} value={radiusPx}
+                onChange={e => { const v = parseInt(e.target.value, 10); setRadiusPx(v); document.documentElement.style.setProperty('--radius-base', `${v}px`) }}
+                style={{ accentColor: 'var(--accent)', width: '100%' }}
+              />
+            </div>
+
+            {/* Радиус кнопок (Яна: «менее острые кнопки») */}
+            <div className="flex flex-col gap-2">
+              <div className="flex items-center justify-between">
+                <span className="text-xs" style={{ color: 'var(--accent)', fontFamily: 'var(--font-involve)' }}>Кнопки</span>
+                <span className="text-xs" style={{ color: 'var(--accent)', fontFamily: 'monospace' }}>{btnRadiusPx}px</span>
+              </div>
+              <input type="range" min={0} max={24} step={1} value={btnRadiusPx}
+                onChange={e => { const v = parseInt(e.target.value, 10); setBtnRadiusPx(v); document.documentElement.style.setProperty('--radius-btn', `${v}px`) }}
+                style={{ accentColor: 'var(--accent)', width: '100%' }}
+              />
+            </div>
+            <div className="flex justify-between text-xs" style={{ color: 'var(--accent)', opacity: 0.3, fontFamily: 'var(--font-involve)' }}>
+              <span>0 — острые</span><span>8 — лёгкие</span><span>24 — круглые</span>
             </div>
           </div>
 
@@ -771,6 +926,57 @@ export default function SiteClient({ initialSettings, initialCustomFonts = [] }:
             {savingEffects ? 'Сохраняем...' : 'Сохранить эффекты'}
           </button>
           {effectsMsg && <span style={msgStyle(effectsMsg)}>{effectsMsg}</span>}
+        </div>
+      </AdminSection>
+
+      {/* ── Trip-тема (эффекты) ── */}
+      <AdminSection title="Trip-тема — эффекты" tab="general">
+        <p className="text-xs" style={{ color: 'var(--accent)', opacity: 0.5, fontFamily: 'var(--font-involve)' }}>
+          Скрытая психоделическая тема (3 быстрых нажатия на смену темы). Цвета — в блоке «Цвета» выше (колонка ✦ Trip).
+          Здесь — анимация: дыхание цвета, скорость дрейфа пятен, интенсивность плавающих кругов.
+        </p>
+
+        {/* Breathe toggle */}
+        <div className="flex items-center gap-4">
+          <button
+            onClick={() => setTripBreathe(v => !v)}
+            style={{
+              display: 'flex', alignItems: 'center', gap: 8,
+              padding: '0.35rem 0.9rem', borderRadius: 20,
+              border: `1.5px solid ${tripBreathe ? 'var(--accent)' : 'var(--border-soft)'}`,
+              background: tripBreathe ? 'var(--accent-2)' : 'var(--bg-2)',
+              cursor: 'pointer', transition: 'all 0.2s',
+            }}
+          >
+            <span style={{ width: 8, height: 8, borderRadius: '50%', background: tripBreathe ? 'var(--accent)' : 'var(--text-muted)', display: 'inline-block' }} />
+            <span style={{ fontFamily: 'var(--font-involve)', fontSize: '0.72rem', color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+              Дыхание цвета: {tripBreathe ? 'вкл' : 'выкл'}
+            </span>
+          </button>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-4">
+          <div className="flex flex-col gap-1.5">
+            <div className="flex items-center justify-between">
+              <span className="text-xs" style={{ color: 'var(--accent)', fontFamily: 'var(--font-involve)' }}>Скорость дрейфа</span>
+              <span className="text-xs" style={{ color: 'var(--accent)', fontFamily: 'monospace' }}>{tripDriftSpeed}с</span>
+            </div>
+            <input type="range" min={4} max={60} step={1} value={tripDriftSpeed}
+              onChange={e => { const v = parseInt(e.target.value, 10); setTripDriftSpeed(v); document.documentElement.style.setProperty('--trip-drift-dur', `${v}s`) }}
+              style={{ accentColor: 'var(--accent)', width: '100%' }}
+            />
+          </div>
+          <RangeRow label="Интенсивность кругов" value={tripBlobOpacity} set={setTripBlobOpacity} cssVar="--trip-blob-opacity" min={0} max={1} step={0.05} suffix="" />
+        </div>
+        <p className="text-xs" style={{ color: 'var(--accent)', opacity: 0.35, fontFamily: 'var(--font-involve)' }}>
+          Предпросмотр дрейфа/кругов виден только при активной trip-теме.
+        </p>
+
+        <div className="flex items-center gap-3 flex-wrap pt-2">
+          <button onClick={saveTrip} disabled={savingTrip} className={a.btn}>
+            {savingTrip ? 'Сохраняем...' : 'Сохранить эффекты trip'}
+          </button>
+          {tripMsg && <span style={msgStyle(tripMsg)}>{tripMsg}</span>}
         </div>
       </AdminSection>
 
@@ -988,6 +1194,27 @@ export default function SiteClient({ initialSettings, initialCustomFonts = [] }:
           WebM — основное видео для десктопа и Android. MP4 (H.264) обязателен для iPhone/iPad —
           Safari не умеет проигрывать WebM. Постер показывается, пока видео грузится.
         </p>
+
+        {/* Скорость воспроизведения — дефолт (посетитель может менять пилюлей в шапке) */}
+        <div className="flex flex-col gap-2 p-4 rounded-xl" style={{ background: 'var(--bg-2)', border: '1px solid var(--border-soft)' }}>
+          <div className="flex items-center justify-between">
+            <span className="text-xs uppercase tracking-widest" style={{ color: 'var(--accent)', opacity: 0.5, fontFamily: 'var(--font-involve)' }}>Скорость по умолчанию</span>
+            <span className="text-xs" style={{ color: 'var(--accent)', fontFamily: 'monospace' }}>{heroSpeedDefault.toFixed(2)}×</span>
+          </div>
+          <input type="range" min={0.25} max={2} step={0.05} value={heroSpeedDefault}
+            onChange={e => setHeroSpeedDefault(parseFloat(e.target.value))}
+            style={{ accentColor: 'var(--accent)', width: '100%' }}
+          />
+          <div className="flex justify-between text-xs" style={{ color: 'var(--accent)', opacity: 0.3, fontFamily: 'var(--font-involve)' }}>
+            <span>0.25× медленно</span><span>1× обычно</span><span>2× быстро</span>
+          </div>
+          <div className="flex items-center gap-3 flex-wrap pt-1">
+            <button onClick={saveHeroSpeed} disabled={savingHeroSpeed} className={a.btn}>
+              {savingHeroSpeed ? 'Сохраняем...' : 'Сохранить скорость'}
+            </button>
+            {heroSpeedMsg && <span style={msgStyle(heroSpeedMsg)}>{heroSpeedMsg}</span>}
+          </div>
+        </div>
 
         {/* WebM */}
         <p className="text-xs font-semibold" style={{ color: 'var(--accent)', fontFamily: 'var(--font-onder)', letterSpacing: '0.08em' }}>WEBM (десктоп / Android)</p>

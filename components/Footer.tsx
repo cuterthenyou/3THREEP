@@ -40,7 +40,7 @@ export const FOOTER_DEFAULTS: FooterContent = {
   instagram_url: 'https://www.instagram.com/3threep.shop/',
   tg_community_url: 'https://t.me/threep_shop',
   meta_disclaimer: '*Meta Platforms признана экстремистской организацией в РФ',
-  copyright: '© 2024 THREEP. All rights reserved. Custom streetwear for the bold.',
+  copyright: '© 2026 THREEP. All rights reserved. Custom streetwear for the bold.',
 }
 
 const VKIcon = () => (
@@ -98,7 +98,7 @@ export default async function Footer() {
             {/* Card 1 — contact us */}
             <div className={`flex-1 flex flex-col items-center justify-center gap-5 px-5 py-8 sm:px-8 sm:py-10 rounded-[10px] ${s.card}`}>
               <h2 className={s.heading}>{content.contact_heading}</h2>
-              <p className={`text-xs text-center ${s.subtitle}`}>
+              <p className={`text-center ${s.subtitle}`}>
                 {content.contact_subtext}
               </p>
               <div className="flex items-center gap-3">
@@ -110,7 +110,7 @@ export default async function Footer() {
             {/* Card 2 — follow us */}
             <div className={`flex-1 flex flex-col items-center justify-center gap-5 px-5 py-8 sm:px-8 sm:py-10 rounded-[10px] ${s.card}`}>
               <h2 className={s.heading}>{content.follow_heading}</h2>
-              <p className={`text-xs text-center ${s.subtitle}`}>
+              <p className={`text-center ${s.subtitle}`}>
                 {content.follow_subtext}
               </p>
               <div className="flex items-center gap-3">
@@ -119,7 +119,7 @@ export default async function Footer() {
                 <SocialBtn href={content.instagram_url} label="Instagram*"><IGIcon /></SocialBtn>
                 <SocialBtn href={content.tg_community_url} label="Telegram канал"><TGIcon /></SocialBtn>
               </div>
-              <p className={`text-xs text-center ${s.disclaimer}`}>
+              <p className={`text-center ${s.disclaimer}`}>
                 {content.meta_disclaimer}
               </p>
             </div>
@@ -136,7 +136,7 @@ export default async function Footer() {
       {/* Copyright + legal */}
       <div className="px-6 sm:px-8 mt-8">
         <div className="max-w-6xl mx-auto flex flex-col items-center gap-2">
-          <p className={`text-sm text-center ${s.copyright}`}>
+          <p className={`text-center ${s.copyright}`}>
             {content.copyright}
           </p>
           <Link href="/privacy" className={s.privacyLink}>

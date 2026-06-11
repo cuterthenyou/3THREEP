@@ -9,6 +9,10 @@ const DEFAULTS = {
   color_bg_dark:      '#1c1c1e',
   color_text_dark:    '#FCB0B2',
   color_accent_dark:  '#FCB0B2',
+  // trip — скрытая психоделическая тема (теперь конфигурируется из админки)
+  color_bg_trip:      '#160a2b',
+  color_text_trip:    '#cdbcff',
+  color_accent_trip:  '#ff5ad0',
   font_heading:       'ONDER',
   font_body:          'Involve',
   font_price:         'DeutschGothic',
@@ -40,6 +44,13 @@ function fontFormat(url: string): string {
   return map[ext] ?? 'truetype'
 }
 
+/** Clamp a numeric setting to a range, falling back to a default if NaN. */
+function num(raw: string | null | undefined, def: number, min: number, max: number): number {
+  const v = parseFloat(raw ?? '')
+  if (isNaN(v)) return def
+  return Math.min(max, Math.max(min, v))
+}
+
 export default async function ThemeStyles() {
   let settings: Record<string, string | null> = {}
   let customFonts: CustomFont[] = []
@@ -64,6 +75,9 @@ export default async function ThemeStyles() {
   const bgDark       = isHex(get('color_bg_dark'))       ? get('color_bg_dark')      : DEFAULTS.color_bg_dark
   const textDark     = isHex(get('color_text_dark'))     ? get('color_text_dark')    : DEFAULTS.color_text_dark
   const accentDark   = isHex(get('color_accent_dark'))   ? get('color_accent_dark')  : DEFAULTS.color_accent_dark
+  const bgTrip       = isHex(get('color_bg_trip'))       ? get('color_bg_trip')      : DEFAULTS.color_bg_trip
+  const textTrip     = isHex(get('color_text_trip'))     ? get('color_text_trip')    : DEFAULTS.color_text_trip
+  const accentTrip   = isHex(get('color_accent_trip'))   ? get('color_accent_trip')  : DEFAULTS.color_accent_trip
 
   const fontHeading  = get('font_heading')
   const fontBody     = get('font_body')
@@ -77,11 +91,37 @@ export default async function ThemeStyles() {
   const grainSizeRaw = parseInt(settings['grain_size'] ?? '256', 10)
   const grainSize    = isNaN(grainSizeRaw) ? 256 : Math.max(64, Math.min(512, grainSizeRaw))
 
-  const radiusScale  = get('border_radius_scale')
-  const radiusValue  = RADIUS_MAP[radiusScale] ?? '0px'
+  // Скругление: новый числовой ключ border_radius_px (0–24px); fallback на старый пресет.
+  const radiusValue  = settings['border_radius_px'] != null
+    ? `${num(settings['border_radius_px'], 0, 0, 24)}px`
+    : (RADIUS_MAP[get('border_radius_scale')] ?? '0px')
+  // Радиус кнопок — отдельный регулятор (Яна: «менее острые кнопки»); по умолчанию = базовому.
+  const radiusBtn    = settings['button_radius_px'] != null
+    ? `${num(settings['button_radius_px'], 0, 0, 24)}px`
+    : radiusValue
 
   const speedScale   = get('animation_speed')
   const speedValue   = SPEED_MAP[speedScale] ?? '1'
+
+  // ── Типографика (множители-шкалы + межстрочное заголовков) ──
+  const typeHeadingScale   = num(settings['type_heading_scale'],   1,   0.6, 1.8)
+  const typeHeadingLeading = num(settings['type_heading_leading'], 1.3, 0.9, 2.0)
+  const typeBodyScale      = num(settings['type_body_scale'],      1,   0.6, 1.8)
+  const typePriceScale     = num(settings['type_price_scale'],     1,   0.6, 1.8)
+  // Пер-секционные оверрайды (по умолчанию наследуют глобальные)
+  const tCatHeading  = num(settings['type_catalog_heading_scale'], typeHeadingScale, 0.6, 1.8)
+  const tCatBody     = num(settings['type_catalog_body_scale'],    typeBodyScale,    0.6, 1.8)
+  const tFootHeading = num(settings['type_footer_heading_scale'],  typeHeadingScale, 0.6, 1.8)
+  const tFootBody    = num(settings['type_footer_body_scale'],     typeBodyScale,    0.6, 1.8)
+  const tModalBody   = num(settings['type_modal_body_scale'],      typeBodyScale,    0.6, 1.8)
+
+  // ── Скорость видео Hero (дефолт) ──
+  const heroSpeed = num(settings['hero_speed_default'], 1, 0.25, 3)
+
+  // ── Trip-эффекты ──
+  const tripBreathe   = settings['trip_breathe'] !== 'false'   // дыхание цвета вкл/выкл
+  const tripDriftSec  = num(settings['trip_drift_speed'], 16, 4, 60)   // период дрейфа пятен, сек
+  const tripBlobOpacity = num(settings['trip_blob_opacity'], 1, 0, 1)  // интенсивность blobs
 
   // Font aliases: override the named vars so all CSS modules (var(--font-onder) etc.) also respond
   const fontOnder   = fontHeading
@@ -104,6 +144,31 @@ export default async function ThemeStyles() {
     if (raw) loadingPhrases = JSON.parse(raw)
   } catch { /* invalid JSON — ignore */ }
 
+  // Общие токены, не зависящие от темы (типографика, радиусы, скорости)
+  const sharedTokens = `
+  --font-heading:  '${fontHeading}', sans-serif;
+  --font-body:     '${fontBody}', sans-serif;
+  --font-price:    '${fontPrice}', sans-serif;
+  --font-onder:    '${fontOnder}', sans-serif;
+  --font-involve:  '${fontInvolve}', sans-serif;
+  --font-deutsch:  '${fontDeutsch}', sans-serif;
+  --grain-size:    ${grainSize}px;
+  --radius-base:   ${radiusValue};
+  --radius-btn:    ${radiusBtn};
+  --animation-speed: ${speedValue};
+  --type-heading-scale:   ${typeHeadingScale};
+  --type-heading-leading: ${typeHeadingLeading};
+  --type-body-scale:      ${typeBodyScale};
+  --type-price-scale:     ${typePriceScale};
+  --type-catalog-heading-scale: ${tCatHeading};
+  --type-catalog-body-scale:    ${tCatBody};
+  --type-footer-heading-scale:  ${tFootHeading};
+  --type-footer-body-scale:     ${tFootBody};
+  --type-modal-body-scale:      ${tModalBody};
+  --hero-speed: ${heroSpeed};
+  --trip-drift-dur: ${tripDriftSec}s;
+  --trip-blob-opacity: ${tripBlobOpacity};`
+
   const css = `${fontFaces ? fontFaces + '\n' : ''}
 :root {
   --bg:         ${bgLight};
@@ -113,23 +178,20 @@ export default async function ThemeStyles() {
   --accent:     ${accentLight};
   --accent-2:   color-mix(in srgb, ${accentLight} 25%, transparent);
   --border:     color-mix(in srgb, ${accentLight} 20%, transparent);
-  --header-scrolled-bg: color-mix(in srgb, ${bgLight} 82%, transparent);
+  --header-scrolled-bg: color-mix(in srgb, ${bgLight} 72%, transparent);
   --bg-subtle:  color-mix(in srgb, ${accentLight} 8%, transparent);
   --border-soft: color-mix(in srgb, ${accentLight} 12%, transparent);
   --border-mid:  color-mix(in srgb, ${accentLight} 30%, transparent);
   --accent-glow: color-mix(in srgb, ${accentLight} 35%, transparent);
   --bg-card:    ${accentLight};
   --text-on-card: ${bgLight};
-  --font-heading:  '${fontHeading}', sans-serif;
-  --font-body:     '${fontBody}', sans-serif;
-  --font-price:    '${fontPrice}', sans-serif;
-  --font-onder:    '${fontOnder}', sans-serif;
-  --font-involve:  '${fontInvolve}', sans-serif;
-  --font-deutsch:  '${fontDeutsch}', sans-serif;
+  /* legacy aliases — держим синхронно с темой, чтобы перекрашивалось ВСЁ */
+  --color-accent:  ${accentLight};
+  --color-primary: ${bgLight};
+  --color-bg:      ${bgLight};
+  --color-bg-dark: color-mix(in srgb, ${bgLight} 80%, black);
+${sharedTokens}
   --grain-opacity: ${grainLight};
-  --grain-size:    ${grainSize}px;
-  --radius-base:   ${radiusValue};
-  --animation-speed: ${speedValue};
   --cursor-color: ${cursorColorLight ?? 'var(--accent)'};
 }
 [data-theme="dark"] {
@@ -140,16 +202,44 @@ export default async function ThemeStyles() {
   --accent:     ${accentDark};
   --accent-2:   color-mix(in srgb, ${accentDark} 25%, transparent);
   --border:     color-mix(in srgb, ${accentDark} 18%, transparent);
-  --header-scrolled-bg: color-mix(in srgb, ${bgDark} 88%, transparent);
+  --header-scrolled-bg: color-mix(in srgb, ${bgDark} 78%, transparent);
   --bg-subtle:  color-mix(in srgb, ${accentDark} 8%, transparent);
   --border-soft: color-mix(in srgb, ${accentDark} 12%, transparent);
   --border-mid:  color-mix(in srgb, ${accentDark} 30%, transparent);
   --accent-glow: color-mix(in srgb, ${accentDark} 35%, transparent);
   --bg-card:    ${accentDark};
   --text-on-card: ${bgDark};
+  --color-accent:  ${accentDark};
+  --color-primary: ${bgDark};
+  --color-bg:      ${bgDark};
+  --color-bg-dark: color-mix(in srgb, ${bgDark} 60%, black);
   --grain-opacity: ${grainDark};
   --cursor-color: ${cursorColorDark ?? 'var(--accent)'};
 }
+html[data-theme="trip"] {
+  --bg:         ${bgTrip};
+  --bg-2:       color-mix(in srgb, ${bgTrip} 70%, white);
+  --text:       ${textTrip};
+  --text-muted: color-mix(in srgb, ${textTrip} 60%, transparent);
+  --accent:     ${accentTrip};
+  --accent-2:   color-mix(in srgb, ${accentTrip} 25%, transparent);
+  --border:     color-mix(in srgb, ${accentTrip} 28%, transparent);
+  --header-scrolled-bg: color-mix(in srgb, ${bgTrip} 78%, transparent);
+  --bg-subtle:  color-mix(in srgb, ${accentTrip} 10%, transparent);
+  --border-soft: color-mix(in srgb, ${accentTrip} 16%, transparent);
+  --border-mid:  color-mix(in srgb, ${accentTrip} 32%, transparent);
+  --overlay-bg:  color-mix(in srgb, ${bgTrip} 96%, black);
+  --accent-glow: color-mix(in srgb, ${accentTrip} 45%, transparent);
+  --bg-card:    ${accentTrip};
+  --text-on-card: ${bgTrip};
+  --color-accent:  ${accentTrip};
+  --color-primary: ${bgTrip};
+  --color-bg:      ${bgTrip};
+  --color-bg-dark: color-mix(in srgb, ${bgTrip} 70%, black);
+  --grain-opacity: 0.06;
+  --cursor-color: var(--accent);
+}
+${tripBreathe ? '' : 'html[data-theme="trip"] .trip-breathe { display: none; }'}
 `.trim()
 
   return (

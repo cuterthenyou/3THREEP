@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import Image from 'next/image'
+import ThemedLogo from './ThemedLogo'
 import type { Product } from '@/lib/types'
 import { useCart } from '@/lib/cart'
 import { trackEvent } from '@/lib/track'
@@ -235,13 +236,11 @@ export default function ProductModal({ product, visible, onClose, modalBg, colle
               <div className="flex flex-col gap-5">
                 {collectionLogo && (
                   <div className="flex justify-center lg:justify-start">
-                    <Image
+                    <ThemedLogo
                       src={collectionLogo}
                       alt="Collection"
-                      width={200}
-                      height={40}
-                      className="theme-img h-10 w-auto"
-                      unoptimized={collectionLogo.endsWith('.svg')}
+                      className="h-10 w-auto"
+                      defaultRatio={4}
                     />
                   </div>
                 )}
@@ -269,9 +268,9 @@ export default function ProductModal({ product, visible, onClose, modalBg, colle
                   const noteText = parts[1] ?? ''
                   return (
                     <>
-                      <p className={`text-sm ${s.description}`} style={{ whiteSpace: 'pre-wrap', marginBottom: noteText ? '0.25rem' : '0.5rem' }}>{mainDesc}</p>
+                      <p className={s.description} style={{ whiteSpace: 'pre-wrap', marginBottom: noteText ? '0.25rem' : '0.5rem' }}>{mainDesc}</p>
                       {noteText && (
-                        <p style={{ whiteSpace: 'pre-wrap', fontFamily: 'var(--font-involve)', fontSize: '0.68rem', opacity: 0.45, lineHeight: 1.55, marginBottom: '0.5rem' }}>{noteText}</p>
+                        <p className={s.note} style={{ marginBottom: '0.5rem' }}>{noteText}</p>
                       )}
                     </>
                   )
@@ -283,10 +282,10 @@ export default function ProductModal({ product, visible, onClose, modalBg, colle
                 {(product.material || product.cut) && (
                   <div className="flex flex-col gap-1">
                     {product.material && (
-                      <p className={`text-sm ${s.detail}`}><span style={{ opacity: 0.7 }}>Состав:</span> {product.material}</p>
+                      <p className={s.detail}><span style={{ opacity: 0.7 }}>Состав:</span> {product.material}</p>
                     )}
                     {product.cut && (
-                      <p className={`text-sm ${s.detail}`}><span style={{ opacity: 0.7 }}>Крой:</span> {product.cut}</p>
+                      <p className={s.detail}><span style={{ opacity: 0.7 }}>Крой:</span> {product.cut}</p>
                     )}
                   </div>
                 )}
@@ -302,11 +301,7 @@ export default function ProductModal({ product, visible, onClose, modalBg, colle
                 <AddToCartButton product={product} size={selectedSize} onClose={onClose} />
 
                 {(product.grade || product.series || product.article) && (
-                  <div style={{
-                    display: 'flex', flexWrap: 'wrap', gap: '1rem',
-                    fontFamily: 'var(--font-involve)', fontSize: '0.68rem',
-                    opacity: 0.45,
-                  }}>
+                  <div className={s.metaRow}>
                     {product.grade && <span>Grade {product.grade}</span>}
                     {product.series && <span>Серия: {product.series}</span>}
                     {product.article && <span>Арт.: {product.article}</span>}

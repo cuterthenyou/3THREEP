@@ -69,8 +69,9 @@
 }
 
 .panelTitle {
-  font-family: var(--font-heading);
-  font-size: 0.7rem;
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: 0.72rem;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--accent);
@@ -113,8 +114,9 @@
 }
 
 .itemTitle {
-  font-family: var(--font-onder);
-  font-size: 0.68rem;
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: 0.72rem;
   letter-spacing: 0.04em;
   color: var(--accent);
 }
