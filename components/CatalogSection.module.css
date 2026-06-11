@@ -83,7 +83,7 @@
   color: var(--accent);
   opacity: 0.5;
   letter-spacing: 0.03em;
-  line-height: 1.8;
+  line-height: var(--type-catalog-body-leading, 1.8);
 }
 
 /* Product card */
@@ -244,7 +244,7 @@
   white-space: nowrap;
 }
 
-/* Discounted price — badge + struck base above, discounted below */
+/* Discounted price — struck base above, discounted below */
 .priceWrap {
   display: flex;
   flex-direction: column;
@@ -252,25 +252,6 @@
   gap: 0.15rem;
   line-height: 1;
   flex-shrink: 0;
-}
-
-.priceOldRow {
-  display: flex;
-  align-items: center;
-  gap: 0.3rem;
-}
-
-/* «−N%» — заметный бейдж скидки, читаемый (Яна: «перечёркнутая слишком мелкая») */
-.priceBadge {
-  font-family: var(--font-onder);
-  font-size: 0.6rem;
-  line-height: 1;
-  letter-spacing: 0.04em;
-  color: var(--bg-card);
-  background: var(--text-on-card);
-  border-radius: var(--radius-btn, 2px);
-  padding: 0.12rem 0.3rem;
-  white-space: nowrap;
 }
 
 .productPriceOld {

@@ -8,11 +8,14 @@ import { ColorPicker, FontSelect, GlitterPreview } from './parts'
 import { parseLevelingConfig, getDiscount } from '@/lib/leveling'
 import type { CustomFont } from '@/components/ThemeStyles'
 
-type SettingsTab = 'general' | 'catalog' | 'account' | 'menu'
+type SettingsTab = 'general' | 'type' | 'effects' | 'catalog' | 'account' | 'content' | 'menu'
 const SETTINGS_TABS: { id: SettingsTab; label: string }[] = [
-  { id: 'general', label: 'Общие' },
+  { id: 'general', label: 'Бренд' },
+  { id: 'type',    label: 'Типографика' },
+  { id: 'effects', label: 'Эффекты' },
   { id: 'catalog', label: 'Каталог' },
   { id: 'account', label: 'Личный кабинет' },
+  { id: 'content', label: 'Контент' },
   { id: 'menu',    label: 'Меню' },
 ]
 
@@ -143,12 +146,17 @@ export default function SiteClient({ initialSettings, initialCustomFonts = [] }:
   const [typeHeadingScale,   setTypeHeadingScale]   = useState(numInit('type_heading_scale', 1))
   const [typeHeadingLeading, setTypeHeadingLeading] = useState(numInit('type_heading_leading', 1.3))
   const [typeBodyScale,      setTypeBodyScale]      = useState(numInit('type_body_scale', 1))
+  const [typeBodyLeading,    setTypeBodyLeading]    = useState(numInit('type_body_leading', 1.6))
   const [typePriceScale,     setTypePriceScale]     = useState(numInit('type_price_scale', 1))
   const [typeCatHeading, setTypeCatHeading] = useState(numInit('type_catalog_heading_scale', 1))
   const [typeCatBody,    setTypeCatBody]    = useState(numInit('type_catalog_body_scale', 1))
+  const [typeCatBodyLead, setTypeCatBodyLead] = useState(numInit('type_catalog_body_leading', 1.8))
   const [typeFootHeading,setTypeFootHeading]= useState(numInit('type_footer_heading_scale', 1))
+  const [typeFootHeadLead, setTypeFootHeadLead] = useState(numInit('type_footer_heading_leading', 1.3))
   const [typeFootBody,   setTypeFootBody]   = useState(numInit('type_footer_body_scale', 1))
+  const [typeFootBodyLead, setTypeFootBodyLead] = useState(numInit('type_footer_body_leading', 1.6))
   const [typeModalBody,  setTypeModalBody]  = useState(numInit('type_modal_body_scale', 1))
+  const [typeModalBodyLead, setTypeModalBodyLead] = useState(numInit('type_modal_body_leading', 1.6))
   const [savingType, setSavingType] = useState(false)
   const [typeMsg, setTypeMsg] = useState('')
 
@@ -459,12 +467,17 @@ export default function SiteClient({ initialSettings, initialCustomFonts = [] }:
       saveSetting('type_heading_scale',   String(typeHeadingScale)),
       saveSetting('type_heading_leading', String(typeHeadingLeading)),
       saveSetting('type_body_scale',      String(typeBodyScale)),
+      saveSetting('type_body_leading',    String(typeBodyLeading)),
       saveSetting('type_price_scale',     String(typePriceScale)),
       saveSetting('type_catalog_heading_scale', String(typeCatHeading)),
       saveSetting('type_catalog_body_scale',    String(typeCatBody)),
+      saveSetting('type_catalog_body_leading',  String(typeCatBodyLead)),
       saveSetting('type_footer_heading_scale',  String(typeFootHeading)),
+      saveSetting('type_footer_heading_leading', String(typeFootHeadLead)),
       saveSetting('type_footer_body_scale',     String(typeFootBody)),
+      saveSetting('type_footer_body_leading',   String(typeFootBodyLead)),
       saveSetting('type_modal_body_scale',      String(typeModalBody)),
+      saveSetting('type_modal_body_leading',    String(typeModalBodyLead)),
     ])
     setSavingType(false); setTypeMsg('✓ Типографика сохранена — перезагрузите страницу для проверки')
   }
@@ -735,33 +748,60 @@ export default function SiteClient({ initialSettings, initialCustomFonts = [] }:
       </AdminSection>
 
       {/* ── Типографика ── */}
-      <AdminSection title="Типографика (размеры и межстрочные)" tab="general">
+      <AdminSection title="Типографика — глобально" tab="type">
         <p className="text-xs" style={{ color: 'var(--accent)', opacity: 0.5, fontFamily: 'var(--font-involve)' }}>
-          Глобальные множители размера и межстрочное заголовков — применяются ко всему сайту.
-          Ниже — отдельные оверрайды для каталога, футера и модалки. Предпросмотр сразу, сохранение — постоянно.
+          Множители размера и межстрочные применяются ко всему сайту. Пер-секционные оверрайды — ниже.
+          Предпросмотр сразу, сохранение — постоянно (одна кнопка сохраняет всю типографику).
         </p>
 
         {/* Live preview */}
         <div className="flex flex-col gap-2 p-4 rounded-xl" style={{ background: 'var(--bg-2)', border: '1px solid var(--border-soft)' }}>
           <span style={{ fontFamily: 'var(--font-heading)', fontSize: `calc(1.6rem * var(--type-heading-scale, 1))`, lineHeight: 'var(--type-heading-leading, 1.3)', color: 'var(--accent)', textTransform: 'uppercase' }}>THREEP STYLE<br/>ВТОРАЯ СТРОКА</span>
-          <span style={{ fontFamily: 'var(--font-body)', fontSize: `calc(0.9rem * var(--type-body-scale, 1))`, color: 'var(--text)' }}>Уличная одежда ручной работы — атмосфера первой, информация второй.</span>
+          <span style={{ fontFamily: 'var(--font-body)', fontSize: `calc(0.9rem * var(--type-body-scale, 1))`, lineHeight: 'var(--type-body-leading, 1.6)', color: 'var(--text)' }}>Уличная одежда ручной работы — атмосфера первой, информация второй. Каждая вещь — это история.</span>
           <span style={{ fontFamily: 'var(--font-price)', fontSize: `calc(1.4rem * var(--type-price-scale, 1))`, color: 'var(--accent)' }}>6 333 ₽</span>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-4">
           <RangeRow label="Заголовки — размер" value={typeHeadingScale} set={setTypeHeadingScale} cssVar="--type-heading-scale" min={0.6} max={1.8} step={0.05} />
           <RangeRow label="Заголовки — межстрочное" value={typeHeadingLeading} set={setTypeHeadingLeading} cssVar="--type-heading-leading" min={0.9} max={2} step={0.02} suffix="" />
-          <RangeRow label="Основной текст — размер" value={typeBodyScale} set={setTypeBodyScale} cssVar="--type-body-scale" min={0.6} max={1.8} step={0.05} />
+          <RangeRow label="Текст — размер" value={typeBodyScale} set={setTypeBodyScale} cssVar="--type-body-scale" min={0.6} max={1.8} step={0.05} />
+          <RangeRow label="Текст — межстрочное" value={typeBodyLeading} set={setTypeBodyLeading} cssVar="--type-body-leading" min={1} max={2.4} step={0.02} suffix="" />
           <RangeRow label="Цены — размер" value={typePriceScale} set={setTypePriceScale} cssVar="--type-price-scale" min={0.6} max={1.8} step={0.05} />
         </div>
 
-        <p className="text-xs uppercase tracking-widest pt-2" style={{ color: 'var(--accent)', opacity: 0.5, fontFamily: 'var(--font-involve)' }}>Оверрайды по секциям</p>
+        <div className="flex items-center gap-3 flex-wrap pt-2">
+          <button onClick={saveTypography} disabled={savingType} className={a.btn}>
+            {savingType ? 'Сохраняем...' : 'Сохранить типографику'}
+          </button>
+          {typeMsg && <span style={msgStyle(typeMsg)}>{typeMsg}</span>}
+        </div>
+      </AdminSection>
+
+      {/* ── Типографика по секциям ── */}
+      <AdminSection title="Типографика — по секциям" tab="type">
+        <p className="text-xs" style={{ color: 'var(--accent)', opacity: 0.5, fontFamily: 'var(--font-involve)' }}>
+          Отдельные размеры и межстрочные для каталога, футера и модалки. Если не трогать — наследуют глобальные.
+        </p>
+
+        <p className="text-xs uppercase tracking-widest" style={{ color: 'var(--accent)', opacity: 0.55, fontFamily: 'var(--font-involve)' }}>Каталог</p>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-x-8 gap-y-4">
+          <RangeRow label="Заголовки — размер" value={typeCatHeading} set={setTypeCatHeading} cssVar="--type-catalog-heading-scale" min={0.6} max={1.8} step={0.05} />
+          <RangeRow label="Текст — размер" value={typeCatBody} set={setTypeCatBody} cssVar="--type-catalog-body-scale" min={0.6} max={1.8} step={0.05} />
+          <RangeRow label="Текст — межстрочное" value={typeCatBodyLead} set={setTypeCatBodyLead} cssVar="--type-catalog-body-leading" min={1} max={2.4} step={0.02} suffix="" />
+        </div>
+
+        <p className="text-xs uppercase tracking-widest pt-1" style={{ color: 'var(--accent)', opacity: 0.55, fontFamily: 'var(--font-involve)' }}>Футер</p>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-4">
-          <RangeRow label="Каталог — заголовки" value={typeCatHeading} set={setTypeCatHeading} cssVar="--type-catalog-heading-scale" min={0.6} max={1.8} step={0.05} />
-          <RangeRow label="Каталог — текст" value={typeCatBody} set={setTypeCatBody} cssVar="--type-catalog-body-scale" min={0.6} max={1.8} step={0.05} />
-          <RangeRow label="Футер — заголовки" value={typeFootHeading} set={setTypeFootHeading} cssVar="--type-footer-heading-scale" min={0.6} max={1.8} step={0.05} />
-          <RangeRow label="Футер — текст" value={typeFootBody} set={setTypeFootBody} cssVar="--type-footer-body-scale" min={0.6} max={1.8} step={0.05} />
-          <RangeRow label="Модалка — текст" value={typeModalBody} set={setTypeModalBody} cssVar="--type-modal-body-scale" min={0.6} max={1.8} step={0.05} />
+          <RangeRow label="Заголовки — размер" value={typeFootHeading} set={setTypeFootHeading} cssVar="--type-footer-heading-scale" min={0.6} max={1.8} step={0.05} />
+          <RangeRow label="Заголовки — межстрочное" value={typeFootHeadLead} set={setTypeFootHeadLead} cssVar="--type-footer-heading-leading" min={0.9} max={2} step={0.02} suffix="" />
+          <RangeRow label="Текст — размер" value={typeFootBody} set={setTypeFootBody} cssVar="--type-footer-body-scale" min={0.6} max={1.8} step={0.05} />
+          <RangeRow label="Текст — межстрочное" value={typeFootBodyLead} set={setTypeFootBodyLead} cssVar="--type-footer-body-leading" min={1} max={2.4} step={0.02} suffix="" />
+        </div>
+
+        <p className="text-xs uppercase tracking-widest pt-1" style={{ color: 'var(--accent)', opacity: 0.55, fontFamily: 'var(--font-involve)' }}>Модалка товара</p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-4">
+          <RangeRow label="Текст — размер" value={typeModalBody} set={setTypeModalBody} cssVar="--type-modal-body-scale" min={0.6} max={1.8} step={0.05} />
+          <RangeRow label="Текст — межстрочное" value={typeModalBodyLead} set={setTypeModalBodyLead} cssVar="--type-modal-body-leading" min={1} max={2.4} step={0.02} suffix="" />
         </div>
 
         <div className="flex items-center gap-3 flex-wrap pt-2">
@@ -773,7 +813,7 @@ export default function SiteClient({ initialSettings, initialCustomFonts = [] }:
       </AdminSection>
 
       {/* ── Визуальные эффекты ── */}
-      <AdminSection title="Визуальные эффекты" tab="general">
+      <AdminSection title="Визуальные эффекты" tab="effects">
         {/* Animation keyframes */}
         <style>{`
           @keyframes eff-sweep {
@@ -950,7 +990,7 @@ export default function SiteClient({ initialSettings, initialCustomFonts = [] }:
       </AdminSection>
 
       {/* ── Trip-тема (эффекты) ── */}
-      <AdminSection title="Trip-тема — эффекты" tab="general">
+      <AdminSection title="Trip-тема — эффекты" tab="effects">
         <p className="text-xs" style={{ color: 'var(--accent)', opacity: 0.5, fontFamily: 'var(--font-involve)' }}>
           Скрытая психоделическая тема (3 быстрых нажатия на смену темы). Цвета — в блоке «Цвета» выше (колонка ✦ Trip).
           Здесь — анимация: дыхание цвета, скорость дрейфа пятен, интенсивность плавающих кругов.
@@ -1001,7 +1041,7 @@ export default function SiteClient({ initialSettings, initialCustomFonts = [] }:
       </AdminSection>
 
       {/* ── Игра «Охота» (баланс) ── */}
-      <AdminSection title="Игра «Охота» — баланс" tab="general">
+      <AdminSection title="Игра «Охота» — баланс" tab="catalog">
         <p className="text-xs" style={{ color: 'var(--accent)', opacity: 0.5, fontFamily: 'var(--font-involve)' }}>
           Мини-игра на странице ИНФА. Множители: 1.0 = базово. Скорость пылесоса уже авто-подстраивается
           под ширину экрана (фикс «медленно на десктопе / быстро на мобиле») — здесь общий множитель сверху.
@@ -1021,7 +1061,7 @@ export default function SiteClient({ initialSettings, initialCustomFonts = [] }:
       </AdminSection>
 
       {/* ── Блёстки ── */}
-      <AdminSection title="Блёстки (тёмная тема)" tab="general">
+      <AdminSection title="Блёстки (тёмная тема)" tab="effects">
         <p className="text-xs" style={{ color: 'var(--accent)', opacity: 0.5, fontFamily: 'var(--font-involve)' }}>
           Анимированные частицы на фоне в тёмной теме.
         </p>
@@ -1089,7 +1129,7 @@ export default function SiteClient({ initialSettings, initialCustomFonts = [] }:
       </AdminSection>
 
       {/* ── Курсор ── */}
-      <AdminSection title="Кастомный курсор" tab="general">
+      <AdminSection title="Кастомный курсор" tab="effects">
         <p className="text-xs" style={{ color: 'var(--accent)', opacity: 0.5, fontFamily: 'var(--font-involve)' }}>
           Только на десктопе (pointer: fine). Работает сразу после включения (перезагрузка не нужна).
         </p>
@@ -1363,7 +1403,7 @@ export default function SiteClient({ initialSettings, initialCustomFonts = [] }:
       </AdminSection>
 
       {/* ── Фразы загрузки ── */}
-      <AdminSection title="Фразы загрузки" tab="general">
+      <AdminSection title="Фразы загрузки" tab="content">
         <p className="text-xs" style={{ color: 'var(--accent)', opacity: 0.5, fontFamily: 'var(--font-involve)' }}>
           Фразы крутятся во время загрузки сайта. Одна фраза — одна строка.
         </p>
@@ -1401,7 +1441,7 @@ export default function SiteClient({ initialSettings, initialCustomFonts = [] }:
       </AdminSection>
 
       {/* ── Бегущая строка ── */}
-      <AdminSection title="Бегущая строка — Футер" tab="general">
+      <AdminSection title="Бегущая строка — Футер" tab="content">
         <p className="text-xs" style={{ color: 'var(--accent)', opacity: 0.5, fontFamily: 'var(--font-involve)' }}>
           Тексты для бегущей строки в футере. Одна строка — одна фраза.
         </p>

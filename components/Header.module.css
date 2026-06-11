@@ -2,20 +2,24 @@
    Стекло-фон живёт на ::before и затухает книзу через mask-градиент (плотное
    сверху, прозрачное снизу). Маскируем именно псевдоэлемент, а НЕ сам хэдер,
    иначе вместе с фоном «растворятся» логотип и кнопки. Контент — поверх (z-index). */
+/* Матовое стекло (iOS): blur ставим НА сам хэдер (на псевдоэлементе/при
+   will-change:transform backdrop-filter не семплит фон и не появляется).
+   Контент — дети хэдера — рисуются поверх и НЕ размываются. Цветовая вуаль с
+   затуханием книзу — на ::after (маска), полупрозрачная, чтобы стекло было видно. */
 .headerBase {
   position: fixed;
-  transition: transform 0.42s cubic-bezier(0.22, 1, 0.36, 1);
-  will-change: transform;
+  transition: transform 0.42s cubic-bezier(0.22, 1, 0.36, 1),
+              backdrop-filter 0.3s ease, -webkit-backdrop-filter 0.3s ease;
 }
 
-/* Контент хэдера всегда поверх стеклянного слоя */
+/* Контент хэдера всегда поверх цветовой вуали */
 .headerBase > * {
   position: relative;
   z-index: 1;
 }
 
-/* Frosted-glass слой — рисуется на ::before, затухает книзу */
-.headerBase::before {
+/* Цветовая вуаль — ::after, затухает книзу через mask */
+.headerBase::after {
   content: '';
   position: absolute;
   inset: 0;
@@ -23,23 +27,17 @@
   pointer-events: none;
   opacity: 0;
   background: var(--header-scrolled-bg);
-  backdrop-filter: blur(20px) saturate(1.6);
-  -webkit-backdrop-filter: blur(20px) saturate(1.6);
-  /* плотное матовое стекло сверху → прозрачно снизу */
-  -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 55%, transparent 100%);
-          mask-image: linear-gradient(to bottom, #000 0%, #000 55%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 60%, transparent 100%);
+          mask-image: linear-gradient(to bottom, #000 0%, #000 60%, transparent 100%);
   transition: opacity 0.32s ease;
 }
 
-/* At the very top — едва заметная вуаль над hero (без стекла) */
-.headerTop::before {
-  opacity: 0;
+/* Scrolled — включаем матовое стекло + проявляем вуаль */
+.headerScrolled {
+  backdrop-filter: blur(20px) saturate(1.7);
+  -webkit-backdrop-filter: blur(20px) saturate(1.7);
 }
-
-/* Scrolled — стеклянный слой проявляется */
-.headerScrolled::before {
-  opacity: 1;
-}
+.headerScrolled::after { opacity: 1; }
 
 /* Hidden on scroll-down, slides back in on scroll-up */
 .headerHidden {
@@ -47,7 +45,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .headerBase, .headerBase::before { transition: none; }
+  .headerBase, .headerBase::after { transition: none; }
   .headerHidden { transform: none; }
 }
 

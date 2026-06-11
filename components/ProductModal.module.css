@@ -5,7 +5,13 @@
 }
 
 .inner {
-  position: relative;
+  /* Scroll container — задаём явно (не полагаемся на Tailwind-утилиту, иначе
+     конфликт position:relative ломал прокрутку на мобиле). */
+  position: absolute;
+  inset: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
   background: var(--bg-2);
   border: 1px solid var(--accent);
   box-shadow: 0 0 0 1px var(--border), 0 24px 60px rgba(0, 0, 0, 0.55);
@@ -136,7 +142,7 @@
   color: var(--accent);
   font-family: var(--font-involve);
   font-size: calc(0.875rem * var(--type-modal-body-scale, 1));
-  line-height: 1.6;
+  line-height: var(--type-modal-body-leading, 1.6);
   word-break: break-word;
 }
 
@@ -145,7 +151,7 @@
   color: var(--accent);
   font-family: var(--font-involve);
   font-size: calc(0.8rem * var(--type-modal-body-scale, 1));
-  line-height: 1.6;
+  line-height: var(--type-modal-body-leading, 1.6);
   opacity: 0.6;
   white-space: pre-wrap;
 }

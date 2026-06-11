@@ -103,17 +103,22 @@ export default async function ThemeStyles() {
   const speedScale   = get('animation_speed')
   const speedValue   = SPEED_MAP[speedScale] ?? '1'
 
-  // ── Типографика (множители-шкалы + межстрочное заголовков) ──
+  // ── Типографика (множители-шкалы + межстрочные) ──
   const typeHeadingScale   = num(settings['type_heading_scale'],   1,   0.6, 1.8)
   const typeHeadingLeading = num(settings['type_heading_leading'], 1.3, 0.9, 2.0)
   const typeBodyScale      = num(settings['type_body_scale'],      1,   0.6, 1.8)
+  const typeBodyLeading    = num(settings['type_body_leading'],    1.6, 1.0, 2.4)
   const typePriceScale     = num(settings['type_price_scale'],     1,   0.6, 1.8)
   // Пер-секционные оверрайды (по умолчанию наследуют глобальные)
   const tCatHeading  = num(settings['type_catalog_heading_scale'], typeHeadingScale, 0.6, 1.8)
   const tCatBody     = num(settings['type_catalog_body_scale'],    typeBodyScale,    0.6, 1.8)
+  const tCatBodyLead = num(settings['type_catalog_body_leading'],  1.8,              1.0, 2.4)
   const tFootHeading = num(settings['type_footer_heading_scale'],  typeHeadingScale, 0.6, 1.8)
+  const tFootHeadLead = num(settings['type_footer_heading_leading'], typeHeadingLeading, 0.9, 2.0)
   const tFootBody    = num(settings['type_footer_body_scale'],     typeBodyScale,    0.6, 1.8)
+  const tFootBodyLead = num(settings['type_footer_body_leading'],  typeBodyLeading,  1.0, 2.4)
   const tModalBody   = num(settings['type_modal_body_scale'],      typeBodyScale,    0.6, 1.8)
+  const tModalBodyLead = num(settings['type_modal_body_leading'],  typeBodyLeading,  1.0, 2.4)
 
   // ── Скорость видео Hero (дефолт) ──
   const heroSpeed = num(settings['hero_speed_default'], 1, 0.25, 3)
@@ -159,12 +164,17 @@ export default async function ThemeStyles() {
   --type-heading-scale:   ${typeHeadingScale};
   --type-heading-leading: ${typeHeadingLeading};
   --type-body-scale:      ${typeBodyScale};
+  --type-body-leading:    ${typeBodyLeading};
   --type-price-scale:     ${typePriceScale};
   --type-catalog-heading-scale: ${tCatHeading};
   --type-catalog-body-scale:    ${tCatBody};
+  --type-catalog-body-leading:  ${tCatBodyLead};
   --type-footer-heading-scale:  ${tFootHeading};
+  --type-footer-heading-leading: ${tFootHeadLead};
   --type-footer-body-scale:     ${tFootBody};
+  --type-footer-body-leading:   ${tFootBodyLead};
   --type-modal-body-scale:      ${tModalBody};
+  --type-modal-body-leading:    ${tModalBodyLead};
   --hero-speed: ${heroSpeed};
   --trip-drift-dur: ${tripDriftSec}s;
   --trip-blob-opacity: ${tripBlobOpacity};`
@@ -178,7 +188,7 @@ export default async function ThemeStyles() {
   --accent:     ${accentLight};
   --accent-2:   color-mix(in srgb, ${accentLight} 25%, transparent);
   --border:     color-mix(in srgb, ${accentLight} 20%, transparent);
-  --header-scrolled-bg: color-mix(in srgb, ${bgLight} 72%, transparent);
+  --header-scrolled-bg: color-mix(in srgb, ${bgLight} 56%, transparent);
   --bg-subtle:  color-mix(in srgb, ${accentLight} 8%, transparent);
   --border-soft: color-mix(in srgb, ${accentLight} 12%, transparent);
   --border-mid:  color-mix(in srgb, ${accentLight} 30%, transparent);
@@ -202,7 +212,7 @@ ${sharedTokens}
   --accent:     ${accentDark};
   --accent-2:   color-mix(in srgb, ${accentDark} 25%, transparent);
   --border:     color-mix(in srgb, ${accentDark} 18%, transparent);
-  --header-scrolled-bg: color-mix(in srgb, ${bgDark} 78%, transparent);
+  --header-scrolled-bg: color-mix(in srgb, ${bgDark} 60%, transparent);
   --bg-subtle:  color-mix(in srgb, ${accentDark} 8%, transparent);
   --border-soft: color-mix(in srgb, ${accentDark} 12%, transparent);
   --border-mid:  color-mix(in srgb, ${accentDark} 30%, transparent);
@@ -224,7 +234,7 @@ html[data-theme="trip"] {
   --accent:     ${accentTrip};
   --accent-2:   color-mix(in srgb, ${accentTrip} 25%, transparent);
   --border:     color-mix(in srgb, ${accentTrip} 28%, transparent);
-  --header-scrolled-bg: color-mix(in srgb, ${bgTrip} 78%, transparent);
+  --header-scrolled-bg: color-mix(in srgb, ${bgTrip} 60%, transparent);
   --bg-subtle:  color-mix(in srgb, ${accentTrip} 10%, transparent);
   --border-soft: color-mix(in srgb, ${accentTrip} 16%, transparent);
   --border-mid:  color-mix(in srgb, ${accentTrip} 32%, transparent);

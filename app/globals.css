@@ -50,12 +50,17 @@
   --type-heading-scale:   1;
   --type-heading-leading: 1.3;
   --type-body-scale:      1;
+  --type-body-leading:    1.6;
   --type-price-scale:     1;
   --type-catalog-heading-scale: 1;
   --type-catalog-body-scale:    1;
+  --type-catalog-body-leading:  1.8;
   --type-footer-heading-scale:  1;
+  --type-footer-heading-leading: 1.3;
   --type-footer-body-scale:     1;
+  --type-footer-body-leading:   1.6;
   --type-modal-body-scale:      1;
+  --type-modal-body-leading:    1.6;
 
   /* ── Hero video default speed ── */
   --hero-speed: 1;
@@ -82,7 +87,7 @@
   --border:     rgba(242, 151, 116, 0.2);
 
   /* ── Helper vars for components ── */
-  --header-scrolled-bg: rgba(169, 52, 42, 0.82);
+  --header-scrolled-bg: rgba(169, 52, 42, 0.56);
   --bg-subtle:          rgba(242, 151, 116, 0.08);
   --border-soft:        rgba(242, 151, 116, 0.12);
   --border-mid:         rgba(242, 151, 116, 0.30);
@@ -144,7 +149,7 @@
   --border:     rgba(252, 176, 178, 0.18);
 
   /* ── Helper vars for components ── */
-  --header-scrolled-bg: rgba(28, 28, 30, 0.88);
+  --header-scrolled-bg: rgba(28, 28, 30, 0.6);
   --bg-subtle:          rgba(252, 176, 178, 0.08);
   --border-soft:        rgba(252, 176, 178, 0.12);
   --border-mid:         rgba(252, 176, 178, 0.30);
