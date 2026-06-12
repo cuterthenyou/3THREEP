@@ -4,57 +4,87 @@
   z-index: 9999;
   pointer-events: none;
   overflow: hidden;
+  --rt-i: 1;
 }
 
-/* Вуаль фона — «проявляет» новую страницу, уходя вверх */
+/* Вуаль «срыва сигнала» — фон уходит вверх рваными полосами (clip), плотная */
 .veil {
   position: absolute;
   inset: 0;
   background: var(--bg);
-  transform-origin: top;
-  animation: rtVeil 0.52s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  animation: rtVeil 0.56s cubic-bezier(0.7, 0, 0.2, 1) forwards;
 }
 
-/* Короткий accent-глитч поверх вуали */
-.glitch {
+/* RGB-сплит — две цветовые копии разъезжаются (хром-аберрация) */
+.rgb {
   position: absolute;
   inset: 0;
-  background:
-    repeating-linear-gradient(0deg, transparent 0 3px, color-mix(in srgb, var(--accent) 9%, transparent) 3px 4px);
-  mix-blend-mode: screen;
   opacity: 0;
-  animation: rtGlitch 0.4s steps(2) forwards;
+  background:
+    linear-gradient(90deg, rgba(255, 0, 90, 0.5), transparent 40%),
+    linear-gradient(270deg, rgba(0, 220, 255, 0.5), transparent 40%);
+  mix-blend-mode: screen;
+  animation: rtRgb 0.5s steps(2) forwards;
 }
 
-/* Accent скан-линия, пролетающая сверху вниз */
+/* Сканлайны — телек/VHS */
 .scan {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  background: repeating-linear-gradient(0deg, transparent 0 2px, rgba(0, 0, 0, 0.5) 2px 4px);
+  animation: rtScan 0.5s linear forwards;
+}
+
+/* Жирная accent-полоса «головки трекинга», пролетает сверху вниз */
+.bar {
   position: absolute;
   left: 0;
   right: 0;
-  top: 0;
-  height: 2px;
+  top: -12%;
+  height: calc(10px * var(--rt-i));
   background: var(--accent);
-  box-shadow: 0 0 18px 2px var(--accent-glow, var(--accent));
+  box-shadow: 0 0 28px 6px var(--accent-glow, var(--accent));
   opacity: 0;
-  animation: rtScan 0.52s ease forwards;
+  animation: rtBar 0.52s cubic-bezier(0.5, 0, 0.5, 1) forwards;
+}
+
+/* Короткая вспышка кадра */
+.flash {
+  position: absolute;
+  inset: 0;
+  background: var(--accent);
+  opacity: 0;
+  mix-blend-mode: overlay;
+  animation: rtFlash 0.4s ease-out forwards;
 }
 
 @keyframes rtVeil {
-  0%   { opacity: 0.92; clip-path: inset(0 0 0 0); }
-  55%  { opacity: 0.55; }
-  100% { opacity: 0;    clip-path: inset(0 0 100% 0); }
+  0%   { opacity: 0.96; clip-path: inset(0 0 0 0); transform: translateY(0); }
+  60%  { opacity: 0.6; }
+  100% { opacity: 0; clip-path: inset(0 0 100% 0); transform: translateY(calc(-2% * var(--rt-i))); }
 }
 
-@keyframes rtGlitch {
-  0%   { opacity: 0.7; transform: translateX(-2px); }
-  40%  { opacity: 0.4; transform: translateX(2px); }
-  100% { opacity: 0;   transform: translateX(0); }
+@keyframes rtRgb {
+  0%   { opacity: calc(0.9 * var(--rt-i)); transform: translateX(calc(-6px * var(--rt-i))) skewX(-2deg); }
+  50%  { opacity: calc(0.6 * var(--rt-i)); transform: translateX(calc(6px * var(--rt-i))) skewX(2deg); }
+  100% { opacity: 0; transform: translateX(0) skewX(0); }
 }
 
 @keyframes rtScan {
-  0%   { top: 0;    opacity: 0; }
-  12%  { opacity: 0.9; }
-  100% { top: 100%; opacity: 0; }
+  0%   { opacity: calc(0.55 * var(--rt-i)); transform: translateY(-6px); }
+  100% { opacity: 0; transform: translateY(6px); }
+}
+
+@keyframes rtBar {
+  0%   { top: -12%; opacity: 0; }
+  12%  { opacity: 0.95; }
+  100% { top: 112%; opacity: 0; }
+}
+
+@keyframes rtFlash {
+  0%   { opacity: calc(0.35 * var(--rt-i)); }
+  100% { opacity: 0; }
 }
 
 @media (prefers-reduced-motion: reduce) {

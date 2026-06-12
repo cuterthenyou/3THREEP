@@ -215,6 +215,12 @@ export default function SiteClient({ initialSettings, initialCustomFonts = [] }:
   const [savingGame, setSavingGame] = useState(false)
   const [gameMsg, setGameMsg] = useState('')
 
+  // ── Переход между страницами (VHS) ──
+  const [pageTransition, setPageTransition] = useState(initialSettings['page_transition_enabled'] !== 'false')
+  const [pageTransIntensity, setPageTransIntensity] = useState(numInit('page_transition_intensity', 1))
+  const [savingPageTrans, setSavingPageTrans] = useState(false)
+  const [pageTransMsg, setPageTransMsg] = useState('')
+
   // Текущая тема админки — чтобы живой предпросмотр цвета бил по нужной теме
   const [adminTheme, setAdminTheme] = useState<'light' | 'dark' | 'trip'>('dark')
   useEffect(() => {
@@ -545,6 +551,16 @@ export default function SiteClient({ initialSettings, initialCustomFonts = [] }:
     setSavingHeroSpeed(true); setHeroSpeedMsg('')
     await saveSetting('hero_speed_default', String(heroSpeedDefault))
     setSavingHeroSpeed(false); setHeroSpeedMsg('✓ Сохранено (сбрасывает ручной выбор скорости у посетителей)')
+  }
+
+  // ── Save page transition ────────────────────────────────────────
+  async function savePageTrans() {
+    setSavingPageTrans(true); setPageTransMsg('')
+    await Promise.all([
+      saveSetting('page_transition_enabled', String(pageTransition)),
+      saveSetting('page_transition_intensity', String(pageTransIntensity)),
+    ])
+    setSavingPageTrans(false); setPageTransMsg('✓ Сохранено — перезагрузите страницу')
   }
 
   // ── Save game balance ───────────────────────────────────────────
@@ -1110,6 +1126,39 @@ export default function SiteClient({ initialSettings, initialCustomFonts = [] }:
             {savingTrip ? 'Сохраняем...' : 'Сохранить эффекты trip'}
           </button>
           {tripMsg && <span style={msgStyle(tripMsg)}>{tripMsg}</span>}
+        </div>
+      </AdminSection>
+
+      {/* ── Переход между страницами (VHS) ── */}
+      <AdminSection title="Переход между страницами (VHS)" tab="effects">
+        <p className="text-xs" style={{ color: 'var(--accent)', opacity: 0.5, fontFamily: 'var(--font-involve)' }}>
+          Глитч-переход при смене страницы: вуаль-«срыв сигнала» + RGB-сплит + сканлайны + accent-полоса.
+        </p>
+        <div className="flex items-center gap-4">
+          <button
+            onClick={() => setPageTransition(v => !v)}
+            style={{
+              display: 'flex', alignItems: 'center', gap: 8,
+              padding: '0.35rem 0.9rem', borderRadius: 20,
+              border: `1.5px solid ${pageTransition ? 'var(--accent)' : 'var(--border-soft)'}`,
+              background: pageTransition ? 'var(--accent-2)' : 'var(--bg-2)',
+              cursor: 'pointer', transition: 'all 0.2s',
+            }}
+          >
+            <span style={{ width: 8, height: 8, borderRadius: '50%', background: pageTransition ? 'var(--accent)' : 'var(--text-muted)', display: 'inline-block' }} />
+            <span style={{ fontFamily: 'var(--font-involve)', fontSize: '0.72rem', color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+              Переход: {pageTransition ? 'вкл' : 'выкл'}
+            </span>
+          </button>
+        </div>
+        {pageTransition && (
+          <RangeRow label="Сила эффекта" value={pageTransIntensity} set={setPageTransIntensity} cssVar="--rt-preview-noop" min={0.3} max={2} step={0.05} suffix="" />
+        )}
+        <div className="flex items-center gap-3 flex-wrap pt-2">
+          <button onClick={savePageTrans} disabled={savingPageTrans} className={a.btn}>
+            {savingPageTrans ? 'Сохраняем...' : 'Сохранить переход'}
+          </button>
+          {pageTransMsg && <span style={msgStyle(pageTransMsg)}>{pageTransMsg}</span>}
         </div>
       </AdminSection>
 

@@ -22,6 +22,7 @@ const ALLOW = [
   'components/BatAnimation.tsx',
   'components/BatAnimation.module.css',
   'components/GlitterCanvas.tsx',   // canvas-арт (динамические rgb)
+  'components/RouteTransition.module.css', // VHS-арт: хром-аберрация = намеренные red/cyan
   'app/admin/',          // админка — внутренний инструмент, не бренд-витрина
   'scripts/',
   'node_modules/',
