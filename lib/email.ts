@@ -111,6 +111,28 @@ export async function sendOTP(email: string, code: string) {
               </tr>
             </table>
 
+            <!-- Actions: copy (best-effort, работает в вебмейле/браузере) + переход на сайт.
+                 Почтовые клиенты вырезают JS, поэтому кнопка «копировать» — best-effort,
+                 а ссылка «ввести код» работает всегда (открывает вход с подставленным e-mail;
+                 на iOS/Android код подставляется из письма автозаполнением клавиатуры). -->
+            <table cellpadding="0" cellspacing="0" style="margin-bottom:28px;">
+              <tr>
+                <td style="padding-right:10px;">
+                  <button type="button"
+                    onclick="try{navigator.clipboard.writeText('${code}');var b=this;b.innerHTML='СКОПИРОВАНО';setTimeout(function(){b.innerHTML='КОПИРОВАТЬ КОД'},1800);}catch(e){}return false;"
+                    style="cursor:pointer;background:#0e0e0e;color:#f29774;border:1px solid #f29774;box-shadow:2px 2px 0 #f29774;padding:10px 18px;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;font-family:monospace,Courier,Arial,sans-serif;">
+                    КОПИРОВАТЬ КОД
+                  </button>
+                </td>
+                <td>
+                  <a href="${siteUrl}/auth?email=${encodeURIComponent(email)}&step=code"
+                    style="display:inline-block;background:#f29774;color:#0e0e0e;border:1px solid #f29774;box-shadow:2px 2px 0 #0e0e0e;padding:11px 18px;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;font-family:monospace,Courier,Arial,sans-serif;text-decoration:none;">
+                    ВВЕСТИ КОД
+                  </a>
+                </td>
+              </tr>
+            </table>
+
             <!-- Expiry -->
             <div style="font-size:10px;letter-spacing:0.16em;color:#f29774;opacity:0.3;text-transform:uppercase;font-family:monospace,Courier,Arial,sans-serif;margin-bottom:48px;">
               ${c.expiryText}

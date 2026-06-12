@@ -56,12 +56,15 @@ export default function AuthForm() {
   const router = useRouter();
   const callbackUrl = searchParams.get('callbackUrl') || '/account';
   const emailFromUrl = searchParams.get('email') ?? '';
+  // Из письма (кнопка «ВВЕСТИ КОД»): ?email=…&step=code → сразу на ввод кода,
+  // код уже отправлен, повторно не шлём.
+  const startOnCode = searchParams.get('step') === 'code' && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailFromUrl);
 
   const [email, setEmail] = useState(emailFromUrl);
   const [code, setCode] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [step, setStep] = useState<'email' | 'code'>('email');
+  const [step, setStep] = useState<'email' | 'code'>(startOnCode ? 'code' : 'email');
   const [consent, setConsent] = useState(false);
   const [newsletter, setNewsletter] = useState(false);
   const [emailTouched, setEmailTouched] = useState(false);

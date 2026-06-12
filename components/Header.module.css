@@ -1,17 +1,18 @@
 /* ── Header bar — прогрессивное матовое стекло (gaussian gradient blur) ──
-   ОДНИМ backdrop-filter градиентный блюр невозможен: blur одинаков по всей
-   высоте. Поэтому стек из нескольких слоёв (.blurLayer1..4): каждый со своим
-   радиусом размытия и маской-градиентом. Тяжёлые слои живут только у верхней
-   кромки, лёгкие тянутся ниже — суммарно блюр МАКСИМАЛЬНЫЙ сверху и плавно
-   уходит в 0 к низу шапки. Никакой нижней линии, границы и тени нет. */
+   ВАЖНЫЙ УРОК (5 сессий бага): в Chromium backdrop-filter ПОЛНОСТЬЮ
+   игнорируется, если на ТОМ ЖЕ элементе стоит `mask`/`-webkit-mask` ИЛИ
+   `transform` (в т.ч. translateZ), ИЛИ если такое стоит на любом предке.
+   Поэтому НИКАКИХ масок и трансформов на блюр-слоях.
+   Градиент блюра делаем «лесенкой» по ВЫСОТЕ: несколько слоёв обычного
+   (немаскированного) backdrop-filter — нижний на всю высоту со слабым блюром,
+   верхние всё короче и сильнее. Сумма = МАКСИМАЛЬНЫЙ блюр у верхней кромки,
+   плавно слабее к низу. Нижней линии/границы/тени нет. */
 .headerBase {
   position: fixed;
   transition: transform 0.42s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-/* Стек блюра + лёгкая вуаль (плотнее вверху → 0 книзу). Под контентом.
-   Вуаль НАМЕРЕННО лёгкая — иначе она перекрывает блюр и выглядит как «просто
-   градиент цвета». Читаемость иконок держим самим блюром + кнопками. */
+/* Стек блюра + лёгкая вуаль (плотнее вверху → 0 книзу). Под контентом. */
 .blurStack {
   position: absolute;
   inset: 0;
@@ -19,46 +20,30 @@
   pointer-events: none;
   background: linear-gradient(
     to bottom,
-    color-mix(in srgb, var(--bg) 30%, transparent) 0%,
+    color-mix(in srgb, var(--bg) 28%, transparent) 0%,
     color-mix(in srgb, var(--bg) 12%, transparent) 50%,
     transparent 100%
   );
   transition: background 0.32s ease;
 }
 
-/* ВАЖНО: на слое с backdrop-filter НЕЛЬЗЯ ставить transform/translateZ —
-   в Chromium это обнуляет backdrop (блюр исчезает, остаётся только вуаль).
-   Это и был баг последних сессий. */
+/* Базовый блюр-слой: только backdrop-filter, БЕЗ mask и БЕЗ transform.
+   Это именно тот «отдельный слой без маски», что работал раньше. */
 .blurLayer {
   position: absolute;
-  inset: 0;
+  top: 0;
+  left: 0;
+  right: 0;
+  /* высоту задаёт каждый слой отдельно (лесенка) */
 }
 
-/* Радиус растёт, маска прижимается к верху → градиентное затухание блюра */
-.blurLayer1 {
-  backdrop-filter: blur(2px) saturate(1.1);
-  -webkit-backdrop-filter: blur(2px) saturate(1.1);
-  -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 60%, transparent 100%);
-          mask-image: linear-gradient(to bottom, #000 0%, #000 60%, transparent 100%);
-}
-.blurLayer2 {
-  backdrop-filter: blur(6px) saturate(1.1);
-  -webkit-backdrop-filter: blur(6px) saturate(1.1);
-  -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 40%, transparent 75%);
-          mask-image: linear-gradient(to bottom, #000 0%, #000 40%, transparent 75%);
-}
-.blurLayer3 {
-  backdrop-filter: blur(12px) saturate(1.1);
-  -webkit-backdrop-filter: blur(12px) saturate(1.1);
-  -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 22%, transparent 50%);
-          mask-image: linear-gradient(to bottom, #000 0%, #000 22%, transparent 50%);
-}
-.blurLayer4 {
-  backdrop-filter: blur(22px) saturate(1.15);
-  -webkit-backdrop-filter: blur(22px) saturate(1.15);
-  -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 8%, transparent 30%);
-          mask-image: linear-gradient(to bottom, #000 0%, #000 8%, transparent 30%);
-}
+/* Лесенка: чем сильнее блюр — тем короче слой (прижат к верхней кромке).
+   Стекаются обычные backdrop-filter (без масок) → суммарный блюр плавно
+   нарастает к верху. */
+.blurLayer1 { bottom: 0;        backdrop-filter: blur(4px)  saturate(1.2); -webkit-backdrop-filter: blur(4px)  saturate(1.2); }
+.blurLayer2 { height: 78%;      backdrop-filter: blur(7px)  saturate(1.2); -webkit-backdrop-filter: blur(7px)  saturate(1.2); }
+.blurLayer3 { height: 56%;      backdrop-filter: blur(11px) saturate(1.25); -webkit-backdrop-filter: blur(11px) saturate(1.25); }
+.blurLayer4 { height: 34%;      backdrop-filter: blur(18px) saturate(1.3); -webkit-backdrop-filter: blur(18px) saturate(1.3); }
 
 /* Контент хэдера — поверх стека блюра */
 .headerRow {
