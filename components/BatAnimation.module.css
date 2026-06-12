@@ -597,3 +597,82 @@
   20%  { transform: translate(-50%, -50%) scale(1.1); opacity: 1; filter: brightness(3); }
   100% { transform: translate(-50%, -50%) scale(2.2); opacity: 0; filter: brightness(1); }
 }
+
+/* ════════════════════════════════════════════════════════════════
+   BOSS — крупный нетопырь с щитом и окном уязвимости (третий глаз)
+   ════════════════════════════════════════════════════════════════ */
+.batBoss {
+  color: var(--accent, #f29774);
+  z-index: 101;
+  filter: drop-shadow(0 0 10px var(--accent, #f29774)) drop-shadow(0 0 24px var(--accent-glow, rgba(242, 151, 116, 0.5)));
+}
+/* Фаза щита — приглушён, неуязвим */
+.batShield {
+  filter: drop-shadow(0 0 6px rgba(120, 140, 170, 0.7)) saturate(0.5) brightness(0.85);
+}
+/* Окно уязвимости — ярко пульсирует «бей!» */
+.batVuln { animation: bossVuln 0.5s ease-in-out infinite alternate; }
+@keyframes bossVuln {
+  0%   { filter: drop-shadow(0 0 10px var(--accent, #f29774)) brightness(1.05); }
+  100% { filter: drop-shadow(0 0 22px var(--accent, #f29774)) drop-shadow(0 0 38px var(--accent, #f29774)) brightness(1.45); }
+}
+/* Вращающееся кольцо щита вокруг босса (множится на scale босса) */
+.bossShieldRing {
+  position: absolute;
+  left: 50%; top: 50%;
+  width: 92px; height: 92px;
+  margin: -46px 0 0 -46px;
+  border-radius: 50%;
+  border: 2px dashed rgba(150, 170, 200, 0.85);
+  box-shadow: 0 0 10px rgba(150, 170, 200, 0.45);
+  pointer-events: none;
+  animation: bossRingSpin 3s linear infinite;
+  transition: opacity 0.25s;
+}
+.batVuln .bossShieldRing { opacity: 0; }
+@keyframes bossRingSpin { to { transform: rotate(360deg); } }
+
+/* HP-бар босса — сверху по центру */
+.bossHud {
+  position: fixed;
+  top: 4.5rem; left: 50%;
+  transform: translateX(-50%);
+  z-index: 190;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+  width: min(86vw, 360px);
+}
+.bossHudLabel {
+  font-family: var(--font-heading, 'ONDER', sans-serif);
+  font-size: 0.7rem; letter-spacing: 0.28em; text-transform: uppercase;
+  color: var(--accent, #f29774);
+  text-shadow: 0 0 12px var(--accent-glow, rgba(242, 151, 116, 0.6));
+}
+.bossHudBarTrack {
+  width: 100%; height: 10px;
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--bg, #090909) 70%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent, #f29774) 40%, transparent);
+  overflow: hidden;
+}
+.bossHudBarFill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent, #f29774), color-mix(in srgb, var(--accent, #f29774) 55%, white));
+  box-shadow: 0 0 12px var(--accent, #f29774);
+  transition: width 0.25s ease;
+}
+.bossHudState {
+  font-family: var(--font-body, monospace);
+  font-size: 0.6rem; letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--text-muted, rgba(255, 255, 255, 0.6));
+}
+.bossHudVuln { color: var(--accent, #f29774); animation: bossStateBlink 0.5s steps(1) infinite; }
+@keyframes bossStateBlink { 0%, 60% { opacity: 1; } 61%, 100% { opacity: 0.4; } }
+
+/* Баннер появления босса */
+.waveBannerBoss .waveBannerNum { color: var(--accent, #f29774); text-shadow: 0 0 26px var(--accent, #f29774); }
+.waveBannerBoss .waveBannerKick { color: var(--accent, #f29774); }
+.waveBannerBoss .waveBannerBar { background: var(--accent, #f29774); }

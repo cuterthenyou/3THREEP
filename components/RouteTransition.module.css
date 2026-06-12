@@ -1,0 +1,62 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+/* Вуаль фона — «проявляет» новую страницу, уходя вверх */
+.veil {
+  position: absolute;
+  inset: 0;
+  background: var(--bg);
+  transform-origin: top;
+  animation: rtVeil 0.52s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+/* Короткий accent-глитч поверх вуали */
+.glitch {
+  position: absolute;
+  inset: 0;
+  background:
+    repeating-linear-gradient(0deg, transparent 0 3px, color-mix(in srgb, var(--accent) 9%, transparent) 3px 4px);
+  mix-blend-mode: screen;
+  opacity: 0;
+  animation: rtGlitch 0.4s steps(2) forwards;
+}
+
+/* Accent скан-линия, пролетающая сверху вниз */
+.scan {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 2px;
+  background: var(--accent);
+  box-shadow: 0 0 18px 2px var(--accent-glow, var(--accent));
+  opacity: 0;
+  animation: rtScan 0.52s ease forwards;
+}
+
+@keyframes rtVeil {
+  0%   { opacity: 0.92; clip-path: inset(0 0 0 0); }
+  55%  { opacity: 0.55; }
+  100% { opacity: 0;    clip-path: inset(0 0 100% 0); }
+}
+
+@keyframes rtGlitch {
+  0%   { opacity: 0.7; transform: translateX(-2px); }
+  40%  { opacity: 0.4; transform: translateX(2px); }
+  100% { opacity: 0;   transform: translateX(0); }
+}
+
+@keyframes rtScan {
+  0%   { top: 0;    opacity: 0; }
+  12%  { opacity: 0.9; }
+  100% { top: 100%; opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .overlay { display: none; }
+}

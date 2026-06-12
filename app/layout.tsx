@@ -11,6 +11,7 @@ import ThemeStyles from '@/components/ThemeStyles';
 import CustomCursor from '@/components/CustomCursor';
 import VisitTracker from '@/components/VisitTracker';
 import LoadingScreen from '@/components/LoadingScreen';
+import RouteTransition from '@/components/RouteTransition';
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -79,6 +80,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         </Providers>
         <ScrollRestorer />
         <ScrollToTop />
+        <RouteTransition />
         <CookieBanner />
       </body>
     </html>

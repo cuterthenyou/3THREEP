@@ -34,6 +34,32 @@ const SPEED_OPTIONS = [
   { value: 'fast',   label: 'Быстро' },
 ] as const
 
+// Готовые палитры — клик заполняет все цвета (light/dark/trip), затем «Сохранить цвета»
+interface ThemePreset {
+  name: string
+  bgL: string; textL: string; accentL: string
+  bgD: string; textD: string; accentD: string
+  bgT: string; textT: string; accentT: string
+}
+const THEME_PRESETS: ThemePreset[] = [
+  { name: 'Терракота',
+    bgL: '#a9342a', textL: '#f29774', accentL: '#f29774',
+    bgD: '#1c1c1e', textD: '#FCB0B2', accentD: '#FCB0B2',
+    bgT: '#160a2b', textT: '#cdbcff', accentT: '#ff5ad0' },
+  { name: 'Неон-нуар',
+    bgL: '#18181b', textL: '#d6f7ff', accentL: '#34e2ff',
+    bgD: '#0b0b10', textD: '#d6f7ff', accentD: '#34e2ff',
+    bgT: '#08010f', textT: '#ffd6f5', accentT: '#ff3bd0' },
+  { name: 'Кислота',
+    bgL: '#14160c', textL: '#e7ff8a', accentL: '#c6ff3a',
+    bgD: '#0c0e08', textD: '#e7ff8a', accentD: '#aaff00',
+    bgT: '#0a1402', textT: '#d6ffe0', accentT: '#6bff5a' },
+  { name: 'Кровь',
+    bgL: '#2a0d0d', textL: '#f0b9b9', accentL: '#e23b3b',
+    bgD: '#140808', textD: '#f0b9b9', accentD: '#ff4d4d',
+    bgT: '#16020a', textT: '#ffc2d6', accentT: '#ff2d6b' },
+]
+
 export default function SiteClient({ initialSettings, initialCustomFonts = [] }: Props) {
   const [activeTab, setActiveTab] = useState<SettingsTab>('general')
 
@@ -180,6 +206,12 @@ export default function SiteClient({ initialSettings, initialCustomFonts = [] }:
   const [gameBatSpeed,    setGameBatSpeed]    = useState(numInit('game_bat_speed', 1))
   const [gameBatScale,    setGameBatScale]    = useState(numInit('game_bat_scale', 1))
   const [gamePowerup,     setGamePowerup]     = useState(numInit('game_powerup_chance', 1))
+  // Боссы
+  const [gameBossHp,      setGameBossHp]      = useState(Math.round(numInit('game_boss_hp', 8)))
+  const [gameBossMegaHp,  setGameBossMegaHp]  = useState(Math.round(numInit('game_boss_mega_hp', 18)))
+  const [gameBossShield,  setGameBossShield]  = useState(numInit('game_boss_shield_ms', 1600))
+  const [gameBossVuln,    setGameBossVuln]    = useState(numInit('game_boss_vuln_ms', 1500))
+  const [gameBossTimeout, setGameBossTimeout] = useState(numInit('game_boss_timeout_ms', 45000))
   const [savingGame, setSavingGame] = useState(false)
   const [gameMsg, setGameMsg] = useState('')
 
@@ -435,6 +467,21 @@ export default function SiteClient({ initialSettings, initialCustomFonts = [] }:
     setSavingColors(false); setColorsMsg('✓ Цвета сохранены — перезагрузите страницу для проверки')
   }
 
+  // Применить пресет: заполнить все 9 цветов + живой предпросмотр текущей темы
+  function applyPreset(p: ThemePreset) {
+    setColorBgLight(p.bgL);   setColorTextLight(p.textL);   setColorAccentLight(p.accentL)
+    setColorBgDark(p.bgD);    setColorTextDark(p.textD);    setColorAccentDark(p.accentD)
+    setColorBgTrip(p.bgT);    setColorTextTrip(p.textT);    setColorAccentTrip(p.accentT)
+    const root = document.documentElement.style
+    const set = (bg: string, text: string, accent: string) => {
+      root.setProperty('--bg', bg); root.setProperty('--text', text); root.setProperty('--accent', accent)
+    }
+    if (adminTheme === 'dark') set(p.bgD, p.textD, p.accentD)
+    else if (adminTheme === 'trip') set(p.bgT, p.textT, p.accentT)
+    else set(p.bgL, p.textL, p.accentL)
+    setColorsMsg('Палитра применена — нажми «Сохранить цвета»')
+  }
+
   // ── Save fonts ──────────────────────────────────────────────────
   async function saveFonts() {
     setSavingFonts(true); setFontsMsg('')
@@ -508,6 +555,11 @@ export default function SiteClient({ initialSettings, initialCustomFonts = [] }:
       saveSetting('game_bat_speed',     String(gameBatSpeed)),
       saveSetting('game_bat_scale',     String(gameBatScale)),
       saveSetting('game_powerup_chance', String(gamePowerup)),
+      saveSetting('game_boss_hp',        String(gameBossHp)),
+      saveSetting('game_boss_mega_hp',   String(gameBossMegaHp)),
+      saveSetting('game_boss_shield_ms', String(gameBossShield)),
+      saveSetting('game_boss_vuln_ms',   String(gameBossVuln)),
+      saveSetting('game_boss_timeout_ms', String(gameBossTimeout)),
     ])
     setSavingGame(false); setGameMsg('✓ Баланс игры сохранён — откройте страницу ИНФА для проверки')
   }
@@ -616,6 +668,27 @@ export default function SiteClient({ initialSettings, initialCustomFonts = [] }:
           (сейчас: {adminTheme === 'dark' ? '☾ тёмная' : adminTheme === 'trip' ? '✦ trip' : '☀ светлая'}).
           После сохранения перекрашивается весь сайт — перезагрузите страницу для финальной проверки.
         </p>
+
+        {/* Пресеты — палитры в один клик */}
+        <div className="flex flex-col gap-2">
+          <span className="text-xs uppercase tracking-widest" style={{ color: 'var(--accent)', opacity: 0.5, fontFamily: 'var(--font-involve)' }}>Готовые палитры</span>
+          <div className="flex flex-wrap gap-2">
+            {THEME_PRESETS.map(p => {
+              const sw = adminTheme === 'dark' ? [p.bgD, p.accentD, p.textD]
+                       : adminTheme === 'trip' ? [p.bgT, p.accentT, p.textT]
+                       : [p.bgL, p.accentL, p.textL]
+              return (
+                <button key={p.name} onClick={() => applyPreset(p)} className={a.btnSecondary}
+                  style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <span style={{ display: 'inline-flex', borderRadius: 3, overflow: 'hidden', border: '1px solid var(--border)' }}>
+                    {sw.map((c, i) => <span key={i} style={{ width: 12, height: 14, background: c }} />)}
+                  </span>
+                  {p.name}
+                </button>
+              )
+            })}
+          </div>
+        </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
           {/* Light theme */}
@@ -1052,6 +1125,35 @@ export default function SiteClient({ initialSettings, initialCustomFonts = [] }:
           <RangeRow label="Размер нетопырей" value={gameBatScale} set={setGameBatScale} cssVar="--game-noop-3" min={0.6} max={1.8} step={0.05} />
           <RangeRow label="Шанс пауэрапов" value={gamePowerup} set={setGamePowerup} cssVar="--game-noop-4" min={0.2} max={3} step={0.1} />
         </div>
+
+        <p className="text-xs uppercase tracking-widest pt-2" style={{ color: 'var(--accent)', opacity: 0.55, fontFamily: 'var(--font-involve)' }}>
+          Боссы (каждый 10-й уровень · мега на 33/66/99)
+        </p>
+        <p className="text-xs" style={{ color: 'var(--accent)', opacity: 0.4, fontFamily: 'var(--font-involve)' }}>
+          Босс защищается щитом — урон проходит только в окно уязвимости (третий глаз). HP = число попаданий по уязвимости.
+        </p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-4">
+          {[
+            { label: 'HP босса (попаданий)', val: gameBossHp, set: setGameBossHp, min: 3, max: 30, step: 1, unit: '' },
+            { label: 'HP мега-босса', val: gameBossMegaHp, set: setGameBossMegaHp, min: 6, max: 60, step: 1, unit: '' },
+            { label: 'Длительность щита', val: gameBossShield, set: setGameBossShield, min: 400, max: 4000, step: 100, unit: 'ms' },
+            { label: 'Окно уязвимости', val: gameBossVuln, set: setGameBossVuln, min: 400, max: 4000, step: 100, unit: 'ms' },
+            { label: 'Время на босса', val: gameBossTimeout, set: setGameBossTimeout, min: 15000, max: 120000, step: 5000, unit: 'ms' },
+          ].map(r => (
+            <div key={r.label} className="flex flex-col gap-1.5">
+              <div className="flex items-center justify-between">
+                <span className="text-xs" style={{ color: 'var(--accent)', fontFamily: 'var(--font-involve)' }}>{r.label}</span>
+                <span className="text-xs" style={{ color: 'var(--accent)', fontFamily: 'monospace' }}>
+                  {r.unit === 'ms' ? `${(r.val / 1000).toFixed(r.step >= 1000 ? 0 : 1)}с` : r.val}
+                </span>
+              </div>
+              <input type="range" min={r.min} max={r.max} step={r.step} value={r.val}
+                onChange={e => r.set(parseFloat(e.target.value))}
+                style={{ accentColor: 'var(--accent)', width: '100%' }} />
+            </div>
+          ))}
+        </div>
+
         <div className="flex items-center gap-3 flex-wrap pt-2">
           <button onClick={saveGame} disabled={savingGame} className={a.btn}>
             {savingGame ? 'Сохраняем...' : 'Сохранить баланс'}

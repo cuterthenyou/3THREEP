@@ -10,10 +10,20 @@ export interface GameConfig {
   batSpeed: number       // множитель скорости нетопырей
   batScale: number       // множитель размера нетопырей
   powerupChance: number  // множитель шанса дропа пауэрапа
+  bossHp: number         // попаданий чтобы убить обычного босса (10/20/…)
+  bossMegaHp: number     // попаданий для мега-босса (33/66/99)
+  bossShieldMs: number   // длительность фазы щита (босс неуязвим), мс
+  bossVulnMs: number     // длительность окна уязвимости (можно бить), мс
+  bossTimeoutMs: number  // сколько даётся на убийство обычного босса, мс
 }
 export const DEFAULT_GAME_CONFIG: GameConfig = {
   roombaSpeed: 1, batSpeed: 1, batScale: 1, powerupChance: 1,
+  bossHp: 8, bossMegaHp: 18, bossShieldMs: 1600, bossVulnMs: 1500, bossTimeoutMs: 45000,
 }
+
+// Босс на каждом 10-м уровне; мега-босс на 33/66/99
+const isBossWave = (n: number) => n > 0 && n % 10 === 0
+const isMegaWave = (n: number) => n === 33 || n === 66 || n === 99
 
 // Сложность (выбор после первого нетопыря): множитель скорости + стартовая волна
 type Difficulty = 'chill' | 'normal' | 'hard'
@@ -62,7 +72,7 @@ function PixelBat() {
 }
 
 // ── Types ─────────────────────────────────────────────────────────────────────
-type BatVariant = 'normal' | 'golden' | 'armored'
+type BatVariant = 'normal' | 'golden' | 'armored' | 'boss'
 type PowerKind  = 'slowmo' | 'freeze' | 'double'
 interface BatData       { id: number; startX: number; startY: number; startVx: number; startVy: number; scale: number; variant: BatVariant; hp: number }
 interface ExplosionData { id: number; x: number; y: number }
@@ -71,7 +81,7 @@ interface HitMarkerData { id: number; x: number; y: number; kind?: 'kill' | 'cli
 interface PowerUpData   { id: number; x: number; y: number; kind: PowerKind }
 type GameState = 'idle' | 'lure' | 'choose' | 'playing' | 'game_over'
 
-const VARIANT_BASE: Record<BatVariant, number> = { normal: 1, golden: 3, armored: 2 }
+const VARIANT_BASE: Record<BatVariant, number> = { normal: 1, golden: 3, armored: 2, boss: 30 }
 const POWER_LABELS: Record<PowerKind, string> = { slowmo: 'ЗАМЕДЛЕНИЕ', freeze: 'ЗАМОРОЗКА', double: 'ОЧКИ ×2' }
 
 const TIMEOUT_PARTICLE_ANGLES = Array.from({ length: 16 }, (_, i) => i * 22.5)
@@ -268,9 +278,11 @@ function PixelRoomba({ splats, dir, speedMult = 1, onSplatHit, onDone }: {
 }
 
 // ── BatInstance ───────────────────────────────────────────────────────────────
-function BatInstance({ bat, cracked, speedRef, onClick, onPositionUpdate }: {
+function BatInstance({ bat, cracked, vulnerable = false, level = 1, speedRef, onClick, onPositionUpdate }: {
   bat: BatData
   cracked: boolean
+  vulnerable?: boolean
+  level?: number
   speedRef: React.MutableRefObject<number>
   onClick: () => void
   onPositionUpdate: (id: number, x: number, y: number) => void
@@ -281,8 +293,9 @@ function BatInstance({ bat, cracked, speedRef, onClick, onPositionUpdate }: {
 
   useEffect(() => {
     const div = divRef.current; if (!div) return
-    // golden bats fly faster and turn more erratically
+    // golden bats fly faster and turn more erratically; boss — медленный и плавный
     const erratic = bat.variant === 'golden'
+    const isBoss = bat.variant === 'boss'
     const st = { x: bat.startX, y: bat.startY, vx: bat.startVx, vy: bat.startVy, lastTime: 0, nextTurnAt: 0 }
     let animId: number, alive = true
     function frame(t: number) {
@@ -291,11 +304,16 @@ function BatInstance({ bat, cracked, speedRef, onClick, onPositionUpdate }: {
       st.lastTime = t
       const mult = speedRef.current   // slow-mo / freeze / normal
       if (t > st.nextTurnAt) {
+        // Манёвренность растёт с уровнем (0→1 за ~30 волн): резче виражи, чаще
+        // смена курса — нетопырей сложнее «тапнуть», но плавно.
+        const ag = Math.min(1, (level - 1) / 30)
         const curA = Math.atan2(st.vy, st.vx)
-        const deflect = (Math.random() - 0.5) * Math.PI * (erratic ? 1.9 : 1.3)
-        const speed = Math.max(80, Math.min(erratic ? 320 : 240, Math.hypot(st.vx, st.vy) * (0.8 + Math.random() * 0.4)))
+        const deflect = (Math.random() - 0.5) * Math.PI * (erratic ? 1.9 : isBoss ? 0.5 : 1.3 + ag * 0.7)
+        const minS = isBoss ? 36 : 80
+        const maxS = erratic ? 320 : isBoss ? 120 : 240 + ag * 90
+        const speed = Math.max(minS, Math.min(maxS, Math.hypot(st.vx, st.vy) * (0.8 + Math.random() * 0.4)))
         st.vx = Math.cos(curA + deflect) * speed; st.vy = Math.sin(curA + deflect) * speed
-        st.nextTurnAt = t + (erratic ? 350 : 600) + Math.random() * (erratic ? 700 : 1400)
+        st.nextTurnAt = t + (erratic ? 350 : isBoss ? 1100 : 600 - ag * 260) + Math.random() * (erratic ? 700 : 1400 - ag * 600)
       }
       st.x += st.vx * dt * mult; st.y += st.vy * dt * mult
       const W = window.innerWidth, H = window.innerHeight
@@ -305,21 +323,29 @@ function BatInstance({ bat, cracked, speedRef, onClick, onPositionUpdate }: {
       if (st.y < 0)       { st.y = 0;      st.vy =  Math.abs(st.vy) }
       if (st.y > H - bH)  { st.y = H - bH; st.vy = -Math.abs(st.vy) }
       posRef.current(bat.id, st.x + bW / 2, st.y + bH / 2)
-      const angle = Math.atan2(st.vy, st.vx) * 180 / Math.PI
+      // боссы не «крутятся» по направлению — остаются вертикально (только лёгкий наклон)
+      const angle = isBoss ? Math.sin(t / 600) * 6 : Math.atan2(st.vy, st.vx) * 180 / Math.PI
       div!.style.transform = `translate(${st.x}px, ${st.y}px) rotate(${angle}deg) scale(${bat.scale})`
       animId = requestAnimationFrame(frame)
     }
     animId = requestAnimationFrame(frame)
     return () => { alive = false; cancelAnimationFrame(animId) }
+  // level намеренно вне deps: он постоянен для волны нетопыря, не перезапускаем rAF
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [bat, speedRef])
 
-  const variantClass = bat.variant === 'golden' ? s.batGold : bat.variant === 'armored' ? s.batArmored : ''
+  const variantClass = bat.variant === 'golden' ? s.batGold
+    : bat.variant === 'armored' ? s.batArmored
+    : bat.variant === 'boss' ? s.batBoss : ''
+  const isBoss = bat.variant === 'boss'
+  const stateClass = isBoss ? (vulnerable ? s.batVuln : s.batShield) : (cracked ? s.batCracked : '')
 
   return (
-    <div ref={divRef} className={`${s.bat} ${variantClass} ${cracked ? s.batCracked : ''}`}
+    <div ref={divRef} className={`${s.bat} ${variantClass} ${stateClass}`}
       style={{ transform: `translate(${bat.startX}px, ${bat.startY}px) scale(${bat.scale})` }}
       onClick={() => clickRef.current()}
       onTouchStart={e => { e.preventDefault(); clickRef.current() }}>
+      {isBoss && <span className={s.bossShieldRing} aria-hidden="true" />}
       <span className={s.flap}><PixelBat /></span>
     </div>
   )
@@ -362,12 +388,31 @@ function ScoreCounter({ score, waveNum, best, combo, effect, bonus, difficultyLa
 function GameOverBanner() { return <div className={s.gameOverCenter}>GAME OVER</div> }
 
 // Центральное оповещение о новой волне (incoming)
-function WaveBanner({ waveNum, bonus }: { waveNum: number; bonus: boolean }) {
+function WaveBanner({ waveNum, bonus, boss, mega }: { waveNum: number; bonus: boolean; boss?: boolean; mega?: boolean }) {
+  const kick = boss ? (mega ? '// ⚠ МЕГА-БОСС' : '// ⚠ БОСС') : bonus ? '// СВАРМ' : '// ВХОДЯЩАЯ'
+  const num  = boss ? (mega ? 'MEGA BOSS' : 'BOSS') : bonus ? 'BONUS WAVE' : `WAVE ${waveNum}`
+  const cls  = boss ? s.waveBannerBoss : bonus ? s.waveBannerBonus : ''
   return (
-    <div className={`${s.waveBanner} ${bonus ? s.waveBannerBonus : ''}`} aria-hidden="true">
-      <span className={s.waveBannerKick}>{bonus ? '// СВАРМ' : '// ВХОДЯЩАЯ'}</span>
-      <span className={s.waveBannerNum}>{bonus ? 'BONUS WAVE' : `WAVE ${waveNum}`}</span>
+    <div className={`${s.waveBanner} ${cls}`} aria-hidden="true">
+      <span className={s.waveBannerKick}>{kick}</span>
+      <span className={s.waveBannerNum}>{num}</span>
       <span className={s.waveBannerBar} />
+    </div>
+  )
+}
+
+// HP-бар босса + подсказка фазы (ЩИТ / БЕЙ!)
+function BossHud({ boss }: { boss: { hp: number; maxHp: number; mega: boolean; vulnerable: boolean } }) {
+  const pct = Math.max(0, Math.min(100, (boss.hp / boss.maxHp) * 100))
+  return (
+    <div className={s.bossHud} aria-hidden="true">
+      <span className={s.bossHudLabel}>{boss.mega ? 'МЕГА-БОСС' : 'БОСС'}</span>
+      <div className={s.bossHudBarTrack}>
+        <div className={s.bossHudBarFill} style={{ width: `${pct}%` }} />
+      </div>
+      <span className={`${s.bossHudState} ${boss.vulnerable ? s.bossHudVuln : ''}`}>
+        {boss.vulnerable ? '⊙ УЯЗВИМ — БЕЙ В ГЛАЗ!' : '◈ ЩИТ — ждёт окна'}
+      </span>
     </div>
   )
 }
@@ -388,8 +433,9 @@ function spawnBat(waveNum = 0, allowSpecial = false, goldenBoost = 0, cfg: GameC
     else if (r < 0.30 && waveNum >= 2) variant = 'armored'
   }
 
-  // Difficulty: base speed grows with wave (capped) × admin/difficulty multipliers
-  const diff = 1 + Math.min(waveNum, 12) * 0.05
+  // Difficulty: base speed растёт плавно и ДОЛЬШЕ (до ~30 волны), чтобы сложность
+  // шла через скорость/манёвр, а не количество. ×admin/difficulty.
+  const diff = 1 + Math.min(waveNum, 30) * 0.035
   const speedMul = (cfg.batSpeed || 1) * (diffMult || 1)
   let speed = (120 + Math.random() * 80) * diff * speedMul
   // нетопыри чуть крупнее (Яна) + админ-множитель размера
@@ -410,11 +456,33 @@ function spawnBat(waveNum = 0, allowSpecial = false, goldenBoost = 0, cfg: GameC
   return { id: nextId(), startX, startY, startVx, startVy, scale, variant, hp }
 }
 
+// Босс — крупный, медленный, влетает сверху по центру. HP = число попаданий по
+// уязвимости (щит блокирует). Мега-босс крупнее и толще.
+function spawnBoss(mega: boolean, cfg: GameConfig = DEFAULT_GAME_CONFIG): BatData {
+  const W = typeof window !== 'undefined' ? window.innerWidth  : 400
+  const speed = mega ? 70 : 90
+  const scale = (mega ? 3.4 : 2.5) * (cfg.batScale || 1)
+  const hp = mega ? Math.max(1, Math.round(cfg.bossMegaHp)) : Math.max(1, Math.round(cfg.bossHp))
+  const spread = (Math.random() - 0.5) * 0.4
+  return {
+    id: nextId(),
+    startX: W / 2 - 36, startY: -40,
+    startVx: Math.cos(Math.PI / 2 + spread) * speed,
+    startVy: Math.sin(Math.PI / 2 + spread) * speed,
+    scale, variant: 'boss', hp,
+  }
+}
+
 // ── Main controller ───────────────────────────────────────────────────────────
 export default function BatAnimation({ config = DEFAULT_GAME_CONFIG }: { config?: GameConfig } = {}) {
   const cfgRef = useRef<GameConfig>(config); cfgRef.current = config
   const difficultyRef = useRef<Difficulty>('normal')
   const firstKillRef = useRef(false)
+  // Босс: видимое состояние (HP-бар, фаза щита/уязвимости) + служебные рефы
+  const [boss, setBoss] = useState<{ hp: number; maxHp: number; mega: boolean; vulnerable: boolean } | null>(null)
+  const bossRef = useRef<{ id: number; mega: boolean } | null>(null)
+  const bossVulnRef = useRef(false)
+  const bossCycleRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const [gameState, setGameState]           = useState<GameState>('idle')
   const [bats, setBats]                     = useState<BatData[]>([])
   const [explosions, setExplosions]         = useState<ExplosionData[]>([])
@@ -456,13 +524,102 @@ export default function BatAnimation({ config = DEFAULT_GAME_CONFIG }: { config?
   splatsRef.current        = splats
   const pendingWaveRef     = useRef(0)
 
+  // ── Boss: цикл «щит ↔ уязвимость» ──
+  function stopBossCycle() {
+    if (bossCycleRef.current) { clearTimeout(bossCycleRef.current); bossCycleRef.current = null }
+  }
+  function startBossCycle(mega: boolean) {
+    stopBossCycle()
+    const cfg = cfgRef.current
+    const shieldMs = Math.max(400, cfg.bossShieldMs * (mega ? 0.8 : 1))
+    const vulnMs   = Math.max(400, cfg.bossVulnMs   * (mega ? 0.75 : 1))
+    const toVuln = () => {
+      bossVulnRef.current = true
+      setBoss(b => (b ? { ...b, vulnerable: true } : b))
+      bossCycleRef.current = setTimeout(toShield, vulnMs)
+    }
+    const toShield = () => {
+      bossVulnRef.current = false
+      setBoss(b => (b ? { ...b, vulnerable: false } : b))
+      bossCycleRef.current = setTimeout(toVuln, shieldMs)
+    }
+    toShield() // стартуем под щитом
+  }
+
+  // ── Game over (запись рекорда + сброс) — общий для свармов и боссов ──
+  function endGame() {
+    setGameState('game_over')
+    try {
+      const cur = scoreRef.current
+      const raw = parseInt(localStorage.getItem('threep-bat-hs') ?? '', 10)
+      const prev = Number.isFinite(raw) ? raw : 0
+      const best = Math.max(cur, prev)
+      if (best > prev) localStorage.setItem('threep-bat-hs', String(best))
+      setBestScore(best)
+    } catch { /* localStorage blocked */ }
+    if (scoreRef.current > 0) trackEvent('bat_score', { score: scoreRef.current })
+    goTimerRef.current = setTimeout(() => {
+      setSplats([]); setGameState('idle'); setScore(0); scoreRef.current = 0; setWaveNum(0)
+      setPowerups([]); setCrackedIds(new Set()); setComboDisplay(0); setActiveEffect(null)
+      setBonusWave(false); setBoss(null); bossRef.current = null; bossVulnRef.current = false
+      comboRef.current = 0; speedMultRef.current = 1; scoreMultRef.current = 1
+      firstKillRef.current = false; difficultyRef.current = 'normal'
+    }, 3000)
+  }
+
+  // ── Перейти к следующей волне через пылесос (после убийства всех/босса) ──
+  function advanceWave(n: number) {
+    const n2 = n + 1
+    pendingWaveRef.current = n2
+    setWaveNum(n2)
+    setRoombaDir(n2 % 2 === 0 ? 'right' : 'left')
+    setRoombaSplats([...splatsRef.current])
+    setRoombaSweeping(true)
+  }
+
   const spawnWaveRef = useRef<(n: number) => void>()
   spawnWaveRef.current = (n: number) => {
     currentWaveSizeRef.current = n
+
+    // ── BOSS WAVE (каждый 10-й; мега на 33/66/99) ──
+    if (isBossWave(n)) {
+      const mega = isMegaWave(n)
+      setBonusWave(false)
+      if (waveTimerRef.current) { clearTimeout(waveTimerRef.current); waveTimerRef.current = null }
+      spawnTimersRef.current.forEach(clearTimeout); spawnTimersRef.current = []
+      batPositions.current.clear(); batHpRef.current.clear()
+      const b = spawnBoss(mega, cfgRef.current)
+      batHpRef.current.set(b.id, b.hp)
+      bossRef.current = { id: b.id, mega }
+      bossVulnRef.current = false
+      setBoss({ hp: b.hp, maxHp: b.hp, mega, vulnerable: false })
+      setBats([b])
+      startBossCycle(mega)
+      // На убийство даётся МНОГО времени; мега — ещё больше. Не успел → game over.
+      const timeout = cfgRef.current.bossTimeoutMs * (mega ? 1.7 : 1)
+      waveTimerRef.current = setTimeout(() => {
+        stopBossCycle()
+        const pos = batPositions.current.get(b.id)
+        batPositions.current.clear(); batHpRef.current.clear()
+        setBats([]); setBoss(null); bossRef.current = null
+        if (pos) setExplosions(prev => [...prev, { id: nextId(), x: pos.x, y: pos.y }])
+        setScreenShake(true); setTimeout(() => setScreenShake(false), 420)
+        endGame()
+      }, timeout)
+      return
+    }
+
     // Every 5th wave is a frantic BONUS swarm: more bats, faster, more gold
     const isBonus = n >= 5 && n % 5 === 0
     setBonusWave(isBonus)
-    const count = isBonus ? Math.round(n * 1.6) + 2 : n
+    // Плавное усложнение: число нетопырей растёт МЕДЛЕННО и упирается в потолок
+    // (особенно на мобиле — иначе к 8-й волне весь экран в мышах). Дальше сложность
+    // идёт через скорость/манёвренность полёта (spawnBat diff + level-agility), а не количество.
+    const vw = typeof window !== 'undefined' ? window.innerWidth : 1024
+    const mobile = vw < 640
+    const cap = mobile ? 6 : 11
+    const base = Math.min(cap, Math.round(2 + Math.sqrt(n) * 1.3))
+    const count = isBonus ? Math.min(cap + (mobile ? 2 : 4), base + (mobile ? 2 : 3)) : base
     const allowSpecial = n >= 2
     const interval = isBonus ? 90 : 150
     const diffMult = DIFFICULTY[difficultyRef.current].speed
@@ -490,32 +647,10 @@ export default function BatAnimation({ config = DEFAULT_GAME_CONFIG }: { config?
       if (gameStateRef.current === 'lure') {
         setGameState('idle')
       } else if (isBonus) {
-        // Бонус-волна не наказывает: улетевшие нетопыри просто исчезают,
-        // очки не теряются — сразу запускаем пылесос и следующую волну.
-        const n2 = currentWaveSizeRef.current + 1
-        pendingWaveRef.current = n2
-        setWaveNum(n2)
-        setRoombaDir(n2 % 2 === 0 ? 'right' : 'left')
-        setRoombaSplats([...splatsRef.current])
-        setRoombaSweeping(true)
+        // Бонус-волна не наказывает: улетевшие нетопыри просто исчезают — дальше.
+        advanceWave(currentWaveSizeRef.current)
       } else {
-        setGameState('game_over')
-        try {
-          const cur = scoreRef.current
-          const raw = parseInt(localStorage.getItem('threep-bat-hs') ?? '', 10)
-          const prev = Number.isFinite(raw) ? raw : 0
-          const best = Math.max(cur, prev)        // never lower the record
-          if (best > prev) localStorage.setItem('threep-bat-hs', String(best))
-          setBestScore(best)
-        } catch { /* localStorage blocked */ }
-        if (scoreRef.current > 0) trackEvent('bat_score', { score: scoreRef.current })
-        goTimerRef.current = setTimeout(() => {
-          setSplats([]); setGameState('idle'); setScore(0); scoreRef.current = 0; setWaveNum(0)
-          setPowerups([]); setCrackedIds(new Set()); setComboDisplay(0); setActiveEffect(null)
-          setBonusWave(false)
-          comboRef.current = 0; speedMultRef.current = 1; scoreMultRef.current = 1
-          firstKillRef.current = false; difficultyRef.current = 'normal'
-        }, 3000)
+        endGame()
       }
     }, 4000)
   }
@@ -536,9 +671,11 @@ export default function BatAnimation({ config = DEFAULT_GAME_CONFIG }: { config?
       if (waveTimerRef.current) { clearTimeout(waveTimerRef.current); waveTimerRef.current = null }
       if (goTimerRef.current) { clearTimeout(goTimerRef.current); goTimerRef.current = null }
       if (comboTimerRef.current) { clearTimeout(comboTimerRef.current); comboTimerRef.current = null }
+      stopBossCycle()
       spawnTimersRef.current.forEach(clearTimeout); spawnTimersRef.current = []
       batPositions.current.clear(); batHpRef.current.clear()
-      setBats([]); setPowerups([]); setCrackedIds(new Set())
+      setBats([]); setPowerups([]); setCrackedIds(new Set()); setBoss(null)
+      bossRef.current = null; bossVulnRef.current = false
       setScore(0); scoreRef.current = 0; setWaveNum(0)
       setComboDisplay(0); comboRef.current = 0; setActiveEffect(null); setBonusWave(false)
       speedMultRef.current = 1; scoreMultRef.current = 1
@@ -554,6 +691,7 @@ export default function BatAnimation({ config = DEFAULT_GAME_CONFIG }: { config?
     if (goTimerRef.current)     clearTimeout(goTimerRef.current)
     if (comboTimerRef.current)  clearTimeout(comboTimerRef.current)
     if (effectTimerRef.current) clearTimeout(effectTimerRef.current)
+    if (bossCycleRef.current)   clearTimeout(bossCycleRef.current)
     spawnTimersRef.current.forEach(clearTimeout)
   }, [])
 
@@ -621,6 +759,41 @@ export default function BatAnimation({ config = DEFAULT_GAME_CONFIG }: { config?
     const pos = batPositions.current.get(clickedId) ?? {
       x: (typeof window !== 'undefined' ? window.innerWidth  : 400) / 2,
       y: (typeof window !== 'undefined' ? window.innerHeight : 800) / 2,
+    }
+
+    // ── BOSS: щит блокирует, бить можно только в окно уязвимости (третий глаз) ──
+    if (bat.variant === 'boss') {
+      if (!bossVulnRef.current) {
+        // под щитом — удар заблокирован
+        setHitMarkers(prev => [...prev, { id: nextId(), x: pos.x, y: pos.y, kind: 'clink' }])
+        return
+      }
+      const left = (batHpRef.current.get(clickedId) ?? bat.hp) - 1
+      batHpRef.current.set(clickedId, left)
+      setBoss(b => (b ? { ...b, hp: Math.max(0, left) } : b))
+      bumpCombo()
+      setHitMarkers(prev => [...prev, { id: nextId(), x: pos.x, y: pos.y, kind: 'kill' }])
+      setSplats(prev => [...prev, { id: nextId(), x: pos.x, y: pos.y, variant: Math.floor(Math.random() * 4), angle: Math.floor(Math.random() * 360) }])
+      setScore(n => { const next = n + scoreMultRef.current; scoreRef.current = next; return next })
+      setBestScore(b => Math.max(b, scoreRef.current))
+      if (left <= 0) {
+        // БОСС ПОВЕРЖЕН — крупная награда, взрыв, следующая волна
+        const mega = bossRef.current?.mega
+        stopBossCycle()
+        if (waveTimerRef.current) { clearTimeout(waveTimerRef.current); waveTimerRef.current = null }
+        batPositions.current.delete(clickedId); batHpRef.current.delete(clickedId)
+        const comboMult = Math.min(1 + Math.floor((comboRef.current - 1) / 3), 5)
+        const reward = VARIANT_BASE.boss * comboMult * scoreMultRef.current * (mega ? 3 : 1)
+        setScore(n => { const next = n + reward; scoreRef.current = next; return next })
+        setBestScore(b => Math.max(b, scoreRef.current))
+        setExplosions(prev => [...prev, { id: nextId(), x: pos.x, y: pos.y }])
+        setScreenShake(true); setTimeout(() => setScreenShake(false), 500)
+        setBoss(null); bossRef.current = null; bossVulnRef.current = false
+        nextWaveNRef.current = currentWaveSizeRef.current + 1
+        scheduleWaveRef.current = true
+        setBats([])
+      }
+      return
     }
 
     // Armored bat: first hit only cracks the shell (no kill / no score)
@@ -724,9 +897,12 @@ export default function BatAnimation({ config = DEFAULT_GAME_CONFIG }: { config?
       {splats.map(sp => <PixelSplat key={sp.id} data={sp} />)}
       {bats.map(bat => (
         <BatInstance key={bat.id} bat={bat} cracked={crackedIds.has(bat.id)} speedRef={speedMultRef}
+          vulnerable={bat.variant === 'boss' ? (boss?.vulnerable ?? false) : false}
+          level={waveNum}
           onClick={() => handleBatClick(bat.id)}
           onPositionUpdate={handlePositionUpdate} />
       ))}
+      {boss && gameState === 'playing' && <BossHud boss={boss} />}
       {powerups.map(pu => (
         <PowerUp key={pu.id} data={pu}
           onCollect={(k) => collectPowerUp(pu.id, k)}
@@ -762,7 +938,8 @@ export default function BatAnimation({ config = DEFAULT_GAME_CONFIG }: { config?
       )}
       {gameState === 'game_over' && <GameOverBanner />}
       {waveBanner && gameState === 'playing' && (
-        <WaveBanner waveNum={waveNum} bonus={waveNum >= 5 && waveNum % 5 === 0} />
+        <WaveBanner waveNum={waveNum} bonus={!isBossWave(waveNum) && waveNum >= 5 && waveNum % 5 === 0}
+          boss={isBossWave(waveNum)} mega={isMegaWave(waveNum)} />
       )}
       {showScore && (
         <ScoreCounter score={score} waveNum={waveNum} best={bestScore}
