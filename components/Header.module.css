@@ -1,13 +1,21 @@
-/* ── Header — МИНИМАЛЬНОЕ стекло (шаг 1: добиться, чтобы blur вообще появился) ──
-   Диагностика: минифицированное `blur(16px)saturate(1.4)` (без пробела) браузер
-   отвергал целиком → backdrop-filter не доходил до элемента. Сводим к голому
-   одиночному blur() — это то, что работало раньше («равномерное размытие»).
-   Сначала убеждаемся, что блюр виден; потом усложняем (вуаль/градиент/hide). */
+/* ── Header — стекло (РАБОЧЕЕ) ────────────────────────────────────────────────
+   ВАЖНО: backdrop-filter ДОЛЖЕН быть одиночным `blur()`. Многофункциональный
+   шорткат (`blur() saturate()`) минификатор склеивает в `blur()saturate()` без
+   пробела, и браузер отвергает ВСЁ свойство → блюр пропадает (баг 5 сессий).
+   Никаких mask/transform на хэдере или предках — тоже убивают backdrop-filter.
+
+   Поведение: в самом верху (не scrolled) фон/блюр СКРЫТЫ (header прозрачный,
+   виден чёткий hero); при скролле — плавно появляется стекло + вуаль (плотнее
+   вверху → 0 книзу, «iOS-ish»). */
 .headerBase {
   position: fixed;
-  background-color: color-mix(in srgb, var(--bg) 40%, transparent);
-  -webkit-backdrop-filter: blur(14px);
-  backdrop-filter: blur(14px);
+  background-color: transparent;
+  -webkit-backdrop-filter: blur(0px);
+  backdrop-filter: blur(0px);
+  transition: background 0.4s ease,
+              -webkit-backdrop-filter 0.4s ease,
+              backdrop-filter 0.4s ease,
+              opacity 0.4s ease;
 }
 
 .headerRow {
@@ -15,16 +23,22 @@
   z-index: 2;
 }
 
-/* Scrolled — чуть плотнее фон (отдельным свойством, blur не трогаем). */
+/* Scrolled — включаем стекло + градиент-вуаль (плотнее вверху). */
 .headerScrolled {
-  background-color: color-mix(in srgb, var(--bg) 60%, transparent);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+  background-image: linear-gradient(
+    to bottom,
+    color-mix(in srgb, var(--bg) 60%, transparent) 0%,
+    color-mix(in srgb, var(--bg) 28%, transparent) 55%,
+    transparent 100%
+  );
 }
 
 /* Hide-on-scroll: прозрачностью, без transform (transform убивает blur). */
 .headerHidden {
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.4s ease;
 }
 
 .navBtn {
