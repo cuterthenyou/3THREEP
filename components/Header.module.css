@@ -1,74 +1,63 @@
-/* ── Header bar — прогрессивное матовое стекло (gaussian gradient blur) ──
-   ВАЖНЫЙ УРОК (5 сессий бага): в Chromium backdrop-filter ПОЛНОСТЬЮ
-   игнорируется, если на ТОМ ЖЕ элементе стоит `mask`/`-webkit-mask` ИЛИ
-   `transform` (в т.ч. translateZ), ИЛИ если такое стоит на любом предке.
-   Поэтому НИКАКИХ масок и трансформов на блюр-слоях.
-   Градиент блюра делаем «лесенкой» по ВЫСОТЕ: несколько слоёв обычного
-   (немаскированного) backdrop-filter — нижний на всю высоту со слабым блюром,
-   верхние всё короче и сильнее. Сумма = МАКСИМАЛЬНЫЙ блюр у верхней кромки,
-   плавно слабее к низу. Нижней линии/границы/тени нет. */
+/* ── Header — стеклянная шапка с backdrop-filter (переписано с нуля) ──────────
+   КОРЕНЬ 5-сессионного бага: backdrop-filter не сэмплит фон, если сам элемент
+   ИЛИ ЛЮБОЙ ЕГО ПРЕДОК промотирован в композит-слой через `transform`
+   (или mask). Шапка ездит по `transform` (hide-on-scroll) → блюр на ней и на
+   её детях мёртв. Поэтому:
+   • .glass — отдельный слой со стеклом, НИКОГДА не трансформируется (гаснет
+     прозрачностью). Именно так работал старый `.glass`.
+   • Прячем по скроллу ТОЛЬКО контент (.headerRow), transform живёт на нём. */
 .headerBase {
   position: fixed;
-  transition: transform 0.42s cubic-bezier(0.22, 1, 0.36, 1);
+  /* клики проходят мимо — ловит только контент-ряд */
+  pointer-events: none;
 }
 
-/* Стек блюра + лёгкая вуаль (плотнее вверху → 0 книзу). Под контентом. */
-.blurStack {
+/* Стекло: чистый backdrop-filter без mask/transform + лёгкая вуаль (плотнее
+   вверху → 0 книзу) для глубины и читаемости. */
+.glass {
   position: absolute;
   inset: 0;
   z-index: 0;
   pointer-events: none;
+  backdrop-filter: blur(16px) saturate(1.4);
+  -webkit-backdrop-filter: blur(16px) saturate(1.4);
   background: linear-gradient(
     to bottom,
-    color-mix(in srgb, var(--bg) 28%, transparent) 0%,
-    color-mix(in srgb, var(--bg) 12%, transparent) 50%,
+    color-mix(in srgb, var(--bg) 34%, transparent) 0%,
+    color-mix(in srgb, var(--bg) 15%, transparent) 55%,
     transparent 100%
   );
-  transition: background 0.32s ease;
+  opacity: 1;
+  transition: opacity 0.36s ease, background 0.32s ease;
 }
 
-/* Базовый блюр-слой: только backdrop-filter, БЕЗ mask и БЕЗ transform.
-   Это именно тот «отдельный слой без маски», что работал раньше. */
-.blurLayer {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  /* высоту задаёт каждый слой отдельно (лесенка) */
-}
-
-/* Лесенка: чем сильнее блюр — тем короче слой (прижат к верхней кромке).
-   Стекаются обычные backdrop-filter (без масок) → суммарный блюр плавно
-   нарастает к верху. */
-.blurLayer1 { bottom: 0;        backdrop-filter: blur(4px)  saturate(1.2); -webkit-backdrop-filter: blur(4px)  saturate(1.2); }
-.blurLayer2 { height: 78%;      backdrop-filter: blur(7px)  saturate(1.2); -webkit-backdrop-filter: blur(7px)  saturate(1.2); }
-.blurLayer3 { height: 56%;      backdrop-filter: blur(11px) saturate(1.25); -webkit-backdrop-filter: blur(11px) saturate(1.25); }
-.blurLayer4 { height: 34%;      backdrop-filter: blur(18px) saturate(1.3); -webkit-backdrop-filter: blur(18px) saturate(1.3); }
-
-/* Контент хэдера — поверх стека блюра */
+/* Контент шапки — поверх стекла; именно он ездит при hide-on-scroll. */
 .headerRow {
   position: relative;
   z-index: 2;
+  pointer-events: auto;
+  transition: transform 0.42s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-/* Scrolled — чуть плотнее вуаль для читаемости (без тени и линии снизу) */
-.headerScrolled .blurStack {
+/* Scrolled — чуть плотнее вуаль (без линии/границы/тени снизу). */
+.headerScrolled .glass {
   background: linear-gradient(
     to bottom,
-    color-mix(in srgb, var(--bg) 52%, transparent) 0%,
-    color-mix(in srgb, var(--bg) 26%, transparent) 55%,
+    color-mix(in srgb, var(--bg) 56%, transparent) 0%,
+    color-mix(in srgb, var(--bg) 30%, transparent) 55%,
     transparent 100%
   );
 }
 
-/* Hidden on scroll-down, slides back in on scroll-up */
-.headerHidden {
-  transform: translateY(-105%);
-}
+/* Hide-on-scroll: уводим контент вверх, стекло гасим прозрачностью —
+   transform НЕ касается .glass, поэтому backdrop-filter остаётся живым. */
+.headerHidden .headerRow { transform: translateY(-130%); }
+.headerHidden .glass { opacity: 0; }
 
 @media (prefers-reduced-motion: reduce) {
-  .headerBase { transition: none; }
-  .headerHidden { transform: none; }
+  .headerRow { transition: none; }
+  .headerHidden .headerRow { transform: none; }
+  .headerHidden .glass { opacity: 1; }
 }
 
 .navBtn {

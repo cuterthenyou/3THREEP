@@ -5,7 +5,7 @@ import sharp from 'sharp'
 const IMAGE_MIME_TYPES = new Set(['image/jpeg', 'image/jpg', 'image/png', 'image/webp'])
 
 const FOLDER_MAX_WIDTHS: Record<string, number> = {
-  avatars: 256,
+  avatars: 400,
   assets: 1920,
   products: 1920,
 }
@@ -21,6 +21,14 @@ async function optimizeBuffer(buf: Buffer, mimeType: string, folder: string): Pr
   if (!IMAGE_MIME_TYPES.has(mimeType)) return buf;
   const width = FOLDER_MAX_WIDTHS[folder] ?? 1920;
   const quality = FOLDER_QUALITY[folder] ?? 82;
+  // Аватары всегда приводим к квадрату (cover, центр) — иначе прямоугольное
+  // фото растягивает/искажает круглый аватар в ЛК. Остальное — по ширине.
+  if (folder === 'avatars') {
+    return sharp(buf)
+      .resize(width, width, { fit: 'cover', position: 'centre' })
+      .webp({ quality })
+      .toBuffer();
+  }
   return sharp(buf)
     .resize({ width, withoutEnlargement: true })
     .webp({ quality })

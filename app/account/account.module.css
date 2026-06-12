@@ -334,17 +334,16 @@
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
-  width: 9rem;
-  align-self: stretch;
+  width: 11.5rem;
+  align-self: flex-start;
 }
 
 
 .avatarBtn {
   position: relative;
   width: 100%;
-  height: 100%;
-  min-height: 8rem;
-  flex: 1;
+  /* Жёсткий КВАДРАТ — больше не растягивается в прямоугольник по высоте карточки */
+  aspect-ratio: 1 / 1;
   border-radius: 2px;
   overflow: hidden;
   display: flex;
@@ -353,7 +352,7 @@
   border: 2px solid var(--accent);
   background: var(--bg-subtle);
   cursor: pointer;
-  box-shadow: 4px 4px 0 var(--accent), -1px -1px 0 var(--shadow-on-card-sm);
+  box-shadow: 5px 5px 0 var(--accent), -1px -1px 0 var(--shadow-on-card-sm);
   outline: 1px solid var(--border);
   outline-offset: 3px;
   transition: box-shadow 0.2s, transform 0.15s;
@@ -637,13 +636,15 @@
 
 .invItemLocked {
   border: 2px solid var(--border-soft);
-  filter: grayscale(1) brightness(0.62);
-  opacity: 0.85;
+  /* Не куплено = призрачное: сильнее гасим прозрачностью, чтобы owned/not-owned
+     читалось мгновенно. */
+  filter: grayscale(1) brightness(0.6);
+  opacity: 0.4;
 }
 
 @media (hover: hover) and (pointer: fine) {
   .invItemOwned:hover { transform: scale(1.05); }
-  .invItemLocked:hover { filter: grayscale(0.4) brightness(0.85); opacity: 1; }
+  .invItemLocked:hover { filter: grayscale(0.3) brightness(0.9); opacity: 0.92; }
 }
 
 .invItemName {
@@ -1104,16 +1105,16 @@
   .avatarCol {
     align-self: center;
     width: auto;
-    height: 8rem;
+    height: 9.5rem;
     flex-direction: row;
     align-items: stretch;       /* рамки тянутся на всю высоту аватарки */
     gap: 0.5rem;
   }
 
   .avatarBtn {
-    min-height: unset;
-    width: 8rem;
-    height: 8rem;
+    width: 9.5rem;
+    height: 9.5rem;
+    aspect-ratio: auto;         /* на мобиле размер задаём явно */
   }
 
   .gothicFrame {
