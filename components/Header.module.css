@@ -1,24 +1,12 @@
-/* ── Header — стеклянная шапка с backdrop-filter (переписано с нуля) ──────────
-   КОРЕНЬ 5-сессионного бага: backdrop-filter не сэмплит фон, если сам элемент
-   ИЛИ ЛЮБОЙ ЕГО ПРЕДОК промотирован в композит-слой через `transform`
-   (или mask). Шапка ездит по `transform` (hide-on-scroll) → блюр на ней и на
-   её детях мёртв. Поэтому:
-   • .glass — отдельный слой со стеклом, НИКОГДА не трансформируется (гаснет
-     прозрачностью). Именно так работал старый `.glass`.
-   • Прячем по скроллу ТОЛЬКО контент (.headerRow), transform живёт на нём. */
+/* ── Header — стеклянная шапка (КАНОНИЧЕСКИЙ паттерн) ─────────────────────────
+   backdrop-filter СТОИТ ПРЯМО НА <header>. Урок 5 сессий: blur умирает, если на
+   самом элементе ИЛИ на предке есть transform/mask, ЛИБО если blur висит на
+   ДОЧЕРНЕМ элементе хэдера (хэдер z-index:50 = stacking context, который режет
+   backdrop ребёнка). Поэтому:
+   • blur на самом <header>, без transform/mask;
+   • hide-on-scroll через OPACITY (не transform!) — transform убил бы blur. */
 .headerBase {
   position: fixed;
-  /* клики проходят мимо — ловит только контент-ряд */
-  pointer-events: none;
-}
-
-/* Стекло: чистый backdrop-filter без mask/transform + лёгкая вуаль (плотнее
-   вверху → 0 книзу) для глубины и читаемости. */
-.glass {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
   backdrop-filter: blur(16px) saturate(1.4);
   -webkit-backdrop-filter: blur(16px) saturate(1.4);
   background: linear-gradient(
@@ -27,20 +15,16 @@
     color-mix(in srgb, var(--bg) 15%, transparent) 55%,
     transparent 100%
   );
-  opacity: 1;
-  transition: opacity 0.36s ease, background 0.32s ease;
+  transition: opacity 0.4s ease, background 0.32s ease;
 }
 
-/* Контент шапки — поверх стекла; именно он ездит при hide-on-scroll. */
 .headerRow {
   position: relative;
   z-index: 2;
-  pointer-events: auto;
-  transition: transform 0.42s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 /* Scrolled — чуть плотнее вуаль (без линии/границы/тени снизу). */
-.headerScrolled .glass {
+.headerScrolled {
   background: linear-gradient(
     to bottom,
     color-mix(in srgb, var(--bg) 56%, transparent) 0%,
@@ -49,15 +33,16 @@
   );
 }
 
-/* Hide-on-scroll: уводим контент вверх, стекло гасим прозрачностью —
-   transform НЕ касается .glass, поэтому backdrop-filter остаётся живым. */
-.headerHidden .headerRow { transform: translateY(-130%); }
-.headerHidden .glass { opacity: 0; }
+/* Hide-on-scroll: гасим прозрачностью (opacity 0), а НЕ transform — иначе blur
+   обнуляется. opacity:1 в покое backdrop-filter не ломает. */
+.headerHidden {
+  opacity: 0;
+  pointer-events: none;
+}
 
 @media (prefers-reduced-motion: reduce) {
-  .headerRow { transition: none; }
-  .headerHidden .headerRow { transform: none; }
-  .headerHidden .glass { opacity: 1; }
+  .headerBase { transition: background 0.32s ease; }
+  .headerHidden { opacity: 1; pointer-events: auto; }
 }
 
 .navBtn {

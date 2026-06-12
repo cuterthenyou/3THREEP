@@ -334,16 +334,19 @@
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
-  width: 11.5rem;
-  align-self: flex-start;
+  /* тянемся на всю высоту карточки; ширину задаёт квадратный аватар */
+  align-self: stretch;
 }
 
 
 .avatarBtn {
   position: relative;
-  width: 100%;
-  /* Жёсткий КВАДРАТ — больше не растягивается в прямоугольник по высоте карточки */
+  /* Равносторонний квадрат ВО ВСЮ ВЫСОТУ блока: высота = высоте карточки,
+     ширина выводится из aspect-ratio → идеальный квадрат, без пустоты снизу. */
+  flex: 1;
+  height: 100%;
   aspect-ratio: 1 / 1;
+  width: auto;
   border-radius: 2px;
   overflow: hidden;
   display: flex;
