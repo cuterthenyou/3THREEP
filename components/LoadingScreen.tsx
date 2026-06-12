@@ -103,7 +103,9 @@ export default function LoadingScreen() {
       minPassed = true
       if (pageDone) dismiss()
     }, 1200)
-    const maxTimer = setTimeout(dismiss, 4000)
+    // Потолок повыше: на медленном соединении карточкам каталога (priority-
+    // изображения первого ряда) нужно успеть догрузиться до window.load.
+    const maxTimer = setTimeout(dismiss, 6500)
 
     if (document.readyState === 'complete') {
       onPageReady()

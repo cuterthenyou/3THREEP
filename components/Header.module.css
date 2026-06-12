@@ -9,7 +9,9 @@
   transition: transform 0.42s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-/* Стек блюра + полупрозрачная вуаль (плотная вверху → 0 книзу). Под контентом. */
+/* Стек блюра + лёгкая вуаль (плотнее вверху → 0 книзу). Под контентом.
+   Вуаль НАМЕРЕННО лёгкая — иначе она перекрывает блюр и выглядит как «просто
+   градиент цвета». Читаемость иконок держим самим блюром + кнопками. */
 .blurStack {
   position: absolute;
   inset: 0;
@@ -17,18 +19,19 @@
   pointer-events: none;
   background: linear-gradient(
     to bottom,
-    color-mix(in srgb, var(--bg) 50%, transparent) 0%,
-    color-mix(in srgb, var(--bg) 28%, transparent) 50%,
+    color-mix(in srgb, var(--bg) 30%, transparent) 0%,
+    color-mix(in srgb, var(--bg) 12%, transparent) 50%,
     transparent 100%
   );
   transition: background 0.32s ease;
 }
 
+/* ВАЖНО: на слое с backdrop-filter НЕЛЬЗЯ ставить transform/translateZ —
+   в Chromium это обнуляет backdrop (блюр исчезает, остаётся только вуаль).
+   Это и был баг последних сессий. */
 .blurLayer {
   position: absolute;
   inset: 0;
-  /* собственный слой композитинга — стабилизирует backdrop-filter */
-  transform: translateZ(0);
 }
 
 /* Радиус растёт, маска прижимается к верху → градиентное затухание блюра */
@@ -63,12 +66,12 @@
   z-index: 2;
 }
 
-/* Scrolled — плотнее вуаль (без тени и линии снизу) */
+/* Scrolled — чуть плотнее вуаль для читаемости (без тени и линии снизу) */
 .headerScrolled .blurStack {
   background: linear-gradient(
     to bottom,
-    color-mix(in srgb, var(--bg) 76%, transparent) 0%,
-    color-mix(in srgb, var(--bg) 46%, transparent) 55%,
+    color-mix(in srgb, var(--bg) 52%, transparent) 0%,
+    color-mix(in srgb, var(--bg) 26%, transparent) 55%,
     transparent 100%
   );
 }

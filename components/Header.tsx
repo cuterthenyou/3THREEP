@@ -383,9 +383,9 @@ export default function Header({ isAdminUser = false, initialCollections, custom
 
                   {/* Чувствительность прицела (для игры) */}
                   <div className={s.settingsRow}>
-                    <span className={s.settingsLabel}>Чувствительность прицела · {aimSens.toFixed(1)}×</span>
+                    <span className={s.settingsLabel}>Чувствительность прицела · {aimSens.toFixed(2)}×</span>
                     <input
-                      type="range" min={0.3} max={3} step={0.1} value={aimSens}
+                      type="range" min={0.05} max={10} step={0.05} value={aimSens}
                       onChange={e => setAim(parseFloat(e.target.value))}
                       className={s.settingsRange}
                       aria-label="Чувствительность прицела для игры"

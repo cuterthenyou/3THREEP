@@ -14,17 +14,21 @@ interface NavConfig {
 interface Props {
   allCollections: { slug: string; name: string }[]
   initialConfig: NavConfig
+  initialFooterText?: string
 }
+
+const DEFAULT_MENU_FOOTER = '333 · РУССКО-НАРОДНЫЙ · СДЕЛАНО ХЛОРКОЙ'
 
 const INPUT_STYLE = { background: 'var(--bg-2)', border: '1px solid var(--border)', color: 'var(--accent)', fontFamily: 'var(--font-involve)', fontSize: '0.85rem' }
 const CARD_STYLE = { background: 'var(--bg-subtle)', border: '1px solid var(--border-soft)', borderRadius: '3px', padding: '1.25rem', display: 'flex', flexDirection: 'column' as const, gap: '1rem' }
 
-export default function MenuClient({ allCollections, initialConfig }: Props) {
+export default function MenuClient({ allCollections, initialConfig, initialFooterText = '' }: Props) {
   const [config, setConfig] = useState<NavConfig>(initialConfig)
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
   const [newLabel, setNewLabel] = useState('')
   const [newHref, setNewHref] = useState('')
+  const [footerText, setFooterText] = useState(initialFooterText)
 
   const orderedCollections = (() => {
     const ordered = config.collectionsOrder
@@ -82,11 +86,18 @@ export default function MenuClient({ allCollections, initialConfig }: Props) {
   async function save() {
     setSaving(true)
     try {
-      await fetch('/api/admin/nav-config', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(config),
-      })
+      await Promise.all([
+        fetch('/api/admin/nav-config', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(config),
+        }),
+        fetch('/api/admin/site-settings', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ key: 'menu_footer_text', value: footerText.trim() || DEFAULT_MENU_FOOTER }),
+        }),
+      ])
       setSaved(true)
     } finally {
       setSaving(false)
@@ -156,6 +167,20 @@ export default function MenuClient({ allCollections, initialConfig }: Props) {
           />
           <button onClick={addCustomItem} className={a.btn}>Добавить</button>
         </div>
+      </div>
+
+      {/* Подпись внизу меню (easter-egg бренда) */}
+      <div style={CARD_STYLE}>
+        <p style={{ ...LABEL_STYLE_MUTED, fontSize: '0.65rem' }}>Подпись внизу меню</p>
+        <p style={{ color: 'var(--text-muted)', fontFamily: 'var(--font-involve)', fontSize: '0.75rem', opacity: 0.6 }}>
+          Мелкий текст в самом низу бургер-меню (под пунктами). Пусто — вернётся дефолт.
+        </p>
+        <input
+          value={footerText}
+          onChange={e => { setFooterText(e.target.value); setSaved(false) }}
+          placeholder={DEFAULT_MENU_FOOTER}
+          style={{ ...INPUT_STYLE, borderRadius: '2px', padding: '0.4rem 0.75rem', outline: 'none' }}
+        />
       </div>
 
       {/* Preview */}

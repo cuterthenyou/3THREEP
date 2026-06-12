@@ -94,9 +94,13 @@
 
 .panelTitle {
   font-family: var(--font-heading);
-  font-size: 0.95rem;
-  letter-spacing: 0.1em;
+  /* ONDER — широкая дисплейная гарнитура: на узкой панели «УВЕДОМЛЕНИЯ»
+     вылезала за край (panel overflow:hidden её срезал). Уменьшаем кегль и
+     letter-spacing + nowrap, чтобы заголовок гарантированно влезал. */
+  font-size: clamp(0.7rem, 3.4vw, 0.82rem);
+  letter-spacing: 0.04em;
   text-transform: uppercase;
+  white-space: nowrap;
   color: var(--accent);
 }
 

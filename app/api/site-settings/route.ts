@@ -24,6 +24,10 @@ const PUBLIC_KEYS = new Set([
   'grain_opacity_dark',
   'glitter_enabled',
   'glitter_intensity',
+  // Переход между страницами (RouteTransition читает их через этот API) —
+  // без них тумблер «выкл» в админке игнорировался: ключ не доходил до клиента.
+  'page_transition_enabled',
+  'page_transition_intensity',
 ])
 
 export async function GET() {

@@ -155,8 +155,8 @@ const ProductCard = React.memo(function ProductCard({
             className="object-cover select-none"
             draggable={false}
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-            priority={index < 2 && i === 0}
-            loading={index < 2 && i === 0 ? undefined : 'lazy'}
+            priority={index < 4 && i === 0}
+            loading={index < 4 && i === 0 ? undefined : 'lazy'}
             quality={70}
             decoding="async"
             style={{ opacity: i === currentImg ? 1 : 0, transition: isManualRef.current ? 'none' : 'opacity 0.6s cubic-bezier(0.4,0,0.2,1)', position: 'absolute', top: 0, left: 0 }}
