@@ -4,6 +4,7 @@
   align-items: center;
 }
 
+/* Нео-брутальная иконка — как у остальных кнопок шапки (navBtn) */
 .bellBtn {
   position: relative;
   display: flex;
@@ -11,17 +12,29 @@
   justify-content: center;
   width: 2.25rem;
   height: 2.25rem;
-  border-radius: 0.5rem;
-  background: transparent;
-  border: none;
+  border-radius: var(--radius-btn, 0.5rem);
+  background: var(--bg-subtle);
+  border: 1px solid var(--accent);
+  box-shadow: 2px 2px 0 var(--accent);
   color: var(--accent);
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
-  transition: opacity 0.15s;
-  opacity: 0.85;
+  transition: box-shadow 0.12s, transform 0.1s, background 0.15s;
 }
 
-.bellBtn:hover { opacity: 1; }
+@media (hover: hover) and (pointer: fine) {
+  .bellBtn:hover {
+    background: var(--accent-2);
+    box-shadow: 3px 3px 0 var(--accent);
+    transform: translate(-1px, -1px);
+  }
+}
+
+.bellBtn:active {
+  box-shadow: 1px 1px 0 var(--accent);
+  transform: translate(1px, 1px);
+  transition-duration: 0.06s;
+}
 
 .badge {
   position: absolute;

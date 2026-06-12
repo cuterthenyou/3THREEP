@@ -1066,7 +1066,7 @@ export default function SiteClient({ initialSettings, initialCustomFonts = [] }:
       <AdminSection title="Trip-тема — эффекты" tab="effects">
         <p className="text-xs" style={{ color: 'var(--accent)', opacity: 0.5, fontFamily: 'var(--font-involve)' }}>
           Скрытая психоделическая тема (3 быстрых нажатия на смену темы). Цвета — в блоке «Цвета» выше (колонка ✦ Trip).
-          Здесь — анимация: дыхание цвета, скорость дрейфа пятен, интенсивность плавающих кругов.
+          «BAD THREEP»: глитч-слой (сканлайны + срезы сигнала), скорость дрейфа фоновых пятен, их интенсивность. Заголовки в trip получают хром-аберрацию автоматически.
         </p>
 
         {/* Breathe toggle */}
@@ -1083,7 +1083,7 @@ export default function SiteClient({ initialSettings, initialCustomFonts = [] }:
           >
             <span style={{ width: 8, height: 8, borderRadius: '50%', background: tripBreathe ? 'var(--accent)' : 'var(--text-muted)', display: 'inline-block' }} />
             <span style={{ fontFamily: 'var(--font-involve)', fontSize: '0.72rem', color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
-              Дыхание цвета: {tripBreathe ? 'вкл' : 'выкл'}
+              Глитч-слой: {tripBreathe ? 'вкл' : 'выкл'}
             </span>
           </button>
         </div>

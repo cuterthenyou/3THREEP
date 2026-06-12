@@ -51,8 +51,8 @@ export default function Hero({ videoUrl, mp4Url, posterUrl }: HeroProps) {
     };
   }, []);
 
-  // Desktop only: pause on press-hold. Touch devices just watch the loop
-  // (touch-to-pause fights iOS autoplay and can leave the video stopped).
+  // Pause on press-hold — мышью (десктоп) И пальцем (мобила). Возобновление по
+  // отпусканию идёт из пользовательского жеста, поэтому iOS снова даёт play().
   const handlePause = useCallback(() => videoRef.current?.pause(), []);
   const handleResume = useCallback(() => videoRef.current?.play().catch(() => {}), []);
 
@@ -77,6 +77,9 @@ export default function Hero({ videoUrl, mp4Url, posterUrl }: HeroProps) {
         onMouseDown={handlePause}
         onMouseUp={handleResume}
         onMouseLeave={handleResume}
+        onTouchStart={handlePause}
+        onTouchEnd={handleResume}
+        onTouchCancel={handleResume}
         style={{ cursor: 'pointer', userSelect: 'none' }}
       >
         {/* MP4 first so iOS Safari (no WebM support) picks it up */}

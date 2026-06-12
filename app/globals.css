@@ -180,63 +180,37 @@
    кадр (лаги) и делает body containing-block для position:fixed (модалка
    уезжает, .trip-fx вылезает за футер). Всё движение — на отдельных fixed-слоях. */
 
-/* Плывущие цветовые пятна — видны только в trip */
+/* Амбиент-пятна — ЗА контентом (z-index -1), чтобы НЕ «мазать» поверх (это
+   и читалось как «покраска сверху») и не ломать стык TornEdge. Контент остаётся
+   в настоящих trip-цветах (перекрас через палитру). Дёшево: 2 пятна, blur 40px. */
 .trip-fx {
   position: fixed;
-  inset: -20%;
-  z-index: 3;
+  inset: -15%;
+  z-index: -1;
   pointer-events: none;
   opacity: 0;
-  transition: opacity 0.7s ease;
+  transition: opacity 0.6s ease;
   mix-blend-mode: screen;
-  filter: blur(60px);
+  filter: blur(42px);
   will-change: transform;
   background:
-    radial-gradient(38% 38% at 28% 30%, color-mix(in srgb, var(--accent) 55%, transparent), transparent 70%),
-    radial-gradient(42% 42% at 72% 58%, rgba(70, 220, 255, 0.42), transparent 70%),
-    radial-gradient(46% 46% at 50% 82%, rgba(170, 80, 255, 0.45), transparent 70%);
+    radial-gradient(40% 40% at 26% 28%, color-mix(in srgb, var(--accent) 60%, transparent), transparent 70%),
+    radial-gradient(44% 44% at 74% 64%, color-mix(in srgb, var(--accent) 32%, transparent), transparent 70%);
 }
 html[data-theme="trip"] .trip-fx { opacity: var(--trip-blob-opacity, 1); }
 @media (prefers-reduced-motion: no-preference) {
-  html[data-theme="trip"] .trip-fx {
-    animation: tripDrift var(--trip-drift-dur, 16s) ease-in-out infinite alternate;
-  }
+  html[data-theme="trip"] .trip-fx { animation: tripDrift var(--trip-drift-dur, 16s) ease-in-out infinite alternate; }
 }
 @keyframes tripDrift {
-  0%   { transform: translate3d(-4%, -3%, 0) scale(1.05) rotate(-3deg); }
-  50%  { transform: translate3d(3%, 2%, 0)  scale(1.15) rotate(2deg); }
-  100% { transform: translate3d(4%, 4%, 0)  scale(1.08) rotate(4deg); }
+  0%   { transform: translate3d(-3%, -2%, 0) scale(1.05); }
+  100% { transform: translate3d(3%, 3%, 0)  scale(1.12); }
 }
 
-/* «Дыхание» цвета — дешёвый fixed-слой поверх (opacity-пульс вместо filter на body).
-   Рендерится всегда; виден только в trip. Скрывается через ThemeStyles если выключен. */
-.trip-breathe {
-  position: fixed;
-  inset: 0;
-  z-index: 3;
-  pointer-events: none;
-  opacity: 0;
-  mix-blend-mode: screen;
-  background:
-    radial-gradient(60% 50% at 50% 0%, color-mix(in srgb, var(--accent) 30%, transparent), transparent 70%),
-    radial-gradient(70% 60% at 50% 100%, rgba(120, 90, 255, 0.28), transparent 70%);
-}
-html[data-theme="trip"] .trip-breathe { opacity: 0.5; }
-@media (prefers-reduced-motion: no-preference) {
-  html[data-theme="trip"] .trip-breathe {
-    animation: tripBreathe calc(var(--trip-drift-dur, 16s) * 1.15) ease-in-out infinite;
-  }
-}
-@keyframes tripBreathe {
-  0%, 100% { opacity: 0.25; transform: scale(1); }
-  50%       { opacity: 0.6;  transform: scale(1.08); }
-}
-
-/* Floating blobs — крупные мягкие круги, плавают только в trip */
+/* Floating blobs — тоже за контентом, 2 шт (третий убран ради перфа) */
 .trip-blobs {
   position: fixed;
   inset: 0;
-  z-index: 3;
+  z-index: -1;
   pointer-events: none;
   opacity: 0;
   overflow: hidden;
@@ -245,30 +219,66 @@ html[data-theme="trip"] .trip-blobs { opacity: var(--trip-blob-opacity, 1); }
 .trip-blobs span {
   position: absolute;
   border-radius: 50%;
-  filter: blur(48px);
+  filter: blur(40px);
   mix-blend-mode: screen;
   will-change: transform;
 }
 .trip-blobs span:nth-child(1) {
-  width: 42vmax; height: 42vmax; left: -8vmax; top: -6vmax;
-  background: radial-gradient(circle, color-mix(in srgb, var(--accent) 65%, transparent), transparent 70%);
+  width: 40vmax; height: 40vmax; left: -8vmax; top: -6vmax;
+  background: radial-gradient(circle, color-mix(in srgb, var(--accent) 60%, transparent), transparent 70%);
 }
 .trip-blobs span:nth-child(2) {
-  width: 34vmax; height: 34vmax; right: -6vmax; top: 18vmax;
-  background: radial-gradient(circle, rgba(70, 220, 255, 0.5), transparent 70%);
+  width: 34vmax; height: 34vmax; right: -6vmax; bottom: -8vmax;
+  background: radial-gradient(circle, rgba(120, 90, 255, 0.45), transparent 70%);
 }
-.trip-blobs span:nth-child(3) {
-  width: 38vmax; height: 38vmax; left: 28vmax; bottom: -10vmax;
-  background: radial-gradient(circle, rgba(170, 80, 255, 0.5), transparent 70%);
-}
+.trip-blobs span:nth-child(3) { display: none; }
 @media (prefers-reduced-motion: no-preference) {
   html[data-theme="trip"] .trip-blobs span:nth-child(1) { animation: tripBlob1 calc(var(--trip-drift-dur, 16s) * 1.6) ease-in-out infinite alternate; }
   html[data-theme="trip"] .trip-blobs span:nth-child(2) { animation: tripBlob2 calc(var(--trip-drift-dur, 16s) * 2.0) ease-in-out infinite alternate; }
-  html[data-theme="trip"] .trip-blobs span:nth-child(3) { animation: tripBlob3 calc(var(--trip-drift-dur, 16s) * 1.3) ease-in-out infinite alternate; }
 }
-@keyframes tripBlob1 { from { transform: translate3d(0,0,0) scale(1); } to { transform: translate3d(8vmax, 6vmax, 0) scale(1.18); } }
-@keyframes tripBlob2 { from { transform: translate3d(0,0,0) scale(1.1); } to { transform: translate3d(-7vmax, 4vmax, 0) scale(0.92); } }
-@keyframes tripBlob3 { from { transform: translate3d(0,0,0) scale(0.95); } to { transform: translate3d(-5vmax, -8vmax, 0) scale(1.2); } }
+@keyframes tripBlob1 { from { transform: translate3d(0,0,0) scale(1); } to { transform: translate3d(7vmax, 5vmax, 0) scale(1.15); } }
+@keyframes tripBlob2 { from { transform: translate3d(0,0,0) scale(1.1); } to { transform: translate3d(-6vmax, -4vmax, 0) scale(0.95); } }
+
+/* ── ЖЁСТКИЙ ГЛИТЧ-СЛОЙ (элемент .trip-breathe; админ-тумблер trip_breathe) ──
+   Сканлайны + редкие резкие «срезы сигнала». Поверх контента, но дёшево:
+   без blur/mix-blend, анимируется только clip-path/transform/opacity (steps). */
+.trip-breathe {
+  position: fixed;
+  inset: 0;
+  z-index: 4;
+  pointer-events: none;
+  opacity: 0;
+  background: repeating-linear-gradient(0deg, transparent 0 2px, rgba(0, 0, 0, 0.18) 2px 3px);
+}
+html[data-theme="trip"] .trip-breathe { opacity: 0.4; }
+@media (prefers-reduced-motion: no-preference) {
+  html[data-theme="trip"] .trip-breathe { animation: tripScan 7s steps(1) infinite; }
+}
+@keyframes tripScan {
+  0%, 90%, 100% { clip-path: inset(0 0 0 0); transform: translateX(0); opacity: 0.4; }
+  91% { clip-path: inset(36% 0 52% 0); transform: translateX(-7px); opacity: 0.85; }
+  93% { clip-path: inset(8% 0 82% 0);  transform: translateX(8px);  opacity: 0.7; }
+  95% { clip-path: inset(68% 0 14% 0); transform: translateX(-5px); opacity: 0.8; }
+  97% { clip-path: inset(0 0 0 0);     transform: translateX(2px);  opacity: 0.5; }
+}
+
+/* Хроматическая аберрация + дрожь заголовков — «битый» THREEP (дёшево) */
+html[data-theme="trip"] h1,
+html[data-theme="trip"] h2,
+html[data-theme="trip"] h3 {
+  text-shadow: 1.5px 0 rgba(255, 0, 90, 0.5), -1.5px 0 rgba(0, 220, 255, 0.5);
+}
+@media (prefers-reduced-motion: no-preference) {
+  html[data-theme="trip"] h1,
+  html[data-theme="trip"] h2,
+  html[data-theme="trip"] h3 { animation: tripAberration 4s steps(1) infinite; }
+}
+@keyframes tripAberration {
+  0%, 86%, 100% { text-shadow: 1.5px 0 rgba(255, 0, 90, 0.5), -1.5px 0 rgba(0, 220, 255, 0.5); transform: translateX(0) skewX(0); }
+  88% { text-shadow: 4px 0 rgba(255, 0, 90, 0.75), -4px 0 rgba(0, 220, 255, 0.75); transform: translateX(2px) skewX(-3deg); }
+  91% { text-shadow: -3px 0 rgba(255, 0, 90, 0.75), 3px 0 rgba(0, 220, 255, 0.75); transform: translateX(-2px) skewX(2deg); }
+  94% { transform: translateX(1px) skewX(0); }
+}
 
 /* Grain/shagreen overlay utility */
 .grain-overlay {

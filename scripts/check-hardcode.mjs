@@ -22,7 +22,6 @@ const ALLOW = [
   'components/BatAnimation.tsx',
   'components/BatAnimation.module.css',
   'components/GlitterCanvas.tsx',   // canvas-арт (динамические rgb)
-  'components/HeroTransition.tsx',  // фолбэк-чтение токена при переходе
   'app/admin/',          // админка — внутренний инструмент, не бренд-витрина
   'scripts/',
   'node_modules/',

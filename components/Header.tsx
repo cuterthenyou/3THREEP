@@ -25,6 +25,15 @@ function BrutalMoon() {
   )
 }
 
+function IconGear() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" aria-hidden="true">
+      <circle cx="8" cy="8" r="2.3" />
+      <path d="M8 1.2v1.8M8 13v1.8M1.2 8h1.8M13 8h1.8M3.2 3.2l1.3 1.3M11.5 11.5l1.3 1.3M12.8 3.2l-1.3 1.3M4.5 11.5l-1.3 1.3" strokeLinecap="round" />
+    </svg>
+  )
+}
+
 function IconGrid() {
   return (
     <svg width="1em" height="1em" viewBox="0 0 14 14" fill="currentColor" style={{ opacity: 0.55, flexShrink: 0 }}>
@@ -97,10 +106,11 @@ export default function Header({ isAdminUser = false, initialCollections, custom
   const [customItems, setCustomItems] = useState<CustomItem[]>(initialCustomItems ?? []);
   const [collectionsLoading, setCollectionsLoading] = useState(!initialCollections);
   const [isDark, setIsDark] = useState(false);
-  const [menuUser, setMenuUser] = useState<{ name: string; level: number; discount?: number } | null>(null);
   const [logoIconUrl, setLogoIconUrl] = useState<string | null>(initialLogoIconUrl ?? null);
   const [logoTextUrl, setLogoTextUrl] = useState<string | null>(initialLogoTextUrl ?? null);
   const [heroSpeed, setHeroSpeed] = useState<number | null>(null);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const settingsRef = useRef<HTMLDivElement>(null);
   const menuHistoryPushed = useRef(false);
 
   function closeMenu() {
@@ -111,14 +121,6 @@ export default function Header({ isAdminUser = false, initialCollections, custom
       setMenuOpen(false);
     }
   }
-
-  // Fetch current user for burger menu display
-  useEffect(() => {
-    fetch('/api/user/me')
-      .then(r => r.ok ? r.json() : { user: null })
-      .then(d => setMenuUser(d.user ?? null))
-      .catch(() => {});
-  }, []);
 
   // Load collections — skip fetch if SSR already provided them.
   // /api/collections appends custom items as pseudo-collections (slug `_custom_*`);
@@ -237,22 +239,29 @@ export default function Header({ isAdminUser = false, initialCollections, custom
     setHeroSpeed(isNaN(def) ? 1 : def);
   }, []);
 
-  function cycleSpeed() {
-    setHeroSpeed(prev => {
-      const cur = prev ?? 1;
-      const idx = SPEED_STEPS.findIndex(v => Math.abs(v - cur) < 0.01);
-      const next = SPEED_STEPS[(idx + 1) % SPEED_STEPS.length];
-      localStorage.setItem('hero-speed', String(next));
-      window.dispatchEvent(new CustomEvent('threep-hero-speed', { detail: next }));
-      return next;
-    });
+  function setSpeed(v: number) {
+    setHeroSpeed(v);
+    localStorage.setItem('hero-speed', String(v));
+    window.dispatchEvent(new CustomEvent('threep-hero-speed', { detail: v }));
   }
 
-  // Show speed pill only on the home page (where the hero video lives)
+  // Show speed control only on the home page (where the hero video lives)
   const [onHome, setOnHome] = useState(false);
   useEffect(() => { setOnHome(window.location.pathname === '/'); }, []);
 
-  const fmtSpeed = (v: number) => (Number.isInteger(v) ? `${v}×` : `${v}×`).replace('.', ',');
+  // Close settings popover on outside click / Escape
+  useEffect(() => {
+    if (!settingsOpen) return;
+    const onDown = (e: MouseEvent) => {
+      if (settingsRef.current && !settingsRef.current.contains(e.target as Node)) setSettingsOpen(false);
+    };
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setSettingsOpen(false); };
+    document.addEventListener('mousedown', onDown);
+    window.addEventListener('keydown', onKey);
+    return () => { document.removeEventListener('mousedown', onDown); window.removeEventListener('keydown', onKey); };
+  }, [settingsOpen]);
+
+  const fmtSpeed = (v: number) => `${v}×`.replace('.', ',');
 
   return (
     <>
@@ -260,7 +269,8 @@ export default function Header({ isAdminUser = false, initialCollections, custom
         ref={headerRef}
         className={`fixed top-0 left-0 right-0 z-50 ${s.headerBase} ${scrolled ? s.headerScrolled : s.headerTop} ${hidden ? s.headerHidden : ''}`}
       >
-        <div className="flex items-center justify-between px-5 sm:px-8 py-4 sm:py-5">
+        <div className={s.glass} aria-hidden="true" />
+        <div className={`flex items-center justify-between px-5 sm:px-8 py-4 sm:py-5 ${s.headerRow}`}>
           <Link href="/" aria-label="На главную">
             {logoIconUrl ? (
               <ThemedLogo src={logoIconUrl} alt="THREEP Logo" className="h-7 sm:h-9" defaultRatio={1} />
@@ -275,30 +285,48 @@ export default function Header({ isAdminUser = false, initialCollections, custom
 
           {/* Icons — on mobile spread evenly across a fixed width, on desktop tight gap */}
           <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
-            {/* Theme toggle */}
-            <button
-              onClick={toggleTheme}
-              className={s.themeBadge}
-              aria-label={isDark ? 'Включить светлую тему' : 'Включить тёмную тему'}
-            >
-              {isDark ? <BrutalSun /> : <BrutalMoon />}
-              <span>{isDark ? 'LIGHT' : 'DARK'}</span>
-            </button>
-
-            {/* Hero video speed — only on home, where the hero plays */}
-            {onHome && heroSpeed != null && (
+            {/* Settings gear — тема + скорость видео в одном поповере (антизахламление) */}
+            <div ref={settingsRef} style={{ position: 'relative' }}>
               <button
-                onClick={cycleSpeed}
-                className={s.speedBadge}
-                aria-label={`Скорость видео ${fmtSpeed(heroSpeed)}`}
-                title="Скорость видео в шапке"
+                onClick={() => setSettingsOpen(v => !v)}
+                className={`flex items-center justify-center w-9 h-9 rounded-lg ${s.navBtn}`}
+                aria-label="Настройки"
+                aria-expanded={settingsOpen}
               >
-                <svg width="11" height="11" viewBox="0 0 14 14" fill="currentColor" aria-hidden="true">
-                  <path d="M7 0a7 7 0 100 14A7 7 0 007 0zm0 12.5A5.5 5.5 0 117 1.5a5.5 5.5 0 010 11zM7 3.2L4 7h2v3.8L9 7H7z"/>
-                </svg>
-                <span>{fmtSpeed(heroSpeed)}</span>
+                <IconGear />
               </button>
-            )}
+
+              {settingsOpen && (
+                <div className={s.settingsPanel}>
+                  {/* Тема */}
+                  <div className={s.settingsRow}>
+                    <span className={s.settingsLabel}>Тема</span>
+                    <button onClick={toggleTheme} className={s.settingsToggle} aria-label="Сменить тему">
+                      {isDark ? <BrutalSun /> : <BrutalMoon />}
+                      <span>{isDark ? 'LIGHT' : 'DARK'}</span>
+                    </button>
+                  </div>
+
+                  {/* Скорость видео — только на главной */}
+                  {onHome && heroSpeed != null && (
+                    <div className={s.settingsRow}>
+                      <span className={s.settingsLabel}>Скорость видео</span>
+                      <div className={s.speedOpts}>
+                        {SPEED_STEPS.map(v => (
+                          <button
+                            key={v}
+                            onClick={() => setSpeed(v)}
+                            className={`${s.speedOpt} ${Math.abs((heroSpeed ?? 1) - v) < 0.01 ? s.speedOptActive : ''}`}
+                          >
+                            {fmtSpeed(v)}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
 
             {/* Notifications */}
             <NotificationBell />
@@ -346,19 +374,6 @@ export default function Header({ isAdminUser = false, initialCollections, custom
             <path d="M1 1L13 13M13 1L1 13" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"/>
           </svg>
         </button>
-        {/* Burger user info — top of overlay, outside nav */}
-        {menuUser && (
-          <div className={s.menuUserInfo}>
-            <span className={s.menuUserName}>{menuUser.name}</span>
-            <span className={s.menuUserMeta}>
-              <span className={s.menuUserLevel}>LVL {menuUser.level}</span>
-              {!!menuUser.discount && menuUser.discount > 0 && (
-                <span className={s.menuUserDiscount}>−{menuUser.discount}%</span>
-              )}
-            </span>
-          </div>
-        )}
-
         <nav className={s.nav}>
           <div className={s.navInner}>
 

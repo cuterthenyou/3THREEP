@@ -618,7 +618,9 @@ export default function BatAnimation({ config = DEFAULT_GAME_CONFIG }: { config?
     const vw = typeof window !== 'undefined' ? window.innerWidth : 1024
     const mobile = vw < 640
     const cap = mobile ? 6 : 11
-    const base = Math.min(cap, Math.round(2 + Math.sqrt(n) * 1.3))
+    // Старт с ОДНОЙ мыши (n=1), дальше плавный рост с плато. Сложность дальше —
+    // через скорость/манёвр (spawnBat diff + level-agility), а не количество.
+    const base = Math.min(cap, Math.max(1, Math.round(1 + Math.sqrt(Math.max(0, n - 1)) * 1.7)))
     const count = isBonus ? Math.min(cap + (mobile ? 2 : 4), base + (mobile ? 2 : 3)) : base
     const allowSpecial = n >= 2
     const interval = isBonus ? 90 : 150
@@ -889,7 +891,9 @@ export default function BatAnimation({ config = DEFAULT_GAME_CONFIG }: { config?
   const removeHitMarker  = useCallback((id: number) => setHitMarkers(prev => prev.filter(h => h.id !== id)), [])
 
   const overlayActive = gameState === 'playing' || gameState === 'game_over' || gameState === 'choose'
-  const showScore     = gameState === 'playing' || gameState === 'game_over'
+  // Счётчик НЕ мешает во время охоты: показываем только на «отдыхе» (пылесос между
+  // волнами) и на game over. Во время активной волны он скрыт.
+  const showScore     = gameState === 'game_over' || (gameState === 'playing' && roombaSweeping)
 
   return (
     <>
