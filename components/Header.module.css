@@ -1,40 +1,76 @@
-/* ── Header bar — матовое стекло (blur фона), sticky/hide/reveal ──
-   backdrop-filter ставим НА САМ хэдер (.headerBase) — самый надёжный вариант:
-   он точно блюрит контент за фиксированной шапкой во всех браузерах. Поверх —
-   полупрозрачный фон-градиент (плотнее вверху → 0 книзу), даёт «эффект стекла»
-   с затуханием даже там, где масочный backdrop-filter не работает (Chromium).
-   Контент (.headerRow) рисуется поверх и НЕ блюрится. Нижнего лайна НЕТ. */
+/* ── Header bar — прогрессивное матовое стекло (gaussian gradient blur) ──
+   ОДНИМ backdrop-filter градиентный блюр невозможен: blur одинаков по всей
+   высоте. Поэтому стек из нескольких слоёв (.blurLayer1..4): каждый со своим
+   радиусом размытия и маской-градиентом. Тяжёлые слои живут только у верхней
+   кромки, лёгкие тянутся ниже — суммарно блюр МАКСИМАЛЬНЫЙ сверху и плавно
+   уходит в 0 к низу шапки. Никакой нижней линии, границы и тени нет. */
 .headerBase {
   position: fixed;
-  /* собственный слой композитинга — стабилизирует backdrop-filter */
-  transform: translateZ(0);
-  backdrop-filter: blur(18px) saturate(1.5);
-  -webkit-backdrop-filter: blur(18px) saturate(1.5);
-  /* полупрозрачная вуаль: плотная вверху, уходит в 0 к низу шапки */
-  background: linear-gradient(
-    to bottom,
-    color-mix(in srgb, var(--bg) 52%, transparent) 0%,
-    color-mix(in srgb, var(--bg) 34%, transparent) 55%,
-    transparent 100%
-  );
-  transition: transform 0.42s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.3s ease, background 0.32s ease;
+  transition: transform 0.42s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-/* Контент хэдера — поверх вуали */
+/* Стек блюра + полупрозрачная вуаль (плотная вверху → 0 книзу). Под контентом. */
+.blurStack {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    to bottom,
+    color-mix(in srgb, var(--bg) 50%, transparent) 0%,
+    color-mix(in srgb, var(--bg) 28%, transparent) 50%,
+    transparent 100%
+  );
+  transition: background 0.32s ease;
+}
+
+.blurLayer {
+  position: absolute;
+  inset: 0;
+  /* собственный слой композитинга — стабилизирует backdrop-filter */
+  transform: translateZ(0);
+}
+
+/* Радиус растёт, маска прижимается к верху → градиентное затухание блюра */
+.blurLayer1 {
+  backdrop-filter: blur(2px) saturate(1.1);
+  -webkit-backdrop-filter: blur(2px) saturate(1.1);
+  -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 60%, transparent 100%);
+          mask-image: linear-gradient(to bottom, #000 0%, #000 60%, transparent 100%);
+}
+.blurLayer2 {
+  backdrop-filter: blur(6px) saturate(1.1);
+  -webkit-backdrop-filter: blur(6px) saturate(1.1);
+  -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 40%, transparent 75%);
+          mask-image: linear-gradient(to bottom, #000 0%, #000 40%, transparent 75%);
+}
+.blurLayer3 {
+  backdrop-filter: blur(12px) saturate(1.1);
+  -webkit-backdrop-filter: blur(12px) saturate(1.1);
+  -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 22%, transparent 50%);
+          mask-image: linear-gradient(to bottom, #000 0%, #000 22%, transparent 50%);
+}
+.blurLayer4 {
+  backdrop-filter: blur(22px) saturate(1.15);
+  -webkit-backdrop-filter: blur(22px) saturate(1.15);
+  -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 8%, transparent 30%);
+          mask-image: linear-gradient(to bottom, #000 0%, #000 8%, transparent 30%);
+}
+
+/* Контент хэдера — поверх стека блюра */
 .headerRow {
   position: relative;
   z-index: 2;
 }
 
-/* Scrolled — плотнее вуаль вверху + мягкая тень (без лайна) */
-.headerScrolled {
+/* Scrolled — плотнее вуаль (без тени и линии снизу) */
+.headerScrolled .blurStack {
   background: linear-gradient(
     to bottom,
-    color-mix(in srgb, var(--bg) 78%, transparent) 0%,
-    color-mix(in srgb, var(--bg) 52%, transparent) 58%,
+    color-mix(in srgb, var(--bg) 76%, transparent) 0%,
+    color-mix(in srgb, var(--bg) 46%, transparent) 55%,
     transparent 100%
   );
-  box-shadow: 0 8px 26px rgba(0, 0, 0, 0.16);
 }
 
 /* Hidden on scroll-down, slides back in on scroll-up */
