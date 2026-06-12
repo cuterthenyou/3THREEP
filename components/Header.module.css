@@ -2,20 +2,33 @@
    backdrop-filter ставим НА сам хэдер (надёжно во всех браузерах — реально
    размывает фон за шапкой). Контент — дети, рисуются поверх и не блюрятся.
    Цветовая вуаль с затуханием книзу — .headerBase::after. Нижнего лайна НЕТ. */
+/* Матовое стекло. blur — на ОТДЕЛЬНОМ слое .glass (без mask: масочный
+   backdrop-filter в Chromium часто не рендерится — поэтому равномерный blur,
+   надёжно блюрит фон ВСЕГДА). «Стекло-градиент» книзу даёт цветовая вуаль
+   ::after с mask. Контент (.headerRow) — поверх, НЕ маскируется и НЕ блюрится. */
 .headerBase {
   position: fixed;
-  transition: transform 0.42s cubic-bezier(0.22, 1, 0.36, 1),
-              backdrop-filter 0.3s ease, -webkit-backdrop-filter 0.3s ease,
-              box-shadow 0.3s ease;
+  transition: transform 0.42s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.3s ease;
 }
 
-/* Контент хэдера — поверх вуали */
+/* Стеклянный слой — равномерный blur фона, всегда включён */
+.glass {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  /* БЕЗ mask — иначе масочный backdrop-filter не рендерится в Chromium и блюр пропадает */
+  backdrop-filter: blur(20px) saturate(1.6);
+  -webkit-backdrop-filter: blur(20px) saturate(1.6);
+}
+
+/* Контент хэдера — поверх стекла/вуали */
 .headerRow {
   position: relative;
   z-index: 2;
 }
 
-/* Цветовая вуаль — затухает книзу через mask */
+/* Цветовая вуаль — затухает книзу через mask (усиливает «градиент стекла») */
 .headerBase::after {
   content: '';
   position: absolute;
@@ -29,10 +42,8 @@
   transition: opacity 0.32s ease;
 }
 
-/* Scrolled — включаем матовое стекло (blur фона) + вуаль; мягкая тень (без лайна) */
+/* Scrolled — добавляем цветовую вуаль + мягкую тень (без лайна) */
 .headerScrolled {
-  backdrop-filter: blur(20px) saturate(1.7);
-  -webkit-backdrop-filter: blur(20px) saturate(1.7);
   box-shadow: 0 8px 26px rgba(0, 0, 0, 0.16);
 }
 .headerScrolled::after { opacity: 1; }

@@ -26,10 +26,11 @@ function BrutalMoon() {
 }
 
 function IconGear() {
+  // Брутальная зубчатая шестерёнка (залитые зубья + вырез по центру)
   return (
-    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" aria-hidden="true">
-      <circle cx="8" cy="8" r="2.3" />
-      <path d="M8 1.2v1.8M8 13v1.8M1.2 8h1.8M13 8h1.8M3.2 3.2l1.3 1.3M11.5 11.5l1.3 1.3M12.8 3.2l-1.3 1.3M4.5 11.5l-1.3 1.3" strokeLinecap="round" />
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style={{ shapeRendering: 'geometricPrecision' }}>
+      <path d="M13.4 2l.5 2.5 2 .8 2.2-1.2 1.8 1.8-1.2 2.2.8 2 2.5.5v2.6l-2.5.5-.8 2 1.2 2.2-1.8 1.8-2.2-1.2-2 .8-.5 2.5h-2.6l-.5-2.5-2-.8-2.2 1.2L2.6 17l1.2-2.2-.8-2L0.5 12.3V9.7l2.5-.5.8-2L2.6 5l1.8-1.8 2.2 1.2 2-.8.5-2.5z"/>
+      <circle cx="11.8" cy="11" r="3.1" fill="var(--bg)" />
     </svg>
   )
 }
@@ -285,6 +286,7 @@ export default function Header({ isAdminUser = false, initialCollections, custom
         ref={headerRef}
         className={`fixed top-0 left-0 right-0 z-50 ${s.headerBase} ${scrolled ? s.headerScrolled : s.headerTop} ${hidden ? s.headerHidden : ''}`}
       >
+        <div className={s.glass} aria-hidden="true" />
         <div className={`flex items-center justify-between px-5 sm:px-8 py-4 sm:py-5 ${s.headerRow}`}>
           <Link href="/" aria-label="На главную">
             {logoIconUrl ? (
@@ -317,7 +319,11 @@ export default function Header({ isAdminUser = false, initialCollections, custom
                   <div className={s.settingsRow}>
                     <span className={s.settingsLabel}>Тема</span>
                     <button onClick={toggleTheme} className={s.settingsToggle} aria-label="Сменить тему">
-                      {theme === 'light' ? <BrutalSun /> : theme === 'trip' ? <IconGear /> : <BrutalMoon />}
+                      {theme === 'light' ? <BrutalSun /> : theme === 'trip' ? (
+                        <svg width="12" height="12" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.4" aria-hidden="true">
+                          <path d="M7 1.5a5.5 5.5 0 105.5 5.5A3 3 0 017 4a2 2 0 002 2" strokeLinecap="round" />
+                        </svg>
+                      ) : <BrutalMoon />}
                       <span>{theme === 'light' ? 'LIGHT' : theme === 'trip' ? 'TRIP' : 'DARK'}</span>
                     </button>
                   </div>
@@ -466,7 +472,7 @@ export default function Header({ isAdminUser = false, initialCollections, custom
 
         {/* Footer links */}
         <div className={s.overlayFooter}>
-          <span className={s.menuBrand}><b>333</b> · НАРОДНЫЙ КАСТОМ · СДЕЛАНО ХЛОРКОЙ</span>
+          <span className={s.menuBrand}><b>333</b> · РУССКО-НАРОДНЫЙ · СДЕЛАНО ХЛОРКОЙ</span>
           <Link href="/privacy" onClick={() => setMenuOpen(false)} className={s.footerLink}>Политика конфиденциальности</Link>
         </div>
       </div>

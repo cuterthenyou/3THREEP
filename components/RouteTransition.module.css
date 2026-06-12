@@ -12,7 +12,7 @@
   position: absolute;
   inset: 0;
   background: var(--bg);
-  animation: rtVeil 0.56s cubic-bezier(0.7, 0, 0.2, 1) forwards;
+  animation: rtVeil 0.8s cubic-bezier(0.7, 0, 0.2, 1) forwards;
 }
 
 /* RGB-сплит — две цветовые копии разъезжаются (хром-аберрация) */
@@ -24,7 +24,7 @@
     linear-gradient(90deg, rgba(255, 0, 90, 0.5), transparent 40%),
     linear-gradient(270deg, rgba(0, 220, 255, 0.5), transparent 40%);
   mix-blend-mode: screen;
-  animation: rtRgb 0.5s steps(2) forwards;
+  animation: rtRgb 0.7s steps(2) forwards;
 }
 
 /* Сканлайны — телек/VHS */
@@ -33,7 +33,7 @@
   inset: 0;
   opacity: 0;
   background: repeating-linear-gradient(0deg, transparent 0 2px, rgba(0, 0, 0, 0.5) 2px 4px);
-  animation: rtScan 0.5s linear forwards;
+  animation: rtScan 0.72s linear forwards;
 }
 
 /* Жирная accent-полоса «головки трекинга», пролетает сверху вниз */
@@ -46,7 +46,7 @@
   background: var(--accent);
   box-shadow: 0 0 28px 6px var(--accent-glow, var(--accent));
   opacity: 0;
-  animation: rtBar 0.52s cubic-bezier(0.5, 0, 0.5, 1) forwards;
+  animation: rtBar 0.78s cubic-bezier(0.5, 0, 0.5, 1) forwards;
 }
 
 /* Короткая вспышка кадра */
@@ -56,7 +56,7 @@
   background: var(--accent);
   opacity: 0;
   mix-blend-mode: overlay;
-  animation: rtFlash 0.4s ease-out forwards;
+  animation: rtFlash 0.55s ease-out forwards;
 }
 
 @keyframes rtVeil {

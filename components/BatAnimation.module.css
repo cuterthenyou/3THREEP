@@ -9,6 +9,8 @@
   will-change: transform;
   touch-action: none;
   user-select: none;
+  /* Обычные нетопыри — в цвет текущей темы (golden/armored/boss переопределяют) */
+  color: var(--accent, #f29774);
 }
 
 /* Touch devices: enlarge the tap target around each bat (visual unchanged) */

@@ -251,36 +251,42 @@ html[data-theme="trip"] .trip-blobs { opacity: calc(var(--trip-blob-opacity, 1) 
   z-index: 4;
   pointer-events: none;
   opacity: 0;
-  background: repeating-linear-gradient(0deg, transparent 0 2px, rgba(0, 0, 0, 0.18) 2px 3px);
+  background:
+    repeating-linear-gradient(0deg, transparent 0 2px, rgba(0, 0, 0, 0.26) 2px 3px),
+    linear-gradient(90deg, rgba(255, 0, 90, 0.05), transparent 50%, rgba(0, 220, 255, 0.05));
 }
-html[data-theme="trip"] .trip-breathe { opacity: calc(0.4 * var(--trip-drunk, 1)); }
+html[data-theme="trip"] .trip-breathe { opacity: calc(0.55 * var(--trip-drunk, 1)); }
 @media (prefers-reduced-motion: no-preference) {
-  html[data-theme="trip"] .trip-breathe { animation: tripScan 7s steps(1) infinite; }
+  html[data-theme="trip"] .trip-breathe { animation: tripScan 4.5s steps(1) infinite; }
 }
 @keyframes tripScan {
-  0%, 90%, 100% { clip-path: inset(0 0 0 0); transform: translateX(0); opacity: 0.4; }
-  91% { clip-path: inset(36% 0 52% 0); transform: translateX(-7px); opacity: 0.85; }
-  93% { clip-path: inset(8% 0 82% 0);  transform: translateX(8px);  opacity: 0.7; }
-  95% { clip-path: inset(68% 0 14% 0); transform: translateX(-5px); opacity: 0.8; }
-  97% { clip-path: inset(0 0 0 0);     transform: translateX(2px);  opacity: 0.5; }
+  0%, 84%, 100% { clip-path: inset(0 0 0 0); transform: translateX(0); opacity: 0.5; }
+  85% { clip-path: inset(30% 0 56% 0); transform: translateX(-10px); opacity: 0.95; }
+  88% { clip-path: inset(6% 0 84% 0);  transform: translateX(11px);  opacity: 0.85; }
+  91% { clip-path: inset(62% 0 18% 0); transform: translateX(-8px);  opacity: 0.9; }
+  94% { clip-path: inset(44% 0 40% 0); transform: translateX(6px);   opacity: 0.8; }
+  97% { clip-path: inset(0 0 0 0);     transform: translateX(2px);   opacity: 0.6; }
 }
 
-/* Хроматическая аберрация + дрожь заголовков — «битый» THREEP (дёшево) */
+/* Хроматическая аберрация + дрожь заголовков — «битый» THREEP (дёшево).
+   Дёргается ЧАЩЕ и сильнее (несколько срывов за цикл). */
 html[data-theme="trip"] h1,
 html[data-theme="trip"] h2,
 html[data-theme="trip"] h3 {
-  text-shadow: 1.5px 0 rgba(255, 0, 90, 0.5), -1.5px 0 rgba(0, 220, 255, 0.5);
+  text-shadow: 2px 0 rgba(255, 0, 90, 0.6), -2px 0 rgba(0, 220, 255, 0.6);
 }
 @media (prefers-reduced-motion: no-preference) {
   html[data-theme="trip"] h1,
   html[data-theme="trip"] h2,
-  html[data-theme="trip"] h3 { animation: tripAberration 4s steps(1) infinite; }
+  html[data-theme="trip"] h3 { animation: tripAberration 2.2s steps(1) infinite; }
 }
 @keyframes tripAberration {
-  0%, 86%, 100% { text-shadow: 1.5px 0 rgba(255, 0, 90, 0.5), -1.5px 0 rgba(0, 220, 255, 0.5); transform: translateX(0) skewX(0); }
-  88% { text-shadow: 4px 0 rgba(255, 0, 90, 0.75), -4px 0 rgba(0, 220, 255, 0.75); transform: translateX(2px) skewX(-3deg); }
-  91% { text-shadow: -3px 0 rgba(255, 0, 90, 0.75), 3px 0 rgba(0, 220, 255, 0.75); transform: translateX(-2px) skewX(2deg); }
-  94% { transform: translateX(1px) skewX(0); }
+  0%, 30%, 52%, 74%, 100% { text-shadow: 2px 0 rgba(255, 0, 90, 0.6), -2px 0 rgba(0, 220, 255, 0.6); transform: translate(0, 0) skewX(0); }
+  18% { text-shadow: 6px 0 rgba(255, 0, 90, 0.85), -6px 0 rgba(0, 220, 255, 0.85); transform: translate(3px, -1px) skewX(-5deg); }
+  22% { text-shadow: -5px 0 rgba(255, 0, 90, 0.85), 5px 0 rgba(0, 220, 255, 0.85); transform: translate(-3px, 1px) skewX(4deg); }
+  40% { text-shadow: 4px 0 rgba(255, 0, 90, 0.8), -4px 0 rgba(0, 220, 255, 0.8); transform: translate(-2px, 0) skewX(3deg); }
+  62% { text-shadow: -6px 0 rgba(255, 0, 90, 0.85), 6px 0 rgba(0, 220, 255, 0.85); transform: translate(3px, 1px) skewX(-4deg); }
+  84% { text-shadow: 5px 0 rgba(255, 0, 90, 0.8), -5px 0 rgba(0, 220, 255, 0.8); transform: translate(2px, -1px) skewX(2deg); }
 }
 
 /* Grain/shagreen overlay utility */
