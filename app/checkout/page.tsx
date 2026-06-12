@@ -115,10 +115,10 @@ export default function CheckoutPage() {
   const orderSummary = (
     <div className="flex flex-col gap-4">
       <h2 className={s.sectionLabel}>Состав заказа</h2>
-      <div className={`rounded-2xl p-5 sm:p-6 flex flex-col gap-4 ${s.summaryCard}`}>
+      <div className={`p-5 sm:p-6 flex flex-col gap-4 hud-corners ${s.summaryCard}`}>
         {items.map(item => (
           <div key={`${item.product.id}-${item.size}`} className="flex items-center gap-4">
-            <div className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden flex-shrink-0">
+            <div className="relative w-16 h-16 sm:w-20 sm:h-20 overflow-hidden flex-shrink-0" style={{ borderRadius: 'var(--radius-base, 0)', border: '1px solid var(--border-soft)' }}>
               {item.product.images[0] && (
                 <Image
                   src={item.product.images[0]}
@@ -174,7 +174,7 @@ export default function CheckoutPage() {
             <div className="flex flex-col gap-4">
               <h2 className={s.sectionLabel}>Как хочешь оформить?</h2>
               <Link
-                href={`/auth?callbackUrl=${encodeURIComponent('/checkout')}`}
+                href={`/auth?callbackUrl=${encodeURIComponent('/account')}`}
                 className={`py-4 text-center ${s.submitBtn}`}
                 style={{ textDecoration: 'none', display: 'block' }}
               >
@@ -205,6 +205,8 @@ export default function CheckoutPage() {
                     <label className={s.fieldLabel}>Имя *</label>
                     <input
                       type="text"
+                      name="name"
+                      autoComplete="name"
                       placeholder="Как к тебе обращаться"
                       value={guestName}
                       onChange={e => { setGuestName(e.target.value); setGuestNameTouched(true) }}
@@ -218,6 +220,9 @@ export default function CheckoutPage() {
                     <label className={s.fieldLabel}>Email *</label>
                     <input
                       type="email"
+                      name="email"
+                      autoComplete="email"
+                      inputMode="email"
                       placeholder="твой@email.com"
                       value={guestEmail}
                       onChange={e => { setGuestEmail(e.target.value); setGuestEmailTouched(true) }}
@@ -231,6 +236,8 @@ export default function CheckoutPage() {
                     <label className={s.fieldLabel}>Телефон</label>
                     <input
                       type="tel"
+                      name="tel"
+                      autoComplete="tel"
                       placeholder="+7 (999) 000-00-00"
                       value={guestPhone}
                       onChange={e => setGuestPhone(e.target.value)}
@@ -244,6 +251,8 @@ export default function CheckoutPage() {
                 <label className={s.fieldLabel}>Адрес доставки *</label>
                 <input
                   type="text"
+                  name="street-address"
+                  autoComplete="street-address"
                   placeholder="Город, улица, дом, квартира, индекс"
                   value={address}
                   onChange={e => { setAddress(e.target.value); setAddressTouched(true) }}

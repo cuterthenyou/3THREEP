@@ -32,7 +32,9 @@ function TrashIcon() {
   )
 }
 
-export default function OrdersClient({ orders }: { orders: Order[] }) {
+interface CatalogProduct { id: string; name: string; price: number; sizes: string[]; image: string | null }
+
+export default function OrdersClient({ orders, products = [] }: { orders: Order[]; products?: CatalogProduct[] }) {
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
@@ -45,8 +47,8 @@ export default function OrdersClient({ orders }: { orders: Order[] }) {
   const [deleting, setDeleting] = useState(false)
 
   // ── Создание заказа (офлайн-продажи) ──
-  type NewItem = { product_name: string; size: string; quantity: string; price: string }
-  const emptyItem: NewItem = { product_name: '', size: '', quantity: '1', price: '' }
+  type NewItem = { product_id: string; product_name: string; product_image: string | null; size: string; quantity: string; price: string }
+  const emptyItem: NewItem = { product_id: '', product_name: '', product_image: null, size: '', quantity: '1', price: '' }
   const [showCreate, setShowCreate] = useState(false)
   const [cEmail, setCEmail] = useState('')
   const [cName, setCName] = useState('')
@@ -63,13 +65,33 @@ export default function OrdersClient({ orders }: { orders: Order[] }) {
     setCItems([{ ...emptyItem }]); setCreateErr('')
   }
 
+  // Выбор товара из базы → автоподстановка названия/цены/картинки/первого размера
+  function selectProduct(i: number, id: string) {
+    setCItems(arr => arr.map((x, j) => {
+      if (j !== i) return x
+      if (!id) return { ...x, product_id: '', product_image: null }
+      const p = products.find(pp => pp.id === id)
+      if (!p) return x
+      return {
+        ...x,
+        product_id: id,
+        product_name: p.name,
+        product_image: p.image,
+        price: String(p.price),
+        size: p.sizes[0] ?? '',
+      }
+    }))
+  }
+
   async function submitCreate() {
     setCreateErr('')
     if (!cEmail.trim()) { setCreateErr('Укажи email'); return }
     const items = cItems
       .filter(it => it.product_name.trim() && parseFloat(it.price) > 0)
       .map(it => ({
+        product_id: it.product_id || null,
         product_name: it.product_name.trim(),
+        product_image: it.product_image,
         size: it.size.trim() || null,
         quantity: parseInt(it.quantity, 10) || 1,
         price: parseFloat(it.price) || 0,
@@ -355,21 +377,47 @@ export default function OrdersClient({ orders }: { orders: Order[] }) {
           {/* Позиции */}
           <div className="flex flex-col gap-2">
             <span className="text-xs uppercase tracking-widest" style={{ color: 'var(--accent)', opacity: 0.5, fontFamily: 'var(--font-involve)' }}>Позиции</span>
-            {cItems.map((it, i) => (
-              <div key={i} className="flex gap-2 flex-wrap items-center">
-                <input value={it.product_name} onChange={e => setCItems(arr => arr.map((x, j) => j === i ? { ...x, product_name: e.target.value } : x))}
-                  placeholder="Товар" style={{ ...INPUT_STYLE, borderRadius: 4, padding: '0.4rem 0.6rem', outline: 'none', flex: 2, minWidth: 120 }} />
-                <input value={it.size} onChange={e => setCItems(arr => arr.map((x, j) => j === i ? { ...x, size: e.target.value } : x))}
-                  placeholder="Размер" style={{ ...INPUT_STYLE, borderRadius: 4, padding: '0.4rem 0.6rem', outline: 'none', width: 70 }} />
-                <input value={it.quantity} onChange={e => setCItems(arr => arr.map((x, j) => j === i ? { ...x, quantity: e.target.value } : x))}
-                  inputMode="numeric" placeholder="Кол-во" style={{ ...INPUT_STYLE, borderRadius: 4, padding: '0.4rem 0.6rem', outline: 'none', width: 60 }} />
-                <input value={it.price} onChange={e => setCItems(arr => arr.map((x, j) => j === i ? { ...x, price: e.target.value } : x))}
-                  inputMode="numeric" placeholder="Цена" style={{ ...INPUT_STYLE, borderRadius: 4, padding: '0.4rem 0.6rem', outline: 'none', width: 80 }} />
-                {cItems.length > 1 && (
-                  <button onClick={() => setCItems(arr => arr.filter((_, j) => j !== i))} className={a.btnDanger} style={{ padding: '0.3rem 0.6rem' }}>✕</button>
-                )}
-              </div>
-            ))}
+            {cItems.map((it, i) => {
+              const selected = products.find(p => p.id === it.product_id)
+              return (
+                <div key={i} className="flex flex-col gap-2" style={{ border: '1px solid var(--border-soft)', borderRadius: 4, padding: '0.6rem' }}>
+                  <div className="flex gap-2 flex-wrap items-center">
+                    {/* Выбор товара из базы (или вручную) */}
+                    <select value={it.product_id} onChange={e => selectProduct(i, e.target.value)}
+                      style={{ ...INPUT_STYLE, borderRadius: 4, padding: '0.4rem 0.6rem', outline: 'none', flex: 2, minWidth: 160 }}>
+                      <option value="">— ввести вручную —</option>
+                      {products.map(p => (
+                        <option key={p.id} value={p.id}>{p.name} · {p.price}</option>
+                      ))}
+                    </select>
+                    {cItems.length > 1 && (
+                      <button onClick={() => setCItems(arr => arr.filter((_, j) => j !== i))} className={a.btnDanger} style={{ padding: '0.3rem 0.6rem' }}>✕</button>
+                    )}
+                  </div>
+                  <div className="flex gap-2 flex-wrap items-center">
+                    {/* Без выбора из базы — ручной ввод названия */}
+                    {!it.product_id && (
+                      <input value={it.product_name} onChange={e => setCItems(arr => arr.map((x, j) => j === i ? { ...x, product_name: e.target.value } : x))}
+                        placeholder="Название товара" style={{ ...INPUT_STYLE, borderRadius: 4, padding: '0.4rem 0.6rem', outline: 'none', flex: 2, minWidth: 120 }} />
+                    )}
+                    {/* Размер: из базы (select) или вручную */}
+                    {selected && selected.sizes.length > 0 ? (
+                      <select value={it.size} onChange={e => setCItems(arr => arr.map((x, j) => j === i ? { ...x, size: e.target.value } : x))}
+                        style={{ ...INPUT_STYLE, borderRadius: 4, padding: '0.4rem 0.6rem', outline: 'none', width: 90 }}>
+                        {selected.sizes.map(sz => <option key={sz} value={sz}>{sz}</option>)}
+                      </select>
+                    ) : (
+                      <input value={it.size} onChange={e => setCItems(arr => arr.map((x, j) => j === i ? { ...x, size: e.target.value } : x))}
+                        placeholder="Размер" style={{ ...INPUT_STYLE, borderRadius: 4, padding: '0.4rem 0.6rem', outline: 'none', width: 80 }} />
+                    )}
+                    <input value={it.quantity} onChange={e => setCItems(arr => arr.map((x, j) => j === i ? { ...x, quantity: e.target.value } : x))}
+                      inputMode="numeric" placeholder="Кол-во" style={{ ...INPUT_STYLE, borderRadius: 4, padding: '0.4rem 0.6rem', outline: 'none', width: 60 }} />
+                    <input value={it.price} onChange={e => setCItems(arr => arr.map((x, j) => j === i ? { ...x, price: e.target.value } : x))}
+                      inputMode="numeric" placeholder="Цена" style={{ ...INPUT_STYLE, borderRadius: 4, padding: '0.4rem 0.6rem', outline: 'none', width: 80 }} />
+                  </div>
+                </div>
+              )
+            })}
             <button onClick={() => setCItems(arr => [...arr, { ...emptyItem }])} className={a.btnSecondary} style={{ alignSelf: 'flex-start' }}>+ позиция</button>
           </div>
 

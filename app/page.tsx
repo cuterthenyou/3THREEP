@@ -54,6 +54,7 @@ export default async function HomePage() {
   let initialCollections: { slug: string; name: string; types: string[] }[] = [];
   let navCustomItems: { label: string; href: string }[] = [];
   let navConfigRaw: string | null = null;
+  let menuFooterText: string | null = null;
 
   try {
     const [productsData, categoriesData, settingsData] = await Promise.all([
@@ -68,6 +69,7 @@ export default async function HomePage() {
       if (row.key === 'logo_icon_url') logoIconUrl = row.value
       if (row.key === 'logo_text_url') logoTextUrl = row.value
       if (row.key === 'nav_config') navConfigRaw = row.value
+      if (row.key === 'menu_footer_text') menuFooterText = row.value
     }
 
     const inactiveCatSlugs = new Set(
@@ -132,7 +134,7 @@ export default async function HomePage() {
 
   return (
     <main className="min-h-screen">
-      <Header isAdminUser={isAdminUser} initialCollections={initialCollections} customItems={navCustomItems} logoIconUrl={logoIconUrl} logoTextUrl={logoTextUrl} />
+      <Header isAdminUser={isAdminUser} initialCollections={initialCollections} customItems={navCustomItems} logoIconUrl={logoIconUrl} logoTextUrl={logoTextUrl} menuFooterText={menuFooterText} />
       <Hero videoUrl={heroVideoUrl} mp4Url={heroVideoMp4Url} posterUrl={heroPosterUrl} />
       <TornEdge />
       <Suspense fallback={<div id="catalog" />}>

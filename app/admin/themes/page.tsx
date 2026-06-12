@@ -1,14 +1,14 @@
 import { redirect } from 'next/navigation'
 import { requireAdmin } from '@/lib/adminAuth'
 import { queryMany } from '@/lib/db'
-import SiteClient from './SiteClient'
+import SiteClient from '../site/SiteClient'
 import type { CustomFont } from '@/components/ThemeStyles'
 
-export default async function SitePage() {
+export default async function ThemesPage() {
   const admin = await requireAdmin()
   if (!admin) redirect('/admin')
 
-  let settings: Record<string, string | null> = {}
+  const settings: Record<string, string | null> = {}
   let customFonts: CustomFont[] = []
   try {
     const [settingsRows, fontRows] = await Promise.all([
@@ -17,7 +17,7 @@ export default async function SitePage() {
     ])
     for (const row of settingsRows) settings[row.key] = row.value
     customFonts = fontRows
-  } catch { /* tables may not exist yet if migration not run */ }
+  } catch { /* tables may not exist yet */ }
 
-  return <SiteClient initialSettings={settings} initialCustomFonts={customFonts} variant="site" />
+  return <SiteClient initialSettings={settings} initialCustomFonts={customFonts} variant="themes" />
 }

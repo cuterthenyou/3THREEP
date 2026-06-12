@@ -123,6 +123,61 @@
   margin-left: 0.15rem;
 }
 
+/* Кастомный hover-тултип ачивки */
+.medalWrap {
+  position: relative;
+  display: inline-flex;
+}
+
+.medalTip {
+  position: absolute;
+  bottom: calc(100% + 0.4rem);
+  left: 50%;
+  transform: translateX(-50%) translateY(3px);
+  z-index: 20;
+  pointer-events: none;
+  width: max-content;
+  max-width: 14rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  padding: 0.4rem 0.6rem;
+  background: var(--bg-2);
+  border: 1px solid var(--accent);
+  box-shadow: 3px 3px 0 var(--accent);
+  border-radius: var(--radius-btn, 2px);
+  opacity: 0;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+.medalTipTitle {
+  font-family: var(--font-onder);
+  font-size: 0.62rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+.medalTipDesc {
+  font-family: var(--font-involve);
+  font-size: 0.66rem;
+  line-height: 1.3;
+  color: var(--accent);
+  opacity: 0.75;
+  white-space: normal;
+}
+.medalTipHint {
+  font-family: var(--font-involve);
+  font-size: 0.55rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--accent);
+  opacity: 0.4;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .medalWrap:hover .medalTip { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
 /* Меньше шрифт у кнопок на мобиле */
 @media (max-width: 639px) {
   .ctaBtn,
@@ -201,8 +256,40 @@
   font-size: 0.5rem;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--color-accent);
+  color: var(--accent);
   white-space: nowrap;
+}
+
+/* Обёртка прогресс-бара + всплывающая подсказка прокачки */
+.sparksWrap {
+  position: relative;
+  width: 100%;
+  max-width: 18rem;
+}
+
+.sparksTip {
+  position: absolute;
+  bottom: calc(100% + 0.4rem);
+  left: 0;
+  z-index: 5;
+  pointer-events: none;
+  white-space: nowrap;
+  padding: 0.3rem 0.55rem;
+  background: var(--bg-2);
+  border: 1px solid var(--accent);
+  box-shadow: 2px 2px 0 var(--accent);
+  border-radius: var(--radius-btn, 2px);
+  font-family: var(--font-involve);
+  font-size: 0.66rem;
+  letter-spacing: 0.04em;
+  color: var(--accent);
+  opacity: 0;
+  transform: translateY(3px);
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .sparksWrap:hover .sparksTip { opacity: 1; transform: translateY(0); }
 }
 
 .username {
@@ -922,10 +1009,10 @@
 .gothicFrame {
   display: flex;
   align-self: stretch;        /* тянется на всю высоту карточки */
-  width: 18px;
+  width: 24px;
   color: var(--accent);
   flex-shrink: 0;
-  opacity: 0.85;
+  opacity: 0.9;
 }
 
 .gothicFrameMobile {
@@ -973,8 +1060,39 @@
   letter-spacing: 0.04em;
 }
 
+/* Раздельные рекорды по сложности */
+.batScoreList {
+  display: flex;
+  align-items: center;
+  gap: 1.4rem;
+}
+.batScoreItem {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.2rem;
+}
+.batScoreDiff {
+  font-family: var(--font-onder);
+  font-size: 0.5rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent);
+  opacity: 0.55;
+}
+.batScoreDiffDeath {
+  color: var(--status-error);
+  opacity: 0.85;
+}
+.batScoreItem .batScoreNum {
+  font-size: 1.35rem;
+}
+
 /* ── Mobile responsive ── */
 @media (max-width: 639px) {
+  .batScoreList { gap: 1rem; }
+  .batScoreItem .batScoreNum { font-size: 1.15rem; }
+
   .profileCard {
     flex-direction: column-reverse;
   }
@@ -1004,7 +1122,7 @@
 
   .gothicFrameMobile {
     display: flex;
-    width: 20px;                /* шире и детальнее на мобиле */
+    width: 26px;                /* шире и детальнее на мобиле, с обеих сторон */
   }
 
   .username {

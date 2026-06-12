@@ -5,6 +5,17 @@ import OrdersClient from './OrdersClient'
 export const revalidate = 0
 
 export default async function AdminOrdersPage() {
+  const productsData = await queryMany(
+    `SELECT id, name, price, sizes, images FROM products WHERE active = true ORDER BY name ASC`
+  ).catch(() => [])
+  const products = (productsData as Array<{ id: string; name: string; price: number; sizes: string[] | null; images: string[] | null }>).map(p => ({
+    id: p.id,
+    name: p.name,
+    price: Number(p.price),
+    sizes: Array.isArray(p.sizes) ? p.sizes : [],
+    image: Array.isArray(p.images) && p.images.length ? p.images[0] : null,
+  }))
+
   const orders = await queryMany(
     `SELECT o.*,
       COALESCE(
@@ -29,7 +40,7 @@ export default async function AdminOrdersPage() {
 
   return (
     <Suspense>
-      <OrdersClient orders={orders as Parameters<typeof OrdersClient>[0]['orders']} />
+      <OrdersClient orders={orders as Parameters<typeof OrdersClient>[0]['orders']} products={products} />
     </Suspense>
   )
 }

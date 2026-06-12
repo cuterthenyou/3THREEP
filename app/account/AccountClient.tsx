@@ -74,7 +74,7 @@ export default function AccountClient({ user, profile, orders, profileBg, profil
   const avatarRef = useRef<HTMLInputElement>(null);
   const nicknameRef = useRef<HTMLInputElement>(null);
   const [isDark, setIsDark] = useState(false);
-  const [batHighScore, setBatHighScore] = useState<number | null>(null);
+  const [batScores, setBatScores] = useState<{ normal: number | null; death: number | null }>({ normal: null, death: null });
 
   useEffect(() => {
     setIsDark(document.documentElement.dataset.theme === 'dark');
@@ -87,8 +87,15 @@ export default function AccountClient({ user, profile, orders, profileBg, profil
 
   useEffect(() => {
     try {
-      const v = localStorage.getItem('threep-bat-hs');
-      if (v !== null) setBatHighScore(parseInt(v, 10));
+      const parse = (k: string) => {
+        const v = localStorage.getItem(k);
+        const n = v !== null ? parseInt(v, 10) : NaN;
+        return Number.isFinite(n) ? n : null;
+      };
+      // раздельные рекорды; общий ключ — фолбэк для старых записей (в NORMAL)
+      const normal = parse('threep-bat-hs-normal') ?? parse('threep-bat-hs');
+      const death = parse('threep-bat-hs-death');
+      setBatScores({ normal, death });
     } catch {}
   }, []);
 
@@ -134,14 +141,6 @@ export default function AccountClient({ user, profile, orders, profileBg, profil
     () => (invType === 'all' ? categoryProducts : categoryProducts.filter((p) => p.product_type === invType)),
     [categoryProducts, invType]
   );
-
-  // «Собранные коллекции»: куплены все нескрытые товары категории
-  const collectedCount = useMemo(() => {
-    return collectionsList.filter((c) => {
-      const items = catalogProducts.filter((p) => p.category === c.slug && !p.coming_soon);
-      return items.length > 0 && items.every((p) => ownedIds.has(p.id));
-    }).length;
-  }, [collectionsList, catalogProducts, ownedIds]);
 
   const activeCat = catalogCategories.find((c) => c.slug === activeCategory);
   const modalBg = (isDark ? activeCat?.modal_bg_url_dark : activeCat?.modal_bg_url) ?? null;
@@ -301,24 +300,26 @@ export default function AccountClient({ user, profile, orders, profileBg, profil
               </div>
               <h2 className={s.username}>{username}</h2>
 
-              {/* Ачивки-медали */}
+              {/* Ачивки-медали — с кастомным hover-тултипом (за что получена) */}
               {achievements.length > 0 && (
                 <div className={s.medalsRow}>
                   {achievements.map((a) => (
-                    <button
-                      key={a.key}
-                      type="button"
-                      disabled={!a.unlocked}
-                      onClick={() => a.unlocked && toggleShowcase(a.key)}
-                      className={`${s.medal} ${a.unlocked ? s.medalUnlocked : s.medalLocked} ${showcase[a.key] ? s.medalShowcased : ''}`}
-                      title={
-                        a.unlocked
-                          ? `${a.title}${a.description ? ' — ' + a.description : ''} (клик — на витрину)`
-                          : `🔒 ${a.title}${a.description ? ': ' + a.description : ''}`
-                      }
-                    >
-                      <Medal kind={a.medal_key ?? ''} size={24} />
-                    </button>
+                    <span key={a.key} className={s.medalWrap}>
+                      <button
+                        type="button"
+                        disabled={!a.unlocked}
+                        onClick={() => a.unlocked && toggleShowcase(a.key)}
+                        className={`${s.medal} ${a.unlocked ? s.medalUnlocked : s.medalLocked} ${showcase[a.key] ? s.medalShowcased : ''}`}
+                        aria-label={a.title}
+                      >
+                        <Medal kind={a.medal_key ?? ''} size={24} />
+                      </button>
+                      <span className={s.medalTip} role="tooltip">
+                        <span className={s.medalTipTitle}>{a.unlocked ? a.title : `🔒 ${a.title}`}</span>
+                        {a.description && <span className={s.medalTipDesc}>{a.description}</span>}
+                        {a.unlocked && <span className={s.medalTipHint}>клик — на витрину</span>}
+                      </span>
+                    </span>
                   ))}
                   <span className={s.medalsCount}>{unlockedCount}/{achievements.length}</span>
                 </div>
@@ -362,12 +363,19 @@ export default function AccountClient({ user, profile, orders, profileBg, profil
                 ))}
               </div>
 
-              {/* Sparks progress bar — до следующего уровня */}
-              <div className={s.sparksBar} data-tier={gamification.tierKey}>
-                <div className={s.sparksFill} style={{ width: `${Math.round(progressPct * 100)}%` }} />
-                <span className={s.sparksHint}>
-                  {toNext > 0 ? `до LVL ${level + 1}: ${toNext} искр` : 'максимум'}
-                </span>
+              {/* Sparks progress bar — прокачка уровня + всплывающая подсказка */}
+              <div className={s.sparksWrap}>
+                <div className={s.sparksBar} data-tier={gamification.tierKey}>
+                  <div className={s.sparksFill} style={{ width: `${Math.round(progressPct * 100)}%` }} />
+                  <span className={s.sparksHint}>
+                    LVL {level} · {Math.round(progressPct * 100)}%
+                  </span>
+                </div>
+                <div className={s.sparksTip} role="tooltip">
+                  {toNext > 0
+                    ? `Искорки: ${sparks} · до LVL ${level + 1} ещё ${toNext}`
+                    : 'Максимальный уровень достигнут'}
+                </div>
               </div>
             </div>
 
@@ -407,31 +415,20 @@ export default function AccountClient({ user, profile, orders, profileBg, profil
             </div>
           </div>
 
-          {/* Collections */}
-          <div className={`${s.collectionsCard} hud-corners`}>
-            <p className={s.collectionsLabel}>
-              Собранные коллекции: {collectedCount} / {collectionsList.length}
-            </p>
-            <div className="flex gap-2 items-center flex-wrap">
-              {collectionsList.length === 0 &&
-                [...Array(3)].map((_, i) => <div key={i} className={s.collectionSlot}>★</div>)}
-              {collectionsList.map((c) => {
-                const items = catalogProducts.filter((p) => p.category === c.slug && !p.coming_soon);
-                const done = items.length > 0 && items.every((p) => ownedIds.has(p.id));
-                return (
-                  <div key={c.slug} className={done ? s.collBadgeDone : s.collBadge} title={c.name}>
-                    {c.name.slice(0, 3).toUpperCase()}
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Bat hunt high score */}
-          {batHighScore !== null && (
+          {/* Bat hunt high score — раздельно по сложности (NORMAL / DEATH) */}
+          {(batScores.normal !== null || batScores.death !== null) && (
             <div className={s.batScoreCard}>
               <span className={s.batScoreLabel}>РЕК. ОХОТЫ</span>
-              <span className={s.batScoreNum}>×{batHighScore}</span>
+              <div className={s.batScoreList}>
+                <span className={s.batScoreItem}>
+                  <span className={s.batScoreDiff}>NORMAL</span>
+                  <span className={s.batScoreNum}>×{batScores.normal ?? 0}</span>
+                </span>
+                <span className={s.batScoreItem}>
+                  <span className={`${s.batScoreDiff} ${s.batScoreDiffDeath}`}>DEATH</span>
+                  <span className={s.batScoreNum}>×{batScores.death ?? 0}</span>
+                </span>
+              </div>
             </div>
           )}
 

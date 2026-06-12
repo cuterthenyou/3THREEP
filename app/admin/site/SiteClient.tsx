@@ -8,13 +8,18 @@ import { ColorPicker, FontSelect, GlitterPreview } from './parts'
 import { parseLevelingConfig, getDiscount } from '@/lib/leveling'
 import type { CustomFont } from '@/components/ThemeStyles'
 
-type SettingsTab = 'general' | 'type' | 'effects' | 'catalog' | 'game' | 'account' | 'content' | 'menu'
-const SETTINGS_TABS: { id: SettingsTab; label: string }[] = [
-  { id: 'general', label: 'Бренд' },
+type SettingsTab = 'general' | 'colors' | 'fonts' | 'type' | 'effects' | 'catalog' | 'account' | 'content' | 'menu'
+
+// Разделы по темам (страница /admin/themes) и по сайту (/admin/site).
+const THEME_TABS: { id: SettingsTab; label: string }[] = [
+  { id: 'colors',  label: 'Цвета' },
+  { id: 'fonts',   label: 'Шрифты' },
   { id: 'type',    label: 'Типографика' },
   { id: 'effects', label: 'Эффекты' },
+]
+const SITE_TABS: { id: SettingsTab; label: string }[] = [
+  { id: 'general', label: 'Бренд' },
   { id: 'catalog', label: 'Каталог' },
-  { id: 'game',    label: 'Игра' },
   { id: 'account', label: 'Личный кабинет' },
   { id: 'content', label: 'Контент' },
   { id: 'menu',    label: 'Меню' },
@@ -23,6 +28,7 @@ const SETTINGS_TABS: { id: SettingsTab; label: string }[] = [
 interface Props {
   initialSettings: Record<string, string | null>
   initialCustomFonts?: CustomFont[]
+  variant?: 'site' | 'themes'
 }
 
 const BUILTIN_FONTS = ['ONDER', 'Involve', 'DeutschGothic'] as const
@@ -61,8 +67,9 @@ const THEME_PRESETS: ThemePreset[] = [
     bgT: '#16020a', textT: '#ffc2d6', accentT: '#ff2d6b' },
 ]
 
-export default function SiteClient({ initialSettings, initialCustomFonts = [] }: Props) {
-  const [activeTab, setActiveTab] = useState<SettingsTab>('general')
+export default function SiteClient({ initialSettings, initialCustomFonts = [], variant = 'site' }: Props) {
+  const TABS = variant === 'themes' ? THEME_TABS : SITE_TABS
+  const [activeTab, setActiveTab] = useState<SettingsTab>(TABS[0].id)
 
   // ── Тюнер геймификации (leveling_config) ──
   const _lvl = parseLevelingConfig(initialSettings['leveling_config'])
@@ -194,6 +201,7 @@ export default function SiteClient({ initialSettings, initialCustomFonts = [] }:
   const [tripBreathe, setTripBreathe]   = useState(initialSettings['trip_breathe'] !== 'false')
   const [tripDriftSpeed, setTripDriftSpeed] = useState(numInit('trip_drift_speed', 16))
   const [tripBlobOpacity, setTripBlobOpacity] = useState(numInit('trip_blob_opacity', 1))
+  const [tripDesync, setTripDesync] = useState(numInit('trip_desync', 1))
   const [savingTrip, setSavingTrip] = useState(false)
   const [tripMsg, setTripMsg] = useState('')
 
@@ -202,25 +210,24 @@ export default function SiteClient({ initialSettings, initialCustomFonts = [] }:
   const [savingHeroSpeed, setSavingHeroSpeed] = useState(false)
   const [heroSpeedMsg, setHeroSpeedMsg] = useState('')
 
-  // ── Игра (баланс нетопырей) ──
-  const [gameRoombaSpeed, setGameRoombaSpeed] = useState(numInit('game_roomba_speed', 1))
-  const [gameBatSpeed,    setGameBatSpeed]    = useState(numInit('game_bat_speed', 1))
-  const [gameBatScale,    setGameBatScale]    = useState(numInit('game_bat_scale', 1))
-  const [gamePowerup,     setGamePowerup]     = useState(numInit('game_powerup_chance', 1))
-  // Боссы
-  const [gameBossHp,      setGameBossHp]      = useState(Math.round(numInit('game_boss_hp', 8)))
-  const [gameBossMegaHp,  setGameBossMegaHp]  = useState(Math.round(numInit('game_boss_mega_hp', 18)))
-  const [gameBossShield,  setGameBossShield]  = useState(numInit('game_boss_shield_ms', 1600))
-  const [gameBossVuln,    setGameBossVuln]    = useState(numInit('game_boss_vuln_ms', 1500))
-  const [gameBossTimeout, setGameBossTimeout] = useState(numInit('game_boss_timeout_ms', 45000))
-  const [savingGame, setSavingGame] = useState(false)
-  const [gameMsg, setGameMsg] = useState('')
+  // Игра вынесена в отдельный раздел /admin/game (структурный game_config).
 
   // ── Переход между страницами (VHS) ──
   const [pageTransition, setPageTransition] = useState(initialSettings['page_transition_enabled'] !== 'false')
   const [pageTransIntensity, setPageTransIntensity] = useState(numInit('page_transition_intensity', 1))
   const [savingPageTrans, setSavingPageTrans] = useState(false)
   const [pageTransMsg, setPageTransMsg] = useState('')
+
+  // ── Подпись в бургер-меню (внизу) ──
+  const DEFAULT_MENU_FOOTER = '333 · РУССКО-НАРОДНЫЙ · СДЕЛАНО ХЛОРКОЙ'
+  const [menuFooterText, setMenuFooterText] = useState(initialSettings['menu_footer_text'] ?? DEFAULT_MENU_FOOTER)
+  const [savingMenuFooter, setSavingMenuFooter] = useState(false)
+  const [menuFooterMsg, setMenuFooterMsg] = useState('')
+  async function saveMenuFooter() {
+    setSavingMenuFooter(true); setMenuFooterMsg('')
+    await saveSetting('menu_footer_text', menuFooterText.trim() || DEFAULT_MENU_FOOTER)
+    setSavingMenuFooter(false); setMenuFooterMsg('✓ Сохранено — обновляю страницу…'); reloadAfterSave()
+  }
 
   // Текущая тема админки — чтобы живой предпросмотр цвета бил по нужной теме
   const [adminTheme, setAdminTheme] = useState<'light' | 'dark' | 'trip'>('dark')
@@ -340,6 +347,12 @@ export default function SiteClient({ initialSettings, initialCustomFonts = [] }:
     })
   }
 
+  // После сохранения настроек жёстко перезагружаем страницу — гарантированно
+  // применяет всё (в т.ч. VHS-переход и серверные настройки, читаемые на mount).
+  function reloadAfterSave(delay = 800) {
+    setTimeout(() => window.location.reload(), delay)
+  }
+
   function buildLevelingCfg() {
     const thresholds = lvlThresholds.split(',').map(s => parseInt(s.trim(), 10)).filter(n => Number.isFinite(n))
     return {
@@ -355,8 +368,8 @@ export default function SiteClient({ initialSettings, initialCustomFonts = [] }:
     setSavingLvl(true)
     await saveSetting('leveling_config', JSON.stringify(buildLevelingCfg()))
     setSavingLvl(false)
-    setLvlMsg('✓ Сохранено')
-    setTimeout(() => setLvlMsg(''), 2000)
+    setLvlMsg('✓ Сохранено — обновляю страницу…')
+    reloadAfterSave()
   }
 
   async function uploadFile(
@@ -471,7 +484,7 @@ export default function SiteClient({ initialSettings, initialCustomFonts = [] }:
       saveSetting('color_text_trip',    colorTextTrip),
       saveSetting('color_accent_trip',  colorAccentTrip),
     ])
-    setSavingColors(false); setColorsMsg('✓ Цвета сохранены — перезагрузите страницу для проверки')
+    setSavingColors(false); setColorsMsg('✓ Цвета сохранены — обновляю страницу…'); reloadAfterSave()
   }
 
   // Применить пресет: заполнить все 9 цветов + живой предпросмотр текущей темы
@@ -497,7 +510,7 @@ export default function SiteClient({ initialSettings, initialCustomFonts = [] }:
       saveSetting('font_body',    fontBody),
       saveSetting('font_price',   fontPrice),
     ])
-    setSavingFonts(false); setFontsMsg('✓ Шрифты сохранены — перезагрузите страницу для проверки')
+    setSavingFonts(false); setFontsMsg('✓ Шрифты сохранены — обновляю страницу…'); reloadAfterSave()
   }
 
   // ── Save effects ────────────────────────────────────────────────
@@ -511,7 +524,7 @@ export default function SiteClient({ initialSettings, initialCustomFonts = [] }:
       saveSetting('button_radius_px',    String(btnRadiusPx)),
       saveSetting('animation_speed',     animationSpeed),
     ])
-    setSavingEffects(false); setEffectsMsg('✓ Эффекты сохранены — перезагрузите страницу для проверки')
+    setSavingEffects(false); setEffectsMsg('✓ Эффекты сохранены — обновляю страницу…'); reloadAfterSave()
   }
 
   // ── Save typography ─────────────────────────────────────────────
@@ -533,7 +546,7 @@ export default function SiteClient({ initialSettings, initialCustomFonts = [] }:
       saveSetting('type_modal_body_scale',      String(typeModalBody)),
       saveSetting('type_modal_body_leading',    String(typeModalBodyLead)),
     ])
-    setSavingType(false); setTypeMsg('✓ Типографика сохранена — перезагрузите страницу для проверки')
+    setSavingType(false); setTypeMsg('✓ Типографика сохранена — обновляю страницу…'); reloadAfterSave()
   }
 
   // ── Save trip effects (цвета trip сохраняются кнопкой «Сохранить цвета») ──
@@ -543,15 +556,16 @@ export default function SiteClient({ initialSettings, initialCustomFonts = [] }:
       saveSetting('trip_breathe',      String(tripBreathe)),
       saveSetting('trip_drift_speed',  String(tripDriftSpeed)),
       saveSetting('trip_blob_opacity', String(tripBlobOpacity)),
+      saveSetting('trip_desync',       String(tripDesync)),
     ])
-    setSavingTrip(false); setTripMsg('✓ Trip-эффекты сохранены — перезагрузите страницу для проверки')
+    setSavingTrip(false); setTripMsg('✓ Trip-эффекты сохранены — обновляю страницу…'); reloadAfterSave()
   }
 
   // ── Save hero speed default ─────────────────────────────────────
   async function saveHeroSpeed() {
     setSavingHeroSpeed(true); setHeroSpeedMsg('')
     await saveSetting('hero_speed_default', String(heroSpeedDefault))
-    setSavingHeroSpeed(false); setHeroSpeedMsg('✓ Сохранено (сбрасывает ручной выбор скорости у посетителей)')
+    setSavingHeroSpeed(false); setHeroSpeedMsg('✓ Сохранено — обновляю страницу…'); reloadAfterSave()
   }
 
   // ── Save page transition ────────────────────────────────────────
@@ -561,24 +575,7 @@ export default function SiteClient({ initialSettings, initialCustomFonts = [] }:
       saveSetting('page_transition_enabled', String(pageTransition)),
       saveSetting('page_transition_intensity', String(pageTransIntensity)),
     ])
-    setSavingPageTrans(false); setPageTransMsg('✓ Сохранено — перезагрузите страницу')
-  }
-
-  // ── Save game balance ───────────────────────────────────────────
-  async function saveGame() {
-    setSavingGame(true); setGameMsg('')
-    await Promise.all([
-      saveSetting('game_roomba_speed',  String(gameRoombaSpeed)),
-      saveSetting('game_bat_speed',     String(gameBatSpeed)),
-      saveSetting('game_bat_scale',     String(gameBatScale)),
-      saveSetting('game_powerup_chance', String(gamePowerup)),
-      saveSetting('game_boss_hp',        String(gameBossHp)),
-      saveSetting('game_boss_mega_hp',   String(gameBossMegaHp)),
-      saveSetting('game_boss_shield_ms', String(gameBossShield)),
-      saveSetting('game_boss_vuln_ms',   String(gameBossVuln)),
-      saveSetting('game_boss_timeout_ms', String(gameBossTimeout)),
-    ])
-    setSavingGame(false); setGameMsg('✓ Баланс игры сохранён — откройте страницу ИНФА для проверки')
+    setSavingPageTrans(false); setPageTransMsg('✓ Сохранено — обновляю страницу…'); reloadAfterSave()
   }
 
   const msgStyle = (m: string) => ({ color: m.startsWith('✓') ? 'var(--status-delivered)' : 'var(--status-error)', fontFamily: 'var(--font-involve)', fontSize: '0.75rem' })
@@ -604,11 +601,11 @@ export default function SiteClient({ initialSettings, initialCustomFonts = [] }:
 
   return (
     <div className="px-6 py-6 max-w-3xl mx-auto flex flex-col gap-8">
-      <AdminPageTitle>Настройки сайта</AdminPageTitle>
+      <AdminPageTitle>{variant === 'themes' ? 'Темы' : 'Настройки сайта'}</AdminPageTitle>
 
       {/* Tabs */}
       <div className="flex flex-wrap gap-2">
-        {SETTINGS_TABS.map(t => (
+        {TABS.map(t => (
           <button
             key={t.id}
             onClick={() => setActiveTab(t.id)}
@@ -679,7 +676,7 @@ export default function SiteClient({ initialSettings, initialCustomFonts = [] }:
       </AdminSection>
 
       {/* ── Цвета ── */}
-      <AdminSection title="Цвета" tab="general">
+      <AdminSection title="Цвета" tab="colors">
         <p className="text-xs" style={{ color: 'var(--accent)', opacity: 0.5, fontFamily: 'var(--font-involve)' }}>
           Кликните на цвет или введите HEX. Живой предпросмотр применяется к <b>текущей теме админки</b>
           (сейчас: {adminTheme === 'dark' ? '☾ тёмная' : adminTheme === 'trip' ? '✦ trip' : '☀ светлая'}).
@@ -748,7 +745,7 @@ export default function SiteClient({ initialSettings, initialCustomFonts = [] }:
       </AdminSection>
 
       {/* ── Шрифты ── */}
-      <AdminSection title="Шрифты" tab="general">
+      <AdminSection title="Шрифты" tab="fonts">
         <p className="text-xs" style={{ color: 'var(--accent)', opacity: 0.5, fontFamily: 'var(--font-involve)' }}>
           Выбранный шрифт применяется ко всем элементам сайта. Загрузи свой шрифт ниже — он сразу появится в списке.
         </p>
@@ -1117,6 +1114,7 @@ export default function SiteClient({ initialSettings, initialCustomFonts = [] }:
             />
           </div>
           <RangeRow label="Интенсивность кругов" value={tripBlobOpacity} set={setTripBlobOpacity} cssVar="--trip-blob-opacity" min={0} max={1} step={0.05} suffix="" />
+          <RangeRow label="Рассинхрон дёрганья текста" value={tripDesync} set={setTripDesync} cssVar="--trip-desync" min={0} max={3} step={0.1} suffix="" />
         </div>
         <p className="text-xs" style={{ color: 'var(--accent)', opacity: 0.35, fontFamily: 'var(--font-involve)' }}>
           Предпросмотр дрейфа/кругов виден только при активной trip-теме.
@@ -1163,54 +1161,7 @@ export default function SiteClient({ initialSettings, initialCustomFonts = [] }:
         </div>
       </AdminSection>
 
-      {/* ── Игра «Охота» (баланс) ── */}
-      <AdminSection title="Игра «Охота» — баланс" tab="game">
-        <p className="text-xs" style={{ color: 'var(--accent)', opacity: 0.5, fontFamily: 'var(--font-involve)' }}>
-          Мини-игра на странице ИНФА. Множители: 1.0 = базово. Скорость пылесоса уже авто-подстраивается
-          под ширину экрана (фикс «медленно на десктопе / быстро на мобиле») — здесь общий множитель сверху.
-        </p>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-4">
-          <RangeRow label="Скорость пылесоса" value={gameRoombaSpeed} set={setGameRoombaSpeed} cssVar="--game-noop-1" min={0.4} max={2} step={0.05} />
-          <RangeRow label="Скорость нетопырей" value={gameBatSpeed} set={setGameBatSpeed} cssVar="--game-noop-2" min={0.4} max={2} step={0.05} />
-          <RangeRow label="Размер нетопырей" value={gameBatScale} set={setGameBatScale} cssVar="--game-noop-3" min={0.6} max={1.8} step={0.05} />
-          <RangeRow label="Шанс пауэрапов" value={gamePowerup} set={setGamePowerup} cssVar="--game-noop-4" min={0.2} max={3} step={0.1} />
-        </div>
-
-        <p className="text-xs uppercase tracking-widest pt-2" style={{ color: 'var(--accent)', opacity: 0.55, fontFamily: 'var(--font-involve)' }}>
-          Боссы (каждый 10-й уровень · мега на 33/66/99)
-        </p>
-        <p className="text-xs" style={{ color: 'var(--accent)', opacity: 0.4, fontFamily: 'var(--font-involve)' }}>
-          Босс защищается щитом — урон проходит только в окно уязвимости (третий глаз). HP = число попаданий по уязвимости.
-        </p>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-4">
-          {[
-            { label: 'HP босса (попаданий)', val: gameBossHp, set: setGameBossHp, min: 3, max: 30, step: 1, unit: '' },
-            { label: 'HP мега-босса', val: gameBossMegaHp, set: setGameBossMegaHp, min: 6, max: 60, step: 1, unit: '' },
-            { label: 'Длительность щита', val: gameBossShield, set: setGameBossShield, min: 400, max: 4000, step: 100, unit: 'ms' },
-            { label: 'Окно уязвимости', val: gameBossVuln, set: setGameBossVuln, min: 400, max: 4000, step: 100, unit: 'ms' },
-            { label: 'Время на босса', val: gameBossTimeout, set: setGameBossTimeout, min: 15000, max: 120000, step: 5000, unit: 'ms' },
-          ].map(r => (
-            <div key={r.label} className="flex flex-col gap-1.5">
-              <div className="flex items-center justify-between">
-                <span className="text-xs" style={{ color: 'var(--accent)', fontFamily: 'var(--font-involve)' }}>{r.label}</span>
-                <span className="text-xs" style={{ color: 'var(--accent)', fontFamily: 'monospace' }}>
-                  {r.unit === 'ms' ? `${(r.val / 1000).toFixed(r.step >= 1000 ? 0 : 1)}с` : r.val}
-                </span>
-              </div>
-              <input type="range" min={r.min} max={r.max} step={r.step} value={r.val}
-                onChange={e => r.set(parseFloat(e.target.value))}
-                style={{ accentColor: 'var(--accent)', width: '100%' }} />
-            </div>
-          ))}
-        </div>
-
-        <div className="flex items-center gap-3 flex-wrap pt-2">
-          <button onClick={saveGame} disabled={savingGame} className={a.btn}>
-            {savingGame ? 'Сохраняем...' : 'Сохранить баланс'}
-          </button>
-          {gameMsg && <span style={msgStyle(gameMsg)}>{gameMsg}</span>}
-        </div>
-      </AdminSection>
+      {/* Игра «Охота» вынесена в отдельный раздел /admin/game */}
 
       {/* ── Блёстки ── */}
       <AdminSection title="Блёстки (тёмная тема)" tab="effects">
@@ -1728,6 +1679,21 @@ export default function SiteClient({ initialSettings, initialCustomFonts = [] }:
         <a href="/admin/menu" className={a.btn} style={{ alignSelf: 'flex-start', textDecoration: 'none' }}>
           Открыть настройки меню →
         </a>
+
+        <div className="flex flex-col gap-2 pt-2" style={{ borderTop: '1px solid var(--border-soft)' }}>
+          <span className="text-xs uppercase tracking-widest" style={{ color: 'var(--accent)', opacity: 0.55, fontFamily: 'var(--font-involve)' }}>
+            Подпись внизу меню
+          </span>
+          <input value={menuFooterText} onChange={e => setMenuFooterText(e.target.value)}
+            placeholder={DEFAULT_MENU_FOOTER}
+            style={{ ...INPUT_STYLE, borderRadius: 4, padding: '0.5rem 0.7rem', outline: 'none' }} />
+          <div className="flex items-center gap-3 flex-wrap">
+            <button onClick={saveMenuFooter} disabled={savingMenuFooter} className={a.btn}>
+              {savingMenuFooter ? 'Сохраняем...' : 'Сохранить подпись'}
+            </button>
+            {menuFooterMsg && <span style={msgStyle(menuFooterMsg)}>{menuFooterMsg}</span>}
+          </div>
+        </div>
       </AdminSection>
 
       </AdminTabContext.Provider>

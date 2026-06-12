@@ -56,8 +56,9 @@ export async function GET() {
     }
 
     return NextResponse.json({ collections })
-  } catch (e) {
-    console.error('[/api/collections] error:', e)
+  } catch {
+    // БД недоступна (например, на этапе сборки без БД) — отдаём пусто без шумного стека
+    console.warn('[/api/collections] DB недоступна — пустой список')
     return NextResponse.json({ collections: [] })
   }
 }

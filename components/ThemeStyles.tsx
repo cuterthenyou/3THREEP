@@ -127,6 +127,7 @@ export default async function ThemeStyles() {
   const tripBreathe   = settings['trip_breathe'] !== 'false'   // дыхание цвета вкл/выкл
   const tripDriftSec  = num(settings['trip_drift_speed'], 16, 4, 60)   // период дрейфа пятен, сек
   const tripBlobOpacity = num(settings['trip_blob_opacity'], 1, 0, 1)  // интенсивность blobs
+  const tripDesync    = num(settings['trip_desync'], 1, 0, 3)          // рассинхрон дёрганья текста
 
   // Font aliases: override the named vars so all CSS modules (var(--font-onder) etc.) also respond
   const fontOnder   = fontHeading
@@ -177,7 +178,8 @@ export default async function ThemeStyles() {
   --type-modal-body-leading:    ${tModalBodyLead};
   --hero-speed: ${heroSpeed};
   --trip-drift-dur: ${tripDriftSec}s;
-  --trip-blob-opacity: ${tripBlobOpacity};`
+  --trip-blob-opacity: ${tripBlobOpacity};
+  --trip-desync: ${tripDesync};`
 
   const css = `${fontFaces ? fontFaces + '\n' : ''}
 :root {

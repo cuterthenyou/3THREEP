@@ -49,6 +49,8 @@ export default function CustomCursor() {
   const prevHovering = useRef(false)
   const rafId = useRef<number>(0)
   const reducedMotion = useRef(false)
+  // Чувствительность прицела (скорость следования) — пользовательская, из шестерёнки
+  const aimSens = useRef(1)
 
   // Mount + pointer detection
   useEffect(() => {
@@ -58,7 +60,18 @@ export default function CustomCursor() {
     const onMqChange = (e: MediaQueryListEvent) => setIsFinePointer(e.matches)
     mq.addEventListener('change', onMqChange)
     reducedMotion.current = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    return () => mq.removeEventListener('change', onMqChange)
+    // Чувствительность прицела: localStorage + живое обновление из шестерёнки
+    const readSens = () => {
+      const v = parseFloat(localStorage.getItem('threep-aim-sens') ?? '')
+      aimSens.current = isNaN(v) ? 1 : Math.min(3, Math.max(0.3, v))
+    }
+    readSens()
+    const onSens = (e: Event) => {
+      const v = (e as CustomEvent<number>).detail
+      if (typeof v === 'number') aimSens.current = Math.min(3, Math.max(0.3, v))
+    }
+    window.addEventListener('threep-aim-sens', onSens as EventListener)
+    return () => { mq.removeEventListener('change', onMqChange); window.removeEventListener('threep-aim-sens', onSens as EventListener) }
   }, [])
 
   // Fetch settings
@@ -112,7 +125,8 @@ export default function CustomCursor() {
     function animate() {
       const mp = mousePos.current
       const tp = trailPos.current
-      const lerpF = reducedMotion.current ? 1 : 0.12
+      // Чувствительность: выше → прицел-трейл быстрее догоняет курсор
+      const lerpF = reducedMotion.current ? 1 : Math.min(1, 0.12 * aimSens.current)
 
       tp.x += (mp.x - tp.x) * lerpF
       tp.y += (mp.y - tp.y) * lerpF

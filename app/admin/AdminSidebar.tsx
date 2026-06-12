@@ -86,6 +86,20 @@ function IcoNewsletter() {
   </svg>
 }
 
+function IcoGame() {
+  // Нетопырь-мишень
+  return <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" style={{ flexShrink: 0 }}>
+    <path d="M8 4 L10 2 L9.5 5 L13 3 L11 6 L15 6 L11.5 8 L14 11 L9.5 9 L8 13 L6.5 9 L2 11 L4.5 8 L1 6 L5 6 L3 3 L6.5 5 L6 2 Z"/>
+  </svg>
+}
+
+function IcoThemes() {
+  // Палитра/капля
+  return <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4" style={{ flexShrink: 0 }}>
+    <path d="M8 1 C4 6 2 8 2 11 a6 6 0 0 0 12 0 C14 8 12 6 8 1 Z"/>
+  </svg>
+}
+
 function IcoExit() {
   return <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" style={{ flexShrink: 0 }}>
     <path d="M0,1 L9,1 L9,3 L2,3 L2,13 L9,13 L9,15 L0,15 Z"/>
@@ -125,6 +139,8 @@ const NAV = [
   { href: '/admin/menu',        label: 'Меню',      Icon: IcoMenu },
   { href: '/admin/media',       label: 'Медиа',     Icon: IcoMedia },
   { href: '/admin/site',        label: 'Сайт',      Icon: IcoSite },
+  { href: '/admin/themes',      label: 'Темы',      Icon: IcoThemes },
+  { href: '/admin/game',        label: 'Игра',      Icon: IcoGame },
   { href: '/admin/texts',       label: 'Тексты',    Icon: IcoTexts },
   { href: '/admin/emojis',      label: 'Emoji',     Icon: IcoEmoji },
   { href: '/admin/newsletter',  label: 'Рассылка',  Icon: IcoNewsletter },

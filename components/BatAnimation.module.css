@@ -240,23 +240,29 @@
 }
 
 /* Lure hint — discreet prompt while a single bat is luring the player in */
+/* Подсказка-приманка — в углу, мелкая, чтобы не мешала контенту */
 .lureHint {
   position: fixed;
-  left: 50%;
-  bottom: 2rem;
-  transform: translateX(-50%);
+  right: 0.9rem;
+  bottom: 0.9rem;
+  left: auto;
+  transform: none;
   z-index: 120;
   pointer-events: none;
   font-family: var(--font-body, monospace);
-  font-size: 0.6rem;
-  letter-spacing: 0.3em;
+  font-size: 0.5rem;
+  letter-spacing: 0.22em;
   text-transform: uppercase;
   color: var(--accent, #f29774);
-  background: color-mix(in srgb, var(--bg, #090909) 70%, transparent);
-  border: 1px solid color-mix(in srgb, var(--accent, #f29774) 35%, transparent);
-  padding: 0.5rem 1rem;
+  background: color-mix(in srgb, var(--bg, #090909) 60%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent, #f29774) 25%, transparent);
+  padding: 0.3rem 0.6rem;
   border-radius: var(--radius-base, 0px);
   animation: lureHintPulse 1.8s ease-in-out infinite;
+}
+
+@media (max-width: 639px) {
+  .lureHint { font-size: 0.45rem; letter-spacing: 0.16em; right: 0.6rem; bottom: 0.6rem; }
 }
 
 @keyframes lureHintPulse {
@@ -431,6 +437,29 @@
   text-transform: uppercase;
   opacity: 0.6;
 }
+
+/* «Сбежать без уважения» — отказ от игры */
+.fleeBtn {
+  margin-top: 0.9rem;
+  align-self: center;
+  cursor: pointer;
+  background: transparent;
+  color: var(--accent, #f29774);
+  border: 1px solid color-mix(in srgb, var(--accent, #f29774) 35%, transparent);
+  border-radius: var(--radius-base, 0px);
+  font-family: var(--font-body, monospace);
+  font-size: 0.6rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  padding: 0.5rem 0.9rem;
+  opacity: 0.6;
+  transition: opacity 0.15s, border-color 0.15s, transform 0.1s;
+  -webkit-tap-highlight-color: transparent;
+}
+@media (hover: hover) and (pointer: fine) {
+  .fleeBtn:hover { opacity: 1; border-color: var(--accent, #f29774); }
+}
+.fleeBtn:active { transform: translateY(1px); }
 
 @keyframes chooseIn {
   0%   { opacity: 0; transform: translate(-50%, -50%) scale(0.92); filter: blur(4px); }

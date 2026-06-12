@@ -1,52 +1,41 @@
 /* ── Header bar — матовое стекло (blur фона), sticky/hide/reveal ──
-   backdrop-filter ставим НА сам хэдер (надёжно во всех браузерах — реально
-   размывает фон за шапкой). Контент — дети, рисуются поверх и не блюрятся.
-   Цветовая вуаль с затуханием книзу — .headerBase::after. Нижнего лайна НЕТ. */
-/* Матовое стекло. blur — на ОТДЕЛЬНОМ слое .glass (без mask: масочный
-   backdrop-filter в Chromium часто не рендерится — поэтому равномерный blur,
-   надёжно блюрит фон ВСЕГДА). «Стекло-градиент» книзу даёт цветовая вуаль
-   ::after с mask. Контент (.headerRow) — поверх, НЕ маскируется и НЕ блюрится. */
+   backdrop-filter ставим НА САМ хэдер (.headerBase) — самый надёжный вариант:
+   он точно блюрит контент за фиксированной шапкой во всех браузерах. Поверх —
+   полупрозрачный фон-градиент (плотнее вверху → 0 книзу), даёт «эффект стекла»
+   с затуханием даже там, где масочный backdrop-filter не работает (Chromium).
+   Контент (.headerRow) рисуется поверх и НЕ блюрится. Нижнего лайна НЕТ. */
 .headerBase {
   position: fixed;
-  transition: transform 0.42s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.3s ease;
+  /* собственный слой композитинга — стабилизирует backdrop-filter */
+  transform: translateZ(0);
+  backdrop-filter: blur(18px) saturate(1.5);
+  -webkit-backdrop-filter: blur(18px) saturate(1.5);
+  /* полупрозрачная вуаль: плотная вверху, уходит в 0 к низу шапки */
+  background: linear-gradient(
+    to bottom,
+    color-mix(in srgb, var(--bg) 52%, transparent) 0%,
+    color-mix(in srgb, var(--bg) 34%, transparent) 55%,
+    transparent 100%
+  );
+  transition: transform 0.42s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.3s ease, background 0.32s ease;
 }
 
-/* Стеклянный слой — равномерный blur фона, всегда включён */
-.glass {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  /* БЕЗ mask — иначе масочный backdrop-filter не рендерится в Chromium и блюр пропадает */
-  backdrop-filter: blur(20px) saturate(1.6);
-  -webkit-backdrop-filter: blur(20px) saturate(1.6);
-}
-
-/* Контент хэдера — поверх стекла/вуали */
+/* Контент хэдера — поверх вуали */
 .headerRow {
   position: relative;
   z-index: 2;
 }
 
-/* Цветовая вуаль — затухает книзу через mask (усиливает «градиент стекла») */
-.headerBase::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  pointer-events: none;
-  opacity: 0;
-  background: var(--header-scrolled-bg);
-  -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 58%, transparent 100%);
-          mask-image: linear-gradient(to bottom, #000 0%, #000 58%, transparent 100%);
-  transition: opacity 0.32s ease;
-}
-
-/* Scrolled — добавляем цветовую вуаль + мягкую тень (без лайна) */
+/* Scrolled — плотнее вуаль вверху + мягкая тень (без лайна) */
 .headerScrolled {
+  background: linear-gradient(
+    to bottom,
+    color-mix(in srgb, var(--bg) 78%, transparent) 0%,
+    color-mix(in srgb, var(--bg) 52%, transparent) 58%,
+    transparent 100%
+  );
   box-shadow: 0 8px 26px rgba(0, 0, 0, 0.16);
 }
-.headerScrolled::after { opacity: 1; }
 
 /* Hidden on scroll-down, slides back in on scroll-up */
 .headerHidden {
@@ -54,7 +43,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .headerBase, .headerBase::after { transition: none; }
+  .headerBase { transition: none; }
   .headerHidden { transform: none; }
 }
 

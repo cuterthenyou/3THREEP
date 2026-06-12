@@ -1,30 +1,30 @@
-import nodemailer from 'nodemailer'
+import nodemailer, { type Transporter } from 'nodemailer'
 
-if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
-  console.error('❌ SMTP credentials not found in environment variables!')
-  console.error('SMTP_USER:', process.env.SMTP_USER ? 'SET' : 'MISSING')
-  console.error('SMTP_PASS:', process.env.SMTP_PASS ? 'SET' : 'MISSING')
+// Транспорт создаётся ЛЕНИВО (на первой реальной отправке), а не при импорте —
+// иначе при сборке (нет SMTP-секретов) сыпались бы ❌-ошибки и DEBUG-логи nodemailer.
+let _transporter: Transporter | null = null
+function getTransporter(): Transporter {
+  if (_transporter) return _transporter
+  _transporter = nodemailer.createTransport({
+    host: process.env.SMTP_HOST || 'smtp.yandex.ru',
+    port: Number(process.env.SMTP_PORT) || 465,
+    secure: true,
+    auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
+  })
+  return _transporter
 }
 
-const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST || 'smtp.yandex.ru',
-  port: Number(process.env.SMTP_PORT) || 465,
-  secure: true,
-  auth: {
-    user: process.env.SMTP_USER!,
-    pass: process.env.SMTP_PASS!,
-  },
-  logger: true,
-  debug: true,
-})
+function hasSmtp() {
+  return Boolean(process.env.SMTP_USER && process.env.SMTP_PASS)
+}
 
 export async function verifyEmailConnection() {
+  if (!hasSmtp()) { console.warn('[email] SMTP не настроен'); return false }
   try {
-    await transporter.verify()
-    console.log('✅ SMTP connection verified')
+    await getTransporter().verify()
     return true
   } catch (error) {
-    console.error('❌ SMTP connection failed:', error)
+    console.error('[email] SMTP connection failed:', error)
     return false
   }
 }
@@ -134,8 +134,9 @@ export async function sendOTP(email: string, code: string) {
 
   const text = `3THREEP\n\n${c.preCodeText.toUpperCase()}\n\n${code}\n\n${c.expiryText}\n\n${c.footerText}`
 
+  if (!hasSmtp()) { console.warn('[email] SMTP не настроен — OTP не отправлен'); throw new Error('SMTP not configured') }
   try {
-    await transporter.sendMail({
+    await getTransporter().sendMail({
       from: `3THREEP <${process.env.SMTP_FROM || process.env.SMTP_USER}>`,
       to: email,
       subject: c.subject,
@@ -156,7 +157,7 @@ export async function sendOrderNotification(orderData: {
   total: number
 }) {
   const adminEmail = process.env.ADMIN_EMAIL
-  if (!adminEmail) return
+  if (!adminEmail || !hasSmtp()) return
 
   const html = `
     <h2>Новый заказ #${orderData.orderId}</h2>
@@ -166,7 +167,7 @@ export async function sendOrderNotification(orderData: {
   `
 
   try {
-    await transporter.sendMail({
+    await getTransporter().sendMail({
       from: `"threep" <${process.env.SMTP_FROM || process.env.SMTP_USER}>`,
       to: adminEmail,
       subject: `Новый заказ #${orderData.orderId}`,

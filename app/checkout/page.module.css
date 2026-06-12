@@ -1,10 +1,10 @@
 .page {
-  background: var(--color-bg-dark);
+  background: var(--bg);
   min-height: 100vh;
 }
 
 .backLink {
-  color: var(--color-accent);
+  color: var(--accent);
   font-family: var(--font-involve);
   font-size: 0.82rem;
   opacity: 0.85;
@@ -13,49 +13,54 @@
   gap: 0.35rem;
   margin-bottom: 1.25rem;
   padding: 0.3rem 0.65rem;
-  border: 1px solid var(--border-mid);
-  border-radius: 3px;
+  border: 1px solid var(--accent);
+  border-radius: var(--radius-btn, 3px);
   background: var(--bg-subtle);
-  box-shadow: 2px 2px 0 var(--border-mid);
+  box-shadow: 2px 2px 0 var(--accent);
   transition: box-shadow 0.12s, transform 0.1s;
   -webkit-tap-highlight-color: transparent;
 }
 
-.backLink:hover {
-  border-color: var(--color-accent);
-  box-shadow: 3px 3px 0 var(--color-accent);
-  transform: translate(-1px, -1px);
-  opacity: 1;
+@media (hover: hover) and (pointer: fine) {
+  .backLink:hover {
+    box-shadow: 3px 3px 0 var(--accent);
+    transform: translate(-1px, -1px);
+    opacity: 1;
+  }
 }
 
 .backLink:active {
-  box-shadow: 1px 1px 0 var(--color-accent);
+  box-shadow: 1px 1px 0 var(--accent);
   transform: translate(1px, 1px);
   transition-duration: 0.06s;
 }
 
 .pageTitle {
-  color: var(--color-accent);
-  font-family: var(--font-onder);
+  color: var(--accent);
+  font-family: var(--font-heading);
+  letter-spacing: 0.06em;
   word-break: break-word;
 }
 
 .sectionLabel {
-  color: var(--color-accent);
+  color: var(--accent);
   font-family: var(--font-onder);
   font-size: 0.7rem;
   text-transform: uppercase;
-  letter-spacing: 0.1em;
-  opacity: 0.45;
+  letter-spacing: 0.18em;
+  opacity: 0.55;
 }
 
+/* Карточка состава заказа — нео-брутал: острые углы, акцентная рамка, тень */
 .summaryCard {
-  background: var(--color-primary);
-  border-radius: 3px;
+  background: var(--bg-2);
+  border: 1px solid var(--accent);
+  box-shadow: 4px 4px 0 var(--accent);
+  border-radius: var(--radius-base, 0);
 }
 
 .itemName {
-  color: var(--color-accent);
+  color: var(--accent);
   font-family: var(--font-onder);
   font-size: 0.82rem;
   line-height: 1.5;
@@ -63,15 +68,16 @@
 }
 
 .itemVariant {
-  color: var(--color-accent);
+  color: var(--accent);
   font-family: var(--font-involve);
   opacity: 0.6;
 }
 
 .itemPrice {
-  color: var(--color-accent);
-  font-family: var(--font-onder);
-  font-size: 0.9rem;
+  color: var(--accent);
+  font-family: var(--font-price);
+  font-size: 1.1rem;
+  letter-spacing: 0.02em;
   flex-shrink: 0;
 }
 
@@ -80,31 +86,35 @@
 }
 
 .totalLabel {
-  color: var(--color-accent);
+  color: var(--accent);
   font-family: var(--font-involve);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  font-size: 0.78rem;
   opacity: 0.6;
 }
 
 .totalValue {
-  color: var(--color-accent);
-  font-family: var(--font-onder);
-  font-size: 1.3rem;
+  color: var(--accent);
+  font-family: var(--font-price);
+  font-size: 1.7rem;
+  letter-spacing: 0.02em;
 }
 
 .notice {
   background: var(--bg-subtle);
   border: 1px solid var(--border);
-  border-radius: 3px;
+  border-radius: var(--radius-base, 0);
   padding: 1rem;
 }
 
 .emptyText {
-  color: var(--color-accent);
+  color: var(--accent);
   font-family: var(--font-involve);
 }
 
 .noticeText {
-  color: var(--color-accent);
+  color: var(--accent);
   font-family: var(--font-involve);
   font-size: 0.875rem;
   line-height: 1.6;
@@ -112,21 +122,22 @@
 }
 
 .fieldLabel {
-  color: var(--color-accent);
+  color: var(--accent);
   font-family: var(--font-onder);
   font-size: 0.7rem;
   text-transform: uppercase;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.14em;
   opacity: 0.55;
 }
 
 .input {
   background: var(--bg-subtle);
-  color: var(--color-accent);
+  color: var(--accent);
   border: 1px solid var(--border-mid);
   font-family: var(--font-involve);
-  font-size: 0.9rem;
-  border-radius: 3px;
+  /* 16px — чтобы iOS не зумил при фокусе */
+  font-size: 16px;
+  border-radius: var(--radius-base, 0);
   outline: none;
   width: 100%;
   transition: border-color 0.2s, box-shadow 0.2s;
@@ -167,26 +178,28 @@
 .submitBtn {
   width: 100%;
   text-transform: uppercase;
-  letter-spacing: 0.1em;
-  background: var(--color-accent);
-  color: var(--color-primary);
-  border-radius: 3px;
+  letter-spacing: 0.12em;
+  background: var(--accent);
+  color: var(--bg);
+  border-radius: var(--radius-btn, 0);
   font-family: var(--font-onder);
   font-size: 0.82rem;
   cursor: pointer;
-  border: 1px solid var(--color-accent);
-  box-shadow: 2px 2px 0 var(--color-accent);
+  border: 1px solid var(--accent);
+  box-shadow: 3px 3px 0 var(--accent);
   transition: box-shadow 0.12s, transform 0.1s;
   -webkit-tap-highlight-color: transparent;
 }
 
-.submitBtn:hover:not(:disabled) {
-  box-shadow: 3px 3px 0 var(--color-accent);
-  transform: translate(-1px, -1px);
+@media (hover: hover) and (pointer: fine) {
+  .submitBtn:hover:not(:disabled) {
+    box-shadow: 4px 4px 0 var(--accent);
+    transform: translate(-1px, -1px);
+  }
 }
 
 .submitBtn:active:not(:disabled) {
-  box-shadow: 1px 1px 0 var(--color-accent);
+  box-shadow: 1px 1px 0 var(--accent);
   transform: translate(1px, 1px);
   transition-duration: 0.06s;
 }
@@ -199,28 +212,29 @@
 .guestBtn {
   width: 100%;
   text-transform: uppercase;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.12em;
   background: transparent;
-  color: var(--color-accent);
-  border: 1px solid var(--border-mid);
-  border-radius: 3px;
+  color: var(--accent);
+  border: 1px solid var(--accent);
+  border-radius: var(--radius-btn, 0);
   font-family: var(--font-onder);
   font-size: 0.82rem;
   cursor: pointer;
   padding: 1rem;
-  box-shadow: 2px 2px 0 var(--border-mid);
-  transition: box-shadow 0.12s, transform 0.1s, border-color 0.15s, background 0.15s;
+  box-shadow: 2px 2px 0 var(--accent);
+  transition: box-shadow 0.12s, transform 0.1s, background 0.15s;
 }
 
-.guestBtn:hover {
-  border-color: var(--color-accent);
-  background: var(--bg-subtle);
-  box-shadow: 3px 3px 0 var(--color-accent);
-  transform: translate(-1px, -1px);
+@media (hover: hover) and (pointer: fine) {
+  .guestBtn:hover {
+    background: var(--bg-subtle);
+    box-shadow: 3px 3px 0 var(--accent);
+    transform: translate(-1px, -1px);
+  }
 }
 
 .guestBtn:active {
-  box-shadow: 1px 1px 0 var(--color-accent);
+  box-shadow: 1px 1px 0 var(--accent);
   transform: translate(1px, 1px);
   transition-duration: 0.06s;
 }
@@ -228,7 +242,7 @@
 .switchModeBtn {
   background: none;
   border: none;
-  color: var(--color-accent);
+  color: var(--accent);
   font-family: var(--font-involve);
   font-size: 0.82rem;
   opacity: 0.5;

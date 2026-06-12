@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
 import { signOut } from 'next-auth/react'
 import s from './Header.module.css'
 
@@ -25,7 +24,6 @@ export default function UserButton() {
   const [user, setUser] = useState<UserData | null | undefined>(undefined)
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
-  const router = useRouter()
 
   useEffect(() => {
     fetch('/api/user/me')
@@ -47,8 +45,8 @@ export default function UserButton() {
     setOpen(false)
     setUser(null)
     await signOut({ redirect: false })
-    router.push('/')
-    router.refresh()
+    // Жёсткий reload на главную — гарантированно сбрасывает состояние сессии/настроек
+    window.location.href = '/'
   }
 
   if (user === undefined) return <div className="w-9 h-9 flex-shrink-0" />

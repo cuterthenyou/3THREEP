@@ -84,6 +84,7 @@ export default function ProductModal({ product, visible, onClose, modalBg, colle
     }
   }, [visible, product])
 
+
   // Ensure body scroll is restored on unmount
   useEffect(() => () => { document.body.style.overflow = '' }, [])
 
@@ -203,7 +204,11 @@ export default function ProductModal({ product, visible, onClose, modalBg, colle
                   style={{ aspectRatio: '3/4', position: 'relative', background: 'var(--bg-2)', maxHeight: '72vh' }}
                   {...touchHandlers}
                 >
-                  <Image src={product.images[activeImg] || product.images[0]} alt={product.name} fill className="object-cover select-none" draggable={false} sizes="40vw" />
+                  {/* Все фото смонтированы и грузятся eager → переключение мгновенно (кроссфейд) */}
+                  {product.images.map((img, i) => (
+                    <Image key={i} src={img} alt={product.name} fill loading="eager" className="object-cover select-none" draggable={false} sizes="40vw"
+                      style={{ opacity: i === activeImg ? 1 : 0, transition: 'opacity 0.25s ease' }} />
+                  ))}
                 </div>
               </div>
 
@@ -214,7 +219,10 @@ export default function ProductModal({ product, visible, onClose, modalBg, colle
                   style={{ aspectRatio: '3/4', position: 'relative', background: 'var(--bg-2)' }}
                   {...touchHandlers}
                 >
-                  <Image src={product.images[activeImg] || product.images[0]} alt={product.name} fill className="object-cover select-none" draggable={false} sizes="100vw" />
+                  {product.images.map((img, i) => (
+                    <Image key={i} src={img} alt={product.name} fill loading="eager" className="object-cover select-none" draggable={false} sizes="100vw"
+                      style={{ opacity: i === activeImg ? 1 : 0, transition: 'opacity 0.25s ease' }} />
+                  ))}
                 </div>
                 {product.images.length > 1 && (
                   <div className={s.thumbsRow}>

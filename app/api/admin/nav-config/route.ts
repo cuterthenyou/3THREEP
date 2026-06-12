@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { revalidatePath } from 'next/cache'
 import { auth } from '@/lib/auth'
 import { isAdmin } from '@/lib/isAdmin'
 import { queryOne, query } from '@/lib/db'
@@ -28,6 +29,8 @@ export async function POST(req: Request) {
        ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value`,
       [JSON.stringify(config)]
     )
+    // Сбрасываем кэш главной (revalidate=60) — кастомные пункты/порядок видны сразу
+    revalidatePath('/')
     return NextResponse.json({ ok: true })
   } catch (e) {
     console.error('[nav-config POST]', e)

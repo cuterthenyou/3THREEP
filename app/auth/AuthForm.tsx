@@ -165,10 +165,13 @@ export default function AuthForm() {
             <div>
               <input
                 type="email"
+                name="email"
+                autoComplete="email"
+                inputMode="email"
                 placeholder="твой@email.com"
                 value={email}
                 onChange={(e) => { setEmail(e.target.value); setEmailTouched(true); }}
-                onKeyDown={(e) => e.key === 'Enter' && !loading && isEmailValid && (isExistingUser === true || consent) && requestCode()}
+                onKeyDown={(e) => e.key === 'Enter' && !loading && isEmailValid && (isExistingUser !== false || consent) && requestCode()}
                 className={`${s.input} ${emailTouched && email ? (isEmailValid ? s.inputValid : s.inputError) : ''}`}
                 autoFocus
                 disabled={loading}
@@ -177,7 +180,9 @@ export default function AuthForm() {
                 <p className={s.fieldError}>Введите действительный email</p>
               )}
             </div>
-            {isExistingUser === false && (
+            {/* Галочки согласия видны по умолчанию (и пока статус не определён);
+                скрываем только для подтверждённо существующего аккаунта. */}
+            {isExistingUser !== true && (
               <>
                 <label className={s.consent}>
                   <input

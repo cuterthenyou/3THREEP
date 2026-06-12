@@ -19,7 +19,13 @@ export default function GameMount() {
       .then(r => (r.ok ? r.json() : {}))
       .then((g: Record<string, string>) => {
         const num = (k: string, def: number) => { const v = parseFloat(g[k] ?? ''); return isNaN(v) ? def : v }
-        setConfig({
+        // Структурный конфиг (новый): один JSON-ключ game_config поверх дефолтов.
+        let structured: Partial<GameConfig> = {}
+        if (g.game_config) {
+          try { structured = JSON.parse(g.game_config) as Partial<GameConfig> } catch { /* invalid JSON */ }
+        }
+        // Легаси числовые ключи (для совместимости со старыми настройками).
+        const legacy: Partial<GameConfig> = {
           roombaSpeed:   num('game_roomba_speed', DEFAULT_GAME_CONFIG.roombaSpeed),
           batSpeed:      num('game_bat_speed', DEFAULT_GAME_CONFIG.batSpeed),
           batScale:      num('game_bat_scale', DEFAULT_GAME_CONFIG.batScale),
@@ -29,7 +35,9 @@ export default function GameMount() {
           bossShieldMs:  num('game_boss_shield_ms', DEFAULT_GAME_CONFIG.bossShieldMs),
           bossVulnMs:    num('game_boss_vuln_ms', DEFAULT_GAME_CONFIG.bossVulnMs),
           bossTimeoutMs: num('game_boss_timeout_ms', DEFAULT_GAME_CONFIG.bossTimeoutMs),
-        })
+        }
+        // Приоритет: defaults < legacy < structured (структурный JSON — главный источник)
+        setConfig({ ...DEFAULT_GAME_CONFIG, ...legacy, ...structured })
       })
       .catch(() => {})
   }, [])

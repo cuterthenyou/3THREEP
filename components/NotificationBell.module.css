@@ -71,6 +71,17 @@
   animation: notifIn 0.16s ease both;
 }
 
+/* Мобила: прижимаем к правому краю вьюпорта — гарантированно влезает, без выхода за экран */
+@media (max-width: 639px) {
+  .panel {
+    position: fixed;
+    top: 3.75rem;
+    right: 0.6rem;
+    left: auto;
+    width: min(21rem, calc(100vw - 1.2rem));
+  }
+}
+
 @keyframes notifIn {
   from { opacity: 0; transform: translateY(-6px); }
   to   { opacity: 1; transform: translateY(0); }
@@ -82,10 +93,9 @@
 }
 
 .panelTitle {
-  font-family: var(--font-body);
-  font-weight: 700;
-  font-size: 0.72rem;
-  letter-spacing: 0.12em;
+  font-family: var(--font-heading);
+  font-size: 0.95rem;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--accent);
 }

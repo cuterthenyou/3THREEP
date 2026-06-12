@@ -79,6 +79,7 @@ interface Props {
   customItems?: CustomItem[];
   logoIconUrl?: string | null;
   logoTextUrl?: string | null;
+  menuFooterText?: string | null;
 }
 
 const ADMIN_LINKS = [
@@ -88,15 +89,17 @@ const ADMIN_LINKS = [
   { href: '/admin/collections', label: 'Коллекции' },
   { href: '/admin/menu', label: 'Меню' },
   { href: '/admin/media', label: 'Медиа' },
-  { href: '/admin/texts', label: 'Тексты' },
   { href: '/admin/site', label: 'Настройки сайта' },
+  { href: '/admin/themes', label: 'Темы' },
+  { href: '/admin/game', label: 'Игра' },
+  { href: '/admin/texts', label: 'Тексты' },
   { href: '/admin/emojis', label: 'Эмодзи' },
   { href: '/admin/newsletter', label: 'Рассылка' },
 ];
 
 interface Collection { slug: string; name: string; types?: string[]; href?: string }
 
-export default function Header({ isAdminUser = false, initialCollections, customItems: initialCustomItems, logoIconUrl: initialLogoIconUrl, logoTextUrl: initialLogoTextUrl }: Props) {
+export default function Header({ isAdminUser = false, initialCollections, customItems: initialCustomItems, logoIconUrl: initialLogoIconUrl, logoTextUrl: initialLogoTextUrl, menuFooterText }: Props) {
   const headerRef = useRef<HTMLElement>(null);
   const { count, setOpen } = useCart();
   const [scrolled, setScrolled] = useState(false);
@@ -111,6 +114,7 @@ export default function Header({ isAdminUser = false, initialCollections, custom
   const [logoIconUrl, setLogoIconUrl] = useState<string | null>(initialLogoIconUrl ?? null);
   const [logoTextUrl, setLogoTextUrl] = useState<string | null>(initialLogoTextUrl ?? null);
   const [heroSpeed, setHeroSpeed] = useState<number | null>(null);
+  const [aimSens, setAimSens] = useState(1);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const settingsRef = useRef<HTMLDivElement>(null);
   const menuHistoryPushed = useRef(false);
@@ -170,14 +174,20 @@ export default function Header({ isAdminUser = false, initialCollections, custom
     document.documentElement.style.setProperty('--trip-drunk', String(v));
   }
 
-  // Sticky styling + direction-aware hide/reveal
+  // Sticky styling + direction-aware hide/reveal.
+  // Прятать шапку начинаем ТОЛЬКО после конца hero-секции (граница — начало каталога);
+  // пока в пределах hero — шапка всегда видна. На страницах без hero — порог небольшой.
   useEffect(() => {
     let lastY = window.scrollY;
+    const heroEnd = () => {
+      const catalog = document.getElementById('catalog');
+      return catalog ? catalog.offsetTop - 80 : 140;
+    };
     const onScroll = () => {
       const y = window.scrollY;
       setScrolled(y > 50);
-      if (y > lastY + 5 && y > 140) setHidden(true);   // scroll down → hide
-      else if (y < lastY - 5) setHidden(false);         // scroll up → reveal
+      if (y > lastY + 5 && y > heroEnd()) setHidden(true);  // scroll down ПОСЛЕ hero → hide
+      else if (y < lastY - 5) setHidden(false);             // scroll up → reveal
       lastY = y;
     };
     window.addEventListener('scroll', onScroll, { passive: true });
@@ -262,6 +272,17 @@ export default function Header({ isAdminUser = false, initialCollections, custom
     window.dispatchEvent(new CustomEvent('threep-hero-speed', { detail: v }));
   }
 
+  // Чувствительность прицела (скорость следования кастом-курсора в игре)
+  useEffect(() => {
+    const stored = parseFloat(localStorage.getItem('threep-aim-sens') ?? '');
+    if (!isNaN(stored)) setAimSens(stored);
+  }, []);
+  function setAim(v: number) {
+    setAimSens(v);
+    localStorage.setItem('threep-aim-sens', String(v));
+    window.dispatchEvent(new CustomEvent('threep-aim-sens', { detail: v }));
+  }
+
   // Show speed control only on the home page (where the hero video lives)
   const [onHome, setOnHome] = useState(false);
   useEffect(() => { setOnHome(window.location.pathname === '/'); }, []);
@@ -286,7 +307,6 @@ export default function Header({ isAdminUser = false, initialCollections, custom
         ref={headerRef}
         className={`fixed top-0 left-0 right-0 z-50 ${s.headerBase} ${scrolled ? s.headerScrolled : s.headerTop} ${hidden ? s.headerHidden : ''}`}
       >
-        <div className={s.glass} aria-hidden="true" />
         <div className={`flex items-center justify-between px-5 sm:px-8 py-4 sm:py-5 ${s.headerRow}`}>
           <Link href="/" aria-label="На главную">
             {logoIconUrl ? (
@@ -353,6 +373,17 @@ export default function Header({ isAdminUser = false, initialCollections, custom
                       />
                     </div>
                   )}
+
+                  {/* Чувствительность прицела (для игры) */}
+                  <div className={s.settingsRow}>
+                    <span className={s.settingsLabel}>Чувствительность прицела · {aimSens.toFixed(1)}×</span>
+                    <input
+                      type="range" min={0.3} max={3} step={0.1} value={aimSens}
+                      onChange={e => setAim(parseFloat(e.target.value))}
+                      className={s.settingsRange}
+                      aria-label="Чувствительность прицела для игры"
+                    />
+                  </div>
                 </div>
               )}
             </div>
@@ -472,7 +503,7 @@ export default function Header({ isAdminUser = false, initialCollections, custom
 
         {/* Footer links */}
         <div className={s.overlayFooter}>
-          <span className={s.menuBrand}><b>333</b> · РУССКО-НАРОДНЫЙ · СДЕЛАНО ХЛОРКОЙ</span>
+          <span className={s.menuBrand}>{menuFooterText ?? '333 · РУССКО-НАРОДНЫЙ · СДЕЛАНО ХЛОРКОЙ'}</span>
           <Link href="/privacy" onClick={() => setMenuOpen(false)} className={s.footerLink}>Политика конфиденциальности</Link>
         </div>
       </div>

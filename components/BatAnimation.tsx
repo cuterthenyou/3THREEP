@@ -3,33 +3,22 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import s from './BatAnimation.module.css'
 import { trackEvent } from '@/lib/track'
+import { DEFAULT_GAME_CONFIG, type GameConfig } from '@/lib/gameConfig'
 
-// ── Admin-tunable balance (site_settings → info/page.tsx → prop) ──────────────
-export interface GameConfig {
-  roombaSpeed: number    // множитель скорости пылесоса
-  batSpeed: number       // множитель скорости нетопырей
-  batScale: number       // множитель размера нетопырей
-  powerupChance: number  // множитель шанса дропа пауэрапа
-  bossHp: number         // попаданий чтобы убить обычного босса (10/20/…)
-  bossMegaHp: number     // попаданий для мега-босса (33/66/99)
-  bossShieldMs: number   // длительность фазы щита (босс неуязвим), мс
-  bossVulnMs: number     // длительность окна уязвимости (можно бить), мс
-  bossTimeoutMs: number  // сколько даётся на убийство обычного босса, мс
-}
-export const DEFAULT_GAME_CONFIG: GameConfig = {
-  roombaSpeed: 1, batSpeed: 1, batScale: 1, powerupChance: 1,
-  bossHp: 8, bossMegaHp: 18, bossShieldMs: 1600, bossVulnMs: 1500, bossTimeoutMs: 45000,
-}
+export { DEFAULT_GAME_CONFIG }
+export type { GameConfig }
 
-// Босс на каждом 10-м уровне; мега-босс на 33/66/99
-const isBossWave = (n: number) => n > 0 && n % 10 === 0
-const isMegaWave = (n: number) => n === 33 || n === 66 || n === 99
+// Босс на каждом N-м уровне (cfg.bossEvery); мега-босс — на cfg.megaWaves
+const isBossWave = (n: number, cfg: GameConfig) => n > 0 && cfg.bossEvery > 0 && n % cfg.bossEvery === 0
+const isMegaWave = (n: number, cfg: GameConfig) => cfg.megaWaves.includes(n)
 
 // Сложность (выбор после первого нетопыря): только два режима — среднего не дано.
 type Difficulty = 'normal' | 'death'
+// Обе сложности стартуют с 1-й волны; DEATH тяжелее за счёт скорости/манёвра, а
+// НЕ за счёт пропуска уровней (раньше death.startWave=6 — игра начиналась с 6-й волны).
 const DIFFICULTY: Record<Difficulty, { label: string; speed: number; startWave: number; hint: string }> = {
   normal: { label: 'NORMAL', speed: 1.0,  startWave: 1, hint: 'жить можно' },
-  death:  { label: 'DEATH',  speed: 1.55, startWave: 6, hint: 'боль' },
+  death:  { label: 'DEATH',  speed: 1.6,  startWave: 1, hint: 'боль' },
 }
 
 // ── Pixel-art bat ─────────────────────────────────────────────────────────────
@@ -278,11 +267,12 @@ function PixelRoomba({ splats, dir, speedMult = 1, onSplatHit, onDone }: {
 }
 
 // ── BatInstance ───────────────────────────────────────────────────────────────
-function BatInstance({ bat, cracked, vulnerable = false, level = 1, speedRef, onClick, onPositionUpdate }: {
+function BatInstance({ bat, cracked, vulnerable = false, level = 1, chaos = 1, speedRef, onClick, onPositionUpdate }: {
   bat: BatData
   cracked: boolean
   vulnerable?: boolean
   level?: number
+  chaos?: number
   speedRef: React.MutableRefObject<number>
   onClick: () => void
   onPositionUpdate: (id: number, x: number, y: number) => void
@@ -304,9 +294,9 @@ function BatInstance({ bat, cracked, vulnerable = false, level = 1, speedRef, on
       st.lastTime = t
       const mult = speedRef.current   // slow-mo / freeze / normal
       if (t > st.nextTurnAt) {
-        // Манёвренность растёт с уровнем (0→1 за ~30 волн): резче виражи, чаще
-        // смена курса — нетопырей сложнее «тапнуть», но плавно.
-        const ag = Math.min(1, (level - 1) / 30)
+        // Манёвренность растёт с уровнем (0→1 за ~30 волн) × chaos (админ-настройка
+        // хаотичности): резче виражи, чаще смена курса — мышей сложнее «тапнуть».
+        const ag = Math.min(1.5, Math.min(1, (level - 1) / 30) * chaos)
         const curA = Math.atan2(st.vy, st.vx)
         const deflect = (Math.random() - 0.5) * Math.PI * (erratic ? 1.9 : isBoss ? 0.5 : 1.3 + ag * 0.7)
         const minS = isBoss ? 36 : 80
@@ -443,28 +433,40 @@ function BossHud({ boss }: { boss: { hp: number; maxHp: number; mega: boolean; v
 let _id = 0
 function nextId() { return ++_id }
 
-function spawnBat(waveNum = 0, allowSpecial = false, goldenBoost = 0, cfg: GameConfig = DEFAULT_GAME_CONFIG, diffMult = 1): BatData {
+function spawnBat(waveNum = 0, allowSpecial = false, goldenBoost = 0, cfg: GameConfig = DEFAULT_GAME_CONFIG, diffMult = 1, lure = false): BatData {
   const W = typeof window !== 'undefined' ? window.innerWidth  : 400
   const H = typeof window !== 'undefined' ? window.innerHeight : 800
 
-  // Pick variant
+  // Pick variant — взвешенный выбор среди доступных на этой волне типов (из конфига).
+  // goldenBoost (бонус-волна) добавляет веса золотым.
   let variant: BatVariant = 'normal'
-  if (allowSpecial) {
-    const r = Math.random()
-    if (r < 0.08 + goldenBoost) variant = 'golden'
-    else if (r < 0.30 && waveNum >= 2) variant = 'armored'
+  if (allowSpecial && !lure) {
+    const pool: { v: BatVariant; w: number }[] = []
+    if (waveNum >= cfg.typeNormal.minWave)  pool.push({ v: 'normal',  w: Math.max(0, cfg.typeNormal.weight) })
+    if (waveNum >= cfg.typeGold.minWave)    pool.push({ v: 'golden',  w: Math.max(0, cfg.typeGold.weight) + goldenBoost * 100 })
+    if (waveNum >= cfg.typeArmored.minWave) pool.push({ v: 'armored', w: Math.max(0, cfg.typeArmored.weight) })
+    const totalW = pool.reduce((s, p) => s + p.w, 0)
+    if (totalW > 0) {
+      let r = Math.random() * totalW
+      for (const p of pool) { r -= p.w; if (r <= 0) { variant = p.v; break } }
+    }
   }
 
   // Difficulty: base speed растёт плавно и ДОЛЬШЕ (до ~30 волны), чтобы сложность
   // шла через скорость/манёвр, а не количество. ×admin/difficulty.
-  const diff = 1 + Math.min(waveNum, 30) * 0.035
+  const diff = 1 + Math.min(waveNum, 30) * (cfg.speedGrowth ?? 0.035)
   const speedMul = (cfg.batSpeed || 1) * (diffMult || 1)
-  let speed = (120 + Math.random() * 80) * diff * speedMul
+  const typeCfg = variant === 'golden' ? cfg.typeGold : variant === 'armored' ? cfg.typeArmored : cfg.typeNormal
+  let speed = (120 + Math.random() * 80) * diff * speedMul * (typeCfg.speed || 1)
   // нетопыри чуть крупнее (Яна) + админ-множитель размера
   let scale = (0.72 + Math.random() * 0.78) * (cfg.batScale || 1)
-  let hp = 1
-  if (variant === 'golden')  { speed *= 1.6; scale = (0.6 + Math.random() * 0.28) * (cfg.batScale || 1); hp = 1 }
-  if (variant === 'armored') { speed *= 0.92; scale = (1.0 + Math.random() * 0.42) * (cfg.batScale || 1); hp = 2 }
+  let hp = Math.max(1, Math.round(typeCfg.hp || 1))
+  if (variant === 'golden')  { scale = (0.6 + Math.random() * 0.28) * (cfg.batScale || 1) }
+  if (variant === 'armored') { scale = (1.0 + Math.random() * 0.42) * (cfg.batScale || 1) }
+
+  // Приманка (lure): первый нетопырь до старта игры — всегда небольшой и спокойный,
+  // чтобы не надоедал и не лез в глаза. Не зависит от роста/админ-множителя размера.
+  if (lure) { variant = 'normal'; scale = 0.6; hp = 1; speed = 110 + Math.random() * 40 }
 
   const side = Math.floor(Math.random() * 4)
   const spread = (Math.random() - 0.5) * 0.5
@@ -483,7 +485,7 @@ function spawnBat(waveNum = 0, allowSpecial = false, goldenBoost = 0, cfg: GameC
 function spawnBoss(mega: boolean, cfg: GameConfig = DEFAULT_GAME_CONFIG): BatData {
   const W = typeof window !== 'undefined' ? window.innerWidth  : 400
   const speed = mega ? 70 : 90
-  const scale = (mega ? 3.4 : 2.5) * (cfg.batScale || 1)
+  const scale = (mega ? cfg.bossMegaScale : cfg.bossScale) * (cfg.batScale || 1)
   const hp = mega ? Math.max(1, Math.round(cfg.bossMegaHp)) : Math.max(1, Math.round(cfg.bossHp))
   const spread = (Math.random() - 0.5) * 0.4
   return {
@@ -568,17 +570,26 @@ export default function BatAnimation({ config = DEFAULT_GAME_CONFIG }: { config?
     toShield() // стартуем под щитом
   }
 
+  // Запись рекорда: общий ключ (совместимость) + раздельный по сложности (NORMAL/DEATH)
+  function persistRecord() {
+    try {
+      const cur = scoreRef.current
+      const diffKey = `threep-bat-hs-${difficultyRef.current}` // -normal / -death
+      const rawAll = parseInt(localStorage.getItem('threep-bat-hs') ?? '', 10)
+      const prevAll = Number.isFinite(rawAll) ? rawAll : 0
+      const bestAll = Math.max(cur, prevAll)
+      if (bestAll > prevAll) localStorage.setItem('threep-bat-hs', String(bestAll))
+      const rawDiff = parseInt(localStorage.getItem(diffKey) ?? '', 10)
+      const prevDiff = Number.isFinite(rawDiff) ? rawDiff : 0
+      if (cur > prevDiff) localStorage.setItem(diffKey, String(cur))
+      setBestScore(bestAll)
+    } catch { /* localStorage blocked */ }
+  }
+
   // ── Game over (запись рекорда + сброс) — общий для свармов и боссов ──
   function endGame() {
     setGameState('game_over')
-    try {
-      const cur = scoreRef.current
-      const raw = parseInt(localStorage.getItem('threep-bat-hs') ?? '', 10)
-      const prev = Number.isFinite(raw) ? raw : 0
-      const best = Math.max(cur, prev)
-      if (best > prev) localStorage.setItem('threep-bat-hs', String(best))
-      setBestScore(best)
-    } catch { /* localStorage blocked */ }
+    persistRecord()
     if (scoreRef.current > 0) trackEvent('bat_score', { score: scoreRef.current, level: currentWaveSizeRef.current })
     goTimerRef.current = setTimeout(() => {
       setSplats([]); setGameState('idle'); setScore(0); scoreRef.current = 0; setWaveNum(0)
@@ -597,6 +608,7 @@ export default function BatAnimation({ config = DEFAULT_GAME_CONFIG }: { config?
     setBats([]); setBoss(null); bossRef.current = null
     setGameState('win')
     try { localStorage.setItem('threep-bat-win', '1') } catch { /* blocked */ }
+    persistRecord()
     try {
       const cur = scoreRef.current
       const raw = parseInt(localStorage.getItem('threep-bat-hs') ?? '', 10)
@@ -630,10 +642,11 @@ export default function BatAnimation({ config = DEFAULT_GAME_CONFIG }: { config?
     // Пройден финальный уровень → победа
     if (n > FINAL_LEVEL) { winGame(); return }
     currentWaveSizeRef.current = n
+    const cfg = cfgRef.current
 
-    // ── BOSS WAVE (каждый 10-й; мега на 33/66/99) ──
-    if (isBossWave(n)) {
-      const mega = isMegaWave(n)
+    // ── BOSS WAVE (каждый cfg.bossEvery; мега на cfg.megaWaves) ──
+    if (isBossWave(n, cfg)) {
+      const mega = isMegaWave(n, cfg)
       setBonusWave(false)
       if (waveTimerRef.current) { clearTimeout(waveTimerRef.current); waveTimerRef.current = null }
       spawnTimersRef.current.forEach(clearTimeout); spawnTimersRef.current = []
@@ -659,27 +672,25 @@ export default function BatAnimation({ config = DEFAULT_GAME_CONFIG }: { config?
       return
     }
 
-    // Every 5th wave is a frantic BONUS swarm: more bats, faster, more gold
-    const isBonus = n >= 5 && n % 5 === 0
+    // Бонус-волна каждые cfg.bonusEvery уровней: больше мышей, быстрее, больше золота
+    const isBonus = cfg.bonusEvery > 0 && n >= cfg.bonusEvery && n % cfg.bonusEvery === 0
     setBonusWave(isBonus)
-    // Плавное усложнение: число нетопырей растёт МЕДЛЕННО и упирается в потолок
-    // (особенно на мобиле — иначе к 8-й волне весь экран в мышах). Дальше сложность
-    // идёт через скорость/манёвренность полёта (spawnBat diff + level-agility), а не количество.
+    // Плавное усложнение: число мышей растёт по cfg.countGrowth и упирается в потолок
+    // (мобайл/десктоп). Дальше сложность — через скорость/манёвр, а не количество.
     const vw = typeof window !== 'undefined' ? window.innerWidth : 1024
     const mobile = vw < 640
-    const cap = mobile ? 6 : 11
-    // Старт с ОДНОЙ мыши (n=1), дальше плавный рост с плато. Сложность дальше —
-    // через скорость/манёвр (spawnBat diff + level-agility), а не количество.
-    const base = Math.min(cap, Math.max(1, Math.round(1 + Math.sqrt(Math.max(0, n - 1)) * 1.7)))
+    const cap = mobile ? cfg.capMobile : cfg.capDesktop
+    const base = Math.min(cap, Math.max(1, Math.round(cfg.baseCount + Math.sqrt(Math.max(0, n - 1)) * cfg.countGrowth)))
     const count = isBonus ? Math.min(cap + (mobile ? 2 : 4), base + (mobile ? 2 : 3)) : base
+    const lure = gameStateRef.current === 'lure'
     const allowSpecial = n >= 2
-    const interval = isBonus ? 90 : 150
+    const interval = isBonus ? Math.max(40, Math.round(cfg.spawnIntervalMs * 0.6)) : cfg.spawnIntervalMs
     const diffMult = DIFFICULTY[difficultyRef.current].speed
     if (waveTimerRef.current) { clearTimeout(waveTimerRef.current); waveTimerRef.current = null }
     spawnTimersRef.current.forEach(clearTimeout); spawnTimersRef.current = []
     for (let i = 0; i < count; i++) {
       spawnTimersRef.current.push(setTimeout(
-        () => setBats(prev => [...prev, spawnBat(n, allowSpecial, isBonus ? 0.18 : 0, cfgRef.current, diffMult)]),
+        () => setBats(prev => [...prev, spawnBat(n, allowSpecial, isBonus ? 0.18 : 0, cfgRef.current, diffMult, lure)]),
         i * interval
       ))
     }
@@ -709,7 +720,14 @@ export default function BatAnimation({ config = DEFAULT_GAME_CONFIG }: { config?
 
   useEffect(() => {
     if (gameState !== 'idle') return
-    const t = setTimeout(() => setGameState('lure'), 3000)
+    // Мышь-приманка появляется не через фикс-время, а через случайную паузу
+    // (cfg.lureMinMs..lureMaxMs) со смещением к меньшим (r^2 → чаще ближе к min).
+    const cfg = cfgRef.current
+    const min = Math.max(500, cfg.lureMinMs)
+    const max = Math.max(min, cfg.lureMaxMs)
+    const r = Math.random() * Math.random() // bias к 0 → чаще короткая пауза
+    const delay = Math.round(min + (max - min) * r)
+    const t = setTimeout(() => setGameState('lure'), delay)
     return () => clearTimeout(t)
   }, [gameState])
 
@@ -881,13 +899,15 @@ export default function BatAnimation({ config = DEFAULT_GAME_CONFIG }: { config?
     setScore(n => { const next = n + gained; scoreRef.current = next; return next })
     setBestScore(b => Math.max(b, scoreRef.current))
 
-    // Power-up drop (only mid-game, ~9% — golden bats are more generous)
+    // Power-up drop (only mid-game) — шансы и пул бонусов из конфига
     if (gameStateRef.current === 'playing') {
-      const pc = cfgRef.current.powerupChance || 1
-      const dropChance = (bat.variant === 'golden' ? 0.45 : 0.14) * pc
-      if (Math.random() < dropChance) {
-        const kinds: PowerKind[] = ['slowmo', 'freeze', 'double']
-        const kind = kinds[Math.floor(Math.random() * kinds.length)]
+      const cfg = cfgRef.current
+      const pc = cfg.powerupChance || 1
+      const dropChance = (bat.variant === 'golden' ? cfg.goldDropChance : cfg.normalDropChance) * pc
+      const pool = (cfg.powerupPool?.length ? cfg.powerupPool : ['slowmo', 'freeze', 'double'])
+        .filter((k): k is PowerKind => k === 'slowmo' || k === 'freeze' || k === 'double')
+      if (pool.length > 0 && Math.random() < dropChance) {
+        const kind = pool[Math.floor(Math.random() * pool.length)]
         setPowerups(prev => [...prev, { id: nextId(), x: pos.x, y: pos.y, kind }])
       }
     }
@@ -918,6 +938,15 @@ export default function BatAnimation({ config = DEFAULT_GAME_CONFIG }: { config?
     setWaveNum(startWave)
     setGameState('playing')
     spawnWaveRef.current?.(startWave)
+  }, [])
+
+  // «Сбежать без уважения» — отказ от игры на экране выбора сложности → в idle.
+  const flee = useCallback(() => {
+    firstKillRef.current = false
+    difficultyRef.current = 'normal'
+    batPositions.current.clear(); batHpRef.current.clear()
+    setBats([]); setSplats([])
+    setGameState('idle')
   }, [])
 
   const collectPowerUp = useCallback((id: number, kind: PowerKind) => {
@@ -959,6 +988,7 @@ export default function BatAnimation({ config = DEFAULT_GAME_CONFIG }: { config?
         <BatInstance key={bat.id} bat={bat} cracked={crackedIds.has(bat.id)} speedRef={speedMultRef}
           vulnerable={bat.variant === 'boss' ? (boss?.vulnerable ?? false) : false}
           level={waveNum}
+          chaos={cfgRef.current.chaos}
           onClick={() => handleBatClick(bat.id)}
           onPositionUpdate={handlePositionUpdate} />
       ))}
@@ -980,7 +1010,7 @@ export default function BatAnimation({ config = DEFAULT_GAME_CONFIG }: { config?
           onSplatHit={handleSplatHit} onDone={handleRoombaDone} />
       )}
       {gameState === 'lure' && (
-        <div className={s.lureHint} aria-hidden="true">Поймай нетопыря — начни охоту</div>
+        <div className={s.lureHint} aria-hidden="true">Поймай нетопыря</div>
       )}
       {gameState === 'choose' && (
         <div className={s.chooseWrap}>
@@ -994,6 +1024,10 @@ export default function BatAnimation({ config = DEFAULT_GAME_CONFIG }: { config?
               </button>
             ))}
           </div>
+          <button className={s.fleeBtn} onClick={flee}
+            onTouchStart={e => { e.preventDefault(); flee() }}>
+            Сбежать без уважения
+          </button>
         </div>
       )}
       {gameState === 'game_over' && <BloodWall />}
@@ -1006,8 +1040,9 @@ export default function BatAnimation({ config = DEFAULT_GAME_CONFIG }: { config?
         </div>
       )}
       {waveBanner && gameState === 'playing' && (
-        <WaveBanner waveNum={waveNum} bonus={!isBossWave(waveNum) && waveNum >= 5 && waveNum % 5 === 0}
-          boss={isBossWave(waveNum)} mega={isMegaWave(waveNum)} />
+        <WaveBanner waveNum={waveNum}
+          bonus={!isBossWave(waveNum, cfgRef.current) && cfgRef.current.bonusEvery > 0 && waveNum >= cfgRef.current.bonusEvery && waveNum % cfgRef.current.bonusEvery === 0}
+          boss={isBossWave(waveNum, cfgRef.current)} mega={isMegaWave(waveNum, cfgRef.current)} />
       )}
       {showScore && (
         <ScoreCounter score={score} waveNum={waveNum} best={bestScore}
