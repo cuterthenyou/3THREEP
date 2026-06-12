@@ -342,11 +342,12 @@
 .avatarBtn {
   position: relative;
   /* Равносторонний квадрат ВО ВСЮ ВЫСОТУ блока: высота = высоте карточки,
-     ширина выводится из aspect-ratio → идеальный квадрат, без пустоты снизу. */
+     ширина выводится из aspect-ratio. align-self:center — иначе flex-колонка
+     растягивает ШИРИНУ под узкую колонку и квадрат сплющивается. */
   flex: 1;
-  height: 100%;
   aspect-ratio: 1 / 1;
   width: auto;
+  align-self: center;
   border-radius: 2px;
   overflow: hidden;
   display: flex;
