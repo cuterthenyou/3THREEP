@@ -1,0 +1,14 @@
+#!/bin/sh
+# THREEP pre-commit — страж дизайн-системы: проверяет staged-файлы на хардкод цветов.
+# Активируется: git config core.hooksPath .githooks  (делается один раз, см. README/scripts).
+
+# Собираем staged .tsx и *.module.css
+files=$(git diff --cached --name-only --diff-filter=ACM | grep -E '\.(tsx|module\.css)$' || true)
+[ -z "$files" ] && exit 0
+
+node scripts/check-hardcode.mjs $files
+status=$?
+if [ "$status" -ne 0 ]; then
+  echo "Коммит остановлен. Чтобы пропустить разово: git commit --no-verify"
+fi
+exit $status

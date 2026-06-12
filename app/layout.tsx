@@ -1,6 +1,5 @@
 import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
-import { Unbounded } from 'next/font/google';
 import { CartProvider } from '@/lib/cart';
 import CartDrawer from '@/components/CartDrawer';
 import Providers from './providers';
@@ -13,13 +12,6 @@ import CustomCursor from '@/components/CustomCursor';
 import VisitTracker from '@/components/VisitTracker';
 import LoadingScreen from '@/components/LoadingScreen';
 import './globals.css';
-
-const unbounded = Unbounded({
-  subsets: ['latin', 'cyrillic'],
-  weight: ['700', '900'],
-  variable: '--font-heading',
-  display: 'swap',
-});
 
 export const metadata: Metadata = {
   title: 'THREEP — Custom Streetwear',
@@ -36,7 +28,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="ru" className={unbounded.variable} data-theme="dark">
+    <html lang="ru" data-theme="dark">
       {/* Inline theme init — runs before paint to prevent FOUC */}
       <head>
         <script

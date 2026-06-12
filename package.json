@@ -7,6 +7,7 @@
     "build": "next build",
     "start": "next start -p 3000",
     "lint": "next lint",
+    "lint:hardcode": "node scripts/check-hardcode.mjs",
     "format": "prettier --write \"**/*.{ts,tsx,css,json}\"",
     "migrate": "node scripts/migrate-to-amvera.js",
     "clean-db": "node scripts/clean-database.js"
