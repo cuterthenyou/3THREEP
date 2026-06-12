@@ -1,21 +1,40 @@
-/* ── Header bar — frosted-glass (iOS-style), sticky/hide/reveal ──
-   Стекло-фон живёт на ::before и затухает книзу через mask-градиент (плотное
-   сверху, прозрачное снизу). Маскируем именно псевдоэлемент, а НЕ сам хэдер,
-   иначе вместе с фоном «растворятся» логотип и кнопки. Контент — поверх (z-index). */
-/* Матовое стекло (iOS): blur ставим НА сам хэдер (на псевдоэлементе/при
-   will-change:transform backdrop-filter не семплит фон и не появляется).
-   Контент — дети хэдера — рисуются поверх и НЕ размываются. Цветовая вуаль с
-   затуханием книзу — на ::after (маска), полупрозрачная, чтобы стекло было видно. */
+/* ── Header bar — «liquid glass» (iOS 26), sticky/hide/reveal ──
+   Стекло строим из трёх слоёв, потому что простой blur плоского фона НЕВИДИМ
+   (за шапкой в каталоге сплошной --bg → блюрить нечего, виден только тинт):
+     • backdrop-filter blur+saturate+brightness НА самом хэдере — размывает то,
+       что под ним (видно, когда проезжают карточки/видео);
+     • ::after — цветовая вуаль с затуханием книзу (mask);
+     • ::before — БЛИК/отражение (specular sheen) + он читается как стекло даже
+       над плоским фоном;
+     • inset-хайлайт сверху + мягкая тень снизу = кромка стекла.
+   Контент (логотип/кнопки) — дети, рисуются поверх и не размываются. */
 .headerBase {
   position: fixed;
   transition: transform 0.42s cubic-bezier(0.22, 1, 0.36, 1),
-              backdrop-filter 0.3s ease, -webkit-backdrop-filter 0.3s ease;
+              backdrop-filter 0.3s ease, -webkit-backdrop-filter 0.3s ease,
+              box-shadow 0.3s ease;
 }
 
-/* Контент хэдера всегда поверх цветовой вуали */
+/* Контент хэдера — поверх всех стеклянных слоёв */
 .headerBase > * {
   position: relative;
+  z-index: 2;
+}
+
+/* Блик стекла (specular sheen) — тонкое световое отражение сверху */
+.headerBase::before {
+  content: '';
+  position: absolute;
+  inset: 0;
   z-index: 1;
+  pointer-events: none;
+  opacity: 0;
+  background:
+    linear-gradient(180deg, color-mix(in srgb, white 16%, transparent) 0%, transparent 48%),
+    radial-gradient(120% 80% at 18% -40%, color-mix(in srgb, white 12%, transparent), transparent 60%);
+  -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 62%, transparent 100%);
+          mask-image: linear-gradient(to bottom, #000 0%, #000 62%, transparent 100%);
+  transition: opacity 0.32s ease;
 }
 
 /* Цветовая вуаль — ::after, затухает книзу через mask */
@@ -32,11 +51,16 @@
   transition: opacity 0.32s ease;
 }
 
-/* Scrolled — включаем матовое стекло + проявляем вуаль */
+/* Scrolled — включаем стекло: blur+saturate+brightness, блик, вуаль, кромка */
 .headerScrolled {
-  backdrop-filter: blur(20px) saturate(1.7);
-  -webkit-backdrop-filter: blur(20px) saturate(1.7);
+  backdrop-filter: blur(16px) saturate(1.9) brightness(1.06);
+  -webkit-backdrop-filter: blur(16px) saturate(1.9) brightness(1.06);
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, white 22%, transparent),   /* верхний хайлайт стекла */
+    inset 0 -1px 0 color-mix(in srgb, var(--accent) 12%, transparent),
+    0 8px 26px rgba(0, 0, 0, 0.18);                              /* мягкая тень под баром */
 }
+.headerScrolled::before,
 .headerScrolled::after { opacity: 1; }
 
 /* Hidden on scroll-down, slides back in on scroll-up */
@@ -45,7 +69,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .headerBase, .headerBase::after { transition: none; }
+  .headerBase, .headerBase::before, .headerBase::after { transition: none; }
   .headerHidden { transform: none; }
 }
 
