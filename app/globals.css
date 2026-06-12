@@ -68,6 +68,9 @@
   /* ── Spacing rhythm (постулат равных отступов) ── */
   --menu-item-gap: 0.5rem;
 
+  /* ── Trip «пьяность» (пользовательский множитель силы trip-эффектов) ── */
+  --trip-drunk: 1;
+
   /* ── Buttons ── */
   --btn-fz-mobile:       0.7rem;   /* unified primary-button font size on <640px */
 
@@ -197,7 +200,7 @@
     radial-gradient(40% 40% at 26% 28%, color-mix(in srgb, var(--accent) 60%, transparent), transparent 70%),
     radial-gradient(44% 44% at 74% 64%, color-mix(in srgb, var(--accent) 32%, transparent), transparent 70%);
 }
-html[data-theme="trip"] .trip-fx { opacity: var(--trip-blob-opacity, 1); }
+html[data-theme="trip"] .trip-fx { opacity: calc(var(--trip-blob-opacity, 1) * var(--trip-drunk, 1)); }
 @media (prefers-reduced-motion: no-preference) {
   html[data-theme="trip"] .trip-fx { animation: tripDrift var(--trip-drift-dur, 16s) ease-in-out infinite alternate; }
 }
@@ -215,7 +218,7 @@ html[data-theme="trip"] .trip-fx { opacity: var(--trip-blob-opacity, 1); }
   opacity: 0;
   overflow: hidden;
 }
-html[data-theme="trip"] .trip-blobs { opacity: var(--trip-blob-opacity, 1); }
+html[data-theme="trip"] .trip-blobs { opacity: calc(var(--trip-blob-opacity, 1) * var(--trip-drunk, 1)); }
 .trip-blobs span {
   position: absolute;
   border-radius: 50%;
@@ -250,7 +253,7 @@ html[data-theme="trip"] .trip-blobs { opacity: var(--trip-blob-opacity, 1); }
   opacity: 0;
   background: repeating-linear-gradient(0deg, transparent 0 2px, rgba(0, 0, 0, 0.18) 2px 3px);
 }
-html[data-theme="trip"] .trip-breathe { opacity: 0.4; }
+html[data-theme="trip"] .trip-breathe { opacity: calc(0.4 * var(--trip-drunk, 1)); }
 @media (prefers-reduced-motion: no-preference) {
   html[data-theme="trip"] .trip-breathe { animation: tripScan 7s steps(1) infinite; }
 }

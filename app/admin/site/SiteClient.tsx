@@ -8,12 +8,13 @@ import { ColorPicker, FontSelect, GlitterPreview } from './parts'
 import { parseLevelingConfig, getDiscount } from '@/lib/leveling'
 import type { CustomFont } from '@/components/ThemeStyles'
 
-type SettingsTab = 'general' | 'type' | 'effects' | 'catalog' | 'account' | 'content' | 'menu'
+type SettingsTab = 'general' | 'type' | 'effects' | 'catalog' | 'game' | 'account' | 'content' | 'menu'
 const SETTINGS_TABS: { id: SettingsTab; label: string }[] = [
   { id: 'general', label: 'Бренд' },
   { id: 'type',    label: 'Типографика' },
   { id: 'effects', label: 'Эффекты' },
   { id: 'catalog', label: 'Каталог' },
+  { id: 'game',    label: 'Игра' },
   { id: 'account', label: 'Личный кабинет' },
   { id: 'content', label: 'Контент' },
   { id: 'menu',    label: 'Меню' },
@@ -1163,7 +1164,7 @@ export default function SiteClient({ initialSettings, initialCustomFonts = [] }:
       </AdminSection>
 
       {/* ── Игра «Охота» (баланс) ── */}
-      <AdminSection title="Игра «Охота» — баланс" tab="catalog">
+      <AdminSection title="Игра «Охота» — баланс" tab="game">
         <p className="text-xs" style={{ color: 'var(--accent)', opacity: 0.5, fontFamily: 'var(--font-involve)' }}>
           Мини-игра на странице ИНФА. Множители: 1.0 = базово. Скорость пылесоса уже авто-подстраивается
           под ширину экрана (фикс «медленно на десктопе / быстро на мобиле») — здесь общий множитель сверху.

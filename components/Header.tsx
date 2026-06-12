@@ -105,7 +105,8 @@ export default function Header({ isAdminUser = false, initialCollections, custom
   const [collections, setCollections] = useState<Collection[]>(initialCollections ?? []);
   const [customItems, setCustomItems] = useState<CustomItem[]>(initialCustomItems ?? []);
   const [collectionsLoading, setCollectionsLoading] = useState(!initialCollections);
-  const [isDark, setIsDark] = useState(false);
+  const [theme, setTheme] = useState<'light' | 'dark' | 'trip'>('dark');
+  const [tripDrunk, setTripDrunk] = useState(1);
   const [logoIconUrl, setLogoIconUrl] = useState<string | null>(initialLogoIconUrl ?? null);
   const [logoTextUrl, setLogoTextUrl] = useState<string | null>(initialLogoTextUrl ?? null);
   const [heroSpeed, setHeroSpeed] = useState<number | null>(null);
@@ -142,15 +143,31 @@ export default function Header({ isAdminUser = false, initialCollections, custom
       .catch(() => setCollectionsLoading(false));
   }, [initialCollections]);
 
-  // Sync theme icon with current theme
+  // Sync theme icon + name with current theme (incl. trip)
   useEffect(() => {
-    setIsDark(document.documentElement.dataset.theme === 'dark');
-    const obs = new MutationObserver(() => {
-      setIsDark(document.documentElement.dataset.theme === 'dark');
-    });
+    const read = () => {
+      const t = (document.documentElement.dataset.theme as 'light' | 'dark' | 'trip') ?? 'dark';
+      setTheme(t);
+    };
+    read();
+    const obs = new MutationObserver(read);
     obs.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
     return () => obs.disconnect();
   }, []);
+
+  // Trip «пьяность» (GTA-эффект): пользовательский множитель силы trip-эффектов
+  useEffect(() => {
+    const stored = parseFloat(localStorage.getItem('trip-drunk') ?? '');
+    const v = isNaN(stored) ? 1 : stored;
+    setTripDrunk(v);
+    document.documentElement.style.setProperty('--trip-drunk', String(v));
+  }, []);
+
+  function setDrunk(v: number) {
+    setTripDrunk(v);
+    localStorage.setItem('trip-drunk', String(v));
+    document.documentElement.style.setProperty('--trip-drunk', String(v));
+  }
 
   // Sticky styling + direction-aware hide/reveal
   useEffect(() => {
@@ -230,7 +247,6 @@ export default function Header({ isAdminUser = false, initialCollections, custom
 
   // Hero video playback speed — cycles through adequate values, persisted +
   // broadcast to the Hero component via a custom event.
-  const SPEED_STEPS = [0.5, 0.75, 1, 1.5];
   useEffect(() => {
     const stored = parseFloat(localStorage.getItem('hero-speed') ?? '');
     if (!isNaN(stored)) { setHeroSpeed(stored); return; }
@@ -297,30 +313,38 @@ export default function Header({ isAdminUser = false, initialCollections, custom
 
               {settingsOpen && (
                 <div className={s.settingsPanel}>
-                  {/* Тема */}
+                  {/* Тема — на кнопке РЕАЛЬНО включённая тема (LIGHT/DARK/TRIP) */}
                   <div className={s.settingsRow}>
                     <span className={s.settingsLabel}>Тема</span>
                     <button onClick={toggleTheme} className={s.settingsToggle} aria-label="Сменить тему">
-                      {isDark ? <BrutalSun /> : <BrutalMoon />}
-                      <span>{isDark ? 'LIGHT' : 'DARK'}</span>
+                      {theme === 'light' ? <BrutalSun /> : theme === 'trip' ? <IconGear /> : <BrutalMoon />}
+                      <span>{theme === 'light' ? 'LIGHT' : theme === 'trip' ? 'TRIP' : 'DARK'}</span>
                     </button>
                   </div>
 
-                  {/* Скорость видео — только на главной */}
+                  {/* Trip «пьяность» (GTA-эффект) — только в trip-теме */}
+                  {theme === 'trip' && (
+                    <div className={s.settingsRow}>
+                      <span className={s.settingsLabel}>Пьяность (trip) · {tripDrunk.toFixed(1)}×</span>
+                      <input
+                        type="range" min={0} max={2} step={0.1} value={tripDrunk}
+                        onChange={e => setDrunk(parseFloat(e.target.value))}
+                        className={s.settingsRange}
+                        aria-label="Сила пьяного эффекта"
+                      />
+                    </div>
+                  )}
+
+                  {/* Скорость видео — ползунок 0.1–2.5, только на главной */}
                   {onHome && heroSpeed != null && (
                     <div className={s.settingsRow}>
-                      <span className={s.settingsLabel}>Скорость видео</span>
-                      <div className={s.speedOpts}>
-                        {SPEED_STEPS.map(v => (
-                          <button
-                            key={v}
-                            onClick={() => setSpeed(v)}
-                            className={`${s.speedOpt} ${Math.abs((heroSpeed ?? 1) - v) < 0.01 ? s.speedOptActive : ''}`}
-                          >
-                            {fmtSpeed(v)}
-                          </button>
-                        ))}
-                      </div>
+                      <span className={s.settingsLabel}>Скорость видео · {fmtSpeed(heroSpeed)}</span>
+                      <input
+                        type="range" min={0.1} max={2.5} step={0.05} value={heroSpeed}
+                        onChange={e => setSpeed(parseFloat(e.target.value))}
+                        className={s.settingsRange}
+                        aria-label="Скорость видео в шапке"
+                      />
                     </div>
                   )}
                 </div>

@@ -138,6 +138,12 @@
 }
 .settingsToggle:active { box-shadow: 1px 1px 0 var(--accent); transform: translate(1px, 1px); transition-duration: 0.06s; }
 
+.settingsRange {
+  width: 100%;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
 .speedOpts {
   display: flex;
   gap: 0.35rem;

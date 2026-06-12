@@ -25,12 +25,11 @@ export const DEFAULT_GAME_CONFIG: GameConfig = {
 const isBossWave = (n: number) => n > 0 && n % 10 === 0
 const isMegaWave = (n: number) => n === 33 || n === 66 || n === 99
 
-// Сложность (выбор после первого нетопыря): множитель скорости + стартовая волна
-type Difficulty = 'chill' | 'normal' | 'hard'
+// Сложность (выбор после первого нетопыря): только два режима — среднего не дано.
+type Difficulty = 'normal' | 'death'
 const DIFFICULTY: Record<Difficulty, { label: string; speed: number; startWave: number; hint: string }> = {
-  chill:  { label: 'ЧИЛЛ',   speed: 0.8, startWave: 1, hint: 'спокойно' },
-  normal: { label: 'НОРМ',   speed: 1.0, startWave: 2, hint: 'как надо' },
-  hard:   { label: 'ХАРДКОР', speed: 1.35, startWave: 5, hint: 'жёстко' },
+  normal: { label: 'NORMAL', speed: 1.0,  startWave: 1, hint: 'жить можно' },
+  death:  { label: 'DEATH',  speed: 1.55, startWave: 6, hint: 'боль' },
 }
 
 // ── Pixel-art bat ─────────────────────────────────────────────────────────────
@@ -79,7 +78,8 @@ interface ExplosionData { id: number; x: number; y: number }
 interface SplatData     { id: number; x: number; y: number; variant: number; angle: number }
 interface HitMarkerData { id: number; x: number; y: number; kind?: 'kill' | 'clink' }
 interface PowerUpData   { id: number; x: number; y: number; kind: PowerKind }
-type GameState = 'idle' | 'lure' | 'choose' | 'playing' | 'game_over'
+type GameState = 'idle' | 'lure' | 'choose' | 'playing' | 'game_over' | 'win'
+const FINAL_LEVEL = 100
 
 const VARIANT_BASE: Record<BatVariant, number> = { normal: 1, golden: 3, armored: 2, boss: 30 }
 const POWER_LABELS: Record<PowerKind, string> = { slowmo: 'ЗАМЕДЛЕНИЕ', freeze: 'ЗАМОРОЗКА', double: 'ОЧКИ ×2' }
@@ -387,6 +387,28 @@ function ScoreCounter({ score, waveNum, best, combo, effect, bonus, difficultyLa
 
 function GameOverBanner() { return <div className={s.gameOverCenter}>GAME OVER</div> }
 
+// Стена пиксельной крови — стекает сверху на game over
+function BloodWall() {
+  const drips = Array.from({ length: 14 }, (_, i) => i)
+  return (
+    <div className={s.bloodWall} aria-hidden="true">
+      <div className={s.bloodTop} />
+      {drips.map(i => (
+        <span
+          key={i}
+          className={s.bloodDrip}
+          style={{
+            left: `${(i / 14) * 100 + (i % 2 ? 1.5 : 0)}%`,
+            width: `${4 + (i % 4) * 2}%`,
+            ['--d' as string]: `${0.1 + (i % 5) * 0.12}s`,
+            ['--h' as string]: `${30 + ((i * 37) % 45)}vh`,
+          }}
+        />
+      ))}
+    </div>
+  )
+}
+
 // Центральное оповещение о новой волне (incoming)
 function WaveBanner({ waveNum, bonus, boss, mega }: { waveNum: number; bonus: boolean; boss?: boolean; mega?: boolean }) {
   const kick = boss ? (mega ? '// ⚠ МЕГА-БОСС' : '// ⚠ БОСС') : bonus ? '// СВАРМ' : '// ВХОДЯЩАЯ'
@@ -557,7 +579,7 @@ export default function BatAnimation({ config = DEFAULT_GAME_CONFIG }: { config?
       if (best > prev) localStorage.setItem('threep-bat-hs', String(best))
       setBestScore(best)
     } catch { /* localStorage blocked */ }
-    if (scoreRef.current > 0) trackEvent('bat_score', { score: scoreRef.current })
+    if (scoreRef.current > 0) trackEvent('bat_score', { score: scoreRef.current, level: currentWaveSizeRef.current })
     goTimerRef.current = setTimeout(() => {
       setSplats([]); setGameState('idle'); setScore(0); scoreRef.current = 0; setWaveNum(0)
       setPowerups([]); setCrackedIds(new Set()); setComboDisplay(0); setActiveEffect(null)
@@ -565,6 +587,32 @@ export default function BatAnimation({ config = DEFAULT_GAME_CONFIG }: { config?
       comboRef.current = 0; speedMultRef.current = 1; scoreMultRef.current = 1
       firstKillRef.current = false; difficultyRef.current = 'normal'
     }, 3000)
+  }
+
+  // ── Победа: пройден финальный 100-й уровень ──
+  function winGame() {
+    stopBossCycle()
+    if (waveTimerRef.current) { clearTimeout(waveTimerRef.current); waveTimerRef.current = null }
+    batPositions.current.clear(); batHpRef.current.clear()
+    setBats([]); setBoss(null); bossRef.current = null
+    setGameState('win')
+    try { localStorage.setItem('threep-bat-win', '1') } catch { /* blocked */ }
+    try {
+      const cur = scoreRef.current
+      const raw = parseInt(localStorage.getItem('threep-bat-hs') ?? '', 10)
+      const best = Math.max(cur, Number.isFinite(raw) ? raw : 0)
+      localStorage.setItem('threep-bat-hs', String(best))
+      setBestScore(best)
+    } catch { /* blocked */ }
+    // Ачивка/финал — событие с максимальным уровнем
+    trackEvent('bat_score', { score: scoreRef.current, level: FINAL_LEVEL, win: 1 })
+    goTimerRef.current = setTimeout(() => {
+      setSplats([]); setGameState('idle'); setScore(0); scoreRef.current = 0; setWaveNum(0)
+      setPowerups([]); setCrackedIds(new Set()); setComboDisplay(0); setActiveEffect(null)
+      setBonusWave(false); setBoss(null); bossRef.current = null; bossVulnRef.current = false
+      comboRef.current = 0; speedMultRef.current = 1; scoreMultRef.current = 1
+      firstKillRef.current = false; difficultyRef.current = 'normal'
+    }, 5000)
   }
 
   // ── Перейти к следующей волне через пылесос (после убийства всех/босса) ──
@@ -579,6 +627,8 @@ export default function BatAnimation({ config = DEFAULT_GAME_CONFIG }: { config?
 
   const spawnWaveRef = useRef<(n: number) => void>()
   spawnWaveRef.current = (n: number) => {
+    // Пройден финальный уровень → победа
+    if (n > FINAL_LEVEL) { winGame(); return }
     currentWaveSizeRef.current = n
 
     // ── BOSS WAVE (каждый 10-й; мега на 33/66/99) ──
@@ -817,11 +867,17 @@ export default function BatAnimation({ config = DEFAULT_GAME_CONFIG }: { config?
     const gained = VARIANT_BASE[bat.variant] * comboMult * scoreMultRef.current
 
     setHitMarkers(prev => [...prev, { id: nextId(), x: pos.x, y: pos.y, kind: 'kill' }])
-    setSplats(prev => [...prev, {
-      id: nextId(), x: pos.x, y: pos.y,
-      variant: Math.floor(Math.random() * 4),
-      angle: Math.floor(Math.random() * 360),
-    }])
+    // Больше крови — кластер из 3 брызг со смещением вокруг точки убийства
+    setSplats(prev => [
+      ...prev,
+      ...Array.from({ length: 3 }, () => ({
+        id: nextId(),
+        x: pos.x + (Math.random() - 0.5) * 60,
+        y: pos.y + (Math.random() - 0.5) * 60,
+        variant: Math.floor(Math.random() * 4),
+        angle: Math.floor(Math.random() * 360),
+      })),
+    ])
     setScore(n => { const next = n + gained; scoreRef.current = next; return next })
     setBestScore(b => Math.max(b, scoreRef.current))
 
@@ -890,7 +946,7 @@ export default function BatAnimation({ config = DEFAULT_GAME_CONFIG }: { config?
   const removeExplosion  = useCallback((id: number) => setExplosions(prev => prev.filter(e => e.id !== id)), [])
   const removeHitMarker  = useCallback((id: number) => setHitMarkers(prev => prev.filter(h => h.id !== id)), [])
 
-  const overlayActive = gameState === 'playing' || gameState === 'game_over' || gameState === 'choose'
+  const overlayActive = gameState === 'playing' || gameState === 'game_over' || gameState === 'choose' || gameState === 'win'
   // Счётчик НЕ мешает во время охоты: показываем только на «отдыхе» (пылесос между
   // волнами) и на game over. Во время активной волны он скрыт.
   const showScore     = gameState === 'game_over' || (gameState === 'playing' && roombaSweeping)
@@ -940,7 +996,15 @@ export default function BatAnimation({ config = DEFAULT_GAME_CONFIG }: { config?
           </div>
         </div>
       )}
+      {gameState === 'game_over' && <BloodWall />}
       {gameState === 'game_over' && <GameOverBanner />}
+      {gameState === 'win' && (
+        <div className={s.winBanner} aria-hidden="true">
+          <span className={s.winKick}>// УРОВЕНЬ 100 ПРОЙДЕН</span>
+          <span className={s.winNum}>THREEP MASTER</span>
+          <span className={s.winSub}>ты прошёл всю охоту 🩸</span>
+        </div>
+      )}
       {waveBanner && gameState === 'playing' && (
         <WaveBanner waveNum={waveNum} bonus={!isBossWave(waveNum) && waveNum >= 5 && waveNum % 5 === 0}
           boss={isBossWave(waveNum)} mega={isMegaWave(waveNum)} />

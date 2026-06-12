@@ -9,7 +9,6 @@ import {
   IconBrandTiktok,
   IconBrandInstagram,
 } from '@tabler/icons-react'
-import BatAnimation, { type GameConfig } from '@/components/BatAnimation'
 import s from './info.module.css'
 
 export type InfoContent = {
@@ -90,7 +89,7 @@ export const INFO_DEFAULTS: InfoContent = {
 
 type TabId = 'delivery' | 'contacts' | 'about'
 
-export default function InfoClient({ content, gameConfig }: { content: InfoContent; gameConfig?: GameConfig }) {
+export default function InfoClient({ content }: { content: InfoContent }) {
   const c = content
   const tabs: { id: TabId; label: string }[] = [
     { id: 'delivery', label: c.tab1_label },
@@ -214,7 +213,6 @@ export default function InfoClient({ content, gameConfig }: { content: InfoConte
         </div>
       </div>
 
-      <BatAnimation config={gameConfig} />
     </main>
   )
 }
