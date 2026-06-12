@@ -1,21 +1,13 @@
-/* ── Header — стеклянная шапка (КАНОНИЧЕСКИЙ паттерн) ─────────────────────────
-   backdrop-filter СТОИТ ПРЯМО НА <header>. Урок 5 сессий: blur умирает, если на
-   самом элементе ИЛИ на предке есть transform/mask, ЛИБО если blur висит на
-   ДОЧЕРНЕМ элементе хэдера (хэдер z-index:50 = stacking context, который режет
-   backdrop ребёнка). Поэтому:
-   • blur на самом <header>, без transform/mask;
-   • hide-on-scroll через OPACITY (не transform!) — transform убил бы blur. */
+/* ── Header — МИНИМАЛЬНОЕ стекло (шаг 1: добиться, чтобы blur вообще появился) ──
+   Диагностика: минифицированное `blur(16px)saturate(1.4)` (без пробела) браузер
+   отвергал целиком → backdrop-filter не доходил до элемента. Сводим к голому
+   одиночному blur() — это то, что работало раньше («равномерное размытие»).
+   Сначала убеждаемся, что блюр виден; потом усложняем (вуаль/градиент/hide). */
 .headerBase {
   position: fixed;
-  backdrop-filter: blur(16px) saturate(1.4);
-  -webkit-backdrop-filter: blur(16px) saturate(1.4);
-  background: linear-gradient(
-    to bottom,
-    color-mix(in srgb, var(--bg) 34%, transparent) 0%,
-    color-mix(in srgb, var(--bg) 15%, transparent) 55%,
-    transparent 100%
-  );
-  transition: opacity 0.4s ease, background 0.32s ease;
+  background-color: color-mix(in srgb, var(--bg) 40%, transparent);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
 }
 
 .headerRow {
@@ -23,26 +15,16 @@
   z-index: 2;
 }
 
-/* Scrolled — чуть плотнее вуаль (без линии/границы/тени снизу). */
+/* Scrolled — чуть плотнее фон (отдельным свойством, blur не трогаем). */
 .headerScrolled {
-  background: linear-gradient(
-    to bottom,
-    color-mix(in srgb, var(--bg) 56%, transparent) 0%,
-    color-mix(in srgb, var(--bg) 30%, transparent) 55%,
-    transparent 100%
-  );
+  background-color: color-mix(in srgb, var(--bg) 60%, transparent);
 }
 
-/* Hide-on-scroll: гасим прозрачностью (opacity 0), а НЕ transform — иначе blur
-   обнуляется. opacity:1 в покое backdrop-filter не ломает. */
+/* Hide-on-scroll: прозрачностью, без transform (transform убивает blur). */
 .headerHidden {
   opacity: 0;
   pointer-events: none;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .headerBase { transition: background 0.32s ease; }
-  .headerHidden { opacity: 1; pointer-events: auto; }
+  transition: opacity 0.4s ease;
 }
 
 .navBtn {
