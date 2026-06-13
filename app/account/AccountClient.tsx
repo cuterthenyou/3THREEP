@@ -460,7 +460,7 @@ export default function AccountClient({ user, profile, orders, profileBg, profil
           )}
 
           {/* Глобальный лидерборд — модалка с топ-100 + твоё место */}
-          <button className={s.lbBtn} onClick={() => setLbOpen(true)}>
+          <button className={`${s.lbBtn} blade-glint blade-glint-ambient`} onClick={() => setLbOpen(true)}>
             🏆 Лидерборд
           </button>
           <LeaderboardModal open={lbOpen} onClose={() => setLbOpen(false)} />

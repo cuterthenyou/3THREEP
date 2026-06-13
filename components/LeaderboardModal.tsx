@@ -53,7 +53,7 @@ export default function LeaderboardModal({ open, onClose }: { open: boolean; onC
       <div className={s.panel} onClick={(e) => e.stopPropagation()}>
         <div className={s.header}>
           <span className={s.title}>ЛИДЕРБОРД · ОХОТА</span>
-          <button className={s.close} onClick={onClose} aria-label="Закрыть">✕</button>
+          <button className={`${s.close} blade-glint`} onClick={onClose} aria-label="Закрыть">✕</button>
         </div>
 
         {data?.me ? (
