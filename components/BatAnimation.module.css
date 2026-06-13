@@ -540,21 +540,10 @@
 }
 
 /* ── Кровь при разрыве сбежавшей мыши (оседает и тает ~2.5с) ──── */
+/* Обёртка-центровка для пиксельного сплэта; форму задаёт SVG внутри */
 .bloodBurst {
   position: absolute;
   transform: translate(-50%, -50%);
-  width: 52px;
-  height: 44px;
-  /* хаотичная лужа (не круг): рваный clip-path + неоднородный фон */
-  background:
-    radial-gradient(ellipse at 38% 42%, #b00000 0%, #7a0000 52%, transparent 60%),
-    radial-gradient(ellipse at 70% 64%, #8a0000 0%, transparent 46%),
-    radial-gradient(ellipse at 24% 72%, #6e0000 0%, transparent 40%);
-  clip-path: polygon(
-    18% 6%, 38% 22%, 52% 4%, 64% 26%, 86% 14%, 78% 40%, 100% 52%,
-    80% 66%, 92% 88%, 64% 78%, 54% 100%, 40% 76%, 16% 92%, 24% 64%,
-    0% 54%, 20% 38%, 6% 22%
-  );
   animation: bloodBurst 2.5s ease-out forwards;
 }
 @keyframes bloodBurst {

@@ -29,7 +29,7 @@ function AddToCartButton({ product, size, onClose }: { product: Product; size: s
   }
 
   return (
-    <button onClick={handleAdd} className={`${s.addBtn} ${added ? s.addBtnAdded : s.addBtnDefault}`}>
+    <button onClick={handleAdd} className={`${s.addBtn} ${added ? s.addBtnAdded : s.addBtnDefault} blade-glint`}>
       {added ? '✓ Добавлено' : 'ШВЫРНУТЬ В КОРЗИНУ'}
     </button>
   )

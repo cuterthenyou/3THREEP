@@ -365,10 +365,10 @@
   overflow: visible;        /* отростки рамы выходят за квадрат (влево в пустоту) */
   display: flex;
   flex-direction: column;
-  /* Флюидная ширина (не хардкод): тянется от вьюпорта, с потолком. Так квадрат
-     ВСЕГДА влезает в ряд, а профиль (flex:1) забирает остальное. */
+  /* Флюидная ширина (не хардкод): тянется от вьюпорта, с потолком. Крупнее,
+     профиль (min-width:0) ужимается слева, чтобы освободить место. */
   flex: 0 0 auto;
-  width: clamp(7.5rem, 13vw, 11.5rem);
+  width: clamp(11rem, 22vw, 17rem);
   align-self: center;
 }
 
@@ -376,14 +376,14 @@
    «языки» уходили в пустое место карточки (а не выглядели как ремень сбоку). */
 .avatarFrame {
   position: absolute;
-  top: -8%;
-  bottom: -8%;
-  left: -20%;
-  right: -7%;
+  top: -10%;
+  bottom: -10%;
+  left: -15%;
+  right: -10%;
   z-index: 1;
   pointer-events: none;
   color: var(--accent);
-  opacity: 0.5;
+  opacity: 0.7;
 }
 .avatarFrame svg {
   display: block;
@@ -632,6 +632,50 @@
   display: flex;
   flex-wrap: wrap;
   gap: 0.4rem;
+}
+
+/* Стрип коллекций: фильтр + прогресс «собрано/всего» */
+.collStrip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+.collChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.3rem 0.65rem;
+  border-radius: var(--radius-btn, 2px);
+  border: 1px solid var(--accent);
+  background: transparent;
+  color: var(--accent);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.15s, box-shadow 0.12s, transform 0.1s;
+  font-family: var(--font-onder);
+  font-size: 0.6rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.collChipName { line-height: 1; }
+.collChipCount {
+  font-family: var(--font-deutsch);
+  letter-spacing: 0.04em;
+  opacity: 0.7;
+}
+.collChipActive {
+  background: var(--accent);
+  color: var(--bg);
+  box-shadow: 2px 2px 0 var(--accent);
+}
+.collChipActive .collChipCount { opacity: 1; }
+/* собранная целиком — акцентная рамка-«галочка» */
+.collChipDone:not(.collChipActive) {
+  border-color: var(--status-delivered);
+  color: var(--status-delivered);
+}
+@media (hover: hover) and (pointer: fine) {
+  .collChip:hover { box-shadow: 3px 3px 0 var(--accent); transform: translate(-1px, -1px); }
 }
 
 .chip,

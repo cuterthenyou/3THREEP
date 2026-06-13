@@ -75,14 +75,14 @@ export function Medal({ kind, size = 34 }: { kind: string; size?: number }) {
 export function OvalTribalFrame() {
   return (
     <svg viewBox="0 -12 200 264" fill="none" xmlns="http://www.w3.org/2000/svg"
-         preserveAspectRatio="xMidYMid meet" aria-hidden="true" style={{ overflow: 'visible' }}>
-      <g stroke="currentColor" fill="currentColor">
+         preserveAspectRatio="none" aria-hidden="true" style={{ overflow: 'visible' }}>
+      <g stroke="currentColor" fill="currentColor" vectorEffect="non-scaling-stroke">
         {/* основные «пламенные» дуги овала */}
-        <path d="M100 6 C152 14 186 62 183 120 C180 186 150 228 100 236" fill="none" strokeWidth="3" strokeLinecap="round" />
-        <path d="M100 6 C48 14 14 62 17 120 C20 186 50 228 100 236" fill="none" strokeWidth="3" strokeLinecap="round" />
+        <path d="M100 6 C152 14 186 62 183 120 C180 186 150 228 100 236" fill="none" strokeWidth="2.5" strokeLinecap="round" vectorEffect="non-scaling-stroke" />
+        <path d="M100 6 C48 14 14 62 17 120 C20 186 50 228 100 236" fill="none" strokeWidth="2.5" strokeLinecap="round" vectorEffect="non-scaling-stroke" />
         {/* тонкий внутренний контур */}
-        <path d="M100 18 C140 26 170 66 167 120 C164 176 140 214 100 224" fill="none" strokeWidth="1" opacity="0.45" />
-        <path d="M100 18 C60 26 30 66 33 120 C36 176 60 214 100 224" fill="none" strokeWidth="1" opacity="0.45" />
+        <path d="M100 18 C140 26 170 66 167 120 C164 176 140 214 100 224" fill="none" strokeWidth="1" opacity="0.45" vectorEffect="non-scaling-stroke" />
+        <path d="M100 18 C60 26 30 66 33 120 C36 176 60 214 100 224" fill="none" strokeWidth="1" opacity="0.45" vectorEffect="non-scaling-stroke" />
         {/* верхний/нижний финиал-крестоцвет */}
         <polygon points="100,4 93,-10 100,1 107,-10" />
         <polygon points="100,238 93,252 100,241 107,252" />

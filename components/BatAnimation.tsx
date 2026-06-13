@@ -96,8 +96,18 @@ function BatExplosion({ data, onDone }: { data: ExplosionData; onDone: () => voi
   return (
     <div className={s.explosion} style={{ left: data.x, top: data.y }}>
       <div className={s.explosionFlashTimeout} />
-      {/* центральная кровавая клякса, тает 2.5с */}
-      <div className={s.bloodBurst} />
+      {/* центральная кровавая лужа — пиксельный сплэт как в игре, тает 2.5с */}
+      <div className={s.bloodBurst}>
+        <svg width="58" height="58" viewBox="0 0 24 24" fill="#8a0000"
+          style={{ shapeRendering: 'crispEdges', imageRendering: 'pixelated', display: 'block', transform: `rotate(${(data.id * 47) % 360}deg)` }}>
+          <polygon points="5,10 10,8 14,8 19,10 17,14 14,16 10,16 7,14" />
+          <polygon points="8,8 16,8 18,12 16,16 8,16 6,12" opacity="0.85" />
+          <rect x="2" y="8" width="2" height="2" /><rect x="20" y="8" width="2" height="2" />
+          <rect x="11" y="2" width="2" height="3" /><rect x="11" y="19" width="2" height="3" />
+          <rect x="4" y="17" width="2" height="2" /><rect x="18" y="17" width="2" height="2" />
+          <rect x="1" y="12" width="2" height="2" /><rect x="21" y="13" width="1" height="2" />
+        </svg>
+      </div>
       <div className={`${s.explosionRing} ${s.explosionRingT1}`} />
       <div className={`${s.explosionRing} ${s.explosionRingT2}`} />
       <div className={`${s.explosionRing} ${s.explosionRingT3}`} />

@@ -291,13 +291,15 @@ html[data-theme="trip"] h3 {
   html[data-theme="trip"] h2:nth-of-type(3n) { animation-delay: calc(var(--trip-desync, 1) * -1.7s); }
   html[data-theme="trip"] h3:nth-of-type(3n) { animation-delay: calc(var(--trip-desync, 1) * -2.4s); animation-duration: 2.1s; }
 }
+/* Магнитуда дрожи/сдвига масштабируется «пьяностью» (--trip-drunk): 0 — спокойно,
+   >1 — заголовки рвёт сильнее. Скос/сдвиг через calc от drunk. */
 @keyframes tripAberration {
   0%, 30%, 52%, 74%, 100% { text-shadow: 2px 0 rgba(255, 0, 90, 0.6), -2px 0 rgba(0, 220, 255, 0.6); transform: translate(0, 0) skewX(0); }
-  18% { text-shadow: 6px 0 rgba(255, 0, 90, 0.85), -6px 0 rgba(0, 220, 255, 0.85); transform: translate(3px, -1px) skewX(-5deg); }
-  22% { text-shadow: -5px 0 rgba(255, 0, 90, 0.85), 5px 0 rgba(0, 220, 255, 0.85); transform: translate(-3px, 1px) skewX(4deg); }
-  40% { text-shadow: 4px 0 rgba(255, 0, 90, 0.8), -4px 0 rgba(0, 220, 255, 0.8); transform: translate(-2px, 0) skewX(3deg); }
-  62% { text-shadow: -6px 0 rgba(255, 0, 90, 0.85), 6px 0 rgba(0, 220, 255, 0.85); transform: translate(3px, 1px) skewX(-4deg); }
-  84% { text-shadow: 5px 0 rgba(255, 0, 90, 0.8), -5px 0 rgba(0, 220, 255, 0.8); transform: translate(2px, -1px) skewX(2deg); }
+  18% { text-shadow: 6px 0 rgba(255, 0, 90, 0.85), -6px 0 rgba(0, 220, 255, 0.85); transform: translate(calc(3px * var(--trip-drunk, 1)), calc(-1px * var(--trip-drunk, 1))) skewX(calc(-5deg * var(--trip-drunk, 1))); }
+  22% { text-shadow: -5px 0 rgba(255, 0, 90, 0.85), 5px 0 rgba(0, 220, 255, 0.85); transform: translate(calc(-3px * var(--trip-drunk, 1)), calc(1px * var(--trip-drunk, 1))) skewX(calc(4deg * var(--trip-drunk, 1))); }
+  40% { text-shadow: 4px 0 rgba(255, 0, 90, 0.8), -4px 0 rgba(0, 220, 255, 0.8); transform: translate(calc(-2px * var(--trip-drunk, 1)), 0) skewX(calc(3deg * var(--trip-drunk, 1))); }
+  62% { text-shadow: -6px 0 rgba(255, 0, 90, 0.85), 6px 0 rgba(0, 220, 255, 0.85); transform: translate(calc(3px * var(--trip-drunk, 1)), calc(1px * var(--trip-drunk, 1))) skewX(calc(-4deg * var(--trip-drunk, 1))); }
+  84% { text-shadow: 5px 0 rgba(255, 0, 90, 0.8), -5px 0 rgba(0, 220, 255, 0.8); transform: translate(calc(2px * var(--trip-drunk, 1)), calc(-1px * var(--trip-drunk, 1))) skewX(calc(2deg * var(--trip-drunk, 1))); }
 }
 
 /* Grain/shagreen overlay utility */
@@ -515,6 +517,8 @@ h4 { font-size: calc(var(--fs-h4) * var(--type-heading-scale, 1)); }
   position: relative;
   overflow: hidden;
   isolation: isolate;
+  /* цвет блика — по выбранной теме (accent), подсвеченный к белому для «света на клинке» */
+  --glint: color-mix(in srgb, var(--accent) 32%, white);
 }
 .blade-glint::after {
   content: '';
@@ -528,9 +532,9 @@ h4 { font-size: calc(var(--fs-h4) * var(--type-heading-scale, 1)); }
   background: linear-gradient(
     90deg,
     transparent,
-    color-mix(in srgb, white 65%, transparent) 44%,
-    color-mix(in srgb, white 92%, transparent) 50%,
-    color-mix(in srgb, white 65%, transparent) 56%,
+    color-mix(in srgb, var(--glint) 60%, transparent) 44%,
+    color-mix(in srgb, var(--glint) 90%, transparent) 50%,
+    color-mix(in srgb, var(--glint) 60%, transparent) 56%,
     transparent
   );
   transform: skewX(-22deg);

@@ -125,6 +125,16 @@ export default function AccountClient({ user, profile, orders, profileBg, profil
     return catalogCategories.filter((c) => withProducts.has(c.slug));
   }, [catalogCategories, catalogProducts]);
 
+  // Прогресс по коллекциям: сколько вещей собрано из доступных (без coming_soon)
+  const collectionStats = useMemo(
+    () => collectionsList.map((c) => {
+      const items = catalogProducts.filter((p) => p.category === c.slug && !p.coming_soon);
+      const owned = items.filter((p) => ownedIds.has(p.id)).length;
+      return { slug: c.slug, name: c.name, owned, total: items.length, complete: items.length > 0 && owned === items.length };
+    }),
+    [collectionsList, catalogProducts, ownedIds]
+  );
+
   const [invCategory, setInvCategory] = useState<string>('');
   const [invType, setInvType] = useState<string>('all');
   const [modalProduct, setModalProduct] = useState<Product | null>(null);
@@ -461,16 +471,18 @@ export default function AccountClient({ user, profile, orders, profileBg, profil
                 </div>
               </div>
 
-              {/* Выбор коллекции */}
-              {collectionsList.length > 1 && (
-                <div className={s.chipRow}>
-                  {collectionsList.map((c) => (
+              {/* Коллекции: фильтр + прогресс «сколько собрано» */}
+              {collectionStats.length > 0 && (
+                <div className={s.collStrip}>
+                  {collectionStats.map((c) => (
                     <button
                       key={c.slug}
                       onClick={() => { setInvCategory(c.slug); setInvType('all'); }}
-                      className={c.slug === activeCategory ? s.chipActive : s.chip}
+                      className={`${s.collChip} ${c.slug === activeCategory ? s.collChipActive : ''} ${c.complete ? s.collChipDone : ''}`}
+                      title={`${c.name}: собрано ${c.owned} из ${c.total}`}
                     >
-                      {c.name}
+                      <span className={s.collChipName}>{c.name}</span>
+                      <span className={s.collChipCount}>{c.owned}/{c.total}{c.complete ? ' ✓' : ''}</span>
                     </button>
                   ))}
                 </div>
@@ -515,7 +527,7 @@ export default function AccountClient({ user, profile, orders, profileBg, profil
                 )}
               </div>
 
-              <Link href={`/?category=${activeCategory}#catalog`} className={`${s.ctaBtn} blade-glint blade-glint-ambient`}>
+              <Link href={`/?category=${encodeURIComponent(activeCategory)}${invType !== 'all' ? `&type=${encodeURIComponent(invType)}` : ''}#catalog`} className={`${s.ctaBtn} blade-glint blade-glint-ambient`}>
                 {categoryProducts.some((p) => ownedIds.has(p.id)) ? 'Добить коллекцию' : 'Собери коллекцию'}
               </Link>
             </div>

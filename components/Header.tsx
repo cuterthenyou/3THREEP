@@ -307,13 +307,7 @@ export default function Header({ isAdminUser = false, initialCollections, custom
         ref={headerRef}
         className={`fixed top-0 left-0 right-0 z-50 ${s.headerBase} ${scrolled ? s.headerScrolled : s.headerTop} ${hidden ? s.headerHidden : ''}`}
       >
-        {/* iOS-градиент размытия: базовый blur на <header> + доп. слои сверху
-            (немаскированные, разной высоты). См. Header.module.css. */}
-        <div className={s.glassGrad} aria-hidden="true">
-          <div className={`${s.gradLayer} ${s.gradLayer1}`} />
-          <div className={`${s.gradLayer} ${s.gradLayer2}`} />
-          <div className={`${s.gradLayer} ${s.gradLayer3}`} />
-        </div>
+        {/* backdrop-filter blur на самом <header> (см. Header.module.css). */}
         <div className={`flex items-center justify-between px-5 sm:px-8 py-4 sm:py-5 ${s.headerRow}`}>
           <Link href="/" aria-label="На главную">
             {logoIconUrl ? (

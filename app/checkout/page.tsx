@@ -175,7 +175,7 @@ export default function CheckoutPage() {
               <h2 className={s.sectionLabel}>Как хочешь оформить?</h2>
               <Link
                 href={`/auth?callbackUrl=${encodeURIComponent('/account')}`}
-                className={`py-4 text-center ${s.submitBtn}`}
+                className={`py-4 text-center ${s.submitBtn} blade-glint`}
                 style={{ textDecoration: 'none', display: 'block' }}
               >
                 Войти / Зарегистрироваться
@@ -279,7 +279,7 @@ export default function CheckoutPage() {
               <button
                 onClick={handleSubmit}
                 disabled={loading}
-                className={`py-4 sm:py-5 ${s.submitBtn}`}
+                className={`py-4 sm:py-5 ${s.submitBtn} blade-glint`}
                 style={{ opacity: loading ? 0.6 : 1 }}
               >
                 {loading ? 'Оформляем...' : 'Оформить заказ'}

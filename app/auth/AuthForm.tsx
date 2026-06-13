@@ -213,7 +213,7 @@ export default function AuthForm() {
                 </label>
               </>
             )}
-            <button onClick={requestCode} disabled={loading || !isEmailValid || (isExistingUser === false && !consent)} className={s.btn}>
+            <button onClick={requestCode} disabled={loading || !isEmailValid || (isExistingUser === false && !consent)} className={`${s.btn} blade-glint`}>
               {loading ? 'Отправляем...' : 'Получить код'}
             </button>
           </>
@@ -231,7 +231,7 @@ export default function AuthForm() {
             <button
               onClick={verifyCode}
               disabled={loading || code.length !== 6}
-              className={s.btn}
+              className={`${s.btn} blade-glint`}
             >
               {loading ? 'Проверяем...' : 'Войти'}
             </button>
