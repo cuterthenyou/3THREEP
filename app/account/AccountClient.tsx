@@ -87,6 +87,8 @@ export default function AccountClient({ user, profile, orders, profileBg, profil
   // Светлый PNG-фон/модалка — только у терракотовой light; все остальные палитры тёмные.
   const isDark = theme !== 'light';
   const isBaseTheme = theme === 'light' || theme === 'dark' || theme === 'trip';
+  // trip + доп-палитры: модалка товара тёмная (var(--bg) + multiply), как в каталоге.
+  const isThemed = theme !== 'light' && theme !== 'dark';
   const [batScores, setBatScores] = useState<{ normal: number | null; death: number | null }>({ normal: null, death: null });
   const [lbOpen, setLbOpen] = useState(false);
 
@@ -624,7 +626,7 @@ export default function AccountClient({ user, profile, orders, profileBg, profil
         visible={modalVisible}
         onClose={closeProductModal}
         modalBg={modalBg}
-        tintBg={!isBaseTheme}
+        tintBg={isThemed}
         collectionLogo={activeCat?.logo_top_url ?? null}
         discount={discount}
       />

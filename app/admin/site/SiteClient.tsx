@@ -304,6 +304,20 @@ export default function SiteClient({ initialSettings, initialCustomFonts = [], i
   const [savingTrip, setSavingTrip] = useState(false)
   const [tripMsg, setTripMsg] = useState('')
 
+  // ── Цвета доп-палитр (ash/toxic/blood/noir/ice/ember) — оверрайд реестра lib/palettes.ts ──
+  const [extraColorSel, setExtraColorSel] = useState(EXTRA_PALETTES[0]?.key ?? 'ash')
+  const [extraColors, setExtraColors] = useState<Record<string, { bg: string; text: string; accent: string }>>(() => {
+    const m: Record<string, { bg: string; text: string; accent: string }> = {}
+    for (const p of EXTRA_PALETTES) m[p.key] = {
+      bg:     initialSettings[`color_bg_${p.key}`]     ?? p.bg,
+      text:   initialSettings[`color_text_${p.key}`]   ?? p.text,
+      accent: initialSettings[`color_accent_${p.key}`] ?? p.accent,
+    }
+    return m
+  })
+  const [savingExtraColors, setSavingExtraColors] = useState(false)
+  const [extraColorsMsg, setExtraColorsMsg] = useState('')
+
   // ── Скорость видео Hero (дефолт) ──
   const [heroSpeedDefault, setHeroSpeedDefault] = useState(numInit('hero_speed_default', 1))
   const [savingHeroSpeed, setSavingHeroSpeed] = useState(false)
@@ -663,6 +677,35 @@ export default function SiteClient({ initialSettings, initialCustomFonts = [], i
     setSavingColors(false); setColorsMsg('✓ Цвета сохранены — обновляю страницу…'); reloadAfterSave()
   }
 
+  // ── Доп-палитры: правка цветов ──
+  function setExtraColor(key: string, field: 'bg' | 'text' | 'accent', v: string) {
+    setExtraColors(prev => ({ ...prev, [key]: { ...prev[key], [field]: v } }))
+    // живой предпросмотр, если админка сейчас в этой теме
+    if (adminTheme === key) {
+      const map = { bg: '--bg', text: '--text', accent: '--accent' } as const
+      document.documentElement.style.setProperty(map[field], v)
+    }
+  }
+  function resetExtraColor(key: string) {
+    const def = PALETTES.find(p => p.key === key)
+    if (!def) return
+    setExtraColors(prev => ({ ...prev, [key]: { bg: def.bg, text: def.text, accent: def.accent } }))
+  }
+  async function saveExtraColors() {
+    setSavingExtraColors(true); setExtraColorsMsg('')
+    const ops: Promise<unknown>[] = []
+    for (const p of EXTRA_PALETTES) {
+      const c = extraColors[p.key]
+      ops.push(
+        saveSetting(`color_bg_${p.key}`,     c.bg),
+        saveSetting(`color_text_${p.key}`,   c.text),
+        saveSetting(`color_accent_${p.key}`, c.accent),
+      )
+    }
+    await Promise.all(ops)
+    setSavingExtraColors(false); setExtraColorsMsg('✓ Сохранено — обновляю страницу…'); reloadAfterSave()
+  }
+
   // Применить пресет: заполнить все 9 цветов + живой предпросмотр текущей темы
   function applyPreset(p: ThemePreset) {
     setColorBgLight(p.bgL);   setColorTextLight(p.textL);   setColorAccentLight(p.accentL)
@@ -960,6 +1003,63 @@ export default function SiteClient({ initialSettings, initialCustomFonts = [], i
             {savingColors ? 'Сохраняем...' : 'Сохранить цвета'}
           </button>
           {colorsMsg && <span style={msgStyle(colorsMsg)}>{colorsMsg}</span>}
+        </div>
+      </AdminSection>
+
+      {/* ── Цвета доп-палитр ── */}
+      <AdminSection title="Цвета доп-палитр" tab="colors">
+        <p className="text-xs" style={{ color: 'var(--accent)', opacity: 0.5, fontFamily: 'var(--font-involve)' }}>
+          Перекрась дополнительные тёмные палитры (ASH / TOXIC / BLOOD / NOIR / ICE / EMBER). Остальные токены
+          (карточки, оверлеи, статус-бейджи) выводятся из этих трёх цветов автоматически. Живой предпросмотр —
+          только если админка сейчас в редактируемой теме; иначе обновите страницу после сохранения.
+        </p>
+
+        {/* Выбор палитры — свотчи отражают текущие (несохранённые) цвета */}
+        <div className="flex items-center gap-2 flex-wrap">
+          {EXTRA_PALETTES.map(p => {
+            const c = extraColors[p.key]
+            const on = extraColorSel === p.key
+            return (
+              <button
+                key={p.key}
+                onClick={() => { setExtraColorSel(p.key); setExtraColorsMsg('') }}
+                className={a.btn}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 8,
+                  ...(on
+                    ? { borderColor: 'var(--accent)', boxShadow: '2px 2px 0 var(--accent)' }
+                    : { opacity: 0.55 }),
+                }}
+              >
+                <span style={{ display: 'inline-flex', borderRadius: 3, overflow: 'hidden', border: '1px solid var(--border)', flexShrink: 0 }}>
+                  <span style={{ width: 12, height: 14, background: c.bg }} />
+                  <span style={{ width: 12, height: 14, background: c.accent }} />
+                  <span style={{ width: 12, height: 14, background: c.text }} />
+                </span>
+                {p.label}
+              </button>
+            )
+          })}
+        </div>
+
+        {/* Пикеры выбранной палитры — key форсит ремоунт при смене (синхронизирует value) */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 pt-1">
+          <ColorPicker key={`${extraColorSel}-bg`}     label="Фон (bg)" value={extraColors[extraColorSel].bg}
+            cssVar={adminTheme === extraColorSel ? '--bg' : undefined}     onChange={v => setExtraColor(extraColorSel, 'bg', v)} />
+          <ColorPicker key={`${extraColorSel}-text`}   label="Текст"    value={extraColors[extraColorSel].text}
+            cssVar={adminTheme === extraColorSel ? '--text' : undefined}   onChange={v => setExtraColor(extraColorSel, 'text', v)} />
+          <ColorPicker key={`${extraColorSel}-accent`} label="Акцент"   value={extraColors[extraColorSel].accent}
+            cssVar={adminTheme === extraColorSel ? '--accent' : undefined} onChange={v => setExtraColor(extraColorSel, 'accent', v)} />
+        </div>
+
+        <div className="flex items-center gap-3 flex-wrap pt-2">
+          <button onClick={saveExtraColors} disabled={savingExtraColors} className={a.btn}>
+            {savingExtraColors ? 'Сохраняем...' : 'Сохранить цвета палитр'}
+          </button>
+          <button onClick={() => resetExtraColor(extraColorSel)} className={a.btnSecondary}>
+            Сбросить «{extraColorSel}» к дефолту
+          </button>
+          {extraColorsMsg && <span style={msgStyle(extraColorsMsg)}>{extraColorsMsg}</span>}
         </div>
       </AdminSection>
 

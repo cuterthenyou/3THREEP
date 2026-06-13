@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, type CSSProperties } from 'react'
 import Image from 'next/image'
 import ThemedLogo from './ThemedLogo'
 import type { Product } from '@/lib/types'
@@ -157,6 +157,20 @@ export default function ProductModal({ product, visible, onClose, modalBg, tintB
     },
   } : {}
 
+  // Themed-темы (trip + доп-палитры, tintBg): фон модалки — ТЁМНЫЙ непрозрачный
+  // var(--bg). У trip `--bg-2` (дефолт .inner) светлый → явно перекрываем, чтобы
+  // модалка была тёмной «как каталог». PNG-арт коллекции кладём сверху через multiply.
+  // Базовые light/dark берут .inner background (var(--bg-2)) без оверрайда.
+  const innerStyle: CSSProperties = {}
+  if (tintBg) innerStyle.backgroundColor = 'var(--bg)'
+  if (modalBg) {
+    innerStyle.backgroundImage = `url(${modalBg})`
+    innerStyle.backgroundSize = 'cover'
+    innerStyle.backgroundPosition = 'center'
+    innerStyle.backgroundRepeat = 'no-repeat'
+    if (tintBg) innerStyle.backgroundBlendMode = 'multiply'
+  }
+
   return (
     <div
       className={`fixed inset-0 z-50 ${s.backdrop}`}
@@ -164,7 +178,7 @@ export default function ProductModal({ product, visible, onClose, modalBg, tintB
       onClick={(e) => e.target === e.currentTarget && closeWithAnimation()}
       {...modalTouchHandlers}
     >
-      <div className={`absolute inset-0 overflow-y-auto ${s.inner}`} style={modalBg ? { backgroundImage: `url(${modalBg})`, backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat', ...(tintBg ? { backgroundColor: 'var(--art-tint, var(--bg))', backgroundBlendMode: 'multiply' } : {}) } : undefined}>
+      <div className={`absolute inset-0 overflow-y-auto ${s.inner}`} style={Object.keys(innerStyle).length ? innerStyle : undefined}>
         <button
           onClick={closeWithAnimation}
           className={`fixed top-5 right-5 z-50 flex items-center justify-center w-9 h-9 ${s.closeBtn}`}

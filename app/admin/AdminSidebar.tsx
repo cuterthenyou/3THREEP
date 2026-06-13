@@ -5,6 +5,8 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { toggleTheme } from '@/lib/theme'
 import ThemedLogo from '@/components/ThemedLogo'
+import ThemeIcon from '@/components/ThemeIcon'
+import { PALETTES } from '@/lib/palettes'
 import s from './AdminSidebar.module.css'
 
 function IcoDash() {
@@ -107,18 +109,6 @@ function IcoExit() {
   </svg>
 }
 
-function IcoSun() {
-  return <svg width="16" height="16" viewBox="0 0 14 14" fill="currentColor" style={{ flexShrink: 0 }}>
-    <path d="M7 0L9 5.5L14 7L9 8.5L7 14L5 8.5L0 7L5 5.5Z"/>
-  </svg>
-}
-
-function IcoMoon() {
-  return <svg width="16" height="16" viewBox="0 0 14 14" fill="currentColor" style={{ flexShrink: 0 }}>
-    <path d="M8,1 L12,3 L14,7 L12,11 L8,13 L10,10.5 L11,7 L10,3.5 Z"/>
-  </svg>
-}
-
 function IcoChevL() {
   return <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="square" style={{ flexShrink: 0 }}>
     <path d="M11,2 L5,8 L11,14"/>
@@ -187,18 +177,21 @@ export default function AdminSidebar() {
   const pathname = usePathname()
   const [collapsed, setCollapsed] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
-  const [isDark, setIsDark] = useState(false)
+  const [theme, setTheme] = useState('dark')
   const [logoIconUrl, setLogoIconUrl] = useState<string | null>(null)
   const [logoTextUrl, setLogoTextUrl] = useState<string | null>(null)
 
+  // Синхронизируем иконку+название кнопки с РЕАЛЬНОЙ темой (вкл. trip и доп-палитры),
+  // а не только light/dark — иначе при цикле тем кнопка застревала на солнце/луне.
   useEffect(() => {
-    setIsDark(document.documentElement.dataset.theme === 'dark')
-    const obs = new MutationObserver(() =>
-      setIsDark(document.documentElement.dataset.theme === 'dark')
-    )
+    const read = () => setTheme(document.documentElement.dataset.theme ?? 'dark')
+    read()
+    const obs = new MutationObserver(read)
     obs.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] })
     return () => obs.disconnect()
   }, [])
+
+  const themeLabel = PALETTES.find(p => p.key === theme)?.label ?? theme.toUpperCase()
 
   useEffect(() => {
     fetch('/api/site-settings')
@@ -248,12 +241,12 @@ export default function AdminSidebar() {
             {!collapsed && <span style={{ fontFamily: "var(--font-involve)", fontSize: '0.75rem' }}>На сайт</span>}
           </Link>
           <button
-            onClick={() => { toggleTheme(); setIsDark(d => !d) }}
-            title={isDark ? 'Светлая тема' : 'Тёмная тема'}
+            onClick={toggleTheme}
+            title={`Тема: ${themeLabel} — сменить`}
             className={s.sidebarBtnAccent}
             style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: collapsed ? '0.6rem' : '0.55rem 0.75rem', justifyContent: collapsed ? 'center' : 'flex-start', borderRadius: '3px', cursor: 'pointer', color: 'var(--accent)', width: '100%', whiteSpace: 'nowrap' }}>
-            {isDark ? <IcoSun /> : <IcoMoon />}
-            {!collapsed && <span style={{ fontFamily: "var(--font-involve)", fontSize: '0.75rem' }}>{isDark ? 'Светлая' : 'Тёмная'}</span>}
+            <ThemeIcon theme={theme} size={14} />
+            {!collapsed && <span style={{ fontFamily: "var(--font-involve)", fontSize: '0.75rem' }}>{themeLabel}</span>}
           </button>
           <button
             onClick={() => setCollapsed(v => !v)}
@@ -317,10 +310,11 @@ export default function AdminSidebar() {
             <span style={{ fontFamily: "var(--font-involve)", fontSize: '0.75rem' }}>На сайт</span>
           </Link>
           <button
-            onClick={() => { toggleTheme(); setIsDark(d => !d) }}
+            onClick={toggleTheme}
+            title={`Тема: ${themeLabel} — сменить`}
             style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.55rem 0.75rem', borderRadius: '3px', background: 'var(--bg-subtle)', border: '1px solid var(--accent)', boxShadow: '2px 2px 0 var(--accent)', cursor: 'pointer', color: 'var(--accent)', width: '100%', whiteSpace: 'nowrap' }}>
-            {isDark ? <IcoSun /> : <IcoMoon />}
-            <span style={{ fontFamily: "var(--font-involve)", fontSize: '0.75rem' }}>{isDark ? 'Светлая' : 'Тёмная'}</span>
+            <ThemeIcon theme={theme} size={14} />
+            <span style={{ fontFamily: "var(--font-involve)", fontSize: '0.75rem' }}>{themeLabel}</span>
           </button>
         </div>
       </aside>

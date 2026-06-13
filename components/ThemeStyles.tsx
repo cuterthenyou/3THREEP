@@ -277,8 +277,20 @@ ${animHover ? '' : '.blade-glint:hover::after { animation: none !important; } .p
 ${animAmbient ? '' : '.blade-glint-ambient::after { animation: none !important; opacity: 0 !important; }'}
 `.trim()
 
-  // CSS доп-палитр (не base) — генерится из реестра. light/dark/trip уже выше.
-  const extraPalettesCss = PALETTES.filter(p => !p.base).map(paletteVarsCss).join('\n')
+  // CSS доп-палитр (не base) — генерится из реестра + админ-оверрайды цветов.
+  // Каждая палитра может переопределить bg/text/accent ключами color_{bg,text,accent}_<key>
+  // (валидный HEX); иначе берутся дефолты из реестра lib/palettes.ts.
+  const extraPalettesCss = PALETTES.filter(p => !p.base).map(p => {
+    const oBg     = settings[`color_bg_${p.key}`]
+    const oText   = settings[`color_text_${p.key}`]
+    const oAccent = settings[`color_accent_${p.key}`]
+    return paletteVarsCss({
+      ...p,
+      bg:     oBg     && isHex(oBg)     ? oBg     : p.bg,
+      text:   oText   && isHex(oText)   ? oText   : p.text,
+      accent: oAccent && isHex(oAccent) ? oAccent : p.accent,
+    })
+  }).join('\n')
 
   // Какие темы включены (тумблеры из админки). Цикл переключения — только
   // НЕ-скрытые включённые; TRIP (hidden) активируется тройным тапом, если включён.

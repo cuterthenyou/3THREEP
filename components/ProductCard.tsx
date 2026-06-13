@@ -102,23 +102,22 @@ const ProductCard = React.memo(function ProductCard({
     setTimeout(() => setGlitching(false), 420)
   }
 
-  // PNG-арт карточки. Доп-темы/trip: рисуем тёмный арт и тонируем его multiply'ем
-  // на --art-tint (светлее --bg → не уходит в near-black, как было при tint=--bg).
-  // Карточка при этом тёмная (--catalog-card-bg) + светлый текст (--catalog-card-text)
-  // + accent-рамка — атмосфернее плоского accent, PNG снова виден.
-  const bgUrl = isDark
-    ? (product.bg_url_dark ?? product.bg_url ?? null)
-    : (product.bg_url ?? product.bg_url_dark ?? null)
+  // PNG-арт карточки нарисован под базовые темы (light/dark). У trip и доп-палитр
+  // (tintBg) собственного светлого арта нет — тёмный PNG + multiply давал near-black и
+  // нечитаемый текст. Поэтому на themed-темах арт НЕ рисуем: карточка берёт `--bg-card`
+  // (= accent, светлая) + `--text-on-card` + accent-рамку — ровно как базовая тема.
+  const bgUrl = tintBg
+    ? null
+    : isDark
+      ? (product.bg_url_dark ?? product.bg_url ?? null)
+      : (product.bg_url ?? product.bg_url_dark ?? null)
 
   return (
     <div
       className={`flex flex-col w-full ${s.productCard} ${owned ? s.productCardOwned : ''}`}
       style={bgUrl
-        ? {
-            backgroundImage: `url(${bgUrl})`, backgroundSize: 'cover', backgroundPosition: 'center',
-            ...(tintBg ? { backgroundColor: 'var(--art-tint, var(--bg))', backgroundBlendMode: 'multiply' } : {}),
-          }
-        : { background: 'var(--catalog-card-bg, var(--bg-card))' }
+        ? { backgroundImage: `url(${bgUrl})`, backgroundSize: 'cover', backgroundPosition: 'center' }
+        : { background: 'var(--bg-card)' }
       }
       onClick={() => onOpen(product)}
       onMouseEnter={triggerGlitch}
