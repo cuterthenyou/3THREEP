@@ -62,6 +62,8 @@ export default async function AccountPage() {
 
   const profileBg = settingsRows.find((r: {key: string; value: string | null}) => r.key === 'profile_bg_url')?.value ?? null
   const profileBgDark = settingsRows.find((r: {key: string; value: string | null}) => r.key === 'profile_bg_url_dark')?.value ?? null
+  const levelTip = settingsRows.find((r: {key: string; value: string | null}) => r.key === 'lk_level_tip')?.value ?? undefined
+  const discountTip = settingsRows.find((r: {key: string; value: string | null}) => r.key === 'lk_discount_tip')?.value ?? undefined
   const TICKER_DEFAULTS = [
     'THREEP — ЭТО СОСТОЯНИЕ ДУШИ',
     'НОВАЯ ДРОПА УЖЕ БЛИЗКО',
@@ -123,6 +125,8 @@ export default async function AccountPage() {
     }
     if (anyCollectionComplete) tasks.push(awardAchievement(user.id, 'full_collection'))
     if ((maxBatRow?.hs ?? 0) >= 50) tasks.push(awardAchievement(user.id, 'game_hunter'))
+    if ((maxBatRow?.hs ?? 0) >= 100) tasks.push(awardAchievement(user.id, 'game_master'))
+    if (ownedOrders.length >= 5) tasks.push(awardAchievement(user.id, 'loyal_buyer'))
     await Promise.all(tasks)
   } catch (e) {
     console.error('[achievements] sync failed:', e)
@@ -164,6 +168,8 @@ export default async function AccountPage() {
       catalogProducts={catalogProducts}
       catalogCategories={catalogCategories}
       achievements={achievements}
+      levelTip={levelTip}
+      discountTip={discountTip}
     />
   )
 }

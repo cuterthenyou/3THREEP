@@ -229,6 +229,20 @@ export default function SiteClient({ initialSettings, initialCustomFonts = [], v
     setSavingMenuFooter(false); setMenuFooterMsg('✓ Сохранено — обновляю страницу…'); reloadAfterSave()
   }
 
+  // ── Тултипы ЛК (уровень / скидка) ──
+  const [lkLevelTip, setLkLevelTip] = useState(initialSettings['lk_level_tip'] ?? '')
+  const [lkDiscountTip, setLkDiscountTip] = useState(initialSettings['lk_discount_tip'] ?? '')
+  const [savingLkTips, setSavingLkTips] = useState(false)
+  const [lkTipsMsg, setLkTipsMsg] = useState('')
+  async function saveLkTips() {
+    setSavingLkTips(true); setLkTipsMsg('')
+    await Promise.all([
+      saveSetting('lk_level_tip', lkLevelTip.trim()),
+      saveSetting('lk_discount_tip', lkDiscountTip.trim()),
+    ])
+    setSavingLkTips(false); setLkTipsMsg('✓ Сохранено — обновляю страницу…'); reloadAfterSave()
+  }
+
   // Текущая тема админки — чтобы живой предпросмотр цвета бил по нужной теме
   const [adminTheme, setAdminTheme] = useState<'light' | 'dark' | 'trip'>('dark')
   useEffect(() => {
@@ -1668,6 +1682,27 @@ export default function SiteClient({ initialSettings, initialCustomFonts = [], v
             {savingLvl ? 'Сохраняем...' : 'Сохранить формулу'}
           </button>
           {lvlMsg && <span style={msgStyle(lvlMsg)}>{lvlMsg}</span>}
+        </div>
+      </AdminSection>
+
+      {/* ── Тултипы ЛК (наведение на бейджи уровня и скидки) ── */}
+      <AdminSection title="Подсказки в ЛК (уровень / скидка)" tab="account">
+        <p className="text-xs" style={{ color: 'var(--accent)', opacity: 0.5, fontFamily: 'var(--font-involve)' }}>
+          Текст всплывающей подсказки при наведении на бейдж «LVL» и на бейдж скидки в личном кабинете. Пусто — показывается дефолт.
+        </p>
+        <label className="flex flex-col gap-1">
+          <span className="text-xs uppercase tracking-widest" style={{ color: 'var(--accent)', opacity: 0.5, fontFamily: 'var(--font-involve)' }}>Подсказка про уровень</span>
+          <textarea value={lkLevelTip} onChange={e => setLkLevelTip(e.target.value)} rows={2} placeholder="Уровень растёт от искорок…" style={{ ...INPUT_STYLE, borderRadius: '2px', padding: '0.5rem 0.75rem', outline: 'none', fontFamily: 'var(--font-involve)', resize: 'vertical' }} />
+        </label>
+        <label className="flex flex-col gap-1">
+          <span className="text-xs uppercase tracking-widest" style={{ color: 'var(--accent)', opacity: 0.5, fontFamily: 'var(--font-involve)' }}>Подсказка про скидку</span>
+          <textarea value={lkDiscountTip} onChange={e => setLkDiscountTip(e.target.value)} rows={2} placeholder="Скидка применяется к ценам…" style={{ ...INPUT_STYLE, borderRadius: '2px', padding: '0.5rem 0.75rem', outline: 'none', fontFamily: 'var(--font-involve)', resize: 'vertical' }} />
+        </label>
+        <div className="flex items-center gap-3 flex-wrap">
+          <button disabled={savingLkTips} onClick={saveLkTips} className={a.btn}>
+            {savingLkTips ? 'Сохраняем...' : 'Сохранить подсказки'}
+          </button>
+          {lkTipsMsg && <span style={msgStyle(lkTipsMsg)}>{lkTipsMsg}</span>}
         </div>
       </AdminSection>
 

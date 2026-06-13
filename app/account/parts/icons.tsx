@@ -48,6 +48,15 @@ export function Medal({ kind, size = 34 }: { kind: string; size?: number }) {
         </>
       case 'game': // охотник — молния
         return <path d="M13 5 L8 13 H11 L10 19 L16 11 H12 Z" fill="currentColor" />
+      case 'skull': // мастер охоты — череп
+        return <>
+          <path d="M12 5.5c-3 0-5 2-5 4.8 0 1.7 1 2.8 1 3.6V15h8v-1.1c0-.8 1-1.9 1-3.6 0-2.8-2-4.8-5-4.8Z" fill="currentColor" />
+          <circle cx="10" cy="10.5" r="1.2" fill="var(--bg-2)" />
+          <circle cx="14" cy="10.5" r="1.2" fill="var(--bg-2)" />
+          <rect x="11.4" y="15" width="1.2" height="2.2" fill="currentColor" />
+        </>
+      case 'crown': // свой человек — корона
+        return <path d="M6 16h12l-1-7-3 3-2-4-2 4-3-3-1 7Z" fill="currentColor" />
       default:
         return <circle cx="12" cy="12" r="3" fill="currentColor" />
     }
@@ -56,6 +65,35 @@ export function Medal({ kind, size = 34 }: { kind: string; size?: number }) {
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
       <polygon points="12,1.5 21.5,6.5 21.5,17.5 12,22.5 2.5,17.5 2.5,6.5" fill="none" stroke="currentColor" strokeWidth="1.4" />
       {glyph}
+    </svg>
+  )
+}
+
+// Нео-трайбл овальная рама ВОКРУГ аватарки (отсылка к референсу — острые
+// «пламенные» отростки, образующие вертикальный овал с навершиями и шипами).
+// Перекрашивается currentColor. viewBox с запасом сверху/снизу под финиалы.
+export function OvalTribalFrame() {
+  return (
+    <svg viewBox="0 -12 200 264" fill="none" xmlns="http://www.w3.org/2000/svg"
+         preserveAspectRatio="xMidYMid meet" aria-hidden="true" style={{ overflow: 'visible' }}>
+      <g stroke="currentColor" fill="currentColor">
+        {/* основные «пламенные» дуги овала */}
+        <path d="M100 6 C152 14 186 62 183 120 C180 186 150 228 100 236" fill="none" strokeWidth="3" strokeLinecap="round" />
+        <path d="M100 6 C48 14 14 62 17 120 C20 186 50 228 100 236" fill="none" strokeWidth="3" strokeLinecap="round" />
+        {/* тонкий внутренний контур */}
+        <path d="M100 18 C140 26 170 66 167 120 C164 176 140 214 100 224" fill="none" strokeWidth="1" opacity="0.45" />
+        <path d="M100 18 C60 26 30 66 33 120 C36 176 60 214 100 224" fill="none" strokeWidth="1" opacity="0.45" />
+        {/* верхний/нижний финиал-крестоцвет */}
+        <polygon points="100,4 93,-10 100,1 107,-10" />
+        <polygon points="100,238 93,252 100,241 107,252" />
+        {/* боковые шипы-«языки пламени» */}
+        <polygon points="183,120 200,108 187,122 200,134" />
+        <polygon points="17,120 0,108 13,122 0,134" />
+        <polygon points="176,66 192,52 181,70" />
+        <polygon points="24,66 8,52 19,70" />
+        <polygon points="176,174 192,188 181,170" />
+        <polygon points="24,174 8,188 19,170" />
+      </g>
     </svg>
   )
 }

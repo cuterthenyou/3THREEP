@@ -13,7 +13,7 @@ import EmojiPicker from '@/components/EmojiPicker';
 import ProductModal from '@/components/ProductModal';
 import NotificationBell from '@/components/NotificationBell';
 import MarqueeTicker from '@/components/MarqueeTicker';
-import { BrutalSun, BrutalMoon, LvlFire, LvlBolt, LvlStar, LvlCircle, GothicStrip, Medal } from './parts/icons';
+import { BrutalSun, BrutalMoon, LvlFire, LvlBolt, LvlStar, LvlCircle, OvalTribalFrame, Medal } from './parts/icons';
 import s from './account.module.css';
 
 interface Gamification {
@@ -48,7 +48,12 @@ interface Props {
   catalogProducts?: Product[];
   catalogCategories?: Category[];
   achievements?: AchievementView[];
+  levelTip?: string;
+  discountTip?: string;
 }
+
+const DEFAULT_LEVEL_TIP = 'Уровень растёт от искорок за полученные заказы. Чем выше уровень — тем больше скидка.';
+const DEFAULT_DISCOUNT_TIP = 'Скидка применяется к ценам в каталоге автоматически. Цена округляется вниз до кратной 3.';
 
 // Вещь «в инвентаре» = заказ оплачен и не отменён. Появляется после оплаты,
 // исчезает при отмене. (Искры/скидка — отдельно, только при 'delivered'.)
@@ -59,7 +64,9 @@ function getUsername(email: string, name: string | null) {
   return email.split('@')[0].toUpperCase();
 }
 
-export default function AccountClient({ user, profile, orders, profileBg, profileBgDark, newsletterSubscribed, tickerTexts, accountTickerTexts, gamification, catalogProducts = [], catalogCategories = [], achievements = [] }: Props) {
+export default function AccountClient({ user, profile, orders, profileBg, profileBgDark, newsletterSubscribed, tickerTexts, accountTickerTexts, gamification, catalogProducts = [], catalogCategories = [], achievements = [], levelTip, discountTip }: Props) {
+  const levelTipText = levelTip?.trim() || DEFAULT_LEVEL_TIP;
+  const discountTipText = discountTip?.trim() || DEFAULT_DISCOUNT_TIP;
   const [loggingOut, setLoggingOut] = useState(false);
   const [activeTab, setActiveTab] = useState<'inventory' | 'orders'>('inventory');
   const [showNicknameModal, setShowNicknameModal] = useState(!profile?.name);
@@ -266,15 +273,23 @@ export default function AccountClient({ user, profile, orders, profileBg, profil
 
       <div className={s.content}>
         <div className={s.inner}>
-          {/* Top nav */}
+          {/* Top nav — на мобиле текст сворачивается в иконки (не влезал) */}
           <div className={s.topNav}>
-            <Link href="/" className={s.topNavLink}>← На главную</Link>
+            <Link href="/" className={s.topNavLink} aria-label="На главную" title="На главную">
+              <svg className={s.navIcon} width="14" height="14" viewBox="0 0 14 14" fill="currentColor" aria-hidden="true"><path d="M7 1 L13 6 H11 V13 H8.5 V9 H5.5 V13 H3 V6 H1 Z"/></svg>
+              <span className={s.navLabel}>← На главную</span>
+            </Link>
             <div className={s.topNavActions}>
               <NotificationBell />
-              <button onClick={handleLogout} disabled={loggingOut} className={s.topNavBtn}>
-                {loggingOut ? '...' : 'Выйти'}
+              <button onClick={handleLogout} disabled={loggingOut} className={s.topNavBtn} aria-label="Выйти" title="Выйти">
+                {loggingOut ? '...' : (
+                  <>
+                    <svg className={s.navIcon} width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="square" aria-hidden="true"><path d="M6 2 H3 V14 H6"/><path d="M10 5 L13 8 L10 11"/><path d="M13 8 H6"/></svg>
+                    <span className={s.navLabel}>Выйти</span>
+                  </>
+                )}
               </button>
-              <button onClick={() => { toggleTheme(); setIsDark(d => !d); }} className={s.topNavBtn} title={isDark ? 'Светлая тема' : 'Тёмная тема'}>
+              <button onClick={() => { toggleTheme(); setIsDark(d => !d); }} className={s.topNavBtn} title={isDark ? 'Светлая тема' : 'Тёмная тема'} aria-label="Сменить тему">
                 {isDark ? <BrutalSun /> : <BrutalMoon />}
               </button>
             </div>
@@ -291,11 +306,23 @@ export default function AccountClient({ user, profile, orders, profileBg, profil
           <div className={`${s.profileCard} hud-corners`}>
             <div className={s.profileInfo}>
               <div className={s.badgeRow}>
-                <span className={`${s.levelBadge} ${s.tier}`} data-tier={gamification.tierKey} title={tierLabel}>
-                  LVL {level}
+                <span className={s.badgeWrap}>
+                  <span className={`${s.levelBadge} ${s.tier}`} data-tier={gamification.tierKey}>
+                    LVL {level}
+                  </span>
+                  <span className={s.badgeTip} role="tooltip">
+                    <span className={s.medalTipTitle}>Уровень {level} · {tierLabel}</span>
+                    <span className={s.medalTipDesc}>{levelTipText}</span>
+                  </span>
                 </span>
                 {discount > 0 && (
-                  <span className={s.discountBadge} title="Твоя скидка на покупки">−{discount}%</span>
+                  <span className={s.badgeWrap}>
+                    <span className={s.discountBadge}>−{discount}%</span>
+                    <span className={s.badgeTip} role="tooltip">
+                      <span className={s.medalTipTitle}>Скидка −{discount}%</span>
+                      <span className={s.medalTipDesc}>{discountTipText}</span>
+                    </span>
+                  </span>
                 )}
               </div>
               <h2 className={s.username}>{username}</h2>
@@ -379,10 +406,7 @@ export default function AccountClient({ user, profile, orders, profileBg, profil
               </div>
             </div>
 
-            {/* Gothic decorative strip — left of avatar, desktop only */}
-            <div className={s.gothicFrame} aria-hidden="true"><GothicStrip /></div>
-
-            {/* Avatar — right column, full card height */}
+            {/* Avatar — right column, full card height, обрамлён нео-трайбл овалом */}
             <div className={s.avatarCol}>
               <input
                 ref={avatarRef}
@@ -391,8 +415,6 @@ export default function AccountClient({ user, profile, orders, profileBg, profil
                 className="hidden"
                 onChange={handleAvatarChange}
               />
-              {/* Gothic strip — mobile left */}
-              <div className={s.gothicFrameMobile} aria-hidden="true"><GothicStrip /></div>
               <button
                 onClick={() => avatarRef.current?.click()}
                 disabled={uploadingAvatar}
@@ -410,8 +432,8 @@ export default function AccountClient({ user, profile, orders, profileBg, profil
                   {uploadingAvatar ? '...' : 'Сменить'}
                 </div>
               </button>
-              {/* Gothic strip — mobile right */}
-              <div className={s.gothicFrameMobile} aria-hidden="true"><GothicStrip /></div>
+              {/* Декоративная трайбл-рама вокруг аватара (тянется влево в пустоту карточки) */}
+              <div className={s.avatarFrame} aria-hidden="true"><OvalTribalFrame /></div>
             </div>
           </div>
 

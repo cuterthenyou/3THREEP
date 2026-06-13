@@ -189,6 +189,35 @@
   .chipActive { font-size: 0.55rem; }
 }
 
+/* Бейдж с кастомным тултипом (уровень / скидка) */
+.badgeWrap {
+  position: relative;
+  display: inline-flex;
+}
+.badgeTip {
+  position: absolute;
+  top: calc(100% + 0.4rem);
+  left: 0;
+  z-index: 20;
+  pointer-events: none;
+  width: max-content;
+  max-width: 15rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  padding: 0.4rem 0.6rem;
+  background: var(--bg-2);
+  border: 1px solid var(--accent);
+  box-shadow: 3px 3px 0 var(--accent);
+  border-radius: var(--radius-btn, 2px);
+  opacity: 0;
+  transform: translateY(3px);
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+@media (hover: hover) and (pointer: fine) {
+  .badgeWrap:hover .badgeTip { opacity: 1; transform: translateY(0); }
+}
+
 .levelBadge {
   font-size: 0.6rem;
   padding: 0.125rem 0.5rem;
@@ -331,11 +360,33 @@
 
 /* Avatar */
 .avatarCol {
+  position: relative;       /* контекст для абсолютной трайбл-рамы */
+  overflow: visible;        /* отростки рамы выходят за квадрат (влево в пустоту) */
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
   /* тянемся на всю высоту карточки; ширину задаёт квадратный аватар */
   align-self: stretch;
+}
+
+/* Нео-трайбл овал ВОКРУГ аватара. Чуть больше квадрата + смещён влево, чтобы
+   «языки» уходили в пустое место карточки (а не выглядели как ремень сбоку). */
+.avatarFrame {
+  position: absolute;
+  top: -8%;
+  bottom: -8%;
+  left: -20%;
+  right: -7%;
+  z-index: 1;
+  pointer-events: none;
+  color: var(--accent);
+  opacity: 0.5;
+}
+.avatarFrame svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
 }
 
 
@@ -927,6 +978,10 @@
   gap: 0.5rem;
 }
 
+/* На десктопе показываем текст, иконку прячем (поведение как было). */
+.navIcon { display: none; }
+.navLabel { display: inline; }
+
 .topNavLink {
   display: inline-flex;
   align-items: center;
@@ -1010,32 +1065,6 @@
   padding: 0.55rem 0;
 }
 
-/* ── Gothic frame decorations ───────────────────────────────── */
-.gothicFrame {
-  display: flex;
-  align-self: stretch;        /* тянется на всю высоту карточки */
-  width: 24px;
-  color: var(--accent);
-  flex-shrink: 0;
-  opacity: 0.9;
-}
-
-.gothicFrameMobile {
-  display: none;
-  align-self: stretch;        /* на мобиле — на всю высоту аватарки */
-  width: 18px;
-  color: var(--accent);
-  flex-shrink: 0;
-  opacity: 0.85;
-}
-
-.gothicFrame svg,
-.gothicFrameMobile svg {
-  display: block;
-  width: 100%;
-  height: 100%;
-}
-
 /* Bat hunt high score card */
 .batScoreCard {
   display: flex;
@@ -1108,10 +1137,9 @@
 
   .avatarCol {
     align-self: center;
-    width: auto;
+    width: 9.5rem;
     height: 9.5rem;
     flex-direction: row;
-    align-items: stretch;       /* рамки тянутся на всю высоту аватарки */
     gap: 0.5rem;
   }
 
@@ -1119,15 +1147,15 @@
     width: 9.5rem;
     height: 9.5rem;
     aspect-ratio: auto;         /* на мобиле размер задаём явно */
+    align-self: center;
   }
 
-  .gothicFrame {
-    display: none;
-  }
-
-  .gothicFrameMobile {
-    display: flex;
-    width: 26px;                /* шире и детальнее на мобиле, с обеих сторон */
+  /* на мобиле рама симметрична (аватар по центру) */
+  .avatarFrame {
+    top: -12%;
+    bottom: -12%;
+    left: -12%;
+    right: -12%;
   }
 
   .username {
@@ -1155,5 +1183,15 @@
   .topNavBtn {
     font-size: 0.62rem;
     padding: 0.28rem 0.6rem;
+  }
+
+  /* Мобила: текст в навбаре ЛК не влезал → сворачиваем в иконки. */
+  .navLabel { display: none; }
+  .navIcon { display: block; }
+  .topNavLink,
+  .topNavBtn {
+    padding: 0.4rem;
+    min-width: 2.2rem;
+    justify-content: center;
   }
 }
