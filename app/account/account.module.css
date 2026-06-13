@@ -365,9 +365,11 @@
   overflow: visible;        /* отростки рамы выходят за квадрат (влево в пустоту) */
   display: flex;
   flex-direction: column;
-  flex-shrink: 0;
-  /* тянемся на всю высоту карточки; ширину задаёт квадратный аватар */
-  align-self: stretch;
+  /* Флюидная ширина (не хардкод): тянется от вьюпорта, с потолком. Так квадрат
+     ВСЕГДА влезает в ряд, а профиль (flex:1) забирает остальное. */
+  flex: 0 0 auto;
+  width: clamp(7.5rem, 13vw, 11.5rem);
+  align-self: center;
 }
 
 /* Нео-трайбл овал ВОКРУГ аватара. Чуть больше квадрата + смещён влево, чтобы
@@ -393,13 +395,10 @@
 
 .avatarBtn {
   position: relative;
-  /* Равносторонний квадрат ВО ВСЮ ВЫСОТУ блока: высота = высоте карточки,
-     ширина выводится из aspect-ratio. align-self:center — иначе flex-колонка
-     растягивает ШИРИНУ под узкую колонку и квадрат сплющивается. */
-  flex: 1;
+  /* Квадрат от ширины колонки (она флюидная, см. .avatarCol) → всегда влезает. */
+  width: 100%;
   aspect-ratio: 1 / 1;
-  width: auto;
-  align-self: center;
+  height: auto;
   border-radius: 2px;
   overflow: hidden;
   display: flex;
