@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react'
 import s from './BatAnimation.module.css'
-import { trackEvent } from '@/lib/track'
+import { trackEvent, submitLeaderboard } from '@/lib/track'
 import { DEFAULT_GAME_CONFIG, type GameConfig } from '@/lib/gameConfig'
 
 export { DEFAULT_GAME_CONFIG }
@@ -667,7 +667,10 @@ export default function BatAnimation({ config = DEFAULT_GAME_CONFIG }: { config?
   function endGame() {
     setGameState('game_over')
     persistRecord()
-    if (scoreRef.current > 0) trackEvent('bat_score', { score: scoreRef.current, level: currentWaveSizeRef.current })
+    if (scoreRef.current > 0) {
+      trackEvent('bat_score', { score: scoreRef.current, level: currentWaveSizeRef.current })
+      submitLeaderboard(scoreRef.current, difficultyRef.current)
+    }
     goTimerRef.current = setTimeout(() => {
       setSplats([]); setGameState('idle'); setScore(0); scoreRef.current = 0; setWaveNum(0)
       setPowerups([]); setCrackedIds(new Set()); setComboDisplay(0); setActiveEffect(null)
@@ -695,6 +698,7 @@ export default function BatAnimation({ config = DEFAULT_GAME_CONFIG }: { config?
     } catch { /* blocked */ }
     // Ачивка/финал — событие с максимальным уровнем
     trackEvent('bat_score', { score: scoreRef.current, level: FINAL_LEVEL, win: 1 })
+    if (scoreRef.current > 0) submitLeaderboard(scoreRef.current, difficultyRef.current, true)
     goTimerRef.current = setTimeout(() => {
       setSplats([]); setGameState('idle'); setScore(0); scoreRef.current = 0; setWaveNum(0)
       setPowerups([]); setCrackedIds(new Set()); setComboDisplay(0); setActiveEffect(null)

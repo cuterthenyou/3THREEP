@@ -1150,6 +1150,27 @@
   font-size: 1.35rem;
 }
 
+/* Кнопка открытия глобального лидерборда (нео-брутал) */
+.lbBtn {
+  align-self: stretch;
+  font-family: var(--font-onder);
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 0.6rem 0.9rem;
+  color: var(--bg);
+  background: var(--accent);
+  border: 1px solid var(--accent);
+  box-shadow: 2px 2px 0 var(--accent);
+  cursor: pointer;
+  transition: box-shadow 0.12s, transform 0.1s;
+  -webkit-tap-highlight-color: transparent;
+}
+@media (hover: hover) and (pointer: fine) {
+  .lbBtn:hover { box-shadow: 3px 3px 0 var(--accent); transform: translate(-1px, -1px); }
+  .lbBtn:active { box-shadow: 1px 1px 0 var(--accent); transform: translate(1px, 1px); transition-duration: 0.06s; }
+}
+
 /* ── Mobile responsive ── */
 @media (max-width: 639px) {
   .batScoreList { gap: 1rem; }

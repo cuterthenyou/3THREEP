@@ -1,0 +1,163 @@
+.backdrop {
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: var(--overlay-heavy);
+  backdrop-filter: blur(9px) saturate(1.1);
+  -webkit-backdrop-filter: blur(9px) saturate(1.1);
+  animation: lbFade 0.2s ease;
+}
+@keyframes lbFade { from { opacity: 0; } to { opacity: 1; } }
+
+.panel {
+  position: relative;
+  width: 100%;
+  max-width: 30rem;
+  max-height: 82vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-2);
+  border: 1px solid var(--accent);
+  box-shadow: 2px 2px 0 var(--accent), 0 24px 60px var(--overlay-heavy);
+  animation: lbRise calc(0.42s * var(--animation-speed, 1)) cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@keyframes lbRise {
+  from { opacity: 0; transform: translateY(18px) scale(0.985); }
+  to   { opacity: 1; transform: none; }
+}
+/* HUD scanline accent across the top */
+.panel::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: repeating-linear-gradient(90deg, var(--accent) 0 12px, transparent 12px 20px);
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.1rem 0.75rem;
+  border-bottom: 1px solid var(--border-soft);
+}
+.title {
+  font-family: var(--font-heading);
+  font-size: 1.05rem;
+  letter-spacing: 0.1em;
+  color: var(--accent);
+}
+.close {
+  width: 1.9rem;
+  height: 1.9rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--accent);
+  color: var(--bg);
+  border: 1px solid var(--accent);
+  box-shadow: 2px 2px 0 var(--accent);
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: box-shadow 0.12s, transform 0.1s;
+  -webkit-tap-highlight-color: transparent;
+}
+@media (hover: hover) and (pointer: fine) {
+  .close:hover { box-shadow: 3px 3px 0 var(--accent); transform: translate(-1px, -1px); }
+  .close:active { box-shadow: 1px 1px 0 var(--accent); transform: translate(1px, 1px); }
+}
+
+.meBanner {
+  padding: 0.6rem 1.1rem;
+  font-family: var(--font-involve);
+  font-size: 0.82rem;
+  color: var(--accent);
+  background: var(--accent-2);
+  border-bottom: 1px solid var(--border-soft);
+}
+.meBanner b { font-family: var(--font-deutsch); font-size: 1.05rem; }
+.meScore { font-family: var(--font-deutsch); }
+
+.list {
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  padding: 0.4rem 1.1rem 1rem;
+}
+.empty {
+  padding: 2rem 0;
+  text-align: center;
+  color: var(--accent);
+  opacity: 0.4;
+  font-family: var(--font-involve);
+  font-size: 0.85rem;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.45rem 0.4rem;
+  border-bottom: 1px solid var(--bg-subtle);
+}
+.row:last-child { border-bottom: none; }
+.rowMe {
+  background: var(--accent-2);
+  border: 1px solid var(--accent);
+  border-radius: var(--radius-base, 0);
+  margin: 0.15rem 0;
+}
+
+.rank {
+  min-width: 2.1rem;
+  font-family: var(--font-involve);
+  font-size: 0.78rem;
+  color: var(--accent);
+  opacity: 0.7;
+}
+.name {
+  flex: 1;
+  min-width: 0;
+  font-family: var(--font-involve);
+  font-size: 0.82rem;
+  color: var(--accent);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.crown { white-space: nowrap; }
+.youTag { opacity: 0.55; }
+.lvl {
+  flex-shrink: 0;
+  font-family: var(--font-involve);
+  font-size: 0.6rem;
+  color: var(--accent);
+  opacity: 0.6;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 0.05rem 0.3rem;
+}
+.plat { flex-shrink: 0; font-size: 0.8rem; opacity: 0.75; }
+.death {
+  flex-shrink: 0;
+  font-family: var(--font-involve);
+  font-size: 0.55rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--status-error);
+  border: 1px solid var(--status-error);
+  border-radius: 3px;
+  padding: 0.05rem 0.3rem;
+}
+.score {
+  flex-shrink: 0;
+  min-width: 3.2rem;
+  text-align: right;
+  font-family: var(--font-deutsch);
+  font-size: 1rem;
+  color: var(--accent);
+}

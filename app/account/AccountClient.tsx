@@ -13,6 +13,7 @@ import EmojiPicker from '@/components/EmojiPicker';
 import ProductModal from '@/components/ProductModal';
 import NotificationBell from '@/components/NotificationBell';
 import MarqueeTicker from '@/components/MarqueeTicker';
+import LeaderboardModal from '@/components/LeaderboardModal';
 import { LvlFire, LvlBolt, LvlStar, LvlCircle, Medal } from './parts/icons';
 import ThemeIcon from '@/components/ThemeIcon';
 import s from './account.module.css';
@@ -86,6 +87,7 @@ export default function AccountClient({ user, profile, orders, profileBg, profil
   const isDark = theme !== 'light';
   const isBaseTheme = theme === 'light' || theme === 'dark' || theme === 'trip';
   const [batScores, setBatScores] = useState<{ normal: number | null; death: number | null }>({ normal: null, death: null });
+  const [lbOpen, setLbOpen] = useState(false);
 
   useEffect(() => {
     const read = () => setThemeState(document.documentElement.dataset.theme ?? 'light');
@@ -456,6 +458,12 @@ export default function AccountClient({ user, profile, orders, profileBg, profil
               </div>
             </div>
           )}
+
+          {/* Глобальный лидерборд — модалка с топ-100 + твоё место */}
+          <button className={s.lbBtn} onClick={() => setLbOpen(true)}>
+            🏆 Лидерборд
+          </button>
+          <LeaderboardModal open={lbOpen} onClose={() => setLbOpen(false)} />
 
           {/* Tabs */}
           <div className={s.tabs}>

@@ -139,26 +139,22 @@ export async function GET(req: NextRequest) {
     `).catch(() => ({ buyers: '0', repeat_buyers: '0' })),
 
     queryMany(`
-      SELECT (e.meta->>'score')::int AS score, NULLIF(e.meta->>'level','')::int AS level, e.created_at, p.name AS player
-      FROM events e
-      LEFT JOIN profiles p ON p.id = e.user_id
-      WHERE e.type='bat_score' AND e.meta->>'score' ~ '^[0-9]+$'
-        AND COALESCE(e.meta->>'device', 'desktop') = 'desktop' ${periodFilter(period, 'e.created_at')}
+      SELECT score, level, created_at, nickname AS player, difficulty, win
+      FROM leaderboard
+      WHERE platform = 'desktop' ${periodFilter(period, 'created_at')}
       ORDER BY score DESC LIMIT 10
-    `).catch(() => [] as Array<{ score: number; level: number | null; created_at: string; player: string | null }>),
+    `).catch(() => [] as Array<{ score: number; level: number | null; created_at: string; player: string | null; difficulty: string; win: boolean }>),
 
     queryMany(`
-      SELECT (e.meta->>'score')::int AS score, NULLIF(e.meta->>'level','')::int AS level, e.created_at, p.name AS player
-      FROM events e
-      LEFT JOIN profiles p ON p.id = e.user_id
-      WHERE e.type='bat_score' AND e.meta->>'score' ~ '^[0-9]+$'
-        AND e.meta->>'device' = 'mobile' ${periodFilter(period, 'e.created_at')}
+      SELECT score, level, created_at, nickname AS player, difficulty, win
+      FROM leaderboard
+      WHERE platform = 'mobile' ${periodFilter(period, 'created_at')}
       ORDER BY score DESC LIMIT 10
-    `).catch(() => [] as Array<{ score: number; level: number | null; created_at: string; player: string | null }>),
+    `).catch(() => [] as Array<{ score: number; level: number | null; created_at: string; player: string | null; difficulty: string; win: boolean }>),
 
     queryOne(`
-      SELECT COUNT(*) AS plays, COUNT(DISTINCT session_id) AS players
-      FROM events WHERE type='bat_score' ${pf}
+      SELECT COUNT(*) AS plays, COUNT(DISTINCT COALESCE(user_id::text, nickname, id::text)) AS players
+      FROM leaderboard WHERE TRUE ${pf}
     `).catch(() => ({ plays: '0', players: '0' })),
   ])
 

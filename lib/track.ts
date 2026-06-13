@@ -31,3 +31,14 @@ export function trackEvent(type: EventType, meta: Record<string, unknown> = {}):
     // sendBeacon unavailable / blocked — silent fail, never breaks UX
   }
 }
+
+// Запись результата игры в лидерборд. Платформа/ник/уровень добираются на сервере
+// (из UA и профиля сессии) — клиент шлёт только очки + сложность + флаг победы.
+export function submitLeaderboard(score: number, difficulty: string, win = false): void {
+  try {
+    const body = JSON.stringify({ score, difficulty, win })
+    navigator.sendBeacon('/api/leaderboard', new Blob([body], { type: 'application/json' }))
+  } catch {
+    // silent fail
+  }
+}
