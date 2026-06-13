@@ -6,6 +6,7 @@ import { useCart } from '@/lib/cart';
 import { toggleTheme } from '@/lib/theme';
 import UserButton from './UserButton';
 import ThemedLogo from './ThemedLogo';
+import { PALETTES } from '@/lib/palettes';
 import NotificationBell from './NotificationBell';
 import s from './Header.module.css';
 
@@ -109,7 +110,7 @@ export default function Header({ isAdminUser = false, initialCollections, custom
   const [collections, setCollections] = useState<Collection[]>(initialCollections ?? []);
   const [customItems, setCustomItems] = useState<CustomItem[]>(initialCustomItems ?? []);
   const [collectionsLoading, setCollectionsLoading] = useState(!initialCollections);
-  const [theme, setTheme] = useState<'light' | 'dark' | 'trip'>('dark');
+  const [theme, setTheme] = useState<string>('dark');
   const [tripDrunk, setTripDrunk] = useState(1);
   const [logoIconUrl, setLogoIconUrl] = useState<string | null>(initialLogoIconUrl ?? null);
   const [logoTextUrl, setLogoTextUrl] = useState<string | null>(initialLogoTextUrl ?? null);
@@ -151,7 +152,7 @@ export default function Header({ isAdminUser = false, initialCollections, custom
   // Sync theme icon + name with current theme (incl. trip)
   useEffect(() => {
     const read = () => {
-      const t = (document.documentElement.dataset.theme as 'light' | 'dark' | 'trip') ?? 'dark';
+      const t = document.documentElement.dataset.theme ?? 'dark';
       setTheme(t);
     };
     read();
@@ -344,8 +345,12 @@ export default function Header({ isAdminUser = false, initialCollections, custom
                         <svg width="12" height="12" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.4" aria-hidden="true">
                           <path d="M7 1.5a5.5 5.5 0 105.5 5.5A3 3 0 017 4a2 2 0 002 2" strokeLinecap="round" />
                         </svg>
-                      ) : <BrutalMoon />}
-                      <span>{theme === 'light' ? 'LIGHT' : theme === 'trip' ? 'TRIP' : 'DARK'}</span>
+                      ) : theme === 'dark' ? <BrutalMoon /> : (
+                        <svg width="12" height="12" viewBox="0 0 14 14" fill="currentColor" aria-hidden="true">
+                          <polygon points="7,1 9,5 13,7 9,9 7,13 5,9 1,7 5,5" />
+                        </svg>
+                      )}
+                      <span>{(PALETTES.find(p => p.key === theme)?.label) ?? theme.toUpperCase()}</span>
                     </button>
                   </div>
 

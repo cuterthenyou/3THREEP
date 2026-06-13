@@ -1,4 +1,5 @@
 import { queryMany } from '@/lib/db'
+import { PALETTES, DEFAULT_ENABLED, ALL_THEME_KEYS, paletteVarsCss } from '@/lib/palettes'
 
 export interface CustomFont { id: number; name: string; url: string }
 
@@ -254,9 +255,26 @@ html[data-theme="trip"] {
 ${tripBreathe ? '' : 'html[data-theme="trip"] .trip-breathe { display: none; }'}
 `.trim()
 
+  // CSS доп-палитр (не base) — генерится из реестра. light/dark/trip уже выше.
+  const extraPalettesCss = PALETTES.filter(p => !p.base).map(paletteVarsCss).join('\n')
+
+  // Какие темы включены (тумблеры из админки). Цикл переключения — только
+  // НЕ-скрытые включённые; TRIP (hidden) активируется тройным тапом, если включён.
+  let enabledRaw: string[] = DEFAULT_ENABLED
+  try {
+    const parsed = JSON.parse(settings['enabled_themes'] ?? '')
+    if (Array.isArray(parsed) && parsed.length) enabledRaw = parsed.filter((k: string) => ALL_THEME_KEYS.includes(k))
+  } catch { /* нет/битый ключ — дефолт */ }
+  if (!enabledRaw.length) enabledRaw = DEFAULT_ENABLED
+  const cycleThemes = enabledRaw.filter(k => !PALETTES.find(p => p.key === k)?.hidden)
+  const tripEnabled = enabledRaw.includes('trip')
+
   return (
     <>
-      <style dangerouslySetInnerHTML={{ __html: css }} />
+      <style dangerouslySetInnerHTML={{ __html: css + '\n' + extraPalettesCss }} />
+      <script dangerouslySetInnerHTML={{
+        __html: `window.__THREEP_THEMES__=${JSON.stringify(cycleThemes)};window.__THREEP_TRIP_ENABLED__=${tripEnabled};`
+      }} />
       {loadingPhrases && (
         <script dangerouslySetInnerHTML={{
           __html: `window.__THREEP_LOADING_PHRASES__=${JSON.stringify(loadingPhrases)};`

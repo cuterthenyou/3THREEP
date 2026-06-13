@@ -6,6 +6,7 @@ import { AdminSection, AdminPageTitle, AdminTabContext } from '../components'
 import { CHECKBOARD_LIGHT, CHECKBOARD_DARK, INPUT_STYLE } from '../adminStyles'
 import { ColorPicker, FontSelect, GlitterPreview } from './parts'
 import { parseLevelingConfig, getDiscount } from '@/lib/leveling'
+import { PALETTES, DEFAULT_ENABLED } from '@/lib/palettes'
 import type { CustomFont } from '@/components/ThemeStyles'
 
 type SettingsTab = 'general' | 'colors' | 'fonts' | 'type' | 'effects' | 'catalog' | 'account' | 'content' | 'menu'
@@ -227,6 +228,23 @@ export default function SiteClient({ initialSettings, initialCustomFonts = [], v
     setSavingMenuFooter(true); setMenuFooterMsg('')
     await saveSetting('menu_footer_text', menuFooterText.trim() || DEFAULT_MENU_FOOTER)
     setSavingMenuFooter(false); setMenuFooterMsg('✓ Сохранено — обновляю страницу…'); reloadAfterSave()
+  }
+
+  // ── Тумблеры тем-палитр (enabled_themes) ──
+  const [enabledThemes, setEnabledThemes] = useState<string[]>(() => {
+    try { const p = JSON.parse(initialSettings['enabled_themes'] ?? ''); if (Array.isArray(p) && p.length) return p } catch {}
+    return DEFAULT_ENABLED
+  })
+  const [savingThemes, setSavingThemes] = useState(false)
+  const [themesMsg, setThemesMsg] = useState('')
+  function toggleThemeKey(key: string) {
+    setEnabledThemes(prev => prev.includes(key) ? prev.filter(k => k !== key) : [...prev, key])
+    setThemesMsg('')
+  }
+  async function saveEnabledThemes() {
+    setSavingThemes(true); setThemesMsg('')
+    await saveSetting('enabled_themes', JSON.stringify(enabledThemes))
+    setSavingThemes(false); setThemesMsg('✓ Сохранено — обновляю страницу…'); reloadAfterSave()
   }
 
   // ── Тултипы ЛК (уровень / скидка) ──
@@ -686,6 +704,35 @@ export default function SiteClient({ initialSettings, initialCustomFonts = [], v
             </div>
             {logoTextMsg && <span style={msgStyle(logoTextMsg)}>{logoTextMsg}</span>}
           </div>
+        </div>
+      </AdminSection>
+
+      {/* ── Темы-палитры: тумблеры ВКЛ/ВЫКЛ ── */}
+      <AdminSection title="Темы (вкл/выкл)" tab="colors">
+        <p className="text-xs" style={{ color: 'var(--accent)', opacity: 0.5, fontFamily: 'var(--font-involve)' }}>
+          Какие темы доступны для переключения на сайте (кнопка темы в шапке циклит включённые).
+          <b> TRIP</b> — секретная: даже включённая, активируется только тройным быстрым тапом по кнопке темы.
+        </p>
+        <div className="flex flex-col gap-2">
+          {PALETTES.map(p => {
+            const on = enabledThemes.includes(p.key)
+            return (
+              <label key={p.key} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.75rem', padding: '0.45rem 0.7rem', background: 'var(--bg-2)', border: `1px solid ${on ? 'var(--accent)' : 'var(--border-soft)'}`, borderRadius: 3 }}>
+                <span style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                  <span style={{ width: 32, height: 16, borderRadius: 2, border: '1px solid var(--border)', background: `linear-gradient(90deg, ${p.bg} 0 50%, ${p.accent} 50% 100%)` }} />
+                  <span style={{ fontFamily: 'var(--font-onder)', fontSize: '0.72rem', letterSpacing: '0.1em', color: 'var(--accent)' }}>{p.label}</span>
+                  {p.hidden && <span style={{ fontFamily: 'var(--font-involve)', fontSize: '0.6rem', opacity: 0.5, color: 'var(--accent)' }}>секретная · тройной тап</span>}
+                </span>
+                <input type="checkbox" checked={on} onChange={() => toggleThemeKey(p.key)} />
+              </label>
+            )
+          })}
+        </div>
+        <div className="flex items-center gap-3 flex-wrap">
+          <button disabled={savingThemes} onClick={saveEnabledThemes} className={a.btn}>
+            {savingThemes ? 'Сохраняем...' : 'Сохранить темы'}
+          </button>
+          {themesMsg && <span style={msgStyle(themesMsg)}>{themesMsg}</span>}
         </div>
       </AdminSection>
 
