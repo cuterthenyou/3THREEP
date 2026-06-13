@@ -515,7 +515,7 @@ export default function AccountClient({ user, profile, orders, profileBg, profil
                 )}
               </div>
 
-              <Link href={`/?category=${activeCategory}#catalog`} className={s.ctaBtn}>
+              <Link href={`/?category=${activeCategory}#catalog`} className={`${s.ctaBtn} blade-glint blade-glint-ambient`}>
                 {categoryProducts.some((p) => ownedIds.has(p.id)) ? 'Добить коллекцию' : 'Собери коллекцию'}
               </Link>
             </div>

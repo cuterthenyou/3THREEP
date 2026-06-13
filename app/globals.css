@@ -506,6 +506,51 @@ h4 { font-size: calc(var(--fs-h4) * var(--type-heading-scale, 1)); }
   }
 }
 
+/* ── BLADE — блик клинка (sword glint) ───────────────────────────────────────
+   Тонкая яркая диагональ-«отблеск» проходит по элементу — как свет на лезвии,
+   вынутом из ножен. Опт-ин утилита: добавь класс `blade-glint` (проход на hover)
+   или `blade-glint-ambient` (периодический проход — для ключевых CTA/hero).
+   overflow:hidden режет только псевдо-блик; box-shadow кнопки не обрезается. */
+.blade-glint {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+.blade-glint::after {
+  content: '';
+  position: absolute;
+  top: -60%;
+  left: -150%;
+  width: 55%;
+  height: 220%;
+  pointer-events: none;
+  z-index: 1;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in srgb, white 65%, transparent) 44%,
+    color-mix(in srgb, white 92%, transparent) 50%,
+    color-mix(in srgb, white 65%, transparent) 56%,
+    transparent
+  );
+  transform: skewX(-22deg);
+  opacity: 0;
+}
+@media (hover: hover) and (pointer: fine) {
+  .blade-glint:hover::after { animation: bladeGlint 0.7s cubic-bezier(0.22, 1, 0.36, 1); }
+}
+.blade-glint-ambient::after { animation: bladeGlint 5s cubic-bezier(0.22, 1, 0.36, 1) 1.4s infinite; }
+@keyframes bladeGlint {
+  0%   { left: -150%; opacity: 0; }
+  10%  { opacity: 1; }
+  62%  { opacity: 1; }
+  100% { left: 150%; opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .blade-glint::after,
+  .blade-glint-ambient::after { animation: none; opacity: 0; }
+}
+
 /* ── Accessibility: visible keyboard focus ring ── */
 :focus-visible {
   outline: 2px solid var(--accent);
