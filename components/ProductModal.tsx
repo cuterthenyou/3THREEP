@@ -164,7 +164,7 @@ export default function ProductModal({ product, visible, onClose, modalBg, tintB
       onClick={(e) => e.target === e.currentTarget && closeWithAnimation()}
       {...modalTouchHandlers}
     >
-      <div className={`absolute inset-0 overflow-y-auto ${s.inner}`} style={modalBg ? { backgroundImage: `url(${modalBg})`, backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat', ...(tintBg ? { backgroundColor: 'var(--bg)', backgroundBlendMode: 'multiply' } : {}) } : undefined}>
+      <div className={`absolute inset-0 overflow-y-auto ${s.inner}`} style={modalBg ? { backgroundImage: `url(${modalBg})`, backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat', ...(tintBg ? { backgroundColor: 'var(--art-tint, var(--bg))', backgroundBlendMode: 'multiply' } : {}) } : undefined}>
         <button
           onClick={closeWithAnimation}
           className={`fixed top-5 right-5 z-50 flex items-center justify-center w-9 h-9 ${s.closeBtn}`}

@@ -50,6 +50,12 @@ export function paletteVarsCss(p: Palette): string {
   --accent-glow: color-mix(in srgb, ${accent} 35%, transparent);
   --bg-card: ${accent};
   --text-on-card: ${bg};
+  /* Каталог-карточка тёмная (атмосфернее плоского accent; PNG-арт снова виден).
+     footer-карточки остаются на --bg-card (accent). --art-tint — светлее --bg,
+     чтобы multiply арта карточки/модалки не давал near-black. */
+  --catalog-card-bg: color-mix(in srgb, ${bg} 86%, ${accent} 9%);
+  --catalog-card-text: ${text};
+  --art-tint: color-mix(in srgb, ${bg} 56%, ${accent} 20%);
   /* оверлей-фон страницы/меню — тонируем под цвет палитры (а не light-терракот) */
   --overlay-bg: color-mix(in srgb, ${bg} 93%, black);
   --color-accent: ${accent};

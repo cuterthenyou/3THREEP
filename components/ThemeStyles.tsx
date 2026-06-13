@@ -257,6 +257,12 @@ html[data-theme="trip"] {
   --accent-glow: color-mix(in srgb, ${accentTrip} 45%, transparent);
   --bg-card:    ${accentTrip};
   --text-on-card: ${bgTrip};
+  /* Каталог-карточка тёмная (атмосфернее яркого accent, в паритете с тёмной модалкой);
+     footer-карточки остаются на --bg-card (accent). --art-tint — светлее --bg для
+     multiply арта/модалки, чтобы PNG не уходил в near-black. */
+  --catalog-card-bg: color-mix(in srgb, ${bgTrip} 80%, ${accentTrip} 13%);
+  --catalog-card-text: ${textTrip};
+  --art-tint: color-mix(in srgb, ${bgTrip} 55%, ${accentTrip} 22%);
   --color-accent:  ${accentTrip};
   --color-primary: ${bgTrip};
   --color-bg:      ${bgTrip};
