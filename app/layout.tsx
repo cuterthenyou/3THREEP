@@ -18,17 +18,61 @@ import TripDesync from '@/components/TripDesync';
 import TripFlash from '@/components/TripFlash';
 import './globals.css';
 
+const SITE_URL = 'https://3threep.ru';
+const SITE_DESC = 'THREEP — экспериментальная уличная одежда ручной работы. Кинематографичная, тёмная, аналоговая эстетика: VHS, глитч, индастриал.';
+
 export const metadata: Metadata = {
-  title: 'THREEP — Custom Streetwear',
-  description: 'THREEP — уличная одежда ручной работы. Хлор, ткань, история.',
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: 'THREEP — Custom Streetwear',
+    template: '%s · THREEP',
+  },
+  description: SITE_DESC,
+  keywords: ['THREEP', '3THREEP', 'streetwear', 'уличная одежда', 'custom streetwear', 'кастом', 'мерч', 'glitch', 'vhs'],
+  applicationName: 'THREEP',
+  alternates: { canonical: '/' },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: { index: true, follow: true, 'max-image-preview': 'large', 'max-snippet': -1 },
+  },
   openGraph: {
     title: 'THREEP — Custom Streetwear',
-    description: 'THREEP — уличная одежда ручной работы.',
-    url: 'https://3threep.ru',
+    description: SITE_DESC,
+    url: SITE_URL,
     siteName: 'THREEP',
     locale: 'ru_RU',
     type: 'website',
   },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'THREEP — Custom Streetwear',
+    description: SITE_DESC,
+  },
+  icons: { icon: '/icon.png', apple: '/icon.png' },
+};
+
+// Структурированные данные (Organization + WebSite) для поисковиков.
+const JSON_LD = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'Organization',
+      '@id': `${SITE_URL}/#org`,
+      name: 'THREEP',
+      url: SITE_URL,
+      logo: `${SITE_URL}/icon.png`,
+      description: SITE_DESC,
+    },
+    {
+      '@type': 'WebSite',
+      '@id': `${SITE_URL}/#site`,
+      url: SITE_URL,
+      name: 'THREEP',
+      publisher: { '@id': `${SITE_URL}/#org` },
+      inLanguage: 'ru-RU',
+    },
+  ],
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
@@ -49,6 +93,10 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <link rel="preload" as="font" type="font/ttf" href="/fonts/ONDER-REGULAR.TTF" crossOrigin="anonymous" />
         <link rel="preload" as="font" type="font/ttf" href="/fonts/Involve-VF.ttf" crossOrigin="anonymous" />
         <link rel="preload" as="font" type="font/ttf" href="/fonts/DeutschGothic-RAMA.ttf" crossOrigin="anonymous" />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(JSON_LD) }}
+        />
         <ThemeStyles />
       </head>
       <body className="overflow-x-hidden">

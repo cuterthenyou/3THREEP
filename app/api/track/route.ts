@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { query } from '@/lib/db'
+import { rateLimit, clientIp } from '@/lib/rate-limit'
 
 let pageViewsReady = false
 
@@ -24,6 +25,10 @@ async function ensurePageViewsTable() {
 
 export async function POST(req: NextRequest) {
   try {
+    // Анти-флуд таблицы page_views по IP.
+    const rl = await rateLimit('pageview_ip', `ip:${clientIp(req)}`, 240, 60_000)
+    if (!rl.ok) return new NextResponse(null, { status: 204 })
+
     const { path, session_id, referrer } = await req.json()
     if (!path || !session_id) return new NextResponse(null, { status: 204 })
     const ua = req.headers.get('user-agent') ?? null

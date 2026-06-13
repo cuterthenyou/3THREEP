@@ -24,6 +24,7 @@ const ALLOW = [
   'components/GlitterCanvas.tsx',   // canvas-арт (динамические rgb)
   'components/RouteTransition.module.css', // VHS-арт: хром-аберрация = намеренные red/cyan
   'components/TripFlash.module.css', // trip-глитч: RGB-split magenta/cyan каналы (как в globals trip-коде)
+  'app/opengraph-image.tsx', // OG-баннер: растр через Satori, CSS-переменные не поддерживаются
   'app/admin/',          // админка — внутренний инструмент, не бренд-витрина
   'scripts/',
   'node_modules/',

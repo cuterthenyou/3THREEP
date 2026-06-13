@@ -1,6 +1,10 @@
+import type { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 import { auth } from '@/lib/auth'
 import AccountClient from './AccountClient'
+
+// Приватный кабинет — не индексируем.
+export const metadata: Metadata = { title: 'Личный кабинет', robots: { index: false, follow: false } }
 import { queryOne, queryMany } from '@/lib/db'
 import { parseLevelingConfig, levelProgress, getDiscount, getTier, sparksForOrder } from '@/lib/leveling'
 import { awardAchievement } from '@/lib/gamification'

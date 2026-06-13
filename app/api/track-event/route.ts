@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { query } from '@/lib/db'
 import { auth } from '@/lib/auth'
+import { rateLimit, clientIp } from '@/lib/rate-limit'
 
 let eventsReady = false
 
@@ -25,6 +26,10 @@ const ALLOWED = new Set(['product_view', 'cart_add', 'checkout_start', 'bat_scor
 
 export async function POST(req: NextRequest) {
   try {
+    // Анти-флуд таблицы events: щедрый лимит по IP (легит-трафик — десятки/мин).
+    const rl = await rateLimit('track_ip', `ip:${clientIp(req)}`, 240, 60_000)
+    if (!rl.ok) return new NextResponse(null, { status: 204 })
+
     const { type, session_id, meta } = await req.json()
     if (!type || !ALLOWED.has(String(type))) return new NextResponse(null, { status: 204 })
 

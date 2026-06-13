@@ -10,15 +10,21 @@ export async function GET() {
   }
 
   const email = session.user.email ?? null;
-  const adminEmailEnv = process.env.ADMIN_EMAIL ?? '';
-  const adminEmails = adminEmailEnv
+  const callerIsAdmin = isAdmin(email);
+
+  // Базовый ответ — только статус самого вызывающего (не утекает чужих данных).
+  const base = { email, isAdmin: callerIsAdmin };
+
+  // Подсказки про ADMIN_EMAIL (кол-во, префикс) — ТОЛЬКО админу, иначе это утечка.
+  if (!callerIsAdmin) return NextResponse.json(base);
+
+  const adminEmails = (process.env.ADMIN_EMAIL ?? '')
     .split(',')
     .map((e) => e.trim().toLowerCase())
     .filter(Boolean);
 
   return NextResponse.json({
-    email,
-    isAdmin: isAdmin(email),
+    ...base,
     adminEmailConfigured: adminEmails.length > 0,
     adminEmailHint: adminEmails.length > 0
       ? `задан (${adminEmails.length} email(s), первый начинается с "${adminEmails[0].slice(0, 4)}...")`

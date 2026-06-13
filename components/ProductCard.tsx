@@ -102,18 +102,21 @@ const ProductCard = React.memo(function ProductCard({
     setTimeout(() => setGlitching(false), 420)
   }
 
-  const bgUrl = isDark
-    ? (product.bg_url_dark ?? product.bg_url ?? null)
-    : (product.bg_url ?? product.bg_url_dark ?? null)
+  // PNG-арт карточки нарисован под базовые темы (light/dark/trip). У доп-палитр
+  // своего арта нет — тонировать его multiply'ем = near-black + нечитаемый текст.
+  // Поэтому на доп-темах арт НЕ рисуем: карточка берёт themed `--bg-card` (= accent)
+  // + `--text-on-card` (= bg) + accent-рамку — ровно как базовая тема (читаемо, в бренде).
+  const bgUrl = tintBg
+    ? null
+    : isDark
+      ? (product.bg_url_dark ?? product.bg_url ?? null)
+      : (product.bg_url ?? product.bg_url_dark ?? null)
 
   return (
     <div
       className={`flex flex-col w-full ${s.productCard} ${owned ? s.productCardOwned : ''}`}
       style={bgUrl
-        // Доп-палитры (toxic/ice/blood/…): тонируем PNG-фон карточки под цвет темы,
-        // чтобы он не выглядел чужеродным (как фон ЛК в AccountClient).
-        ? { backgroundImage: `url(${bgUrl})`, backgroundSize: 'cover', backgroundPosition: 'center',
-            ...(tintBg ? { backgroundColor: 'var(--bg)', backgroundBlendMode: 'multiply' } : {}) }
+        ? { backgroundImage: `url(${bgUrl})`, backgroundSize: 'cover', backgroundPosition: 'center' }
         : { background: 'var(--bg-card)' }
       }
       onClick={() => onOpen(product)}
