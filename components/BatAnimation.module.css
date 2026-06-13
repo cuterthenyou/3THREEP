@@ -262,7 +262,8 @@
 }
 
 @media (max-width: 639px) {
-  .lureHint { font-size: 0.45rem; letter-spacing: 0.16em; right: 0.6rem; bottom: 0.6rem; }
+  /* на мобиле подсказку убираем — места нет, пусть догадается сам */
+  .lureHint { display: none; }
 }
 
 @keyframes lureHintPulse {
@@ -538,6 +539,52 @@
   100% { transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))); opacity: 0; }
 }
 
+/* ── Кровь при разрыве сбежавшей мыши (оседает и тает ~2.5с) ──── */
+.bloodBurst {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  width: 30px;
+  height: 30px;
+  border-radius: 46% 54% 50% 50% / 52% 48% 56% 44%;
+  background: radial-gradient(circle, #b00000 0%, #7a0000 60%, transparent 72%);
+  animation: bloodBurst 2.5s ease-out forwards;
+}
+@keyframes bloodBurst {
+  0%   { transform: translate(-50%, -50%) scale(0.3); opacity: 0; }
+  12%  { transform: translate(-50%, -50%) scale(1.25); opacity: 0.9; }
+  30%  { transform: translate(-50%, -50%) scale(1); opacity: 0.8; }
+  100% { transform: translate(-50%, -50%) scale(1); opacity: 0; }
+}
+
+.bloodDrop {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  width: var(--sz, 6px);
+  height: var(--sz, 6px);
+  border-radius: 50% 50% 52% 48% / 48% 52% 50% 50%;
+  background: #9c0000;
+  opacity: 0;
+  animation: bloodFly 2.5s cubic-bezier(0.16, 0.84, 0.3, 1) forwards;
+}
+/* летит наружу (быстро), потом оседает и медленно тает */
+@keyframes bloodFly {
+  0%   { transform: translate(-50%, -50%) scale(0.6); opacity: 0; }
+  10%  { opacity: 1; }
+  35%  { transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(1); opacity: 0.95; }
+  60%  { transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(1); opacity: 0.8; }
+  100% { transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(1); opacity: 0; }
+}
+
+/* Кровавые глаза опасных мышей / боссов */
+.bloodEyes {
+  filter: drop-shadow(0 0 2px #ff1414) drop-shadow(0 0 4px #ff0000);
+  animation: bloodEyePulse 1.4s ease-in-out infinite;
+}
+@keyframes bloodEyePulse {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.62; }
+}
+
 /* ── Blood splatter stains ──────────────────────────────────── */
 
 .splat {
@@ -750,15 +797,29 @@
   background: #8a0000;
   border-radius: 0 0 40% 40%;
 }
+/* Кровавые кляксы-натёки на гребне стены (брутальнее) */
+.bloodBlob {
+  position: absolute;
+  top: 6vh;
+  border-radius: 50% 50% 48% 52% / 30% 30% 70% 70%;
+  background: radial-gradient(ellipse at 50% 30%, #a00000 0%, #6e0000 70%, transparent 75%);
+  transform: scaleY(0);
+  transform-origin: top;
+  animation: bloodBlobDrop 0.6s ease-out var(--d, 0s) forwards;
+}
 @keyframes bloodTop {
   to { transform: scaleY(1); }
 }
 @keyframes bloodDrip {
   to { height: var(--h, 40vh); }
 }
+@keyframes bloodBlobDrop {
+  to { transform: scaleY(1); }
+}
 @media (prefers-reduced-motion: reduce) {
   .bloodTop { transform: scaleY(1); animation: none; }
   .bloodDrip { height: var(--h, 40vh); animation: none; }
+  .bloodBlob { transform: scaleY(1); animation: none; }
 }
 
 /* ── WIN — финальный экран (100 уровень) ── */

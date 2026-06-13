@@ -22,7 +22,10 @@ const DIFFICULTY: Record<Difficulty, { label: string; speed: number; startWave: 
 }
 
 // ── Pixel-art bat ─────────────────────────────────────────────────────────────
-function PixelBat() {
+function PixelBat({ variant = 'normal' }: { variant?: BatVariant }) {
+  // Опасные мыши (золото/броня/босс) — кровавые светящиеся глаза
+  const danger = variant === 'golden' || variant === 'armored' || variant === 'boss'
+  const eyeFill = danger ? '#ff1414' : 'var(--bg)'
   return (
     <svg width="72" height="50" viewBox="0 -5 48 33" fill="currentColor" aria-hidden="true"
       style={{ shapeRendering: 'crispEdges', imageRendering: 'pixelated' }}>
@@ -43,9 +46,11 @@ function PixelBat() {
       <polygon points="29,5 30,2 27,6" fill="var(--bg)" opacity="0.5"/>
       <polygon points="27,4 24,2 29,-3"/>
       <polygon points="27,3 25,2 28,0" fill="var(--bg)" opacity="0.5"/>
-      {/* Eyes — glowing slit pupils */}
-      <polygon points="21,14 22,11.5 23,14 22,16.5" fill="var(--bg)"/>
-      <polygon points="25,14 26,11.5 27,14 26,16.5" fill="var(--bg)"/>
+      {/* Eyes — glowing slit pupils (кровавые у опасных) */}
+      <g className={danger ? s.bloodEyes : undefined}>
+        <polygon points="21,14 22,11.5 23,14 22,16.5" fill={eyeFill}/>
+        <polygon points="25,14 26,11.5 27,14 26,16.5" fill={eyeFill}/>
+      </g>
       {/* Third eye — distinct accent glow on the forehead */}
       <g className={s.thirdEye}>
         <polygon points="22.6,9 24,5.5 25.4,9 24,12.5" fill="var(--accent, #f29774)"/>
@@ -75,14 +80,24 @@ const POWER_LABELS: Record<PowerKind, string> = { slowmo: 'ЗАМЕДЛЕНИЕ'
 
 const TIMEOUT_PARTICLE_ANGLES = Array.from({ length: 16 }, (_, i) => i * 22.5)
 const TIMEOUT_PARTICLE_DIST   = 58
+// Кровавые капли разлетаются на разные дистанции и оседают (затухают ~2.5с)
+const BLOOD_DROPS = Array.from({ length: 14 }, (_, i) => ({
+  angle: i * 25.7 + (i % 2 ? 9 : 0),
+  dist: 36 + ((i * 17) % 46),
+  size: 5 + ((i * 7) % 7),
+  delay: (i % 4) * 0.03,
+}))
 
-// ── Timeout explosion (bat escapes) — brutal shockwave ────────────────────────
+// ── Timeout explosion (bat escapes) — кровавый разрыв (кровь тает ~2.5с) ───────
 function BatExplosion({ data, onDone }: { data: ExplosionData; onDone: () => void }) {
   const cbRef = useRef(onDone); cbRef.current = onDone
-  useEffect(() => { const t = setTimeout(() => cbRef.current(), 950); return () => clearTimeout(t) }, [])
+  // дольше живём — кровь оседает и затухает 2.5с
+  useEffect(() => { const t = setTimeout(() => cbRef.current(), 2600); return () => clearTimeout(t) }, [])
   return (
     <div className={s.explosion} style={{ left: data.x, top: data.y }}>
       <div className={s.explosionFlashTimeout} />
+      {/* центральная кровавая клякса, тает 2.5с */}
+      <div className={s.bloodBurst} />
       <div className={`${s.explosionRing} ${s.explosionRingT1}`} />
       <div className={`${s.explosionRing} ${s.explosionRingT2}`} />
       <div className={`${s.explosionRing} ${s.explosionRingT3}`} />
@@ -91,6 +106,19 @@ function BatExplosion({ data, onDone }: { data: ExplosionData; onDone: () => voi
         return (
           <div key={i} className={`${s.particle} ${s.particleTimeout}`}
             style={{ '--dx': `${Math.cos(rad) * TIMEOUT_PARTICLE_DIST}px`, '--dy': `${Math.sin(rad) * TIMEOUT_PARTICLE_DIST}px` } as React.CSSProperties} />
+        )
+      })}
+      {/* кровавые капли — разлетаются и оседают, затухая за ~2.5с */}
+      {BLOOD_DROPS.map((d, i) => {
+        const rad = (d.angle * Math.PI) / 180
+        return (
+          <div key={`b${i}`} className={s.bloodDrop}
+            style={{
+              '--dx': `${Math.cos(rad) * d.dist}px`,
+              '--dy': `${Math.sin(rad) * d.dist}px`,
+              '--sz': `${d.size}px`,
+              animationDelay: `${d.delay}s`,
+            } as React.CSSProperties} />
         )
       })}
     </div>
@@ -336,7 +364,7 @@ function BatInstance({ bat, cracked, vulnerable = false, level = 1, chaos = 1, s
       onClick={() => clickRef.current()}
       onTouchStart={e => { e.preventDefault(); clickRef.current() }}>
       {isBoss && <span className={s.bossShieldRing} aria-hidden="true" />}
-      <span className={s.flap}><PixelBat /></span>
+      <span className={s.flap}><PixelBat variant={bat.variant} /></span>
     </div>
   )
 }
@@ -377,9 +405,11 @@ function ScoreCounter({ score, waveNum, best, combo, effect, bonus, difficultyLa
 
 function GameOverBanner() { return <div className={s.gameOverCenter}>GAME OVER</div> }
 
-// Стена пиксельной крови — стекает сверху на game over
+// Стена пиксельной крови — стекает сверху на game over (брутальнее: больше потёков + кляксы)
 function BloodWall() {
-  const drips = Array.from({ length: 14 }, (_, i) => i)
+  const N = 22
+  const drips = Array.from({ length: N }, (_, i) => i)
+  const blobs = Array.from({ length: 7 }, (_, i) => i)
   return (
     <div className={s.bloodWall} aria-hidden="true">
       <div className={s.bloodTop} />
@@ -388,10 +418,23 @@ function BloodWall() {
           key={i}
           className={s.bloodDrip}
           style={{
-            left: `${(i / 14) * 100 + (i % 2 ? 1.5 : 0)}%`,
-            width: `${4 + (i % 4) * 2}%`,
-            ['--d' as string]: `${0.1 + (i % 5) * 0.12}s`,
-            ['--h' as string]: `${30 + ((i * 37) % 45)}vh`,
+            left: `${(i / N) * 100 + (i % 2 ? 1.2 : 0)}%`,
+            width: `${3 + (i % 5) * 2}%`,
+            ['--d' as string]: `${0.05 + (i % 6) * 0.1}s`,
+            ['--h' as string]: `${34 + ((i * 37) % 52)}vh`,
+          }}
+        />
+      ))}
+      {/* кровавые кляксы-натёки на гребне стены */}
+      {blobs.map(i => (
+        <span
+          key={`bl${i}`}
+          className={s.bloodBlob}
+          style={{
+            left: `${8 + (i * 13) % 84}%`,
+            width: `${20 + (i % 3) * 14}px`,
+            height: `${16 + (i % 4) * 12}px`,
+            ['--d' as string]: `${0.1 + (i % 4) * 0.13}s`,
           }}
         />
       ))}
