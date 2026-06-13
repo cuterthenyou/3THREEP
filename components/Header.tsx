@@ -8,23 +8,8 @@ import UserButton from './UserButton';
 import ThemedLogo from './ThemedLogo';
 import { PALETTES } from '@/lib/palettes';
 import NotificationBell from './NotificationBell';
+import ThemeIcon from './ThemeIcon';
 import s from './Header.module.css';
-
-function BrutalSun() {
-  return (
-    <svg width="12" height="12" viewBox="0 0 14 14" fill="currentColor">
-      <path d="M7 0L9 5.5L14 7L9 8.5L7 14L5 8.5L0 7L5 5.5Z"/>
-    </svg>
-  )
-}
-
-function BrutalMoon() {
-  return (
-    <svg width="12" height="12" viewBox="0 0 14 14" fill="currentColor">
-      <path d="M8,1 L12,3 L14,7 L12,11 L8,13 L10,10.5 L11,7 L10,3.5 Z"/>
-    </svg>
-  )
-}
 
 function IconGear() {
   // Брутальная зубчатая шестерёнка (залитые зубья + вырез по центру)
@@ -341,15 +326,7 @@ export default function Header({ isAdminUser = false, initialCollections, custom
                   <div className={s.settingsRow}>
                     <span className={s.settingsLabel}>Тема</span>
                     <button onClick={toggleTheme} className={s.settingsToggle} aria-label="Сменить тему">
-                      {theme === 'light' ? <BrutalSun /> : theme === 'trip' ? (
-                        <svg width="12" height="12" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.4" aria-hidden="true">
-                          <path d="M7 1.5a5.5 5.5 0 105.5 5.5A3 3 0 017 4a2 2 0 002 2" strokeLinecap="round" />
-                        </svg>
-                      ) : theme === 'dark' ? <BrutalMoon /> : (
-                        <svg width="12" height="12" viewBox="0 0 14 14" fill="currentColor" aria-hidden="true">
-                          <polygon points="7,1 9,5 13,7 9,9 7,13 5,9 1,7 5,5" />
-                        </svg>
-                      )}
+                      <ThemeIcon theme={theme} size={12} />
                       <span>{(PALETTES.find(p => p.key === theme)?.label) ?? theme.toUpperCase()}</span>
                     </button>
                   </div>

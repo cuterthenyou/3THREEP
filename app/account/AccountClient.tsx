@@ -1,7 +1,7 @@
 'use client';
 
 import { signOut } from 'next-auth/react';
-import { useState, useRef, useEffect, useMemo } from 'react';
+import { useState, useRef, useEffect, useMemo, type CSSProperties } from 'react';
 import type { Order, Profile, OrderStatus, Product, Category } from '@/lib/types';
 import { ORDER_STATUS_LABELS, STATUS_COLORS } from '@/lib/types';
 import { formatPrice } from '@/lib/utils';
@@ -13,7 +13,8 @@ import EmojiPicker from '@/components/EmojiPicker';
 import ProductModal from '@/components/ProductModal';
 import NotificationBell from '@/components/NotificationBell';
 import MarqueeTicker from '@/components/MarqueeTicker';
-import { BrutalSun, BrutalMoon, LvlFire, LvlBolt, LvlStar, LvlCircle, OvalTribalFrame, Medal } from './parts/icons';
+import { LvlFire, LvlBolt, LvlStar, LvlCircle, Medal } from './parts/icons';
+import ThemeIcon from '@/components/ThemeIcon';
 import s from './account.module.css';
 
 interface Gamification {
@@ -80,14 +81,16 @@ export default function AccountClient({ user, profile, orders, profileBg, profil
   const [unsubscribing, setUnsubscribing] = useState(false);
   const avatarRef = useRef<HTMLInputElement>(null);
   const nicknameRef = useRef<HTMLInputElement>(null);
-  const [isDark, setIsDark] = useState(false);
+  const [theme, setThemeState] = useState('light');
+  // Светлый PNG-фон/модалка — только у терракотовой light; все остальные палитры тёмные.
+  const isDark = theme !== 'light';
+  const isBaseTheme = theme === 'light' || theme === 'dark' || theme === 'trip';
   const [batScores, setBatScores] = useState<{ normal: number | null; death: number | null }>({ normal: null, death: null });
 
   useEffect(() => {
-    setIsDark(document.documentElement.dataset.theme === 'dark');
-    const obs = new MutationObserver(() =>
-      setIsDark(document.documentElement.dataset.theme === 'dark')
-    );
+    const read = () => setThemeState(document.documentElement.dataset.theme ?? 'light');
+    read();
+    const obs = new MutationObserver(read);
     obs.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
     return () => obs.disconnect();
   }, []);
@@ -230,7 +233,15 @@ export default function AccountClient({ user, profile, orders, profileBg, profil
   }
 
   return (
-    <div className={s.page} style={(() => { const bg = isDark ? (profileBgDark ?? profileBg) : (profileBg ?? profileBgDark); return bg ? { backgroundImage: `url(${bg})`, backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' } : undefined })()} >
+    <div className={s.page} style={(() => {
+      const bg = isDark ? (profileBgDark ?? profileBg) : (profileBg ?? profileBgDark);
+      if (!bg) return undefined;
+      const base: CSSProperties = { backgroundImage: `url(${bg})`, backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' };
+      // Доп-палитры (не light/dark/trip): тёмный PNG тонируем под цвет темы,
+      // чтобы фон ЛК не выглядел чужеродным на toxic/ice/blood/… (авто для любых будущих тем).
+      if (!isBaseTheme) { base.backgroundColor = 'var(--bg)'; base.backgroundBlendMode = 'multiply'; }
+      return base;
+    })()} >
       {/* Nickname modal */}
       {showNicknameModal && (
         <div className={s.modalOverlay}>
@@ -286,8 +297,8 @@ export default function AccountClient({ user, profile, orders, profileBg, profil
                   </>
                 )}
               </button>
-              <button onClick={() => { toggleTheme(); setIsDark(d => !d); }} className={s.topNavBtn} title={isDark ? 'Светлая тема' : 'Тёмная тема'} aria-label="Сменить тему">
-                {isDark ? <BrutalSun /> : <BrutalMoon />}
+              <button onClick={() => toggleTheme()} className={s.topNavBtn} title="Сменить тему" aria-label="Сменить тему">
+                <ThemeIcon theme={theme} />
               </button>
             </div>
           </div>
@@ -426,8 +437,6 @@ export default function AccountClient({ user, profile, orders, profileBg, profil
                   {uploadingAvatar ? '...' : 'Сменить'}
                 </div>
               </button>
-              {/* Декоративная трайбл-рама вокруг аватара (тянется влево в пустоту карточки) */}
-              <div className={s.avatarFrame} aria-hidden="true"><OvalTribalFrame /></div>
             </div>
           </div>
 

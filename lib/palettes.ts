@@ -29,7 +29,10 @@ export const PALETTES: Palette[] = [
 export const ALL_THEME_KEYS = PALETTES.map(p => p.key)
 export const DEFAULT_ENABLED = ['light', 'dark', 'trip']
 
-/** CSS-блок переменных для доп-палитры (модель — как dark в ThemeStyles). */
+/** CSS-блок переменных для доп-палитры (модель — как dark в ThemeStyles).
+ * ВАЖНО: набор токенов держим в ПАРИТЕТЕ с тёмной темой — иначе фоны модалок,
+ * карточек, оверлеев и статус-бейджи ЛК падают в light-дефолты из globals.css
+ * и выглядят чужеродно. Все доп-палитры тёмные → берут «тёмное» семейство. */
 export function paletteVarsCss(p: Palette): string {
   const { bg, text, accent } = p
   return `[data-theme="${p.key}"] {
@@ -47,11 +50,23 @@ export function paletteVarsCss(p: Palette): string {
   --accent-glow: color-mix(in srgb, ${accent} 35%, transparent);
   --bg-card: ${accent};
   --text-on-card: ${bg};
+  /* оверлей-фон страницы/меню — тонируем под цвет палитры (а не light-терракот) */
+  --overlay-bg: color-mix(in srgb, ${bg} 93%, black);
   --color-accent: ${accent};
   --color-primary: ${bg};
   --color-bg: ${bg};
   --color-bg-dark: color-mix(in srgb, ${bg} 60%, black);
-  --grain-opacity: 0.04;
+  /* статус-цвета и мягкие подложки — тёмное семейство (яркие, читаются на тёмном) */
+  --status-new: #F29774;
+  --status-paid: #7EC8A4;
+  --status-in-progress: #F2C46D;
+  --status-shipped: #74B3F2;
+  --status-delivered: #A8E6A3;
+  --status-cancelled: #E08080;
+  --status-error: #E08080;
+  --status-paid-soft: rgba(126, 200, 154, 0.15);
+  --status-error-soft: rgba(224, 85, 85, 0.15);
+  --grain-opacity: 0.05;
   --cursor-color: var(--accent);
 }`
 }
