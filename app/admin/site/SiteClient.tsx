@@ -5,7 +5,7 @@ import a from '../admin.module.css'
 import { AdminSection, AdminPageTitle, AdminTabContext, InfoTip } from '../components'
 import { CHECKBOARD_LIGHT, CHECKBOARD_DARK, INPUT_STYLE } from '../adminStyles'
 import { ColorPicker, FontSelect, GlitterPreview } from './parts'
-import { parseLevelingConfig, getDiscount } from '@/lib/leveling'
+import { parseLevelingConfig, getDiscount, sparksToReachLevel, type LevelingConfig } from '@/lib/leveling'
 import { PALETTES, DEFAULT_ENABLED } from '@/lib/palettes'
 import type { CustomFont } from '@/components/ThemeStyles'
 
@@ -75,6 +75,71 @@ const THEME_PRESETS: ThemePreset[] = [
     bgD: '#140808', textD: '#f0b9b9', accentD: '#ff4d4d',
     bgT: '#16020a', textT: '#ffc2d6', accentT: '#ff2d6b' },
 ]
+
+// Живой предпросмотр формулы уровней: кривая «уровень → искры» + пунктир скидки,
+// таблица уровень/искры/скидка и валидация порогов. cfg уже нормализован
+// parseLevelingConfig (дефолты подставлены), так что считаем напрямую.
+function LevelingPreview({ cfg }: { cfg: LevelingConfig }) {
+  const N = Math.min(24, Math.max(12, cfg.thresholds.length + 4))
+  const levels = Array.from({ length: N }, (_, i) => i + 1)
+  const sparks = levels.map(L => sparksToReachLevel(L, cfg))
+  const discounts = levels.map(L => getDiscount(L, cfg))
+
+  // Валидация: пороги строго возрастают, первый — 0.
+  const t = cfg.thresholds
+  const monotonic = t.every((v, i) => i === 0 || v > t[i - 1])
+  const startsAtZero = t[0] === 0
+  const warnings: string[] = []
+  if (!monotonic) warnings.push('Пороги должны строго возрастать (каждый больше предыдущего).')
+  if (!startsAtZero) warnings.push('Первый порог обычно 0 — это 1-й уровень «из коробки».')
+
+  const W = 300, H = 110, pad = 10
+  const maxSparks = Math.max(sparks[N - 1] || 1, 1)
+  const maxDisc = Math.max(cfg.discount_max, ...discounts, 1)
+  const px = (i: number) => pad + (i / (N - 1)) * (W - 2 * pad)
+  const pyS = (v: number) => H - pad - (v / maxSparks) * (H - 2 * pad)
+  const pyD = (v: number) => H - pad - (v / maxDisc) * (H - 2 * pad)
+  const line = (arr: number[], y: (v: number) => number) =>
+    arr.map((v, i) => `${i ? 'L' : 'M'}${px(i).toFixed(1)} ${y(v).toFixed(1)}`).join(' ')
+
+  const chip = (txt: string, key: string | number) => (
+    <span key={key} style={{ fontFamily: 'var(--font-onder)', fontSize: '0.58rem', letterSpacing: '0.05em', color: 'var(--accent)', background: 'var(--bg-2)', border: '1px solid var(--border)', borderRadius: '2px', padding: '0.22rem 0.45rem', whiteSpace: 'nowrap' }}>{txt}</span>
+  )
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginTop: '0.25rem' }}>
+      {warnings.length > 0 && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
+          {warnings.map((w, i) => (
+            <span key={i} style={{ fontFamily: 'var(--font-involve)', fontSize: '0.66rem', color: 'var(--status-error, var(--accent))', opacity: 0.85 }}>⚠ {w}</span>
+          ))}
+        </div>
+      )}
+
+      <svg viewBox={`0 0 ${W} ${H}`} width="100%" height={H} preserveAspectRatio="none"
+        style={{ background: 'var(--bg-2)', border: '1px solid var(--border-soft)', borderRadius: 3 }}>
+        {[0.25, 0.5, 0.75].map(f => (
+          <line key={f} x1={pad} x2={W - pad} y1={pad + f * (H - 2 * pad)} y2={pad + f * (H - 2 * pad)}
+            stroke="var(--border-soft)" strokeWidth="1" />
+        ))}
+        <path d={line(sparks, pyS)} fill="none" stroke="var(--accent)" strokeWidth="2" />
+        <path d={line(discounts, pyD)} fill="none" stroke="var(--accent)" strokeWidth="1.5" strokeDasharray="4 3" opacity="0.55" />
+      </svg>
+      <span style={{ color: 'var(--accent)', opacity: 0.55, fontFamily: 'var(--font-involve)', fontSize: '0.62rem', letterSpacing: '0.04em' }}>
+        Уровни 1–{N} · ▬ искр всего до уровня (макс {maxSparks}) · ┄ скидка (до {maxDisc}%)
+      </span>
+
+      {/* Таблица уровень → искры → скидка */}
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem' }}>
+        {levels.map((L, i) => {
+          const prev = i === 0 ? 0 : sparks[i - 1]
+          const step = sparks[i] - prev
+          return chip(`LVL ${L} · ${sparks[i]} искр${step ? ` (+${step})` : ''} · −${discounts[i]}%`, L)
+        })}
+      </div>
+    </div>
+  )
+}
 
 export default function SiteClient({ initialSettings, initialCustomFonts = [], initialAchievements = [], variant = 'site' }: Props) {
   const TABS = variant === 'themes' ? THEME_TABS : SITE_TABS
@@ -1862,20 +1927,8 @@ export default function SiteClient({ initialSettings, initialCustomFonts = [], i
           <input value={lvlThresholds} onChange={e => setLvlThresholds(e.target.value)} style={{ ...INPUT_STYLE, borderRadius: '2px', padding: '0.5rem 0.75rem', outline: 'none', fontFamily: 'var(--font-involve)' }} />
         </label>
 
-        {/* Превью: уровень → скидка */}
-        {(() => {
-          const cfg = parseLevelingConfig(JSON.stringify(buildLevelingCfg()))
-          const rows = [1, 2, 5, 10, 11, 15, 20]
-          return (
-            <div className="flex flex-wrap gap-2" style={{ marginTop: '0.25rem' }}>
-              {rows.map(L => (
-                <span key={L} style={{ fontFamily: 'var(--font-onder)', fontSize: '0.6rem', letterSpacing: '0.06em', color: 'var(--accent)', background: 'var(--bg-2)', border: '1px solid var(--border)', borderRadius: '2px', padding: '0.25rem 0.5rem' }}>
-                  LVL {L} → {getDiscount(L, cfg)}%
-                </span>
-              ))}
-            </div>
-          )
-        })()}
+        {/* Живой предпросмотр: кривая искр, пунктир скидки, таблица и валидация */}
+        <LevelingPreview cfg={parseLevelingConfig(JSON.stringify(buildLevelingCfg()))} />
 
         <div className="flex items-center gap-3 flex-wrap">
           <button disabled={savingLvl} onClick={saveLeveling} className={a.btn}>
