@@ -9,7 +9,7 @@ import { parseLevelingConfig, getDiscount } from '@/lib/leveling'
 import { PALETTES, DEFAULT_ENABLED } from '@/lib/palettes'
 import type { CustomFont } from '@/components/ThemeStyles'
 
-type SettingsTab = 'general' | 'colors' | 'fonts' | 'type' | 'effects' | 'catalog' | 'account' | 'content' | 'menu'
+type SettingsTab = 'general' | 'colors' | 'fonts' | 'type' | 'effects' | 'animations' | 'catalog' | 'account' | 'content' | 'menu'
 
 // Разделы по темам (страница /admin/themes) и по сайту (/admin/site).
 const THEME_TABS: { id: SettingsTab; label: string }[] = [
@@ -17,6 +17,7 @@ const THEME_TABS: { id: SettingsTab; label: string }[] = [
   { id: 'fonts',   label: 'Шрифты' },
   { id: 'type',    label: 'Типографика' },
   { id: 'effects', label: 'Эффекты' },
+  { id: 'animations', label: 'Анимации' },
 ]
 const SITE_TABS: { id: SettingsTab; label: string }[] = [
   { id: 'general', label: 'Бренд' },
@@ -46,12 +47,8 @@ interface Props {
 const BUILTIN_FONTS = ['ONDER', 'Involve', 'DeutschGothic'] as const
 type FontName = string
 
-const SPEED_OPTIONS = [
-  { value: 'off',    label: 'Выкл' },
-  { value: 'slow',   label: 'Медленно' },
-  { value: 'normal', label: 'Нормально' },
-  { value: 'fast',   label: 'Быстро' },
-] as const
+// Legacy-пресет → числовой множитель (для старых сохранённых значений animation_speed)
+const LEGACY_SPEED: Record<string, number> = { off: 1, slow: 2, normal: 1, fast: 0.5 }
 
 // Готовые палитры — клик заполняет все цвета (light/dark/trip), затем «Сохранить цвета»
 interface ThemePreset {
@@ -174,9 +171,19 @@ export default function SiteClient({ initialSettings, initialCustomFonts = [], i
   const [grainDark,  setGrainDark]  = useState(isNaN(grainDarkRaw)  ? 5.5 : Math.round(grainDarkRaw  * 1000) / 10)
   const grainScaleRaw = parseInt(initialSettings['grain_size'] ?? '256', 10)
   const [grainScale, setGrainScale] = useState(isNaN(grainScaleRaw) ? 256 : Math.max(64, Math.min(512, grainScaleRaw)))
-  const [animationSpeed, setAnimationSpeed] = useState(initialSettings['animation_speed'] ?? 'normal')
   const [savingEffects, setSavingEffects] = useState(false)
   const [effectsMsg, setEffectsMsg] = useState('')
+
+  // ── Анимации (вкладка «Анимации») ───────────────────────────────
+  const _rawSpeed = initialSettings['animation_speed']
+  const _speedNum = _rawSpeed != null && !isNaN(parseFloat(_rawSpeed)) ? parseFloat(_rawSpeed) : (LEGACY_SPEED[_rawSpeed ?? 'normal'] ?? 1)
+  const [animSpeed, setAnimSpeed] = useState(Math.min(2, Math.max(0.5, _speedNum)))
+  const [animReveal, setAnimReveal]   = useState(initialSettings['anim_reveal_enabled']  !== 'false')
+  const [animHover, setAnimHover]     = useState(initialSettings['anim_hover_enabled']   !== 'false')
+  const [animAmbient, setAnimAmbient] = useState(initialSettings['anim_ambient_enabled'] !== 'false')
+  const [savingAnim, setSavingAnim] = useState(false)
+  const [animMsg, setAnimMsg] = useState('')
+  const [animPreviewKey, setAnimPreviewKey] = useState(0)
 
   // Скругление — ползунки в px (новые ключи; fallback на старый пресет)
   const presetRadiusPx = ({ sharp: 0, slight: 4, rounded: 10 } as Record<string, number>)[initialSettings['border_radius_scale'] ?? 'sharp'] ?? 0
@@ -594,7 +601,6 @@ export default function SiteClient({ initialSettings, initialCustomFonts = [], i
       saveSetting('grain_size',          String(grainScale)),
       saveSetting('border_radius_px',    String(radiusPx)),
       saveSetting('button_radius_px',    String(btnRadiusPx)),
-      saveSetting('animation_speed',     animationSpeed),
     ])
     setSavingEffects(false); setEffectsMsg('✓ Эффекты сохранены — обновляю страницу…'); reloadAfterSave()
   }
@@ -638,6 +644,18 @@ export default function SiteClient({ initialSettings, initialCustomFonts = [], i
     setSavingHeroSpeed(true); setHeroSpeedMsg('')
     await saveSetting('hero_speed_default', String(heroSpeedDefault))
     setSavingHeroSpeed(false); setHeroSpeedMsg('✓ Сохранено — обновляю страницу…'); reloadAfterSave()
+  }
+
+  // ── Save animations ─────────────────────────────────────────────
+  async function saveAnimations() {
+    setSavingAnim(true); setAnimMsg('')
+    await Promise.all([
+      saveSetting('animation_speed',      String(animSpeed)),
+      saveSetting('anim_reveal_enabled',  String(animReveal)),
+      saveSetting('anim_hover_enabled',   String(animHover)),
+      saveSetting('anim_ambient_enabled', String(animAmbient)),
+    ])
+    setSavingAnim(false); setAnimMsg('✓ Анимации сохранены — обновляю страницу…'); reloadAfterSave()
   }
 
   // ── Save page transition ────────────────────────────────────────
@@ -1002,18 +1020,6 @@ export default function SiteClient({ initialSettings, initialCustomFonts = [], i
 
       {/* ── Визуальные эффекты ── */}
       <AdminSection title="Визуальные эффекты" tab="effects">
-        {/* Animation keyframes */}
-        <style>{`
-          @keyframes eff-sweep {
-            0%   { transform: translateX(-120%); }
-            100% { transform: translateX(420%); }
-          }
-          @keyframes eff-pulse {
-            0%, 100% { opacity: 0.25; transform: scale(0.9); }
-            50%       { opacity: 1;    transform: scale(1); }
-          }
-        `}</style>
-
         <div className="flex flex-col gap-8">
 
           {/* ── Grain opacity ── */}
@@ -1128,45 +1134,6 @@ export default function SiteClient({ initialSettings, initialCustomFonts = [], i
             </div>
           </div>
 
-          {/* ── Animation speed ── */}
-          <div className="flex flex-col gap-3">
-            <span className="text-xs uppercase tracking-widest" style={{ color: 'var(--accent)', opacity: 0.5, fontFamily: 'var(--font-involve)' }}>Скорость анимаций <InfoTip text="Глобальный темп появлений и переходов по сайту. «Выкл» отключает анимации входа (для слабых устройств / accessibility)." /></span>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 6 }}>
-              {SPEED_OPTIONS.map(opt => {
-                const dur = ({ off: 0, slow: 2200, normal: 800, fast: 280 } as Record<string, number>)[opt.value] ?? 800
-                const active = animationSpeed === opt.value
-                return (
-                  <button
-                    key={opt.value}
-                    onClick={() => setAnimationSpeed(opt.value)}
-                    style={{
-                      display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10,
-                      padding: '12px 6px', cursor: 'pointer', overflow: 'hidden',
-                      borderRadius: 6,
-                      background: active ? 'var(--accent-2)' : 'var(--bg-2)',
-                      border: `1.5px solid ${active ? 'var(--accent)' : 'var(--border-soft)'}`,
-                      transition: 'border-color 0.15s, background 0.15s',
-                    }}
-                  >
-                    {/* Animation demo */}
-                    <div style={{ width: '100%', height: 6, borderRadius: 3, background: 'var(--bg-subtle)', overflow: 'hidden', position: 'relative' }}>
-                      {dur === 0 ? (
-                        <div style={{ width: '100%', height: '100%', background: active ? 'var(--accent)' : 'var(--border-soft)', opacity: 0.35 }} />
-                      ) : (
-                        <div style={{
-                          position: 'absolute', width: '35%', height: '100%', borderRadius: 3,
-                          background: active ? 'var(--accent)' : 'var(--border)',
-                          animation: `eff-sweep ${dur}ms linear infinite`,
-                        }} />
-                      )}
-                    </div>
-                    <span style={{ fontSize: '0.65rem', color: active ? 'var(--accent)' : 'var(--text-muted)', fontFamily: 'var(--font-involve)', whiteSpace: 'nowrap' }}>{opt.label}</span>
-                  </button>
-                )
-              })}
-            </div>
-          </div>
-
         </div>
 
         <div className="flex items-center gap-3 flex-wrap pt-2">
@@ -1174,6 +1141,105 @@ export default function SiteClient({ initialSettings, initialCustomFonts = [], i
             {savingEffects ? 'Сохраняем...' : 'Сохранить эффекты'}
           </button>
           {effectsMsg && <span style={msgStyle(effectsMsg)}>{effectsMsg}</span>}
+        </div>
+      </AdminSection>
+
+      {/* ── Анимации (скорость + категории) ── */}
+      <AdminSection title="Анимации" tab="animations">
+        <style>{`
+          @keyframes anim-demo-rise { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
+          @keyframes anim-demo-glint {
+            0% { left: -60%; opacity: 0; } 12% { opacity: 1; } 60% { opacity: 1; } 100% { left: 120%; opacity: 0; }
+          }
+        `}</style>
+        <p className="text-xs" style={{ color: 'var(--accent)', opacity: 0.5, fontFamily: 'var(--font-involve)' }}>
+          Глобальный темп и категории движения по сайту. Скорость — множитель длительности появлений, ховеров и бликов.
+          Тумблеры мгновенно гасят целые группы анимаций (для слабых устройств / accessibility).
+        </p>
+
+        {/* Скорость — числовой множитель */}
+        <RangeRow
+          label="Скорость анимаций"
+          value={animSpeed}
+          set={setAnimSpeed}
+          cssVar="--animation-speed"
+          min={0.5} max={2} step={0.05} suffix="×"
+          info="Множитель длительности: 0.5× — резко и быстро, 1× — норма, 2× — медленно и плавно. Влияет на появления секций, ховер-блики и амбиент BLADE."
+        />
+        <div className="flex justify-between text-xs" style={{ color: 'var(--accent)', opacity: 0.3, fontFamily: 'var(--font-involve)' }}>
+          <span>0.5× — резко</span><span>1× — норма</span><span>2× — плавно</span>
+        </div>
+
+        {/* Живой предпросмотр */}
+        <div className="flex flex-col gap-2 pt-1">
+          <div className="flex items-center justify-between">
+            <span className="text-xs uppercase tracking-widest" style={{ color: 'var(--accent)', opacity: 0.5, fontFamily: 'var(--font-involve)' }}>Предпросмотр</span>
+            <button
+              onClick={() => setAnimPreviewKey(k => k + 1)}
+              className={a.btnSecondary}
+              style={{ fontSize: '0.65rem', padding: '4px 10px' }}
+            >
+              ▷ Проиграть
+            </button>
+          </div>
+          <div style={{ display: 'flex', gap: 10 }}>
+            {[0, 1, 2].map(i => (
+              <div
+                key={`${animPreviewKey}-${i}`}
+                style={{
+                  flex: 1, height: 46, borderRadius: 6, position: 'relative', overflow: 'hidden',
+                  background: 'var(--bg-subtle)', border: '1px solid var(--border-soft)',
+                  animation: animReveal ? `anim-demo-rise ${0.55 * animSpeed}s cubic-bezier(0.22,1,0.36,1) ${i * 0.09 * animSpeed}s both` : 'none',
+                }}
+              >
+                {animAmbient && (
+                  <span style={{
+                    position: 'absolute', top: 0, bottom: 0, width: '40%', left: '-60%',
+                    background: 'linear-gradient(90deg, transparent, color-mix(in srgb, var(--accent) 55%, transparent), transparent)',
+                    transform: 'skewX(-22deg)',
+                    animation: `anim-demo-glint ${5 * animSpeed}s cubic-bezier(0.22,1,0.36,1) ${1 + i * 0.3}s infinite`,
+                  }} />
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Категории-тумблеры */}
+        <div className="flex flex-col gap-3 pt-2">
+          {([
+            { label: 'Появления секций и карточек', state: animReveal, set: setAnimReveal, hint: 'Плавный «выезд» секций при прокрутке и каскад появления карточек каталога.' },
+            { label: 'Ховер-блики (BLADE / glitch)', state: animHover, set: setAnimHover, hint: 'Блик-«клинок» и пиксель-распад при наведении на кнопки и элементы.' },
+            { label: 'Амбиентный блик (BLADE)', state: animAmbient, set: setAnimAmbient, hint: 'Периодический проход блика по ключевым CTA без наведения.' },
+          ] as const).map((row, i) => (
+            <div key={i} className="flex items-center justify-between gap-3">
+              <span className="text-xs" style={{ color: 'var(--accent)', fontFamily: 'var(--font-involve)' }}>
+                {row.label} <InfoTip text={row.hint} />
+              </span>
+              <button
+                onClick={() => row.set(v => !v)}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0,
+                  padding: '0.3rem 0.8rem', borderRadius: 20,
+                  border: `1.5px solid ${row.state ? 'var(--accent)' : 'var(--border-soft)'}`,
+                  background: row.state ? 'var(--accent-2)' : 'var(--bg-2)',
+                  cursor: 'pointer', transition: 'all 0.2s',
+                }}
+              >
+                <span style={{ width: 8, height: 8, borderRadius: '50%', background: row.state ? 'var(--accent)' : 'var(--text-muted)', display: 'inline-block' }} />
+                <span style={{ fontFamily: 'var(--font-involve)', fontSize: '0.7rem', color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+                  {row.state ? 'вкл' : 'выкл'}
+                </span>
+              </button>
+            </div>
+          ))}
+        </div>
+
+        <div className="flex items-center gap-3 flex-wrap pt-2">
+          <button onClick={saveAnimations} disabled={savingAnim} className={a.btn}>
+            {savingAnim ? 'Сохраняем...' : 'Сохранить анимации'}
+          </button>
+          {animMsg && <span style={msgStyle(animMsg)}>{animMsg}</span>}
         </div>
       </AdminSection>
 

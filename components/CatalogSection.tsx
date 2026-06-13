@@ -189,9 +189,12 @@ export default function CatalogSection({ products, categories, categoryData = {}
           </div>
         </div>
 
-        <div className={`grid ${GRID_CLASS[cols]} gap-y-8 gap-x-6 max-w-6xl mx-auto`}>
+        <div key={`${activeCategory}-${activeType}`} className={`grid ${GRID_CLASS[cols]} gap-y-8 gap-x-6 max-w-6xl mx-auto`}>
           {filtered.map((product, idx) => (
-            <ProductCard key={product.id} product={product} index={idx} onOpen={openModal} categoryData={categoryData} isDark={isDark} discount={discount} owned={ownedSet.has(product.id)} />
+            // Wrapper carries the staggered load-cascade so the card keeps its own hover-lift.
+            <div key={product.id} className="card-rise flex" style={{ animationDelay: `${(idx % 12) * 55}ms` }}>
+              <ProductCard product={product} index={idx} onOpen={openModal} categoryData={categoryData} isDark={isDark} discount={discount} owned={ownedSet.has(product.id)} />
+            </div>
           ))}
         </div>
       </section>

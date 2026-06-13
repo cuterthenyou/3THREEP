@@ -274,7 +274,7 @@ export default function CheckoutPage() {
                 />
               </div>
 
-              {error && <p className={s.errorText}>{error}</p>}
+              {error && <p key={error} className={`${s.errorText} form-shake`}>{error}</p>}
 
               <button
                 onClick={handleSubmit}

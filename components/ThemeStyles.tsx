@@ -101,8 +101,16 @@ export default async function ThemeStyles() {
     ? `${num(settings['button_radius_px'], 0, 0, 24)}px`
     : radiusValue
 
-  const speedScale   = get('animation_speed')
-  const speedValue   = SPEED_MAP[speedScale] ?? '1'
+  // Скорость анимаций: новый числовой ключ (0.3–2.5×); fallback на старые пресеты.
+  const rawSpeed     = settings['animation_speed']
+  const speedValue   = rawSpeed != null && rawSpeed !== '' && !isNaN(parseFloat(rawSpeed))
+    ? String(num(rawSpeed, 1, 0.3, 2.5))
+    : (SPEED_MAP[get('animation_speed')] ?? '1')
+
+  // Тумблеры категорий анимаций (вкладка «Анимации» в админке). По умолчанию ВКЛ.
+  const animReveal   = settings['anim_reveal_enabled']  !== 'false'  // появления секций/карточек
+  const animHover    = settings['anim_hover_enabled']   !== 'false'  // ховер-блики (blade/pixel-decay)
+  const animAmbient  = settings['anim_ambient_enabled'] !== 'false'  // амбиент-блик (blade-glint-ambient)
 
   // ── Типографика (множители-шкалы + межстрочные) ──
   const typeHeadingScale   = num(settings['type_heading_scale'],   1,   0.6, 1.8)
@@ -253,6 +261,9 @@ html[data-theme="trip"] {
   --cursor-color: var(--accent);
 }
 ${tripBreathe ? '' : 'html[data-theme="trip"] .trip-breathe { display: none; }'}
+${animReveal ? '' : '.reveal, .reveal-up { opacity: 1 !important; transform: none !important; animation: none !important; } .card-rise { animation: none !important; }'}
+${animHover ? '' : '.blade-glint:hover::after { animation: none !important; } .pixel-decay-hover:hover { animation: none !important; } [data-pixel-decay]:hover::before { animation: none !important; }'}
+${animAmbient ? '' : '.blade-glint-ambient::after { animation: none !important; opacity: 0 !important; }'}
 `.trim()
 
   // CSS доп-палитр (не base) — генерится из реестра. light/dark/trip уже выше.
@@ -273,7 +284,7 @@ ${tripBreathe ? '' : 'html[data-theme="trip"] .trip-breathe { display: none; }'}
     <>
       <style dangerouslySetInnerHTML={{ __html: css + '\n' + extraPalettesCss }} />
       <script dangerouslySetInnerHTML={{
-        __html: `window.__THREEP_THEMES__=${JSON.stringify(cycleThemes)};window.__THREEP_TRIP_ENABLED__=${tripEnabled};`
+        __html: `window.__THREEP_THEMES__=${JSON.stringify(cycleThemes)};window.__THREEP_TRIP_ENABLED__=${tripEnabled};window.__THREEP_ANIM__={reveal:${animReveal},hover:${animHover},ambient:${animAmbient}};`
       }} />
       {loadingPhrases && (
         <script dangerouslySetInnerHTML={{

@@ -439,7 +439,8 @@ h4 { font-size: calc(var(--fs-h4) * var(--type-heading-scale, 1)); }
 }
 
 .pixel-decay-hover:hover {
-  animation: pixelDecayOut 0.45s ease forwards, pixelDecayIn 0.45s ease 0.45s forwards;
+  animation: pixelDecayOut calc(0.45s * var(--animation-speed)) ease forwards,
+             pixelDecayIn  calc(0.45s * var(--animation-speed)) ease calc(0.45s * var(--animation-speed)) forwards;
 }
 
 [data-pixel-decay] {
@@ -466,7 +467,7 @@ h4 { font-size: calc(var(--fs-h4) * var(--type-heading-scale, 1)); }
 
 [data-pixel-decay]:hover::before {
   opacity: 1;
-  animation: glitchFlash 0.6s ease;
+  animation: glitchFlash calc(0.6s * var(--animation-speed)) ease;
 }
 
 /* ── Neo-brutal button hover (matches theme badge) ── */
@@ -541,9 +542,9 @@ h4 { font-size: calc(var(--fs-h4) * var(--type-heading-scale, 1)); }
   opacity: 0;
 }
 @media (hover: hover) and (pointer: fine) {
-  .blade-glint:hover::after { animation: bladeGlint 0.7s cubic-bezier(0.22, 1, 0.36, 1); }
+  .blade-glint:hover::after { animation: bladeGlint calc(0.7s * var(--animation-speed)) cubic-bezier(0.22, 1, 0.36, 1); }
 }
-.blade-glint-ambient::after { animation: bladeGlint 5s cubic-bezier(0.22, 1, 0.36, 1) 1.4s infinite; }
+.blade-glint-ambient::after { animation: bladeGlint calc(5s * var(--animation-speed)) cubic-bezier(0.22, 1, 0.36, 1) 1.4s infinite; }
 @keyframes bladeGlint {
   0%   { left: -150%; opacity: 0; }
   10%  { opacity: 1; }
@@ -588,10 +589,58 @@ h4 { font-size: calc(var(--fs-h4) * var(--type-heading-scale, 1)); }
 
 /* ── On-enter reveal — fade up; stagger with inline animation-delay ── */
 .reveal-up {
-  animation: fadeInUp 0.5s ease both;
+  animation: fadeInUp calc(0.5s * var(--animation-speed)) ease both;
 }
 @media (prefers-reduced-motion: reduce) {
   .reveal-up { animation: none; }
+}
+
+/* ── Scroll-into-view reveal (driven by <Reveal>, IntersectionObserver) ──
+   Element starts hidden; `.is-in` is added when it enters the viewport.
+   Speed scales with the global --animation-speed multiplier. */
+.reveal {
+  opacity: 0;
+  transform: translateY(16px);
+  will-change: opacity, transform;
+}
+.reveal.is-in {
+  animation: fadeInUp calc(0.6s * var(--animation-speed)) cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .reveal { opacity: 1; transform: none; }
+  .reveal.is-in { animation: none; }
+}
+
+/* ── Catalog card load-cascade — staggered rise via inline animation-delay ── */
+@keyframes cardRise {
+  from { opacity: 0; transform: translateY(22px) scale(0.985); }
+  to   { opacity: 1; transform: none; }
+}
+.card-rise {
+  animation: cardRise calc(0.5s * var(--animation-speed)) cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .card-rise { animation: none; }
+}
+
+/* ── Form feedback — shake on error, pop on success ── */
+@keyframes formShake {
+  0%, 100% { transform: translateX(0); }
+  15% { transform: translateX(-6px); }
+  30% { transform: translateX(5px); }
+  45% { transform: translateX(-4px); }
+  60% { transform: translateX(3px); }
+  75% { transform: translateX(-2px); }
+}
+@keyframes formPop {
+  0%   { transform: scale(0.92); opacity: 0; }
+  60%  { transform: scale(1.04); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+.form-shake { animation: formShake calc(0.42s * var(--animation-speed)) cubic-bezier(0.36, 0.07, 0.19, 0.97) both; }
+.form-pop   { animation: formPop  calc(0.4s * var(--animation-speed)) cubic-bezier(0.22, 1, 0.36, 1) both; }
+@media (prefers-reduced-motion: reduce) {
+  .form-shake, .form-pop { animation: none; }
 }
 
 /* Custom scrollbar */

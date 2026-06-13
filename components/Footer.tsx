@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { queryOne } from '@/lib/db'
 import MarqueeTicker from './MarqueeTicker'
+import Reveal from './Reveal'
 import s from './Footer.module.css'
 
 const TICKER_DEFAULTS = [
@@ -96,33 +97,37 @@ export default async function Footer() {
           <div className="flex flex-col sm:flex-row gap-4 sm:gap-6">
 
             {/* Card 1 — contact us */}
-            <div className={`flex-1 flex flex-col items-center justify-center gap-5 px-5 py-8 sm:px-8 sm:py-10 rounded-[10px] ${s.card}`}>
-              <h2 className={s.heading}>{content.contact_heading}</h2>
-              <p className={`text-center ${s.subtitle}`}>
-                {content.contact_subtext}
-              </p>
-              <div className="flex items-center gap-3">
-                <SocialBtn href={content.vk_direct_url} label="VK"><VKIcon /></SocialBtn>
-                <SocialBtn href={content.tg_url} label="Telegram"><TGIcon /></SocialBtn>
+            <Reveal className="flex-1 flex">
+              <div className={`flex-1 flex flex-col items-center justify-center gap-5 px-5 py-8 sm:px-8 sm:py-10 rounded-[10px] ${s.card}`}>
+                <h2 className={s.heading}>{content.contact_heading}</h2>
+                <p className={`text-center ${s.subtitle}`}>
+                  {content.contact_subtext}
+                </p>
+                <div className="flex items-center gap-3">
+                  <SocialBtn href={content.vk_direct_url} label="VK"><VKIcon /></SocialBtn>
+                  <SocialBtn href={content.tg_url} label="Telegram"><TGIcon /></SocialBtn>
+                </div>
               </div>
-            </div>
+            </Reveal>
 
             {/* Card 2 — follow us */}
-            <div className={`flex-1 flex flex-col items-center justify-center gap-5 px-5 py-8 sm:px-8 sm:py-10 rounded-[10px] ${s.card}`}>
-              <h2 className={s.heading}>{content.follow_heading}</h2>
-              <p className={`text-center ${s.subtitle}`}>
-                {content.follow_subtext}
-              </p>
-              <div className="flex items-center gap-3">
-                <SocialBtn href={content.vk_community_url} label="VK сообщество"><VKIcon /></SocialBtn>
-                <SocialBtn href={content.tiktok_url} label="TikTok"><TikTokIcon /></SocialBtn>
-                <SocialBtn href={content.instagram_url} label="Instagram*"><IGIcon /></SocialBtn>
-                <SocialBtn href={content.tg_community_url} label="Telegram канал"><TGIcon /></SocialBtn>
+            <Reveal className="flex-1 flex" delay={110}>
+              <div className={`flex-1 flex flex-col items-center justify-center gap-5 px-5 py-8 sm:px-8 sm:py-10 rounded-[10px] ${s.card}`}>
+                <h2 className={s.heading}>{content.follow_heading}</h2>
+                <p className={`text-center ${s.subtitle}`}>
+                  {content.follow_subtext}
+                </p>
+                <div className="flex items-center gap-3">
+                  <SocialBtn href={content.vk_community_url} label="VK сообщество"><VKIcon /></SocialBtn>
+                  <SocialBtn href={content.tiktok_url} label="TikTok"><TikTokIcon /></SocialBtn>
+                  <SocialBtn href={content.instagram_url} label="Instagram*"><IGIcon /></SocialBtn>
+                  <SocialBtn href={content.tg_community_url} label="Telegram канал"><TGIcon /></SocialBtn>
+                </div>
+                <p className={`text-center ${s.disclaimer}`}>
+                  {content.meta_disclaimer}
+                </p>
               </div>
-              <p className={`text-center ${s.disclaimer}`}>
-                {content.meta_disclaimer}
-              </p>
-            </div>
+            </Reveal>
 
           </div>
         </div>
