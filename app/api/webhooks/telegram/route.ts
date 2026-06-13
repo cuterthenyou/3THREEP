@@ -1,8 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { timingSafeEqual } from 'crypto'
+import { escapeTgHtml } from '@/lib/telegram'
 
 const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN
 const CHAT_ID = process.env.TELEGRAM_ADMIN_CHAT_ID
 const SECRET = process.env.WEBHOOK_SECRET
+
+/** Сравнение секрета в постоянное время (без утечки длины/совпадения по таймингу). */
+function secretMatches(provided: string | null): boolean {
+  if (!SECRET || !provided) return false
+  const a = Buffer.from(provided)
+  const b = Buffer.from(SECRET)
+  if (a.length !== b.length) return false
+  return timingSafeEqual(a, b)
+}
 
 async function sendTelegram(text: string) {
   if (!BOT_TOKEN || !CHAT_ID) return
@@ -23,10 +34,13 @@ async function sendTelegram(text: string) {
 
 export async function POST(req: NextRequest) {
   if (SECRET) {
-    const headerSecret = req.headers.get('x-webhook-secret')
-    if (headerSecret !== SECRET) {
+    if (!secretMatches(req.headers.get('x-webhook-secret'))) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
+  } else if (process.env.NODE_ENV === 'production') {
+    // Без секрета вебхук открыт на спам админ-чата. В prod требуем настройку.
+    console.warn('[webhook/telegram] WEBHOOK_SECRET не задан — вебхук отклонён (fail-closed в prod)')
+    return NextResponse.json({ error: 'Webhook not configured' }, { status: 503 })
   }
 
   const body = await req.json()
@@ -39,7 +53,7 @@ export async function POST(req: NextRequest) {
   try {
     if (table === 'messages' && record.is_admin === false) {
       const orderId = String(record.order_id).slice(0, 8)
-      const text = record.text?.slice(0, 200) || ''
+      const text = escapeTgHtml(record.text?.slice(0, 200) || '')
       await sendTelegram(
         `💬 <b>Новое сообщение по заказу</b>\n\n` +
         `Заказ: <code>#${orderId}</code>\n` +
@@ -55,7 +69,7 @@ export async function POST(req: NextRequest) {
         `🛒 <b>Новый заказ!</b>\n\n` +
         `Заказ: <code>#${orderId}</code>\n` +
         `Сумма: ${total} ₽\n` +
-        `Адрес: ${record.delivery_address || '—'}\n\n` +
+        `Адрес: ${escapeTgHtml(record.delivery_address) || '—'}\n\n` +
         `👉 https://3threep.ru/admin/orders/${record.id}`
       )
     }

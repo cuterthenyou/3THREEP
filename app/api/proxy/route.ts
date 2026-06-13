@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { isSafeProxyUrl } from '@/lib/ssrf'
+import { isSafeProxyUrl, assertSafeResolvedHost } from '@/lib/ssrf'
 import { rateLimit, clientIp } from '@/lib/rate-limit'
 
 const MAX_BYTES = 5 * 1024 * 1024 // 5 МБ — прокси только для картинок/SVG
@@ -14,6 +14,11 @@ export async function GET(req: NextRequest) {
   // Анти-абуз пропускной способности: лимит обращений к прокси с одного IP.
   const rl = await rateLimit('proxy_ip', `ip:${clientIp(req)}`, 200, 60_000)
   if (!rl.ok) return new NextResponse('rate limited', { status: 429 })
+
+  // Анти-DNS-rebinding: резолвим хост и проверяем фактические IP перед fetch.
+  if (!(await assertSafeResolvedHost(new URL(url).hostname))) {
+    return new NextResponse('blocked host', { status: 400 })
+  }
 
   const ctrl = new AbortController()
   const timer = setTimeout(() => ctrl.abort(), FETCH_TIMEOUT)

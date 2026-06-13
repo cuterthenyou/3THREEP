@@ -2,9 +2,13 @@
 // Анти-SSRF: проверка, что хост запроса не указывает во внутреннюю сеть.
 // Используется прокси-роутом (/api/proxy), который тянет внешние картинки/SVG.
 // Блокируем loopback/private/link-local/reserved диапазоны и метадату облака.
-// Остаточный риск — DNS-rebinding для доменных имён (резолв в приватный IP);
-// для картиночного прокси это приемлемо, отмечено как follow-up.
+// Доменные имена дополнительно РЕЗОЛВИМ (assertSafeResolvedHost) и проверяем
+// КАЖДЫЙ полученный IP — это закрывает базовый DNS-rebinding (домен → приватный
+// IP). Остаточный TOCTOU (резолв при fetch может отличаться от проверочного)
+// для картиночного прокси приемлем — отмечено как follow-up.
 // ════════════════════════════════════════════════════════════════════
+
+import { lookup } from 'dns/promises'
 
 function ipv4Blocked(ip: string): boolean {
   const m = ip.match(/^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/)
@@ -48,4 +52,24 @@ export function isSafeProxyUrl(raw: string): boolean {
   if (u.port && u.port !== '80' && u.port !== '443') return false
   if (u.username || u.password) return false
   return !isBlockedHost(u.hostname)
+}
+
+/**
+ * Резолвит хост URL и проверяет, что НИ ОДИН полученный IP не указывает во
+ * внутреннюю сеть. Закрывает DNS-rebinding: домен прошёл isBlockedHost (не
+ * литеральный приватный IP), но A/AAAA указывает на 169.254.169.254 / 10.x и т.п.
+ * Если хост — уже литеральный IP, isBlockedHost его и так покрыл; резолв пропускаем.
+ * @returns true — безопасно резолвится во внешний IP.
+ */
+export async function assertSafeResolvedHost(hostname: string): Promise<boolean> {
+  const h = hostname.toLowerCase().replace(/^\[|\]$/g, '')
+  // Литеральный IP — уже проверен синхронно, повторный резолв не нужен.
+  if (/^[\d.]+$/.test(h) || h.includes(':')) return !isBlockedHost(h)
+  try {
+    const addrs = await lookup(h, { all: true })
+    if (!addrs.length) return false
+    return addrs.every((a) => !isBlockedHost(a.address))
+  } catch {
+    return false // не резолвится — не проксируем
+  }
 }

@@ -1,6 +1,6 @@
 import { auth } from '@/lib/auth'
 import { query, queryMany, queryOne } from '@/lib/db'
-import { sendTelegram } from '@/lib/telegram'
+import { sendTelegram, escapeTgHtml } from '@/lib/telegram'
 import { filterProfanity } from '@/lib/profanity'
 import { rateLimit } from '@/lib/rate-limit'
 import { NextResponse, type NextRequest } from 'next/server'
@@ -57,7 +57,7 @@ export async function POST(
   sendTelegram(
     `💬 <b>Новое сообщение по заказу</b>\n\n` +
     `Заказ: <code>#${String(id).slice(0, 8)}</code>\n` +
-    `Текст: ${clean.slice(0, 200)}\n\n` +
+    `Текст: ${escapeTgHtml(clean.slice(0, 200))}\n\n` +
     `👉 https://3threep.ru/admin/orders/${id}`
   ).catch(() => {})
 

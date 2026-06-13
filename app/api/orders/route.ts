@@ -1,6 +1,6 @@
 import { auth } from '@/lib/auth'
 import { query, queryOne, queryMany } from '@/lib/db'
-import { sendTelegram } from '@/lib/telegram'
+import { sendTelegram, escapeTgHtml } from '@/lib/telegram'
 import { getLevel, getDiscount, parseLevelingConfig } from '@/lib/leveling'
 import { applyDiscount } from '@/lib/utils'
 import { NextResponse, type NextRequest } from 'next/server'
@@ -163,13 +163,13 @@ export async function POST(req: NextRequest) {
   }
 
   const totalFormatted = Number(order.total).toLocaleString('ru-RU')
-  const whoLabel = isGuest ? `Гость: ${guest_email}` : `Пользователь`
+  const whoLabel = isGuest ? `Гость: ${escapeTgHtml(guest_email)}` : `Пользователь`
   sendTelegram(
     `🛒 <b>Новый заказ!</b>\n\n` +
     `Заказ: <code>#${String(order.id).slice(0, 8)}</code>\n` +
     `${whoLabel}\n` +
     `Сумма: ${totalFormatted} ₽\n` +
-    `Адрес: ${order.delivery_address || '—'}\n\n` +
+    `Адрес: ${escapeTgHtml(order.delivery_address) || '—'}\n\n` +
     `👉 https://3threep.ru/admin/orders/${order.id}`
   ).catch(() => {})
 
