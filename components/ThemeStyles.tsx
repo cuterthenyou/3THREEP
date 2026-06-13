@@ -137,6 +137,9 @@ export default async function ThemeStyles() {
   const tripDriftSec  = num(settings['trip_drift_speed'], 16, 4, 60)   // период дрейфа пятен, сек
   const tripBlobOpacity = num(settings['trip_blob_opacity'], 1, 0, 1)  // интенсивность blobs
   const tripDesync    = num(settings['trip_desync'], 1, 0, 3)          // рассинхрон дёрганья текста
+  const tripWarp      = settings['trip_warp_enabled'] !== 'false'      // жидкий варп вкл/выкл (дефолт ON)
+  const tripWarpInt   = num(settings['trip_warp_intensity'], 1, 0, 2)  // интенсивность марева
+  const tripTapMs     = Math.round(num(settings['trip_tap_window_ms'], 500, 200, 2000)) // окно тройного тапа
 
   // Font aliases: override the named vars so all CSS modules (var(--font-onder) etc.) also respond
   const fontOnder   = fontHeading
@@ -188,7 +191,8 @@ export default async function ThemeStyles() {
   --hero-speed: ${heroSpeed};
   --trip-drift-dur: ${tripDriftSec}s;
   --trip-blob-opacity: ${tripBlobOpacity};
-  --trip-desync: ${tripDesync};`
+  --trip-desync: ${tripDesync};
+  --trip-warp: ${tripWarpInt};`
 
   const css = `${fontFaces ? fontFaces + '\n' : ''}
 :root {
@@ -261,6 +265,7 @@ html[data-theme="trip"] {
   --cursor-color: var(--accent);
 }
 ${tripBreathe ? '' : 'html[data-theme="trip"] .trip-breathe { display: none; }'}
+${tripWarp ? '' : 'html[data-theme="trip"] .trip-warp { display: none; } html[data-theme="trip"] .trip-fx { filter: blur(42px); }'}
 ${animReveal ? '' : '.reveal, .reveal-up { opacity: 1 !important; transform: none !important; animation: none !important; } .card-rise { animation: none !important; }'}
 ${animHover ? '' : '.blade-glint:hover::after { animation: none !important; } .pixel-decay-hover:hover { animation: none !important; } [data-pixel-decay]:hover::before { animation: none !important; }'}
 ${animAmbient ? '' : '.blade-glint-ambient::after { animation: none !important; opacity: 0 !important; }'}
@@ -284,7 +289,7 @@ ${animAmbient ? '' : '.blade-glint-ambient::after { animation: none !important; 
     <>
       <style dangerouslySetInnerHTML={{ __html: css + '\n' + extraPalettesCss }} />
       <script dangerouslySetInnerHTML={{
-        __html: `window.__THREEP_THEMES__=${JSON.stringify(cycleThemes)};window.__THREEP_TRIP_ENABLED__=${tripEnabled};window.__THREEP_ANIM__={reveal:${animReveal},hover:${animHover},ambient:${animAmbient}};`
+        __html: `window.__THREEP_THEMES__=${JSON.stringify(cycleThemes)};window.__THREEP_TRIP_ENABLED__=${tripEnabled};window.__THREEP_TRIP_TAP_MS__=${tripTapMs};window.__THREEP_ANIM__={reveal:${animReveal},hover:${animHover},ambient:${animAmbient}};`
       }} />
       {loadingPhrases && (
         <script dangerouslySetInnerHTML={{

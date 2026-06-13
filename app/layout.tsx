@@ -13,6 +13,8 @@ import VisitTracker from '@/components/VisitTracker';
 import LoadingScreen from '@/components/LoadingScreen';
 import RouteTransition from '@/components/RouteTransition';
 import GameMount from '@/components/GameMount';
+import TripCursorTrail from '@/components/TripCursorTrail';
+import TripDesync from '@/components/TripDesync';
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -54,10 +56,25 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <VisitTracker />
         <GlitterCanvas />
         {/* TRIP theme — psychedelic layers (visible only in [data-theme="trip"]).
-            Все слои fixed + анимируют только transform/opacity (без filter на body). */}
+            Все слои fixed + анимируют только transform/opacity (без filter на body).
+            #trip-warp-filter — жидкое искажение (feTurbulence + feDisplacementMap),
+            применяется ТОЛЬКО к trip-слоям (.trip-fx / .trip-warp), не к контенту. */}
+        <svg aria-hidden="true" width="0" height="0" style={{ position: 'absolute', pointerEvents: 'none' }}>
+          <filter id="trip-warp-filter" x="-25%" y="-25%" width="150%" height="150%" colorInterpolationFilters="sRGB">
+            <feTurbulence type="fractalNoise" baseFrequency="0.006 0.011" numOctaves={2} seed={7} result="warpNoise">
+              <animate attributeName="baseFrequency" dur="18s" values="0.006 0.011;0.013 0.006;0.006 0.011" repeatCount="indefinite" />
+            </feTurbulence>
+            <feDisplacementMap in="SourceGraphic" in2="warpNoise" xChannelSelector="R" yChannelSelector="G" scale={24}>
+              <animate attributeName="scale" dur="9s" values="14;36;14" repeatCount="indefinite" />
+            </feDisplacementMap>
+          </filter>
+        </svg>
         <div aria-hidden="true" className="trip-fx" />
+        <div aria-hidden="true" className="trip-warp" />
         <div aria-hidden="true" className="trip-breathe" />
         <div aria-hidden="true" className="trip-blobs"><span /><span /><span /></div>
+        <TripCursorTrail />
+        <TripDesync />
         {/* Grain/noise texture overlay — opacity controlled by --grain-opacity CSS var */}
         <div
           aria-hidden="true"

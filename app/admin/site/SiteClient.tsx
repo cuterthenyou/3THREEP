@@ -221,6 +221,9 @@ export default function SiteClient({ initialSettings, initialCustomFonts = [], i
   const [tripDriftSpeed, setTripDriftSpeed] = useState(numInit('trip_drift_speed', 16))
   const [tripBlobOpacity, setTripBlobOpacity] = useState(numInit('trip_blob_opacity', 1))
   const [tripDesync, setTripDesync] = useState(numInit('trip_desync', 1))
+  const [tripWarp, setTripWarp] = useState(initialSettings['trip_warp_enabled'] !== 'false')
+  const [tripWarpInt, setTripWarpInt] = useState(numInit('trip_warp_intensity', 1))
+  const [tripTapMs, setTripTapMs] = useState(Math.round(numInit('trip_tap_window_ms', 500)))
   const [savingTrip, setSavingTrip] = useState(false)
   const [tripMsg, setTripMsg] = useState('')
 
@@ -635,6 +638,9 @@ export default function SiteClient({ initialSettings, initialCustomFonts = [], i
       saveSetting('trip_drift_speed',  String(tripDriftSpeed)),
       saveSetting('trip_blob_opacity', String(tripBlobOpacity)),
       saveSetting('trip_desync',       String(tripDesync)),
+      saveSetting('trip_warp_enabled',   String(tripWarp)),
+      saveSetting('trip_warp_intensity', String(tripWarpInt)),
+      saveSetting('trip_tap_window_ms',  String(tripTapMs)),
     ])
     setSavingTrip(false); setTripMsg('✓ Trip-эффекты сохранены — обновляю страницу…'); reloadAfterSave()
   }
@@ -1283,8 +1289,49 @@ export default function SiteClient({ initialSettings, initialCustomFonts = [], i
           <RangeRow label="Интенсивность кругов" value={tripBlobOpacity} set={setTripBlobOpacity} cssVar="--trip-blob-opacity" min={0} max={1} step={0.05} suffix="" info="Видимость дрейфующих цветных пятен на фоне в trip-теме. 0 — пятна скрыты." />
           <RangeRow label="Рассинхрон дёрганья текста" value={tripDesync} set={setTripDesync} cssVar="--trip-desync" min={0} max={3} step={0.1} suffix="" info="Насколько вразнобой дёргаются заголовки h1/h2/h3. 0 — синхронно, выше — каждый трясётся со своей задержкой («пьяный» эффект)." />
         </div>
+
+        {/* Liquid-варп — жидкое «плавление» (фон рябит как вода + марево поверх) */}
+        <div className="flex items-center gap-4 pt-1">
+          <button
+            onClick={() => setTripWarp(v => !v)}
+            style={{
+              display: 'flex', alignItems: 'center', gap: 8,
+              padding: '0.35rem 0.9rem', borderRadius: 20,
+              border: `1.5px solid ${tripWarp ? 'var(--accent)' : 'var(--border-soft)'}`,
+              background: tripWarp ? 'var(--accent-2)' : 'var(--bg-2)',
+              cursor: 'pointer', transition: 'all 0.2s',
+            }}
+          >
+            <span style={{ width: 8, height: 8, borderRadius: '50%', background: tripWarp ? 'var(--accent)' : 'var(--text-muted)', display: 'inline-block' }} />
+            <span style={{ fontFamily: 'var(--font-involve)', fontSize: '0.72rem', color: 'var(--accent)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+              Жидкий варп: {tripWarp ? 'вкл' : 'выкл'}
+            </span>
+          </button>
+          <InfoTip text="Безопасное «плавление»: feDisplacementMap рябит фоновые пятна как воду + полупрозрачное марево поверх контента. Геометрия страницы (шапка/модалки) НЕ искажается." />
+        </div>
+        {tripWarp && (
+          <RangeRow label="Интенсивность варпа" value={tripWarpInt} set={setTripWarpInt} cssVar="--trip-warp" min={0} max={2} step={0.05} suffix="×" info="Сила жидкого марева поверх контента. Дополнительно множится на «пьяность» из настроек шапки." />
+        )}
+
+        {/* Окно тройного тапа активации trip */}
+        <div className="flex flex-col gap-1.5 pt-1">
+          <div className="flex items-center justify-between">
+            <span className="text-xs" style={{ color: 'var(--accent)', fontFamily: 'var(--font-involve)' }}>
+              Окно тройного тапа <InfoTip text="Насколько быстро надо трижды нажать на смену темы, чтобы открыть trip. Все 3 тапа должны уложиться в это окно. Меньше — строже (труднее активировать случайно), больше — легче. Дефолт 500мс." />
+            </span>
+            <span className="text-xs" style={{ color: 'var(--accent)', fontFamily: 'monospace' }}>{tripTapMs}мс</span>
+          </div>
+          <input type="range" min={200} max={2000} step={50} value={tripTapMs}
+            onChange={e => setTripTapMs(parseInt(e.target.value, 10))}
+            style={{ accentColor: 'var(--accent)', width: '100%' }}
+          />
+          <div className="flex justify-between text-xs" style={{ color: 'var(--accent)', opacity: 0.3, fontFamily: 'var(--font-involve)' }}>
+            <span>200 — очень строго</span><span>500 — норма</span><span>2000 — легко</span>
+          </div>
+        </div>
+
         <p className="text-xs" style={{ color: 'var(--accent)', opacity: 0.35, fontFamily: 'var(--font-involve)' }}>
-          Предпросмотр дрейфа/кругов виден только при активной trip-теме.
+          Предпросмотр дрейфа/кругов/варпа виден только при активной trip-теме.
         </p>
 
         <div className="flex items-center gap-3 flex-wrap pt-2">

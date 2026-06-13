@@ -26,12 +26,19 @@ export function setTheme(t: Theme) {
   localStorage.setItem(KEY, t)
 }
 
-// 3 быстрых нажатия (< 1.6с между ними) активируют trip (если включён в админке);
-// из trip — выход в первую тему цикла. Обычное переключение идёт по включённым темам.
+// 3 ОЧЕНЬ быстрых тапа (все три в окне `tripTapWindow()`мс — осознанный «бёрст»,
+// а не обычное перелистывание тем) активируют trip, если он включён в админке.
+// Из trip — выход в первую тему цикла. Окно настраивается в админке (по умолч. 500мс),
+// чтобы trip не всплывал случайно при цикле тем.
+function tripTapWindow(): number {
+  if (typeof window === 'undefined') return 500
+  const w = (window as unknown as Record<string, unknown>)['__THREEP_TRIP_TAP_MS__']
+  return typeof w === 'number' && w > 0 ? w : 500
+}
 let _clicks: number[] = []
 export function toggleTheme() {
   const now = Date.now()
-  _clicks = _clicks.filter(t => now - t < 1600)
+  _clicks = _clicks.filter(t => now - t < tripTapWindow())
   _clicks.push(now)
 
   const cycle = cycleThemes()
