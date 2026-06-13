@@ -129,6 +129,14 @@ export default function AuthForm() {
       const response = await fetch(
         `/api/auth/callback/email?token=${code}&email=${encodeURIComponent(email)}`
       );
+      if (response.status === 429) {
+        setError('Слишком много попыток. Подожди немного и попробуй снова.');
+        setShake(true);
+        setTimeout(() => { setShake(false); setCode(''); }, 450);
+        setLoading(false);
+        verifyingRef.current = false;
+        return;
+      }
       if (response.url.includes('/error') || response.url.includes('error=')) {
         setError('Неверный код. Попробуй ещё раз.');
         setShake(true);

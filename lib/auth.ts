@@ -2,7 +2,13 @@ import NextAuth, { type DefaultSession } from 'next-auth'
 import type { Adapter } from 'next-auth/adapters'
 import { query, queryOne } from './db'
 import { sendOTP } from './email'
+import { rateLimit } from './rate-limit'
 import { randomBytes, createHash } from 'crypto'
+
+// Анти-спам/брут OTP по email (IP-лимит — в route-обёртке catch-all).
+const OTP_WINDOW = 15 * 60 * 1000
+const OTP_SEND_EMAIL_LIMIT = 5    // запросов кода на email / 15 мин
+const OTP_VERIFY_EMAIL_LIMIT = 10 // проверок кода на email / 15 мин
 
 // Хеширование токена (NextAuth использует SHA-256)
 function hashToken(token: string) {
@@ -184,7 +190,14 @@ function PostgresAdapter(): Adapter {
 
     async useVerificationToken({ identifier, token }) {
       console.log(`[Adapter] Verifying OTP for: ${identifier}, input token: ${token.substring(0, 10)}...`)
-      
+
+      // Анти-брут: лимит проверок кода на email. Превышение → как «неверный код».
+      const rl = await rateLimit('otp_verify_email', `email:${identifier.toLowerCase()}`, OTP_VERIFY_EMAIL_LIMIT, OTP_WINDOW)
+      if (!rl.ok) {
+        console.warn(`[Adapter] verify rate-limited for ${identifier}`)
+        return null
+      }
+
       // Получаем сохранённый OTP
       const storedOtp = otpStore.get(identifier)
       if (!storedOtp) {
@@ -298,6 +311,13 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       
       async sendVerificationRequest({ identifier: email, token }) {
         try {
+          // Анти-спам: лимит запросов кода на email. Превышение → ошибка (фронт покажет).
+          const rl = await rateLimit('otp_send_email', `email:${email.toLowerCase()}`, OTP_SEND_EMAIL_LIMIT, OTP_WINDOW)
+          if (!rl.ok) {
+            console.warn(`[NextAuth] send rate-limited for ${email}`)
+            throw new Error('RateLimit: too many code requests')
+          }
+
           // Сохраняем оригинальный OTP (token ещё не хеширован здесь)
           otpStore.set(email, token)
           console.log(`[NextAuth] Stored OTP for ${email}: ${token}`)

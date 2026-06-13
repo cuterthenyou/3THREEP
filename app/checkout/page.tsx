@@ -2,13 +2,13 @@
 
 export const dynamic = 'force-dynamic'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import { useCart } from '@/lib/cart'
 import Image from 'next/image'
 import Link from 'next/link'
-import { formatPrice } from '@/lib/utils'
+import { formatPrice, applyDiscount } from '@/lib/utils'
 import { trackEvent } from '@/lib/track'
 import s from './page.module.css'
 
@@ -30,11 +30,26 @@ export default function CheckoutPage() {
   const [addressTouched, setAddressTouched] = useState(false)
   const [guestEmailTouched, setGuestEmailTouched] = useState(false)
   const [guestNameTouched, setGuestNameTouched] = useState(false)
+  // Idempotency-Key — стабильный на сессию оформления (дедуп двойного сабмита на сервере).
+  const idempotencyKey = useRef<string>(typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : String(Date.now() + Math.random()))
+
+  // Скидка уровня (для залогиненных) — чтобы итог в сводке совпадал с тем, что
+  // посчитает сервер. Считается на сервере по профилю, здесь только отображаем.
+  const [discount, setDiscount] = useState(0)
 
   useEffect(() => {
-    if (status === 'authenticated') setMode('user')
-    else if (status === 'unauthenticated') setMode('choose')
+    if (status === 'authenticated') {
+      setMode('user')
+      fetch('/api/user/me')
+        .then(r => r.json())
+        .then(d => setDiscount(d?.user?.discount ?? 0))
+        .catch(() => {})
+    } else if (status === 'unauthenticated') setMode('choose')
   }, [status])
+
+  // Цена позиции с учётом скидки уровня (как на сервере: вниз до кратного 3 по юниту).
+  const lineTotal = (price: number, qty: number) => applyDiscount(price, discount) * qty
+  const discountedTotal = items.reduce((s, i) => s + lineTotal(i.product.price, i.quantity), 0)
 
   // Funnel stage 3: reaching checkout with a non-empty cart
   useEffect(() => {
@@ -60,17 +75,14 @@ export default function CheckoutPage() {
     setError('')
 
     try {
+      // Цену/итог НЕ шлём — сервер считает сам из БД (бэк не верит фронту).
       const payload: Record<string, unknown> = {
         items: items.map(i => ({
           product_id: i.product.id,
-          product_name: i.product.name,
-          product_image: i.product.images[0] ?? null,
           size: i.size,
           color: i.color,
           quantity: i.quantity,
-          price: i.product.price,
         })),
-        total,
         delivery_address: address.trim(),
         comment: comment.trim() || null,
       }
@@ -83,7 +95,7 @@ export default function CheckoutPage() {
 
       const res = await fetch('/api/orders', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'Idempotency-Key': idempotencyKey.current },
         body: JSON.stringify(payload),
       })
 
@@ -135,14 +147,24 @@ export default function CheckoutPage() {
                 {item.size}{item.color && ` · ${item.color}`} × {item.quantity}
               </p>
             </div>
-            <p className={s.itemPrice}>{formatPrice(item.product.price * item.quantity)}</p>
+            <p className={s.itemPrice}>{formatPrice(lineTotal(item.product.price, item.quantity))}</p>
           </div>
         ))}
         <div className={`flex justify-between items-center pt-3 ${s.totalDivider}`}>
           <span className={s.totalLabel}>Итого</span>
-          <span className={s.totalValue}>{formatPrice(total)}</span>
+          <span className={s.totalValue}>
+            {discount > 0 && (
+              <span className={s.totalOld}>{formatPrice(total)}</span>
+            )}
+            {formatPrice(discountedTotal)}
+          </span>
         </div>
       </div>
+      {discount > 0 && (
+        <p className={s.noticeText} style={{ opacity: 0.6, fontSize: '0.78rem' }}>
+          Скидка уровня −{discount}% уже учтена в итоге
+        </p>
+      )}
       <div className={s.notice}>
         <p className={s.noticeText}>
           После оформления мы свяжемся с тобой и пришлём реквизиты для перевода.

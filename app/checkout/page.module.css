@@ -101,6 +101,15 @@
   letter-spacing: 0.02em;
 }
 
+/* Старый итог (зачёркнут) рядом со скидочным — для залогиненных со скидкой уровня. */
+.totalOld {
+  color: var(--accent);
+  opacity: 0.4;
+  text-decoration: line-through;
+  font-size: 1.05rem;
+  margin-right: 0.5rem;
+}
+
 .notice {
   background: var(--bg-subtle);
   border: 1px solid var(--border);
