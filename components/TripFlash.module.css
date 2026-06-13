@@ -1,0 +1,33 @@
+/* Срыв сигнала при входе/выходе trip. Цвета — фирменные trip-каналы
+   (rgba как в .trip-breathe globals.css), это намеренный глитч-вайб. */
+.flash {
+  position: fixed;
+  inset: 0;
+  z-index: 9990;
+  pointer-events: none;
+  mix-blend-mode: screen;
+  background:
+    repeating-linear-gradient(0deg, transparent 0 2px, rgba(0, 0, 0, 0.35) 2px 3px),
+    linear-gradient(90deg, rgba(255, 0, 90, 0.35), transparent 45%, rgba(0, 220, 255, 0.35));
+}
+
+/* Вход в trip — «рвём сигнал»: срезы, RGB-сдвиг, инверт-вспых, затем затухание. */
+.in { animation: tripFlashIn 0.8s steps(1, end) forwards; }
+@keyframes tripFlashIn {
+  0%   { opacity: 0; transform: translateX(0) scaleY(1); filter: none; clip-path: inset(0 0 0 0); }
+  6%   { opacity: 1; transform: translateX(-14px) scaleY(1.05); filter: invert(1) hue-rotate(80deg); clip-path: inset(38% 0 30% 0); }
+  14%  { opacity: 0.95; transform: translateX(12px); filter: hue-rotate(200deg); clip-path: inset(6% 0 80% 0); }
+  26%  { opacity: 1; transform: translateX(-8px); filter: invert(1); clip-path: inset(62% 0 14% 0); }
+  40%  { opacity: 0.85; transform: translateX(6px); filter: hue-rotate(120deg); clip-path: inset(44% 0 40% 0); }
+  58%  { opacity: 0.6; transform: translateX(-3px); filter: none; clip-path: inset(0 0 0 0); }
+  78%  { opacity: 0.3; transform: translateX(1px); }
+  100% { opacity: 0; transform: translateX(0); }
+}
+
+/* Выход из trip — быстрый коллапс по вертикали. */
+.out { animation: tripFlashOut 0.48s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+@keyframes tripFlashOut {
+  0%   { opacity: 0.7; transform: scaleY(1); filter: saturate(2); }
+  45%  { opacity: 0.9; transform: scaleY(0.04); filter: saturate(3) brightness(1.4); }
+  100% { opacity: 0; transform: scaleY(0); filter: none; }
+}

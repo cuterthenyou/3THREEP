@@ -17,7 +17,7 @@ export default function Reveal({
   className = '',
   as: Tag = 'div' as ElementType,
 }: {
-  children: ReactNode
+  children?: ReactNode
   /** stagger in ms (applied as animation-delay) */
   delay?: number
   className?: string

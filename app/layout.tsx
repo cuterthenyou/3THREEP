@@ -15,6 +15,7 @@ import RouteTransition from '@/components/RouteTransition';
 import GameMount from '@/components/GameMount';
 import TripCursorTrail from '@/components/TripCursorTrail';
 import TripDesync from '@/components/TripDesync';
+import TripFlash from '@/components/TripFlash';
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -75,6 +76,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <div aria-hidden="true" className="trip-blobs"><span /><span /><span /></div>
         <TripCursorTrail />
         <TripDesync />
+        <TripFlash />
         {/* Grain/noise texture overlay — opacity controlled by --grain-opacity CSS var */}
         <div
           aria-hidden="true"

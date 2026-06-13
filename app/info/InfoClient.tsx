@@ -9,6 +9,7 @@ import {
   IconBrandTiktok,
   IconBrandInstagram,
 } from '@tabler/icons-react'
+import Reveal from '@/components/Reveal'
 import s from './info.module.css'
 
 export type InfoContent = {
@@ -108,9 +109,9 @@ export default function InfoClient({ content }: { content: InfoContent }) {
             <Link href="/" className={s.backLink} style={{ marginBottom: 0 }}>← Главная</Link>
             <Link href="/#menu" className={s.backLink} style={{ marginBottom: 0, opacity: 0.5 }}>В МЕНЮ ↗</Link>
           </div>
-          <span className={s.heading}>ИНФА</span>
-          <div className={s.divider} />
-          <p className={s.subhead}>Доставка · Контакты · О бренде</p>
+          <Reveal as="span" className={s.heading}>ИНФА</Reveal>
+          <Reveal as="div" className={s.divider} delay={120} />
+          <Reveal as="p" className={s.subhead} delay={200}>Доставка · Контакты · О бренде</Reveal>
         </div>
       </div>
 
@@ -135,22 +136,22 @@ export default function InfoClient({ content }: { content: InfoContent }) {
 
           {tab === 'delivery' && (
             <div className={s.sectionBlock}>
-              <p className={s.text}>{c.delivery_intro}</p>
-              <div>
+              <Reveal as="p" className={s.text}>{c.delivery_intro}</Reveal>
+              <Reveal delay={90}>
                 <span className={s.sectionLabel}>{c.payment_heading}</span>
                 <p className={s.text}>{c.payment_text}</p>
-              </div>
-              <div>
+              </Reveal>
+              <Reveal delay={180}>
                 <span className={s.sectionLabel}>{c.delivery_heading}</span>
                 <p className={s.text}>{c.delivery_text}</p>
                 <p className={s.textNote}>{c.delivery_note}</p>
-              </div>
+              </Reveal>
             </div>
           )}
 
           {tab === 'contacts' && (
             <div className={s.socialGroup}>
-              <div>
+              <Reveal>
                 <span className={s.socialGroupLabel}>{c.write_heading}</span>
                 <div className={s.socialList}>
                   <a href={c.vk_url} target="_blank" rel="noopener noreferrer" className={s.socialRow}>
@@ -166,8 +167,8 @@ export default function InfoClient({ content }: { content: InfoContent }) {
                     <span className={s.socialHandle}>{c.mail_email}</span>
                   </a>
                 </div>
-              </div>
-              <div>
+              </Reveal>
+              <Reveal delay={130}>
                 <span className={s.socialGroupLabel}>{c.follow_heading}</span>
                 <div className={s.socialList}>
                   <a href={c.vk_community_url} target="_blank" rel="noopener noreferrer" className={s.socialRow}>
@@ -188,25 +189,25 @@ export default function InfoClient({ content }: { content: InfoContent }) {
                   </a>
                 </div>
                 <p className={s.disclaimer}>{c.contacts_meta_disclaimer}</p>
-              </div>
+              </Reveal>
             </div>
           )}
 
           {tab === 'about' && (
             <div className={s.sectionBlock}>
-              <div>
+              <Reveal>
                 <span className={s.sectionLabel}>{c.location_heading}</span>
                 <p className={s.text}>{c.location_text}</p>
-              </div>
-              <div>
+              </Reveal>
+              <Reveal delay={90}>
                 <span className={s.sectionLabel}>{c.what_heading}</span>
                 <p className={s.text}>{c.what_text}</p>
                 <p className={s.textSub}>{c.what_subtext}</p>
-              </div>
-              <div>
+              </Reveal>
+              <Reveal delay={180}>
                 <span className={s.sectionLabel}>{c.how_heading}</span>
                 <p className={s.text}>{c.how_text}</p>
-              </div>
+              </Reveal>
             </div>
           )}
 
