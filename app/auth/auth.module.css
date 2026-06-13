@@ -158,8 +158,25 @@
 
 .slotActive {
   border-color: var(--accent);
-  box-shadow: 0 0 0 1px var(--accent);
+  box-shadow: 0 0 0 1px var(--accent), 0 0 14px var(--accent-glow);
+  animation: slotPulse 1.1s ease-in-out infinite;
 }
+/* мигающая каретка в активном слоте */
+.slotActive::after {
+  content: '';
+  position: absolute;
+  bottom: 0.55rem;
+  width: 1.4rem;
+  height: 2px;
+  background: var(--accent);
+  box-shadow: 0 0 8px var(--accent-glow);
+  animation: caretBlink 0.7s steps(1) infinite;
+}
+@keyframes slotPulse {
+  0%, 100% { box-shadow: 0 0 0 1px var(--accent), 0 0 9px var(--accent-glow); }
+  50%      { box-shadow: 0 0 0 1px var(--accent), 0 0 20px var(--accent-glow); }
+}
+@keyframes caretBlink { 0%, 50% { opacity: 1; } 51%, 100% { opacity: 0; } }
 
 .slotFilled {
   border-bottom-color: var(--accent);
@@ -172,9 +189,50 @@
   line-height: 1;
 }
 
+/* Цифра «впечатывается» — упругий поп + лёгкий перелёт */
 .slotDigit {
   display: block;
-  animation: digitIn 0.12s ease-out forwards;
+  animation: digitLock 0.26s cubic-bezier(0.2, 1.4, 0.4, 1) forwards;
+}
+@keyframes digitLock {
+  0%   { transform: translateY(9px) scale(0.5); opacity: 0; }
+  55%  { transform: translateY(0) scale(1.22);  opacity: 1; }
+  100% { transform: translateY(0) scale(1);     opacity: 1; }
+}
+
+/* Проверка кода — сканирующая полоса по ряду (VHS-ish) */
+.codeVerifying::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 28%;
+  left: -40%;
+  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--accent) 38%, transparent), transparent);
+  animation: codeScan 0.85s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 2;
+}
+@keyframes codeScan { 0% { left: -40%; } 100% { left: 112%; } }
+
+/* Успех — каскад «принято» по слотам (зелёная вспышка) */
+.codeSuccess .slot {
+  border-color: var(--status-delivered);
+  animation: slotAccept 0.5s ease-out forwards;
+}
+.codeSuccess .slot:nth-child(2) { animation-delay: 0.05s; }
+.codeSuccess .slot:nth-child(3) { animation-delay: 0.10s; }
+.codeSuccess .slot:nth-child(4) { animation-delay: 0.15s; }
+.codeSuccess .slot:nth-child(5) { animation-delay: 0.20s; }
+.codeSuccess .slot:nth-child(6) { animation-delay: 0.25s; }
+@keyframes slotAccept {
+  0%   { box-shadow: 0 0 0 1px var(--accent); }
+  40%  { box-shadow: 0 0 0 2px var(--status-delivered), 0 0 18px var(--status-delivered); transform: translateY(-4px); }
+  100% { box-shadow: 0 0 0 1px var(--status-delivered); transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .slotActive, .slotActive::after, .slotDigit, .codeVerifying::before, .codeSuccess .slot { animation: none; }
 }
 
 /* The actual input element — invisible overlay covering the whole codeWrap */

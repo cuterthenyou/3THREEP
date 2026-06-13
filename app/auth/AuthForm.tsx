@@ -7,16 +7,18 @@ import Link from 'next/link';
 import s from './auth.module.css';
 
 // ── 6-slot animated code input ───────────────────────────────────────────────
-function CodeInput({ value, onChange, disabled, shake }: {
+function CodeInput({ value, onChange, disabled, shake, verifying, success }: {
   value: string
   onChange: (v: string) => void
   disabled?: boolean
   shake?: boolean
+  verifying?: boolean
+  success?: boolean
 }) {
   const inputRef = useRef<HTMLInputElement>(null)
 
   return (
-    <div className={`${s.codeWrap} ${shake ? s.codeShake : ''}`} onClick={() => inputRef.current?.focus()}>
+    <div className={`${s.codeWrap} ${shake ? s.codeShake : ''} ${verifying ? s.codeVerifying : ''} ${success ? s.codeSuccess : ''}`} onClick={() => inputRef.current?.focus()}>
       {Array.from({ length: 6 }, (_, i) => {
         const char = value[i] ?? null
         const isActive = i === value.length && value.length < 6
@@ -71,6 +73,7 @@ export default function AuthForm() {
   const [isExistingUser, setIsExistingUser] = useState<boolean | null>(null);
   const [resendSeconds, setResendSeconds] = useState(0);
   const [shake, setShake] = useState(false);
+  const [success, setSuccess] = useState(false);
   const resendIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const verifyingRef = useRef(false);
 
@@ -137,7 +140,9 @@ export default function AuthForm() {
       if (newsletter) {
         await fetch('/api/newsletter/subscribe', { method: 'POST' }).catch(() => {})
       }
-      window.location.href = callbackUrl;
+      // короткая анимация «принято» по слотам перед редиректом
+      setSuccess(true);
+      setTimeout(() => { window.location.href = callbackUrl; }, 600);
     } catch {
       setError('Произошла ошибка. Попробуй ещё раз.');
       setLoading(false);
@@ -227,6 +232,8 @@ export default function AuthForm() {
               onChange={setCode}
               disabled={loading}
               shake={shake}
+              verifying={loading && !success}
+              success={success}
             />
             <button
               onClick={verifyCode}
