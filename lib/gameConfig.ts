@@ -47,6 +47,10 @@ export interface GameConfig {
   bossTimeoutMs: number
   bossScale: number
   bossMegaScale: number
+  // реплики боссов (MK-style диалог перед волной); пул выбирается случайно
+  bossSpeechEnabled: boolean
+  bossSpeeches: string[]
+  bossMegaSpeeches: string[]
 }
 
 export const DEFAULT_GAME_CONFIG: GameConfig = {
@@ -62,6 +66,9 @@ export const DEFAULT_GAME_CONFIG: GameConfig = {
   bossEvery: 10, megaWaves: [33, 66, 99],
   bossHp: 8, bossMegaHp: 18, bossShieldMs: 1600, bossVulnMs: 1500, bossTimeoutMs: 45000,
   bossScale: 2.5, bossMegaScale: 3.4,
+  bossSpeechEnabled: true,
+  bossSpeeches: ['ТЫ ЗАШЁЛ НЕ В ТУ ПЕЩЕРУ', 'ПОСЛЕДНИЙ ПИСК ТВОЕЙ ОХОТЫ', 'КРОВЬ ЗА КРОВЬ', 'Я ЧУЮ ТВОЙ СТРАХ'],
+  bossMegaSpeeches: ['ТЫ РАЗБУДИЛ ДРЕВНЕЕ', 'ЗДЕСЬ ОХОТА КОНЧАЕТСЯ', 'СКЛОНИСЬ ПЕРЕД РОЕМ'],
 }
 
 export const ALL_POWERUPS: { key: string; label: string }[] = [

@@ -180,6 +180,30 @@ export default function GameClient({ initialConfig }: { initialConfig: GameConfi
         <Num label="Размер обычного босса" value={cfg.bossScale} onChange={v => set('bossScale', v)} step={0.1} min={1} max={6} />
         <Num label="Размер мегабосса" value={cfg.bossMegaScale} onChange={v => set('bossMegaScale', v)} step={0.1} min={1} max={8} />
       </div>
+
+      {/* Реплики боссов (MK-style диалог перед волной) */}
+      <div style={card}>
+        <span style={sectionTitle}>Реплики боссов</span>
+        <label style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.75rem' }}>
+          <span style={{ color: 'var(--accent)', fontFamily: 'var(--font-involve)', fontSize: '0.8rem' }}>
+            Диалог перед боссом<span style={{ opacity: 0.45, fontSize: '0.7rem' }}> · печатный текст в стиле MK</span>
+          </span>
+          <input type="checkbox" checked={cfg.bossSpeechEnabled !== false}
+            onChange={e => set('bossSpeechEnabled', e.target.checked)} />
+        </label>
+        <label style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
+          <span style={{ color: 'var(--accent)', opacity: 0.5, fontFamily: 'var(--font-involve)', fontSize: '0.6rem', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Реплики обычного босса · по одной на строку (выбор случайный)</span>
+          <textarea rows={4} value={(cfg.bossSpeeches ?? []).join('\n')}
+            onChange={e => set('bossSpeeches', e.target.value.split('\n').map(s => s.trim()).filter(Boolean))}
+            style={{ ...inputStyle, width: '100%', fontFamily: 'var(--font-involve)', resize: 'vertical' }} />
+        </label>
+        <label style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
+          <span style={{ color: 'var(--accent)', opacity: 0.5, fontFamily: 'var(--font-involve)', fontSize: '0.6rem', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Реплики мегабосса · по одной на строку</span>
+          <textarea rows={3} value={(cfg.bossMegaSpeeches ?? []).join('\n')}
+            onChange={e => set('bossMegaSpeeches', e.target.value.split('\n').map(s => s.trim()).filter(Boolean))}
+            style={{ ...inputStyle, width: '100%', fontFamily: 'var(--font-involve)', resize: 'vertical' }} />
+        </label>
+      </div>
     </div>
   )
 }

@@ -456,6 +456,29 @@ function WaveBanner({ waveNum, bonus, boss, mega }: { waveNum: number; bonus: bo
   )
 }
 
+// MK-style диалог перед боссом — текст печатается посимвольно
+function BossDialog({ data }: { data: { text: string; mega: boolean } }) {
+  const [shown, setShown] = useState('')
+  useEffect(() => {
+    setShown('')
+    let i = 0
+    const id = setInterval(() => {
+      i++
+      setShown(data.text.slice(0, i))
+      if (i >= data.text.length) clearInterval(id)
+    }, 34)
+    return () => clearInterval(id)
+  }, [data])
+  return (
+    <div className={`${s.bossDialog} ${data.mega ? s.bossDialogMega : ''}`} aria-hidden="true">
+      <span className={s.bossDialogName}>{data.mega ? '⚠ МЕГА-БОСС' : '⚠ БОСС'}</span>
+      <span className={s.bossDialogText}>
+        {shown}<span className={s.bossDialogCaret}>▌</span>
+      </span>
+    </div>
+  )
+}
+
 // HP-бар босса + подсказка фазы (ЩИТ / БЕЙ!)
 function BossHud({ boss }: { boss: { hp: number; maxHp: number; mega: boolean; vulnerable: boolean } }) {
   const pct = Math.max(0, Math.min(100, (boss.hp / boss.maxHp) * 100))
@@ -547,6 +570,7 @@ export default function BatAnimation({ config = DEFAULT_GAME_CONFIG }: { config?
   const firstKillRef = useRef(false)
   // Босс: видимое состояние (HP-бар, фаза щита/уязвимости) + служебные рефы
   const [boss, setBoss] = useState<{ hp: number; maxHp: number; mega: boolean; vulnerable: boolean } | null>(null)
+  const [bossDialog, setBossDialog] = useState<{ text: string; mega: boolean } | null>(null)
   const bossRef = useRef<{ id: number; mega: boolean } | null>(null)
   const bossVulnRef = useRef(false)
   const bossCycleRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -694,24 +718,39 @@ export default function BatAnimation({ config = DEFAULT_GAME_CONFIG }: { config?
       if (waveTimerRef.current) { clearTimeout(waveTimerRef.current); waveTimerRef.current = null }
       spawnTimersRef.current.forEach(clearTimeout); spawnTimersRef.current = []
       batPositions.current.clear(); batHpRef.current.clear()
-      const b = spawnBoss(mega, cfgRef.current)
-      batHpRef.current.set(b.id, b.hp)
-      bossRef.current = { id: b.id, mega }
-      bossVulnRef.current = false
-      setBoss({ hp: b.hp, maxHp: b.hp, mega, vulnerable: false })
-      setBats([b])
-      startBossCycle(mega)
-      // На убийство даётся МНОГО времени; мега — ещё больше. Не успел → game over.
-      const timeout = cfgRef.current.bossTimeoutMs * (mega ? 1.7 : 1)
-      waveTimerRef.current = setTimeout(() => {
-        stopBossCycle()
-        const pos = batPositions.current.get(b.id)
-        batPositions.current.clear(); batHpRef.current.clear()
-        setBats([]); setBoss(null); bossRef.current = null
-        if (pos) setExplosions(prev => [...prev, { id: nextId(), x: pos.x, y: pos.y }])
-        setScreenShake(true); setTimeout(() => setScreenShake(false), 420)
-        endGame()
-      }, timeout)
+
+      // Собственно спавн босса (после диалога, если он есть)
+      const spawnTheBoss = () => {
+        const b = spawnBoss(mega, cfgRef.current)
+        batHpRef.current.set(b.id, b.hp)
+        bossRef.current = { id: b.id, mega }
+        bossVulnRef.current = false
+        setBoss({ hp: b.hp, maxHp: b.hp, mega, vulnerable: false })
+        setBats([b])
+        startBossCycle(mega)
+        // На убийство даётся МНОГО времени; мега — ещё больше. Не успел → game over.
+        const timeout = cfgRef.current.bossTimeoutMs * (mega ? 1.7 : 1)
+        waveTimerRef.current = setTimeout(() => {
+          stopBossCycle()
+          const pos = batPositions.current.get(b.id)
+          batPositions.current.clear(); batHpRef.current.clear()
+          setBats([]); setBoss(null); bossRef.current = null
+          if (pos) setExplosions(prev => [...prev, { id: nextId(), x: pos.x, y: pos.y }])
+          setScreenShake(true); setTimeout(() => setScreenShake(false), 420)
+          endGame()
+        }, timeout)
+      }
+
+      // MK-style реплика перед боссом (текст из админки); затем спавн
+      const pool = mega ? (cfg.bossMegaSpeeches ?? []) : (cfg.bossSpeeches ?? [])
+      if (cfg.bossSpeechEnabled !== false && pool.length > 0) {
+        const text = pool[Math.floor(Math.random() * pool.length)]
+        setBossDialog({ text, mega })
+        const dt = setTimeout(() => { setBossDialog(null); spawnTheBoss() }, 2700)
+        spawnTimersRef.current.push(dt)
+      } else {
+        spawnTheBoss()
+      }
       return
     }
 
@@ -787,7 +826,7 @@ export default function BatAnimation({ config = DEFAULT_GAME_CONFIG }: { config?
       stopBossCycle()
       spawnTimersRef.current.forEach(clearTimeout); spawnTimersRef.current = []
       batPositions.current.clear(); batHpRef.current.clear()
-      setBats([]); setPowerups([]); setCrackedIds(new Set()); setBoss(null)
+      setBats([]); setPowerups([]); setCrackedIds(new Set()); setBoss(null); setBossDialog(null)
       bossRef.current = null; bossVulnRef.current = false
       setScore(0); scoreRef.current = 0; setWaveNum(0)
       setComboDisplay(0); comboRef.current = 0; setActiveEffect(null); setBonusWave(false)
@@ -1036,6 +1075,7 @@ export default function BatAnimation({ config = DEFAULT_GAME_CONFIG }: { config?
           onPositionUpdate={handlePositionUpdate} />
       ))}
       {boss && gameState === 'playing' && <BossHud boss={boss} />}
+      {bossDialog && gameState === 'playing' && <BossDialog data={bossDialog} />}
       {powerups.map(pu => (
         <PowerUp key={pu.id} data={pu}
           onCollect={(k) => collectPowerUp(pu.id, k)}

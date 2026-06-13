@@ -763,6 +763,58 @@
 .waveBannerBoss .waveBannerKick { color: var(--accent, #f29774); }
 .waveBannerBoss .waveBannerBar { background: var(--accent, #f29774); }
 
+/* ── MK-style диалог босса (печатный текст перед волной) ──────── */
+.bossDialog {
+  position: fixed;
+  left: 50%;
+  bottom: 12vh;
+  transform: translateX(-50%);
+  z-index: 200;
+  pointer-events: none;
+  width: min(90vw, 460px);
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  padding: 0.9rem 1.1rem;
+  background: color-mix(in srgb, var(--bg, #090909) 86%, transparent);
+  border: 1px solid var(--accent, #f29774);
+  box-shadow: 4px 4px 0 var(--accent, #f29774), 0 0 30px color-mix(in srgb, var(--accent, #f29774) 35%, transparent);
+  animation: bossDialogIn 0.32s cubic-bezier(0.2, 0.9, 0.25, 1) both;
+}
+.bossDialogMega {
+  box-shadow: 5px 5px 0 var(--accent, #f29774), 0 0 44px color-mix(in srgb, var(--accent, #f29774) 55%, transparent);
+}
+.bossDialogName {
+  font-family: var(--font-heading, 'ONDER', sans-serif);
+  font-size: 0.62rem;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+  color: var(--accent, #f29774);
+  text-shadow: 0 0 12px var(--accent-glow, rgba(242, 151, 116, 0.6));
+}
+.bossDialogText {
+  font-family: var(--font-body, monospace);
+  font-size: 0.95rem;
+  line-height: 1.3;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text, #f29774);
+  min-height: 1.3em;
+}
+.bossDialogCaret {
+  color: var(--accent, #f29774);
+  animation: bossCaret 0.6s steps(1) infinite;
+}
+@keyframes bossCaret { 0%, 50% { opacity: 1; } 51%, 100% { opacity: 0; } }
+@keyframes bossDialogIn {
+  0%   { opacity: 0; transform: translateX(-50%) translateY(14px); }
+  100% { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+@media (max-width: 639px) {
+  .bossDialog { bottom: 16vh; }
+  .bossDialogText { font-size: 0.82rem; }
+}
+
 /* ════════════════════════════════════════════════════════════════
    BLOOD WALL — стена пиксельной крови стекает сверху на GAME OVER
    ════════════════════════════════════════════════════════════════ */
