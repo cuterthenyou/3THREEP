@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react'
 import a from '../admin.module.css'
-import { AdminSection, AdminPageTitle, AdminTabContext } from '../components'
+import { AdminSection, AdminPageTitle, AdminTabContext, InfoTip } from '../components'
 import { CHECKBOARD_LIGHT, CHECKBOARD_DARK, INPUT_STYLE } from '../adminStyles'
 import { ColorPicker, FontSelect, GlitterPreview } from './parts'
 import { parseLevelingConfig, getDiscount } from '@/lib/leveling'
@@ -26,9 +26,20 @@ const SITE_TABS: { id: SettingsTab; label: string }[] = [
   { id: 'menu',    label: 'Меню' },
 ]
 
+// Медаль-ачивка для редактора текстов (title/description) в админке.
+export interface AdminAchievement {
+  key: string
+  title: string
+  description: string | null
+  medal_key: string | null
+  condition_type: string
+  threshold: number
+}
+
 interface Props {
   initialSettings: Record<string, string | null>
   initialCustomFonts?: CustomFont[]
+  initialAchievements?: AdminAchievement[]
   variant?: 'site' | 'themes'
 }
 
@@ -68,7 +79,7 @@ const THEME_PRESETS: ThemePreset[] = [
     bgT: '#16020a', textT: '#ffc2d6', accentT: '#ff2d6b' },
 ]
 
-export default function SiteClient({ initialSettings, initialCustomFonts = [], variant = 'site' }: Props) {
+export default function SiteClient({ initialSettings, initialCustomFonts = [], initialAchievements = [], variant = 'site' }: Props) {
   const TABS = variant === 'themes' ? THEME_TABS : SITE_TABS
   const [activeTab, setActiveTab] = useState<SettingsTab>(TABS[0].id)
 
@@ -259,6 +270,35 @@ export default function SiteClient({ initialSettings, initialCustomFonts = [], v
       saveSetting('lk_discount_tip', lkDiscountTip.trim()),
     ])
     setSavingLkTips(false); setLkTipsMsg('✓ Сохранено — обновляю страницу…'); reloadAfterSave()
+  }
+
+  // ── Тексты медалей (achievements: title/description) ──
+  const [medals, setMedals] = useState<AdminAchievement[]>(initialAchievements)
+  const [savingMedalKey, setSavingMedalKey] = useState<string | null>(null)
+  const [medalMsg, setMedalMsg] = useState<Record<string, string>>({})
+  function setMedalField(key: string, field: 'title' | 'description', value: string) {
+    setMedals(prev => prev.map(m => (m.key === key ? { ...m, [field]: value } : m)))
+    setMedalMsg(prev => ({ ...prev, [key]: '' }))
+  }
+  async function saveMedal(m: AdminAchievement) {
+    setSavingMedalKey(m.key)
+    const res = await fetch('/api/admin/achievements', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ key: m.key, title: m.title, description: m.description }),
+    })
+    setSavingMedalKey(null)
+    setMedalMsg(prev => ({ ...prev, [m.key]: res.ok ? '✓ Сохранено' : 'Ошибка' }))
+  }
+
+  // Человекочитаемое описание условия выдачи (read-only контекст в редакторе).
+  const MEDAL_CONDITION_LABEL: Record<string, (t: number) => string> = {
+    profile_created: () => 'Выдаётся за создание профиля',
+    first_purchase:  () => 'Выдаётся за первую покупку',
+    multi_buy:       t => `Выдаётся за покупку ${t}+ вещей в одном заказе`,
+    full_collection: () => 'Выдаётся за полностью собранную коллекцию',
+    game_score:      t => `Выдаётся за ${t}+ очков в игре «Охота»`,
+    order_count:     t => `Выдаётся за ${t}+ оплаченных заказов`,
   }
 
   // Текущая тема админки — чтобы живой предпросмотр цвета бил по нужной теме
@@ -613,14 +653,14 @@ export default function SiteClient({ initialSettings, initialCustomFonts = [], v
   const msgStyle = (m: string) => ({ color: m.startsWith('✓') ? 'var(--status-delivered)' : 'var(--status-error)', fontFamily: 'var(--font-involve)', fontSize: '0.75rem' })
 
   // Переиспользуемый ползунок с живым предпросмотром через CSS-переменную
-  function RangeRow({ label, value, set, cssVar, min, max, step, suffix = '×' }: {
+  function RangeRow({ label, value, set, cssVar, min, max, step, suffix = '×', info }: {
     label: string; value: number; set: (v: number) => void; cssVar: string
-    min: number; max: number; step: number; suffix?: string
+    min: number; max: number; step: number; suffix?: string; info?: string
   }) {
     return (
       <div className="flex flex-col gap-1.5">
         <div className="flex items-center justify-between">
-          <span className="text-xs" style={{ color: 'var(--accent)', fontFamily: 'var(--font-involve)' }}>{label}</span>
+          <span className="text-xs" style={{ color: 'var(--accent)', fontFamily: 'var(--font-involve)' }}>{label}{info && <> <InfoTip text={info} /></>}</span>
           <span className="text-xs" style={{ color: 'var(--accent)', fontFamily: 'monospace' }}>{value.toFixed(2)}{suffix}</span>
         </div>
         <input type="range" min={min} max={max} step={step} value={value}
@@ -910,11 +950,11 @@ export default function SiteClient({ initialSettings, initialCustomFonts = [], v
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-4">
-          <RangeRow label="Заголовки — размер" value={typeHeadingScale} set={setTypeHeadingScale} cssVar="--type-heading-scale" min={0.6} max={1.8} step={0.05} />
-          <RangeRow label="Заголовки — межстрочное" value={typeHeadingLeading} set={setTypeHeadingLeading} cssVar="--type-heading-leading" min={0.9} max={2} step={0.02} suffix="" />
-          <RangeRow label="Текст — размер" value={typeBodyScale} set={setTypeBodyScale} cssVar="--type-body-scale" min={0.6} max={1.8} step={0.05} />
-          <RangeRow label="Текст — межстрочное" value={typeBodyLeading} set={setTypeBodyLeading} cssVar="--type-body-leading" min={1} max={2.4} step={0.02} suffix="" />
-          <RangeRow label="Цены — размер" value={typePriceScale} set={setTypePriceScale} cssVar="--type-price-scale" min={0.6} max={1.8} step={0.05} />
+          <RangeRow label="Заголовки — размер" value={typeHeadingScale} set={setTypeHeadingScale} cssVar="--type-heading-scale" min={0.6} max={1.8} step={0.05} info="Множитель размера всех заголовков сайта. 1× — базовый размер из дизайна." />
+          <RangeRow label="Заголовки — межстрочное" value={typeHeadingLeading} set={setTypeHeadingLeading} cssVar="--type-heading-leading" min={0.9} max={2} step={0.02} suffix="" info="Расстояние между строками в многострочных заголовках (line-height)." />
+          <RangeRow label="Текст — размер" value={typeBodyScale} set={setTypeBodyScale} cssVar="--type-body-scale" min={0.6} max={1.8} step={0.05} info="Множитель размера основного текста (описания, абзацы)." />
+          <RangeRow label="Текст — межстрочное" value={typeBodyLeading} set={setTypeBodyLeading} cssVar="--type-body-leading" min={1} max={2.4} step={0.02} suffix="" info="Расстояние между строками основного текста (line-height)." />
+          <RangeRow label="Цены — размер" value={typePriceScale} set={setTypePriceScale} cssVar="--type-price-scale" min={0.6} max={1.8} step={0.05} info="Множитель размера ценников (шрифт --font-price)." />
         </div>
 
         <div className="flex items-center gap-3 flex-wrap pt-2">
@@ -1038,7 +1078,7 @@ export default function SiteClient({ initialSettings, initialCustomFonts = [], v
           {/* ── Grain scale ── */}
           <div className="flex flex-col gap-3">
             <div className="flex items-center justify-between">
-              <span className="text-xs uppercase tracking-widest" style={{ color: 'var(--accent)', opacity: 0.5, fontFamily: 'var(--font-involve)' }}>Крупность зерна</span>
+              <span className="text-xs uppercase tracking-widest" style={{ color: 'var(--accent)', opacity: 0.5, fontFamily: 'var(--font-involve)' }}>Крупность зерна <InfoTip text="Размер плитки шума в пикселях: меньше — мелкое плотное зерно, больше — крупная плёночная фактура." /></span>
               <span className="text-xs" style={{ color: 'var(--accent)', fontFamily: 'monospace' }}>{grainScale}px</span>
             </div>
             <input type="range" min={64} max={512} step={32} value={grainScale}
@@ -1090,7 +1130,7 @@ export default function SiteClient({ initialSettings, initialCustomFonts = [], v
 
           {/* ── Animation speed ── */}
           <div className="flex flex-col gap-3">
-            <span className="text-xs uppercase tracking-widest" style={{ color: 'var(--accent)', opacity: 0.5, fontFamily: 'var(--font-involve)' }}>Скорость анимаций</span>
+            <span className="text-xs uppercase tracking-widest" style={{ color: 'var(--accent)', opacity: 0.5, fontFamily: 'var(--font-involve)' }}>Скорость анимаций <InfoTip text="Глобальный темп появлений и переходов по сайту. «Выкл» отключает анимации входа (для слабых устройств / accessibility)." /></span>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 6 }}>
               {SPEED_OPTIONS.map(opt => {
                 const dur = ({ off: 0, slow: 2200, normal: 800, fast: 280 } as Record<string, number>)[opt.value] ?? 800
@@ -1174,8 +1214,8 @@ export default function SiteClient({ initialSettings, initialCustomFonts = [], v
               style={{ accentColor: 'var(--accent)', width: '100%' }}
             />
           </div>
-          <RangeRow label="Интенсивность кругов" value={tripBlobOpacity} set={setTripBlobOpacity} cssVar="--trip-blob-opacity" min={0} max={1} step={0.05} suffix="" />
-          <RangeRow label="Рассинхрон дёрганья текста" value={tripDesync} set={setTripDesync} cssVar="--trip-desync" min={0} max={3} step={0.1} suffix="" />
+          <RangeRow label="Интенсивность кругов" value={tripBlobOpacity} set={setTripBlobOpacity} cssVar="--trip-blob-opacity" min={0} max={1} step={0.05} suffix="" info="Видимость дрейфующих цветных пятен на фоне в trip-теме. 0 — пятна скрыты." />
+          <RangeRow label="Рассинхрон дёрганья текста" value={tripDesync} set={setTripDesync} cssVar="--trip-desync" min={0} max={3} step={0.1} suffix="" info="Насколько вразнобой дёргаются заголовки h1/h2/h3. 0 — синхронно, выше — каждый трясётся со своей задержкой («пьяный» эффект)." />
         </div>
         <p className="text-xs" style={{ color: 'var(--accent)', opacity: 0.35, fontFamily: 'var(--font-involve)' }}>
           Предпросмотр дрейфа/кругов виден только при активной trip-теме.
@@ -1212,7 +1252,7 @@ export default function SiteClient({ initialSettings, initialCustomFonts = [], v
           </button>
         </div>
         {pageTransition && (
-          <RangeRow label="Сила эффекта" value={pageTransIntensity} set={setPageTransIntensity} cssVar="--rt-preview-noop" min={0.3} max={2} step={0.05} suffix="" />
+          <RangeRow label="Сила эффекта" value={pageTransIntensity} set={setPageTransIntensity} cssVar="--rt-preview-noop" min={0.3} max={2} step={0.05} suffix="" info="Насколько резкий VHS-срыв при смене страницы: RGB-сплит, сканлайны и дрожь. Выше — агрессивнее." />
         )}
         <div className="flex items-center gap-3 flex-wrap pt-2">
           <button onClick={savePageTrans} disabled={savingPageTrans} className={a.btn}>
@@ -1688,24 +1728,24 @@ export default function SiteClient({ initialSettings, initialCustomFonts = [], v
         </p>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <label className="flex flex-col gap-1">
-            <span className="text-xs uppercase tracking-widest" style={{ color: 'var(--accent)', opacity: 0.5, fontFamily: 'var(--font-involve)' }}>Искры за заказ</span>
+            <span className="text-xs uppercase tracking-widest" style={{ color: 'var(--accent)', opacity: 0.5, fontFamily: 'var(--font-involve)' }}>Искры за заказ <InfoTip text="Сколько искр начисляется за каждый доставленный заказ. Искры — это XP уровней." /></span>
             <input type="number" value={lvlSparkOrder} onChange={e => setLvlSparkOrder(e.target.value)} style={{ ...INPUT_STYLE, borderRadius: '2px', padding: '0.5rem 0.75rem', outline: 'none' }} />
           </label>
           <label className="flex flex-col gap-1">
-            <span className="text-xs uppercase tracking-widest" style={{ color: 'var(--accent)', opacity: 0.5, fontFamily: 'var(--font-involve)' }}>Искры за доп. вещь</span>
+            <span className="text-xs uppercase tracking-widest" style={{ color: 'var(--accent)', opacity: 0.5, fontFamily: 'var(--font-involve)' }}>Искры за доп. вещь <InfoTip text="Доп. искры за каждую вещь в заказе сверх первой. Заказ из 3 вещей = «за заказ» + 2 × «за доп. вещь»." /></span>
             <input type="number" value={lvlSparkExtra} onChange={e => setLvlSparkExtra(e.target.value)} style={{ ...INPUT_STYLE, borderRadius: '2px', padding: '0.5rem 0.75rem', outline: 'none' }} />
           </label>
           <label className="flex flex-col gap-1">
-            <span className="text-xs uppercase tracking-widest" style={{ color: 'var(--accent)', opacity: 0.5, fontFamily: 'var(--font-involve)' }}>Шаг сверх таблицы</span>
+            <span className="text-xs uppercase tracking-widest" style={{ color: 'var(--accent)', opacity: 0.5, fontFamily: 'var(--font-involve)' }}>Шаг сверх таблицы <InfoTip text="Когда пороги из таблицы кончились — каждый следующий уровень стоит на столько искр дороже предыдущего." /></span>
             <input type="number" value={lvlIncrement} onChange={e => setLvlIncrement(e.target.value)} style={{ ...INPUT_STYLE, borderRadius: '2px', padding: '0.5rem 0.75rem', outline: 'none' }} />
           </label>
           <label className="flex flex-col gap-1">
-            <span className="text-xs uppercase tracking-widest" style={{ color: 'var(--accent)', opacity: 0.5, fontFamily: 'var(--font-involve)' }}>Макс. скидка, %</span>
+            <span className="text-xs uppercase tracking-widest" style={{ color: 'var(--accent)', opacity: 0.5, fontFamily: 'var(--font-involve)' }}>Макс. скидка, % <InfoTip text="Потолок скидки: выше этого % скидка не растёт, даже на максимальных уровнях. Цена округляется вниз до кратного 3." /></span>
             <input type="number" value={lvlDiscountMax} onChange={e => setLvlDiscountMax(e.target.value)} style={{ ...INPUT_STYLE, borderRadius: '2px', padding: '0.5rem 0.75rem', outline: 'none' }} />
           </label>
         </div>
         <label className="flex flex-col gap-1">
-          <span className="text-xs uppercase tracking-widest" style={{ color: 'var(--accent)', opacity: 0.5, fontFamily: 'var(--font-involve)' }}>Пороги уровней (кумулятивно, через запятую)</span>
+          <span className="text-xs uppercase tracking-widest" style={{ color: 'var(--accent)', opacity: 0.5, fontFamily: 'var(--font-involve)' }}>Пороги уровней (кумулятивно, через запятую) <InfoTip text="Сколько всего искр нужно накопить для каждого уровня, по порядку. Первое число — порог 1-го уровня (обычно 0)." /></span>
           <input value={lvlThresholds} onChange={e => setLvlThresholds(e.target.value)} style={{ ...INPUT_STYLE, borderRadius: '2px', padding: '0.5rem 0.75rem', outline: 'none', fontFamily: 'var(--font-involve)' }} />
         </label>
 
@@ -1751,6 +1791,59 @@ export default function SiteClient({ initialSettings, initialCustomFonts = [], v
           </button>
           {lkTipsMsg && <span style={msgStyle(lkTipsMsg)}>{lkTipsMsg}</span>}
         </div>
+      </AdminSection>
+
+      {/* ── Тексты медалей (ачивки) ── */}
+      <AdminSection title="Медали — тексты ачивок" tab="account">
+        <p className="text-xs" style={{ color: 'var(--accent)', opacity: 0.5, fontFamily: 'var(--font-involve)' }}>
+          Название и описание медалей, которые видны в ряду ачивок личного кабинета. Условие выдачи и порог
+          задаются миграцией — здесь меняется только текст (каждая медаль сохраняется отдельно).
+        </p>
+        {medals.length === 0 ? (
+          <p className="text-xs" style={{ color: 'var(--accent)', opacity: 0.4, fontFamily: 'var(--font-involve)' }}>
+            Ачивки не найдены — проверьте, применена ли миграция 09/10.
+          </p>
+        ) : (
+          <div className="flex flex-col gap-3">
+            {medals.map(m => {
+              const condLabel = (MEDAL_CONDITION_LABEL[m.condition_type]?.(m.threshold)) ?? `Условие: ${m.condition_type}`
+              return (
+                <div key={m.key} className="flex flex-col gap-2 p-3 rounded-xl" style={{ background: 'var(--bg-2)', border: '1px solid var(--border-soft)' }}>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="text-xs uppercase tracking-widest font-bold" style={{ color: 'var(--accent)', fontFamily: 'var(--font-involve)' }}>{m.key}</span>
+                    {m.medal_key && (
+                      <span className="text-xs" style={{ color: 'var(--accent)', opacity: 0.4, fontFamily: 'monospace' }}>medal: {m.medal_key}</span>
+                    )}
+                    <InfoTip text={condLabel} />
+                  </div>
+                  <label className="flex flex-col gap-1">
+                    <span className="text-xs uppercase tracking-widest" style={{ color: 'var(--accent)', opacity: 0.5, fontFamily: 'var(--font-involve)' }}>Название</span>
+                    <input
+                      value={m.title}
+                      onChange={e => setMedalField(m.key, 'title', e.target.value)}
+                      style={{ ...INPUT_STYLE, borderRadius: '2px', padding: '0.45rem 0.7rem', outline: 'none', fontFamily: 'var(--font-onder)', letterSpacing: '0.06em' }}
+                    />
+                  </label>
+                  <label className="flex flex-col gap-1">
+                    <span className="text-xs uppercase tracking-widest" style={{ color: 'var(--accent)', opacity: 0.5, fontFamily: 'var(--font-involve)' }}>Описание</span>
+                    <textarea
+                      value={m.description ?? ''}
+                      onChange={e => setMedalField(m.key, 'description', e.target.value)}
+                      rows={2}
+                      style={{ ...INPUT_STYLE, borderRadius: '2px', padding: '0.45rem 0.7rem', outline: 'none', fontFamily: 'var(--font-involve)', resize: 'vertical' }}
+                    />
+                  </label>
+                  <div className="flex items-center gap-3 flex-wrap">
+                    <button disabled={savingMedalKey === m.key || !m.title.trim()} onClick={() => saveMedal(m)} className={a.btn}>
+                      {savingMedalKey === m.key ? 'Сохраняем...' : 'Сохранить'}
+                    </button>
+                    {medalMsg[m.key] && <span style={msgStyle(medalMsg[m.key])}>{medalMsg[m.key]}</span>}
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        )}
       </AdminSection>
 
       {/* ── Меню (на отдельной странице) ── */}
