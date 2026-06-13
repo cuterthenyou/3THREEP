@@ -617,6 +617,7 @@ export default function AccountClient({ user, profile, orders, profileBg, profil
         visible={modalVisible}
         onClose={closeProductModal}
         modalBg={modalBg}
+        tintBg={!isBaseTheme}
         collectionLogo={activeCat?.logo_top_url ?? null}
         discount={discount}
       />

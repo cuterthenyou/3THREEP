@@ -14,6 +14,7 @@ interface Props {
   visible: boolean
   onClose: () => void
   modalBg?: string | null
+  tintBg?: boolean
   collectionLogo?: string | null
   discount?: number
 }
@@ -35,7 +36,7 @@ function AddToCartButton({ product, size, onClose }: { product: Product; size: s
   )
 }
 
-export default function ProductModal({ product, visible, onClose, modalBg, collectionLogo, discount = 0 }: Props) {
+export default function ProductModal({ product, visible, onClose, modalBg, tintBg = false, collectionLogo, discount = 0 }: Props) {
   const [activeImg, setActiveImg] = useState(0)
   const [selectedSize, setSelectedSize] = useState('S')
   const [touchStart, setTouchStart] = useState<{ x: number; y: number } | null>(null)
@@ -163,7 +164,7 @@ export default function ProductModal({ product, visible, onClose, modalBg, colle
       onClick={(e) => e.target === e.currentTarget && closeWithAnimation()}
       {...modalTouchHandlers}
     >
-      <div className={`absolute inset-0 overflow-y-auto ${s.inner}`} style={modalBg ? { backgroundImage: `url(${modalBg})`, backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' } : undefined}>
+      <div className={`absolute inset-0 overflow-y-auto ${s.inner}`} style={modalBg ? { backgroundImage: `url(${modalBg})`, backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat', ...(tintBg ? { backgroundColor: 'var(--bg)', backgroundBlendMode: 'multiply' } : {}) } : undefined}>
         <button
           onClick={closeWithAnimation}
           className={`fixed top-5 right-5 z-50 flex items-center justify-center w-9 h-9 ${s.closeBtn}`}

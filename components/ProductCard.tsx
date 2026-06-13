@@ -14,6 +14,7 @@ const ProductCard = React.memo(function ProductCard({
   onOpen,
   categoryData,
   isDark,
+  tintBg = false,
   discount = 0,
   owned = false,
 }: {
@@ -22,6 +23,7 @@ const ProductCard = React.memo(function ProductCard({
   onOpen: (p: Product) => void
   categoryData: Record<string, Category>
   isDark: boolean
+  tintBg?: boolean
   discount?: number
   owned?: boolean
 }) {
@@ -108,7 +110,10 @@ const ProductCard = React.memo(function ProductCard({
     <div
       className={`flex flex-col w-full ${s.productCard} ${owned ? s.productCardOwned : ''}`}
       style={bgUrl
-        ? { backgroundImage: `url(${bgUrl})`, backgroundSize: 'cover', backgroundPosition: 'center' }
+        // Доп-палитры (toxic/ice/blood/…): тонируем PNG-фон карточки под цвет темы,
+        // чтобы он не выглядел чужеродным (как фон ЛК в AccountClient).
+        ? { backgroundImage: `url(${bgUrl})`, backgroundSize: 'cover', backgroundPosition: 'center',
+            ...(tintBg ? { backgroundColor: 'var(--bg)', backgroundBlendMode: 'multiply' } : {}) }
         : { background: 'var(--bg-card)' }
       }
       onClick={() => onOpen(product)}

@@ -54,7 +54,11 @@ export default function CatalogSection({ products, categories, categoryData = {}
   const [modalVisible, setModalVisible] = useState(false)
   const [modalBg, setModalBg] = useState<string | null>(null)
   const [modalCollectionLogo, setModalCollectionLogo] = useState<string | null>(null)
-  const [isDark, setIsDark] = useState(false)
+  const [theme, setThemeState] = useState('light')
+  // Светлый PNG-фон/модалка — только у терракотовой light; все прочие палитры тёмные.
+  const isDark = theme !== 'light'
+  // Базовые темы (light/dark/trip) имеют свой PNG; доп-палитры тонируем под цвет темы.
+  const isBaseTheme = theme === 'light' || theme === 'dark' || theme === 'trip'
   const [cols, setCols] = useState<Cols>(3)
   const savedScrollRef = useRef<number>(0)
 
@@ -71,8 +75,9 @@ export default function CatalogSection({ products, categories, categoryData = {}
   }
 
   useEffect(() => {
-    setIsDark(document.documentElement.dataset.theme === 'dark')
-    const obs = new MutationObserver(() => setIsDark(document.documentElement.dataset.theme === 'dark'))
+    const read = () => setThemeState(document.documentElement.dataset.theme ?? 'light')
+    read()
+    const obs = new MutationObserver(read)
     obs.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] })
     return () => obs.disconnect()
   }, [])
@@ -193,7 +198,7 @@ export default function CatalogSection({ products, categories, categoryData = {}
           {filtered.map((product, idx) => (
             // Wrapper carries the staggered load-cascade so the card keeps its own hover-lift.
             <div key={product.id} className="card-rise flex" style={{ animationDelay: `${(idx % 12) * 55}ms` }}>
-              <ProductCard product={product} index={idx} onOpen={openModal} categoryData={categoryData} isDark={isDark} discount={discount} owned={ownedSet.has(product.id)} />
+              <ProductCard product={product} index={idx} onOpen={openModal} categoryData={categoryData} isDark={isDark} tintBg={!isBaseTheme} discount={discount} owned={ownedSet.has(product.id)} />
             </div>
           ))}
         </div>
@@ -225,7 +230,7 @@ export default function CatalogSection({ products, categories, categoryData = {}
         ) : null
       })()}
 
-      <ProductModal product={openProduct} visible={modalVisible} onClose={closeModal} modalBg={modalBg} collectionLogo={modalCollectionLogo} discount={discount} />
+      <ProductModal product={openProduct} visible={modalVisible} onClose={closeModal} modalBg={modalBg} tintBg={!isBaseTheme} collectionLogo={modalCollectionLogo} discount={discount} />
     </>
   )
 }
