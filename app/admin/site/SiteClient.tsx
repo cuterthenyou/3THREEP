@@ -181,6 +181,18 @@ export default function SiteClient({ initialSettings, initialCustomFonts = [], i
   const [profileDarkMsg, setProfileDarkMsg] = useState('')
   const profileRef = useRef<HTMLInputElement>(null)
   const profileDarkRef = useRef<HTMLInputElement>(null)
+  // ── Per-theme profile bg (доп-палитры: ash/toxic/blood/…) ──
+  const EXTRA_PALETTES = PALETTES.filter(p => !p.base)
+  const [themeBgSel, setThemeBgSel] = useState(EXTRA_PALETTES[0]?.key ?? 'ash')
+  const [themeBgs, setThemeBgs] = useState<Record<string, string | null>>(() => {
+    const m: Record<string, string | null> = {}
+    for (const p of EXTRA_PALETTES) m[p.key] = initialSettings[`profile_bg_url_${p.key}`] ?? null
+    return m
+  })
+  const [uploadingThemeBg, setUploadingThemeBg] = useState(false)
+  const [savingThemeBg, setSavingThemeBg] = useState(false)
+  const [themeBgMsg, setThemeBgMsg] = useState('')
+  const themeBgRef = useRef<HTMLInputElement>(null)
 
   // ── Logos ───────────────────────────────────────────────────────
   const [logoIconUrl, setLogoIconUrl] = useState<string | null>(initialSettings['logo_icon_url'] ?? null)
@@ -615,6 +627,23 @@ export default function SiteClient({ initialSettings, initialCustomFonts = [], i
     setProfileBgDark(null); setSavingProfileDark(true)
     await saveSetting('profile_bg_url_dark', null)
     setSavingProfileDark(false); setProfileDarkMsg('✓ Удалён')
+  }
+  // Фон ЛК под конкретную доп-тему (profile_bg_url_<key>). ЛК берёт его без тинта.
+  async function uploadThemeBg(file: File) {
+    setUploadingThemeBg(true); setThemeBgMsg('')
+    const fd = new FormData(); fd.append('file', file); fd.append('folder', 'assets')
+    const res = await fetch('/api/admin/upload', { method: 'POST', body: fd })
+    const data = await res.json()
+    setUploadingThemeBg(false)
+    if (!data.url) { setThemeBgMsg('Ошибка загрузки'); return }
+    setThemeBgs(m => ({ ...m, [themeBgSel]: data.url })); setSavingThemeBg(true)
+    await saveSetting(`profile_bg_url_${themeBgSel}`, data.url)
+    setSavingThemeBg(false); setThemeBgMsg('✓ Фон обновлён')
+  }
+  async function removeThemeBg() {
+    setThemeBgs(m => ({ ...m, [themeBgSel]: null })); setSavingThemeBg(true)
+    await saveSetting(`profile_bg_url_${themeBgSel}`, null)
+    setSavingThemeBg(false); setThemeBgMsg('✓ Удалён')
   }
 
   // ── Save colors ─────────────────────────────────────────────────
@@ -1781,6 +1810,47 @@ export default function SiteClient({ initialSettings, initialCustomFonts = [], i
             onChange={e => e.target.files?.[0] && uploadProfileBgDark(e.target.files[0])} />
           {profileBgDark && <button onClick={removeProfileBgDark} disabled={savingProfileDark} className={a.btnDanger}>Удалить</button>}
           {profileDarkMsg && <span style={msgStyle(profileDarkMsg)}>{profileDarkMsg}</span>}
+        </div>
+      </AdminSection>
+
+      {/* ── Profile bg per доп-тема ── */}
+      <AdminSection title="Фон профиля под доп-темы" tab="account">
+        <p className="text-xs" style={{ color: 'var(--accent)', opacity: 0.5, fontFamily: 'var(--font-involve)' }}>
+          Свой PNG-фон ЛК для конкретной доп-палитры (ash/toxic/blood/…). Если не задан — берётся
+          тёмный фон выше + авто-тинт под цвет темы.
+        </p>
+        <div className="flex items-center gap-2 flex-wrap">
+          {EXTRA_PALETTES.map(p => (
+            <button
+              key={p.key}
+              onClick={() => { setThemeBgSel(p.key); setThemeBgMsg('') }}
+              className={a.btn}
+              style={themeBgSel === p.key
+                ? { borderColor: 'var(--accent)', boxShadow: '2px 2px 0 var(--accent)' }
+                : { opacity: 0.55 }}
+            >
+              {p.label}{themeBgs[p.key] ? ' ●' : ''}
+            </button>
+          ))}
+        </div>
+        {themeBgs[themeBgSel] ? (
+          <div className="rounded-xl overflow-hidden" style={{ maxHeight: 200, background: CHECKBOARD_DARK }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={themeBgs[themeBgSel] as string} alt="" className="w-full object-contain" style={{ maxHeight: 200 }} />
+          </div>
+        ) : (
+          <div className="rounded-xl flex items-center justify-center h-24" style={{ background: 'var(--bg-2)', border: '1px dashed var(--border-soft)' }}>
+            <span className="text-xs" style={{ color: 'var(--accent)', opacity: 0.3, fontFamily: 'var(--font-involve)' }}>Фон для «{themeBgSel}» не задан</span>
+          </div>
+        )}
+        <div className="flex items-center gap-3 flex-wrap">
+          <button onClick={() => themeBgRef.current?.click()} disabled={uploadingThemeBg || savingThemeBg} className={a.btn}>
+            {uploadingThemeBg ? 'Загружаем...' : savingThemeBg ? 'Сохраняем...' : `Загрузить PNG для «${themeBgSel}»`}
+          </button>
+          <input ref={themeBgRef} type="file" accept="image/png" className="hidden"
+            onChange={e => { if (e.target.files?.[0]) { uploadThemeBg(e.target.files[0]); e.target.value = '' } }} />
+          {themeBgs[themeBgSel] && <button onClick={removeThemeBg} disabled={savingThemeBg} className={a.btnDanger}>Удалить</button>}
+          {themeBgMsg && <span style={msgStyle(themeBgMsg)}>{themeBgMsg}</span>}
         </div>
       </AdminSection>
 

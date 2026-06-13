@@ -43,6 +43,7 @@ interface Props {
   orders: Order[];
   profileBg?: string | null;
   profileBgDark?: string | null;
+  profileBgByTheme?: Record<string, string>;
   newsletterSubscribed?: boolean;
   tickerTexts?: string[];
   accountTickerTexts?: string[];
@@ -66,7 +67,7 @@ function getUsername(email: string, name: string | null) {
   return email.split('@')[0].toUpperCase();
 }
 
-export default function AccountClient({ user, profile, orders, profileBg, profileBgDark, newsletterSubscribed, tickerTexts, accountTickerTexts, gamification, catalogProducts = [], catalogCategories = [], achievements = [], levelTip, discountTip }: Props) {
+export default function AccountClient({ user, profile, orders, profileBg, profileBgDark, profileBgByTheme = {}, newsletterSubscribed, tickerTexts, accountTickerTexts, gamification, catalogProducts = [], catalogCategories = [], achievements = [], levelTip, discountTip }: Props) {
   const levelTipText = levelTip?.trim() || DEFAULT_LEVEL_TIP;
   const discountTipText = discountTip?.trim() || DEFAULT_DISCOUNT_TIP;
   const [loggingOut, setLoggingOut] = useState(false);
@@ -236,6 +237,12 @@ export default function AccountClient({ user, profile, orders, profileBg, profil
 
   return (
     <div className={s.page} style={(() => {
+      // Свой PNG-арт под конкретную доп-тему (profile_bg_url_<key>) — рисуем КАК ЕСТЬ,
+      // без тинта: это намеренный арт под палитру.
+      const themed = profileBgByTheme[theme];
+      if (themed) {
+        return { backgroundImage: `url(${themed})`, backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' } as CSSProperties;
+      }
       const bg = isDark ? (profileBgDark ?? profileBg) : (profileBg ?? profileBgDark);
       if (!bg) return undefined;
       const base: CSSProperties = { backgroundImage: `url(${bg})`, backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat' };

@@ -66,6 +66,12 @@ export default async function AccountPage() {
 
   const profileBg = settingsRows.find((r: {key: string; value: string | null}) => r.key === 'profile_bg_url')?.value ?? null
   const profileBgDark = settingsRows.find((r: {key: string; value: string | null}) => r.key === 'profile_bg_url_dark')?.value ?? null
+  // Фоны ЛК под доп-темы: profile_bg_url_<key> → { ash: url, … } (только заданные)
+  const profileBgByTheme: Record<string, string> = {}
+  for (const r of settingsRows as Array<{ key: string; value: string | null }>) {
+    const m = r.key.match(/^profile_bg_url_(.+)$/)
+    if (m && m[1] !== 'dark' && r.value) profileBgByTheme[m[1]] = r.value
+  }
   const levelTip = settingsRows.find((r: {key: string; value: string | null}) => r.key === 'lk_level_tip')?.value ?? undefined
   const discountTip = settingsRows.find((r: {key: string; value: string | null}) => r.key === 'lk_discount_tip')?.value ?? undefined
   const TICKER_DEFAULTS = [
@@ -157,6 +163,7 @@ export default async function AccountPage() {
       orders={orders}
       profileBg={profileBg}
       profileBgDark={profileBgDark}
+      profileBgByTheme={profileBgByTheme}
       newsletterSubscribed={userRow?.newsletter_subscription === true}
       tickerTexts={tickerTexts}
       accountTickerTexts={accountTickerTexts}
