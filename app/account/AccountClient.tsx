@@ -161,20 +161,7 @@ export default function AccountClient({ user, profile, orders, profileBg, profil
     setTimeout(() => setModalProduct(null), 250);
   }
 
-  // ── Ачивки: витрина (showcase) ────────────────────────────────────────
-  const [showcase, setShowcase] = useState<Record<string, boolean>>(
-    () => Object.fromEntries(achievements.map((a) => [a.key, a.showcased]))
-  );
-  async function toggleShowcase(key: string) {
-    const next = !showcase[key];
-    setShowcase((s) => ({ ...s, [key]: next }));
-    const res = await fetch('/api/account/achievements/showcase', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ key, showcased: next }),
-    }).catch(() => null);
-    if (!res || !res.ok) setShowcase((s) => ({ ...s, [key]: !next })); // откат (в т.ч. лимит витрины)
-  }
+  // Ачивки-медали теперь информационные (без «витрины») — счётчик открытых.
   const unlockedCount = achievements.filter((a) => a.unlocked).length;
 
   async function handleSaveNickname() {
@@ -327,24 +314,21 @@ export default function AccountClient({ user, profile, orders, profileBg, profil
               </div>
               <h2 className={s.username}>{username}</h2>
 
-              {/* Ачивки-медали — с кастомным hover-тултипом (за что получена) */}
+              {/* Ачивки-медали — информационные, с hover-тултипом (за что получена) */}
               {achievements.length > 0 && (
                 <div className={s.medalsRow}>
                   {achievements.map((a) => (
                     <span key={a.key} className={s.medalWrap}>
-                      <button
-                        type="button"
-                        disabled={!a.unlocked}
-                        onClick={() => a.unlocked && toggleShowcase(a.key)}
-                        className={`${s.medal} ${a.unlocked ? s.medalUnlocked : s.medalLocked} ${showcase[a.key] ? s.medalShowcased : ''}`}
+                      <span
+                        className={`${s.medal} ${a.unlocked ? s.medalUnlocked : s.medalLocked}`}
                         aria-label={a.title}
                       >
                         <Medal kind={a.medal_key ?? ''} size={24} />
-                      </button>
+                      </span>
                       <span className={s.medalTip} role="tooltip">
                         <span className={s.medalTipTitle}>{a.unlocked ? a.title : `🔒 ${a.title}`}</span>
                         {a.description && <span className={s.medalTipDesc}>{a.description}</span>}
-                        {a.unlocked && <span className={s.medalTipHint}>клик — на витрину</span>}
+                        {!a.unlocked && <span className={s.medalTipHint}>ещё не открыта</span>}
                       </span>
                     </span>
                   ))}

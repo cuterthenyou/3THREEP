@@ -41,7 +41,8 @@
 }
 
 .profileInfo {
-  flex: 1;
+  flex: 1 1 0;
+  min-width: 0;              /* даёт колонке сжиматься → квадратный аватар всегда влезает */
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
@@ -1115,8 +1116,11 @@
   opacity: 0.55;
 }
 .batScoreDiffDeath {
-  color: var(--status-error);
-  opacity: 0.85;
+  /* было var(--status-error) — на светлой теме тёмно-красный сливался с тёмной
+     карточкой. Берём читаемый accent + красное свечение для «death»-вайба. */
+  color: var(--accent);
+  opacity: 0.95;
+  text-shadow: 0 0 6px var(--status-error);
 }
 .batScoreItem .batScoreNum {
   font-size: 1.35rem;
