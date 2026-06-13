@@ -2,9 +2,20 @@
 
 import { createContext, useContext, type ReactNode } from 'react'
 import { SECTION_TITLE } from '../adminStyles'
+import a from '../admin.module.css'
 
 /** Active settings tab — AdminSection hides itself if its `tab` doesn't match. */
 export const AdminTabContext = createContext<string | null>(null)
+
+/** Переиспользуемый тултип-пояснение (?) к полю настроек. Hover/focus. */
+export function InfoTip({ text }: { text: string }) {
+  return (
+    <span className={a.infoTip} tabIndex={0} role="note" aria-label={text}>
+      <span className={a.infoTipMark} aria-hidden="true">?</span>
+      <span className={a.infoTipPop}>{text}</span>
+    </span>
+  )
+}
 
 export function AdminPageTitle({ children }: { children: ReactNode }) {
   return (
