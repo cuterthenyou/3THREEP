@@ -909,3 +909,73 @@
   from { text-shadow: 0 0 18px var(--accent, #f29774); }
   to   { text-shadow: 0 0 40px var(--accent, #f29774), 0 0 60px var(--accent, #f29774); }
 }
+
+/* ── Мини-лидерборд на экране конца игры / победы ── */
+.goLb {
+  position: fixed;
+  left: 50%;
+  bottom: 10%;
+  transform: translateX(-50%);
+  z-index: 206;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: 13rem;
+  max-width: 86vw;
+  padding: 0.6rem 0.85rem;
+  background: color-mix(in srgb, var(--bg, #1c1c1e) 80%, transparent);
+  border: 1px solid var(--accent, #f29774);
+  box-shadow: 2px 2px 0 var(--accent, #f29774);
+  animation: goLbIn 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: 0.25s;
+}
+@keyframes goLbIn {
+  0%   { opacity: 0; transform: translateX(-50%) translateY(16px); }
+  100% { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+.goLbTitle {
+  font-family: var(--font-heading, 'ONDER', sans-serif);
+  font-size: 0.6rem;
+  letter-spacing: 0.28em;
+  text-align: center;
+  color: var(--accent, #f29774);
+  opacity: 0.6;
+}
+.goLbHint {
+  font-family: var(--font-body, monospace);
+  font-size: 0.7rem;
+  text-align: center;
+  color: var(--text, #fff);
+  opacity: 0.55;
+}
+.goLbRow {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.1rem 0.25rem;
+  font-family: var(--font-body, monospace);
+  font-size: 0.74rem;
+  color: var(--text, #fff);
+}
+.goLbMe { background: var(--accent-2, rgba(242, 151, 116, 0.25)); }
+.goLbRank { width: 1.15rem; text-align: center; }
+.goLbName {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--accent, #f29774);
+}
+.goLbScore { font-family: var(--font-price, var(--font-heading, sans-serif)); color: var(--accent, #f29774); }
+.goLbYou {
+  margin-top: 0.2rem;
+  padding-top: 0.3rem;
+  border-top: 1px solid var(--border-soft, rgba(242, 151, 116, 0.12));
+  font-family: var(--font-body, monospace);
+  font-size: 0.66rem;
+  letter-spacing: 0.05em;
+  text-align: center;
+  color: var(--accent, #f29774);
+}

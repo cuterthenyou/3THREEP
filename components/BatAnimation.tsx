@@ -415,6 +415,50 @@ function ScoreCounter({ score, waveNum, best, combo, effect, bonus, difficultyLa
 
 function GameOverBanner() { return <div className={s.gameOverCenter}>GAME OVER</div> }
 
+// Мини-лидерборд на экране конца игры/победы: топ-3 + место игрока.
+// Фетч с задержкой — даём sendBeacon из endGame долететь и записать результат.
+function GameOverLeaderboard() {
+  const [data, setData] = useState<null | {
+    top: { rank: number; nickname: string | null; score: number; isMe: boolean }[]
+    me: { rank: number; score: number } | null
+  }>(null)
+  useEffect(() => {
+    let alive = true
+    const t = setTimeout(() => {
+      fetch('/api/leaderboard')
+        .then((r) => (r.ok ? r.json() : null))
+        .then((d) => { if (alive && d) setData(d) })
+        .catch(() => {})
+    }, 1100)
+    return () => { alive = false; clearTimeout(t) }
+  }, [])
+  const medals = ['🥇', '🥈', '🥉']
+  return (
+    <div className={s.goLb} aria-hidden="true">
+      <span className={s.goLbTitle}>ЛИДЕРБОРД</span>
+      {!data ? (
+        <span className={s.goLbHint}>···</span>
+      ) : data.top.length === 0 ? (
+        <span className={s.goLbHint}>стань первым в топе</span>
+      ) : (
+        <>
+          {data.top.slice(0, 3).map((r) => (
+            <div key={r.rank} className={`${s.goLbRow} ${r.isMe ? s.goLbMe : ''}`}>
+              <span className={s.goLbRank}>{medals[r.rank - 1]}</span>
+              <span className={s.goLbName}>{r.nickname || 'Аноним'}</span>
+              <span className={s.goLbScore}>×{r.score}</span>
+            </div>
+          ))}
+          {data.me && data.me.rank > 3 && (
+            <div className={s.goLbYou}>ты на {data.me.rank}-м · ×{data.me.score}</div>
+          )}
+          {!data.me && <div className={s.goLbYou}>войди — попадёшь в топ</div>}
+        </>
+      )}
+    </div>
+  )
+}
+
 // Стена пиксельной крови — стекает сверху на game over (брутальнее: больше потёков + кляксы)
 function BloodWall() {
   const N = 22
@@ -1136,6 +1180,7 @@ export default function BatAnimation({ config = DEFAULT_GAME_CONFIG }: { config?
           <span className={s.winSub}>ты прошёл всю охоту 🩸</span>
         </div>
       )}
+      {(gameState === 'game_over' || gameState === 'win') && <GameOverLeaderboard />}
       {waveBanner && gameState === 'playing' && (
         <WaveBanner waveNum={waveNum}
           bonus={!isBossWave(waveNum, cfgRef.current) && cfgRef.current.bonusEvery > 0 && waveNum >= cfgRef.current.bonusEvery && waveNum % cfgRef.current.bonusEvery === 0}
